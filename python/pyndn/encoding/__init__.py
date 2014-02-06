@@ -9,9 +9,9 @@ __all__ = ['tlv', 'tlv_encoder', 'tlv_wire_format']
 import sys as _sys
 
 try:
-	from pyndn.encoding.tlv import *
-	from pyndn.encoding.tlv_encoder import *
-	from pyndn.encoding.tlv_wire_format import *
+    from pyndn.encoding.tlv import *
+    from pyndn.encoding.tlv_encoder import *
+    from pyndn.encoding.tlv_wire_format import *
 except ImportError:
-	del _sys.modules[__name__]
-	raise
+    del _sys.modules[__name__]
+    raise

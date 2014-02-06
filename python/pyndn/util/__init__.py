@@ -9,7 +9,7 @@ __all__ = ['dynamic_byte_array']
 import sys as _sys
 
 try:
-	from pyndn.util.dynamic_byte_array import *
+    from pyndn.util.dynamic_byte_array import *
 except ImportError:
-	del _sys.modules[__name__]
-	raise
+    del _sys.modules[__name__]
+    raise
