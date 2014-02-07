@@ -9,6 +9,14 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`interest` Module
+----------------------
+
+.. automodule:: pyndn.interest
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`name` Module
 ------------------
 
