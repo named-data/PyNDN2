@@ -12,12 +12,14 @@ because the new or old owner can't change the bytes.
 Note that  the pointer to the ByteBuffer can be None.
 """
 
+from StringIO import StringIO
+
 class Blob(object):
     def __init__(self, value):
         # TODO: Add copy parameter
-        if type(value) is memoryview:
+        if isinstance(value, memoryview):
             self._array = value
-        elif type(value) is Blob:
+        elif isinstance(value, Blob):
             self._array = value._array
         else:
             # Assume the type is an array of ints
@@ -43,6 +45,16 @@ class Blob(object):
     def isNull(self):
         return self._array == None
     
+    def toHex(self):
+        if self._array == None:
+            return ""
+        
+        result = StringIO()
+        for i in range(len(self._array)):
+            result.write("%02X" % self[i])
+        
+        return result.getvalue()
+    
     def __len__(self):
         if self._array == None:
             return 0
@@ -60,10 +72,10 @@ class Blob(object):
 
     # Different versions of Python implement memoryarray with elements
     #   of different types, so define __getitem__ accordingly.
-    if type(memoryview(bytearray(1))[0]) is str:
+    if isinstance(memoryview(bytearray(1))[0], str):
         # memoryview elements are str.
         __getitem__ = _getFromStr
-    elif type(memoryview(bytearray(1))[0]) is bytes:
+    elif isinstance(memoryview(bytearray(1))[0], bytes):
         # memoryview elements are bytes.
         __getitem__ = _getFromBytes
     else:

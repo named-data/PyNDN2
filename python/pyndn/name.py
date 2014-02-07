@@ -5,7 +5,7 @@
 # See COPYING for copyright and distribution information.
 #
 
-import StringIO
+from StringIO import StringIO
 from pyndn.util import Blob
 
 """
@@ -15,7 +15,7 @@ This module defines the NDN Name class.
 class Name(object):
     class Component(object):
         def __init__(self, value):
-            if type(value) is Blob:
+            if isinstance(value, Blob):
                 self._value = value
             else:
                 self._value = Blob(value)
@@ -27,7 +27,7 @@ class Name(object):
         self._components = []
         
     def append(self, value):
-        if type(value) is Name.Component:
+        if isinstance(value, Name.Component):
             self._components.append(value)
         else:
             self._components.append(Name.Component(value))
@@ -48,14 +48,12 @@ class Name(object):
         if len(self._components) == 0:
             return "/"
   
-        result = StringIO.StringIO()
+        result = StringIO()
         for component in self._components:
             result.write("/")
             self.toEscapedString(component.getValue(), result)
   
-        uri = result.getvalue()
-        result.close()
-        return uri
+        return result.getvalue()
         
     @staticmethod
     def toEscapedString(value, result):
@@ -96,7 +94,7 @@ class Name(object):
         return len(self._components)
         
     def __getitem__(self, key):
-        if type(key) is int:
+        if isinstance(key, int):
             return self._components[key]
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
