@@ -27,18 +27,23 @@ class Name(object):
 
     def __init__(self, value = None):
         self._components = []
+        self._changeCount = 0
         
     def append(self, value):
         if isinstance(value, Name.Component):
             self._components.append(value)
         else:
             self._components.append(Name.Component(value))
+            
+        self._changeCount += 1
+        return self
 
     def get(self, i):
         return self._components[i]
     
     def clear(self):
         self._components = []
+        self._changeCount += 1
     
     def toUri(self):
         """
@@ -56,6 +61,15 @@ class Name(object):
             self.toEscapedString(component.getValue(), result)
   
         return result.getvalue()
+        
+    def getChangeCount(self):
+        """
+        Get the change count, which is incremented each time this object is 
+        changed.
+        
+        :return: The change count.
+        :rtype: int
+        """
         
     @staticmethod
     def toEscapedString(value, result):
