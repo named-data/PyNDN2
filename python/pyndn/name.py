@@ -94,7 +94,7 @@ class Name(object):
         return len(self._components)
         
     def __getitem__(self, key):
-        if isinstance(key, int):
+        if type(key) == int:
             return self._components[key]
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
