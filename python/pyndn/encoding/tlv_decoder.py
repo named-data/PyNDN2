@@ -248,9 +248,9 @@ class TlvDecoder(object):
         :param expectedType: The expected type.
         :type expectedType: int
         :return: The bytes in the value as a slice on the byte array.  This is
-        not necessarily a copy of the bytes in the input buffer.  If you need
-        a copy, then you must make a copy of the return value.
-        :rtype: array type of int
+          not necessarily a copy of the bytes in the input buffer.  If you need
+          a copy, then you must make a copy of the return value.
+        :rtype: memoryview or equivalent
         :raises: ValueError if did not get the expected TLV type.
         """
         length = self.readTypeAndLength(expectedType)
@@ -273,7 +273,7 @@ class TlvDecoder(object):
         :param endOffset: The offset of the end of the parent TLV, returned by 
           readNestedTlvsStart.
         :return: Return True, or else False if the next TLV doesn't have the 
-        expected type.
+          expected type.
         :rtype: bool
         """
         if self.peekType(expectedType, endOffset):
