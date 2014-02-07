@@ -5,11 +5,17 @@
 # See COPYING for copyright and distribution information.
 #
 
+from random import SystemRandom
 from pyndn.util import Blob
 from wire_format import WireFormat
 from tlv_encoder import TlvEncoder
 from tlv_decoder import TlvDecoder
 from tlv import Tlv
+
+# The Python documentation says "Use SystemRandom if you require a 
+#   cryptographically secure pseudo-random number generator.
+# http://docs.python.org/2/library/random.html
+_systemRandom = SystemRandom()
 
 """
 This module defines the Tlv0_1a2WireFormat class which extends WireFormat to
@@ -28,7 +34,40 @@ class Tlv0_1a2WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        
+        # Encode the Nonce as 4 bytes.
+        if len(interest.getNonce()) == 0:
+            # This is the most common case. Generate a nonce.
+            nonce = bytearray(4)
+            for i in range(4):
+                nonce[i] = _systemRandom.randint(0, 0xff)                
+            encoder.writeBlobTlv(Tlv.Nonce, nonce)
+        elif len(interest.getNonce()) < 4:
+            nonce = bytearray(4)
+            if len(interest.getNonce()) > 0:
+                # Copy existing nonce bytes.
+                nonce[:len(interest.getNonce())] = interest.getNonce().buf()
+            
+            # Generate random bytes for remainig bytes in the nonce.
+            for i in range(len(interest.getNonce()), 4):
+                nonce[i] = _systemRandom.randint(0, 0xff)
+                
+            encoder.writeBlobTlv(Tlv.Nonce, nonce)
+        elif len(interest.getNonce()) == 4:
+            # Use the nonce as-is.
+            encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf())
+        else:
+            # Truncate.
+            encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf()[:4])
+        
+        # TODO: implement Selectors
         self.encodeName(interest.getName(), encoder)
+
+        encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
+        
         return Blob(encoder.getOutput())
 
     def decodeInterest(self, interest, input):
@@ -42,7 +81,15 @@ class Tlv0_1a2WireFormat(WireFormat):
         :type input: An array type with int elements.
         """
         decoder = TlvDecoder(input)
+
+        endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
         self.decodeName(interest.getName(), decoder)
+        # TODO: implement Selectors
+
+        # Require a Nonce, but don't force it to be 4 bytes.
+        interest.setNonce(Blob(decoder.readBlobTlv(Tlv.Nonce)))
+
+        decoder.finishNestedTlvs(endOffset)
         
     @staticmethod
     def encodeName(name, encoder):
@@ -56,10 +103,8 @@ class Tlv0_1a2WireFormat(WireFormat):
 
     @staticmethod
     def decodeName(name, decoder):
-        endOffset = decoder.readNestedTlvsStart(Tlv.Name)
-        
+        endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
         while decoder._offset < endOffset:
-            # TODO: Use Blob constructor with copy True.
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
    
         decoder.finishNestedTlvs(endOffset)
