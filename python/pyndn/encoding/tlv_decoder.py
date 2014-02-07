@@ -20,7 +20,9 @@ class TlvDecoder(object):
     :type input: An array type with int elements.
     """
     def __init__(self, input):
-        self._input = input
+        # Create a Blob and take its buf() since this creates a memoryview
+        #   which is more efficient for slicing.
+        self._input = Blob(input).buf()
         self._offset = 0
         
     def readVarNumber(self):
@@ -239,20 +241,19 @@ class TlvDecoder(object):
     def readBlobTlv(self, expectedType):
         """
         Decode the type and length from self's input starting at offset, 
-        expecting the type to be expectedType. Then return a Blob of the bytes
+        expecting the type to be expectedType. Then return an array of the bytes
         in the value.  Update offset.
 
         :param expectedType: The expected type.
         :type expectedType: int
-        :return: The bytes in the value as a Blob of a memoryview on the byte
-          array.
-        :rtype: Blob
+        :return: The bytes in the value as a slice on the byte array.  This is
+        not necessarily a copy of the bytes in the input buffer.  If you need
+        a copy, then you must make a copy of the return value.
+        :rtype: array type of int
         :raises: ValueError if did not get the expected TLV type.
         """
         length = self.readTypeAndLength(expectedType)
-        # TODO: Fix this because it assumes the input is a Blob.
-        result = Blob(self._input.getImmutableArray \
-          ()[self._offset:self._offset + length])
+        result = self._input[self._offset:self._offset + length]
         
         # readTypeAndLength already checked if length exceeds the input buffer.
         self._offset += length
