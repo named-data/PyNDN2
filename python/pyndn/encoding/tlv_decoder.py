@@ -20,9 +20,10 @@ class TlvDecoder(object):
     :type input: An array type with int elements.
     """
     def __init__(self, input):
+        self._input = input
         # Create a Blob and take its buf() since this creates a memoryview
         #   which is more efficient for slicing.
-        self._input = Blob(input).buf()
+        self._inputView = Blob(input).buf()
         self._offset = 0
         
     def readVarNumber(self):
@@ -253,7 +254,8 @@ class TlvDecoder(object):
         :raises: ValueError if did not get the expected TLV type.
         """
         length = self.readTypeAndLength(expectedType)
-        result = self._input[self._offset:self._offset + length]
+        # Use _inputView to get the slice.
+        result = self._inputView[self._offset:self._offset + length]
         
         # readTypeAndLength already checked if length exceeds the input buffer.
         self._offset += length
