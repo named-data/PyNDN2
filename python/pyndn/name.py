@@ -15,15 +15,17 @@ This module defines the NDN Name class.
 class Name(object):
     class Component(object):
         def __init__(self, value):
-            if isinstance(value, Blob):
-                self._value = value
+            if type(value) == Name.Component:
+                # Use the existing Blob in the other Component.
+                self._value = value._value
             else:
-                self._value = Blob(value)
+                # Blob will make a copy.
+                self._value = value if isinstance(value, Blob) else Blob(value)
             
         def getValue(self):
             return self._value
 
-    def __init__(self):
+    def __init__(self, value = None):
         self._components = []
         
     def append(self, value):
