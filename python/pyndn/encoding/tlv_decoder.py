@@ -214,7 +214,7 @@ class TlvDecoder(object):
         :rtype: int
         """
         if self.peekType(expectedType, endOffset):
-            return readNonNegativeIntegerTlv(expectedType)
+            return self.readNonNegativeIntegerTlv(expectedType)
         else:
             return None
         
@@ -235,7 +235,7 @@ class TlvDecoder(object):
         :rtype: float
         """
         if self.peekType(expectedType, endOffset):
-            return float(readNonNegativeIntegerTlv(expectedType))
+            return float(self.readNonNegativeIntegerTlv(expectedType))
         else:
             return None
         
