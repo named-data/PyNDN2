@@ -153,7 +153,7 @@ class TlvDecoder(object):
         :param length: The number of bytes in the encoded integer.
         :type length: int
         :return: The integer.
-        :rtype: int
+        :rtype: int (or long if a large integer on a 32-bit system)
         :raises: ValueError if length is an invalid length for a TLV 
           .nonNegativeInteger
         """
@@ -235,6 +235,8 @@ class TlvDecoder(object):
         :rtype: float
         """
         if self.peekType(expectedType, endOffset):
+            # Note: readNonNegativeIntegerTlv will return int, or long if
+            #   it is large and this is a 32-bit system.
             return float(self.readNonNegativeIntegerTlv(expectedType))
         else:
             return None

@@ -160,13 +160,13 @@ class TlvEncoder(object):
         :param type: The type of the TLV.
         :type type: int
         :param value: Negative for none, otherwise otherwise use 
-          long(round(value)).
+          int(round(value)).
         :type value: float
         """
         if value != None and value >= 0:
-            # Use an arbitrary-precision long which is less efficient than
-            #   int, but can handle the precision of a float on a 32-bit system.
-            self.writeNonNegativeIntegerTlv(type, long(round(value)))
+            # Note: int() will return int, or long if value is large and this 
+            #   is a 32-bit system.
+            self.writeNonNegativeIntegerTlv(type, int(round(value)))
 
     def writeBlobTlv(self, type, value):
         """
