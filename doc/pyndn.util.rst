@@ -17,6 +17,14 @@ util Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`change_counter` Module
+----------------------------
+
+.. automodule:: pyndn.util.change_counter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`dynamic_byte_array` Module
 --------------------------------
 
