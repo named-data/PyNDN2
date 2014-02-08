@@ -4,7 +4,7 @@
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # See COPYING for copyright and distribution information.
 
-__all__ = ['blob', 'change_counter' 'dynamic_byte_array']
+__all__ = ['blob', 'change_counter', 'dynamic_byte_array']
 
 import sys as _sys
 

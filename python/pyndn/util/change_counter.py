@@ -5,8 +5,6 @@
 # See COPYING for copyright and distribution information.
 #
 
-from pyndn.util import Blob
-
 """
 This module defines the ChangeCounter class which keeps a target object whose 
 change count is tracked by a local change count.  You can set to a new target 
@@ -14,6 +12,8 @@ which updates the local change count, and you can call checkChanged
 to check if the target (or one of the target's targets) has been changed.
 The target object must have a method getChangeCount.
 """
+
+from pyndn.util import Blob
 
 class ChangeCounter(object):
     """
