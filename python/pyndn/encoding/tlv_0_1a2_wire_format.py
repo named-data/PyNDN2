@@ -37,6 +37,10 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat \
+          (Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
+        encoder.writeOptionalNonNegativeIntegerTlv \
+          (Tlv.Scope, interest.getScope())
         
         # Encode the Nonce as 4 bytes.
         if len(interest.getNonce()) == 0:
@@ -88,6 +92,11 @@ class Tlv0_1a2WireFormat(WireFormat):
 
         # Require a Nonce, but don't force it to be 4 bytes.
         interest.setNonce(Blob(decoder.readBlobTlv(Tlv.Nonce)))
+        interest.setScope(decoder.readOptionalNonNegativeIntegerTlv \
+          (Tlv.Scope, endOffset))
+        interest.setInterestLifetimeMilliseconds \
+           (decoder.readOptionalNonNegativeIntegerTlvAsFloat \
+            (Tlv.InterestLifetime, endOffset))
 
         decoder.finishNestedTlvs(endOffset)
         

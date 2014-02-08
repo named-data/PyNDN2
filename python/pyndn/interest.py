@@ -17,6 +17,8 @@ class Interest(object):
     def __init__(self, name = None):
         self._name = ChangeCounter(name if type(name) == Name else Name(name))
         self._nonce = Blob()
+        self._scope = None
+        self._interestLifetimeMilliseconds = None
         
         self._getNonceChangeCount = 0
         self._changeCount = 0
@@ -29,7 +31,7 @@ class Interest(object):
         Return the nonce value from the incoming interest.  If you change any of
         the fields in this Interest object, then the nonce value is cleared.
         
-        :return: The nonce.  If isNull() then there nonce is omitted.
+        :return: The nonce.  If isNull() then the nonce is omitted.
         :rtype: Blob
         """
         if self._getNonceChangeCount != self.getChangeCount():
@@ -38,6 +40,24 @@ class Interest(object):
             self._getNonceChangeCount = self.getChangeCount()
 
         return self._nonce
+    
+    def getScope(self):
+        """
+        Get the interest scope.
+        
+        :return: The scope, or None for none.
+        :rtype: int
+        """
+        return self._scope
+
+    def getInterestLifetimeMilliseconds(self):
+        """
+        Get the interest lifetime.
+        
+        :return: The interest lifetime in milliseconds, or None for none.
+        :rtype: float
+        """
+        return self._interestLifetimeMilliseconds
     
     def setName(self, name):
         self._name = ChangeCounter(name if type(name) == Name else Name(name))
@@ -49,6 +69,16 @@ class Interest(object):
         #   clear _nonce.
         self._changeCount += 1
         self._getNonceChangeCount = self.getChangeCount();
+    
+    def setScope(self, scope):
+        self._scope = scope
+        self._changeCount += 1
+    
+    def setInterestLifetimeMilliseconds(self, interestLifetimeMilliseconds):
+        self._interestLifetimeMilliseconds = None \
+           if interestLifetimeMilliseconds == None \
+           else float(interestLifetimeMilliseconds) 
+        self._changeCount += 1
     
     def wireEncode(self, wireFormat = WireFormat.getDefaultWireFormat()):
         """
