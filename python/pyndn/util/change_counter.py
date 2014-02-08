@@ -13,8 +13,6 @@ to check if the target (or one of the target's targets) has been changed.
 The target object must have a method getChangeCount.
 """
 
-from pyndn.util import Blob
-
 class ChangeCounter(object):
     """
     Create a new ChangeCounter to track the given target.  This sets the local
