@@ -13,7 +13,7 @@ from tlv_decoder import TlvDecoder
 from tlv import Tlv
 
 # The Python documentation says "Use SystemRandom if you require a 
-#   cryptographically secure pseudo-random number generator.
+#   cryptographically secure pseudo-random number generator."
 # http://docs.python.org/2/library/random.html
 _systemRandom = SystemRandom()
 
@@ -37,10 +37,10 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        encoder.writeOptionalNonNegativeIntegerTlvFromFloat \
-          (Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
-        encoder.writeOptionalNonNegativeIntegerTlv \
-          (Tlv.Scope, interest.getScope())
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
+          Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.Scope, interest.getScope())
         
         # Encode the Nonce as 4 bytes.
         if len(interest.getNonce()) == 0:
@@ -92,11 +92,11 @@ class Tlv0_1a2WireFormat(WireFormat):
 
         # Require a Nonce, but don't force it to be 4 bytes.
         nonce = Blob(decoder.readBlobTlv(Tlv.Nonce))
-        interest.setScope(decoder.readOptionalNonNegativeIntegerTlv \
-          (Tlv.Scope, endOffset))
-        interest.setInterestLifetimeMilliseconds \
-           (decoder.readOptionalNonNegativeIntegerTlvAsFloat \
-            (Tlv.InterestLifetime, endOffset))
+        interest.setScope(decoder.readOptionalNonNegativeIntegerTlv(
+          Tlv.Scope, endOffset))
+        interest.setInterestLifetimeMilliseconds(
+           decoder.readOptionalNonNegativeIntegerTlvAsFloat
+           (Tlv.InterestLifetime, endOffset))
 
         # Set the nonce last because setting other interest fields clears it.
         interest.setNonce(nonce)

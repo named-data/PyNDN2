@@ -75,9 +75,9 @@ class Interest(object):
         self._changeCount += 1
     
     def setInterestLifetimeMilliseconds(self, interestLifetimeMilliseconds):
-        self._interestLifetimeMilliseconds = None \
-           if interestLifetimeMilliseconds == None \
-           else float(interestLifetimeMilliseconds) 
+        self._interestLifetimeMilliseconds = (None
+           if interestLifetimeMilliseconds == None
+           else float(interestLifetimeMilliseconds)) 
         self._changeCount += 1
     
     def wireEncode(self, wireFormat = WireFormat.getDefaultWireFormat()):

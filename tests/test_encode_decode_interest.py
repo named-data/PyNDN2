@@ -1,6 +1,11 @@
-from time import *
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# See COPYING for copyright and distribution information.
+#
+
 from pyndn import Interest
-from pyndn.util import Blob
 
 def dump(*list):
     result = ""
@@ -10,12 +15,12 @@ def dump(*list):
 
 def dumpInterest(interest):
     dump("name:", interest.getName().toUri())
-    dump("nonce:", "<none>" if interest.getNonce().size() == 0 \
+    dump("nonce:", "<none>" if interest.getNonce().size() == 0
                             else interest.getNonce().toHex())
-    dump("scope:", "<none>" if interest.getScope() == None \
+    dump("scope:", "<none>" if interest.getScope() == None
                             else interest.getScope())
-    dump("lifetimeMilliseconds:", \
-         "<none>" if interest.getInterestLifetimeMilliseconds() == None \
+    dump("lifetimeMilliseconds:",
+         "<none>" if interest.getInterestLifetimeMilliseconds() == None
                   else interest.getInterestLifetimeMilliseconds())
     
 interest = Interest()

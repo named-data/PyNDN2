@@ -39,24 +39,24 @@ class TlvDecoder(object):
         if firstOctet < 253:
             result = firstOctet
         elif firstOctet == 253:
-            result = (self._input[self._offset] << 8) + \
-                      self._input[self._offset + 1]
+            result = ((self._input[self._offset] << 8) +
+                       self._input[self._offset + 1])
             self._offset += 2
         elif firstOctet == 254:
-            result = (self._input[self._offset]     << 24) + \
-                     (self._input[self._offset + 1] << 16) + \
-                     (self._input[self._offset + 2] << 8) + \
-                      self._input[self._offset + 3]
+            result = ((self._input[self._offset]     << 24) +
+                      (self._input[self._offset + 1] << 16) +
+                      (self._input[self._offset + 2] << 8) +
+                       self._input[self._offset + 3])
             self._offset += 4
         else:
-            result = (self._input[self._offset]     << 56) + \
-                     (self._input[self._offset + 1] << 48) + \
-                     (self._input[self._offset + 2] << 40) + \
-                     (self._input[self._offset + 3] << 32) + \
-                     (self._input[self._offset + 4] << 24) + \
-                     (self._input[self._offset + 5] << 16) + \
-                     (self._input[self._offset + 6] << 8) + \
-                      self._input[self._offset + 7]
+            result = ((self._input[self._offset]     << 56) +
+                      (self._input[self._offset + 1] << 48) +
+                      (self._input[self._offset + 2] << 40) +
+                      (self._input[self._offset + 3] << 32) +
+                      (self._input[self._offset + 4] << 24) +
+                      (self._input[self._offset + 5] << 16) +
+                      (self._input[self._offset + 6] << 8) +
+                       self._input[self._offset + 7])
             self._offset += 8
         
         return result
@@ -115,8 +115,8 @@ class TlvDecoder(object):
           the nested TLVs
         """
         if self._offset != endOffset:
-            raise ValueError \
-               ("TLV length does not equal the total length of the nested TLVs")
+            raise ValueError(
+               "TLV length does not equal the total length of the nested TLVs")
                
     def peekType(self, expectedType, endOffset):
         """
@@ -160,22 +160,22 @@ class TlvDecoder(object):
         if length == 1:
             result = self._input[self._offset]
         elif length == 2:
-            result = (self._input[self._offset] << 8) + \
-                      self._input[self._offset + 1]
+            result = ((self._input[self._offset] << 8) +
+                       self._input[self._offset + 1])
         elif length == 4:
-            result = (self._input[self._offset]     << 24) + \
-                     (self._input[self._offset + 1] << 16) + \
-                     (self._input[self._offset + 2] << 8) + \
-                      self._input[self._offset + 3]
+            result = ((self._input[self._offset]     << 24) +
+                      (self._input[self._offset + 1] << 16) +
+                      (self._input[self._offset + 2] << 8) +
+                       self._input[self._offset + 3])
         elif length == 8:
-            result = (self._input[self._offset]     << 56) + \
-                     (self._input[self._offset + 1] << 48) + \
-                     (self._input[self._offset + 2] << 40) + \
-                     (self._input[self._offset + 3] << 32) + \
-                     (self._input[self._offset + 4] << 24) + \
-                     (self._input[self._offset + 5] << 16) + \
-                     (self._input[self._offset + 6] << 8) + \
-                      self._input[self._offset + 7]
+            result = ((self._input[self._offset]     << 56) +
+                      (self._input[self._offset + 1] << 48) +
+                      (self._input[self._offset + 2] << 40) +
+                      (self._input[self._offset + 3] << 32) +
+                      (self._input[self._offset + 4] << 24) +
+                      (self._input[self._offset + 5] << 16) +
+                      (self._input[self._offset + 6] << 8) +
+                       self._input[self._offset + 7])
         else:
             raise ValueError("Invalid length for a TLV nonNegativeInteger")
         

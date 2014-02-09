@@ -97,9 +97,9 @@ class Name(object):
             for i in range(len(value)):
                 x = value[i]
                 # Check for 0-9, A-Z, a-z, (+), (-), (.), (_)
-                if (x >= 0x30 and x <= 0x39) or (x >= 0x41 and x <= 0x5a) or \
-                   (x >= 0x61 and x <= 0x7a) or x == 0x2b or x == 0x2d or \
-                   x == 0x2e or x == 0x5f:
+                if ((x >= 0x30 and x <= 0x39) or (x >= 0x41 and x <= 0x5a) or
+                    (x >= 0x61 and x <= 0x7a) or x == 0x2b or x == 0x2d or
+                    x == 0x2e or x == 0x5f):
                     result.write(chr(x))
                 else:
                     result.write("%%%02X" % x)
