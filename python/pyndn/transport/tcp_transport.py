@@ -22,6 +22,8 @@ class TcpTransport(Transport):
     def __init__(self):
         self._socket = None
         self._poll = None
+        self._kqueue = None
+        self._kevents = None
         self._buffer = bytearray(8000)
         # Create a Blob and take its buf() since this creates a memoryview
         #   which is more efficient for slicing.
@@ -78,16 +80,19 @@ class TcpTransport(Transport):
         self._socket.connect(
           (connectionInfo.getHost(), connectionInfo.getPort()))
           
-        # TODO: Check to set up _poll vs. _kqueue.
-        ## Set up _poll.
-        #self._poll = select.poll()
-        #self._poll.register(self._socket.fileno(), select.POLLIN)
-        
-        ## Set up _kqueue.
-        self._kqueue = select.kqueue()
-        self._kevents = [select.kevent(
-          self._socket.fileno(), filter = select.KQ_FILTER_READ,
-          flags = select.KQ_EV_ADD | select.KQ_EV_ENABLE | select.KQ_EV_CLEAR)]
+        if hasattr(select, "poll"):
+            # Set up _poll.  (Ubuntu, etc.)
+            self._poll = select.poll()
+            self._poll.register(self._socket.fileno(), select.POLLIN)
+        elif hasattr(select, "kqueue"):
+            ## Set up _kqueue. (BSD and OS X)
+            self._kqueue = select.kqueue()
+            self._kevents = [select.kevent(
+              self._socket.fileno(), filter = select.KQ_FILTER_READ,
+              flags = select.KQ_EV_ADD | select.KQ_EV_ENABLE | 
+                      select.KQ_EV_CLEAR)]
+        else:
+            raise RuntimeError("Cannot find a polling utility for sockets")
           
         #self._elementReader = BinaryXmlElementReader(elementListener)
         self._elementListener = elementListener
@@ -119,8 +124,15 @@ class TcpTransport(Transport):
         # Loop until there is no more data in the receive buffer.
         while True:
             if self._poll != None:
-                # TODO: Check for data waiting using _poll.
-                pass
+                # Set timeout to 0 for an immediate check.
+                pollResultList = self._poll.poll(0)
+                if len(pollResultList) == 0:
+                    return
+                for (fd, pollResult) in pollResultList:
+                    if pollResult < 0 or pollResult & select.POLLIN == 0:
+                        # Timeout, so no data ready. Or the flags indicate 
+                        # no data ready.
+                        return
             else:
                 # Set timeout to 0 for an immediate check.
                 if len(self._kqueue.control(self._kevents, 1, 0)) == 0:
