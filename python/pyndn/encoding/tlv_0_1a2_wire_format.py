@@ -43,24 +43,24 @@ class Tlv0_1a2WireFormat(WireFormat):
           Tlv.Scope, interest.getScope())
         
         # Encode the Nonce as 4 bytes.
-        if len(interest.getNonce()) == 0:
+        if interest.getNonce().size() == 0:
             # This is the most common case. Generate a nonce.
             nonce = bytearray(4)
             for i in range(4):
                 nonce[i] = _systemRandom.randint(0, 0xff)                
             encoder.writeBlobTlv(Tlv.Nonce, nonce)
-        elif len(interest.getNonce()) < 4:
+        elif interest.getNonce().size() < 4:
             nonce = bytearray(4)
-            if len(interest.getNonce()) > 0:
+            if interest.getNonce().size() > 0:
                 # Copy existing nonce bytes.
-                nonce[:len(interest.getNonce())] = interest.getNonce().buf()
+                nonce[:interest.getNonce().size()] = interest.getNonce().buf()
             
             # Generate random bytes for remainig bytes in the nonce.
-            for i in range(len(interest.getNonce()), 4):
+            for i in range(interest.getNonce().size(), 4):
                 nonce[i] = _systemRandom.randint(0, 0xff)
                 
             encoder.writeBlobTlv(Tlv.Nonce, nonce)
-        elif len(interest.getNonce()) == 4:
+        elif interest.getNonce().size() == 4:
             # Use the nonce as-is.
             encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf())
         else:
@@ -109,7 +109,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         
         # Encode the components backwards.
         for i in range(len(name) - 1, -1, -1):
-            encoder.writeBlobTlv(Tlv.NameComponent, name[i]._value)
+            encoder.writeBlobTlv(Tlv.NameComponent, name[i]._value.buf())
     
         encoder.writeTypeAndLength(Tlv.Name, len(encoder) - saveLength)
 

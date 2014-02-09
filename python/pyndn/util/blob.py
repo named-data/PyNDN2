@@ -58,7 +58,10 @@ class Blob(object):
         :return: The length of the array.
         :rtype: int
         """
-        return len(self)
+        if self._array == None:
+            return 0
+        else:
+            return len(self._array)
     
     def buf(self):
         """
@@ -100,19 +103,6 @@ class Blob(object):
         
         return result.getvalue()
     
-    def __len__(self):
-        if self._array == None:
-            return 0
-        else:
-            return len(self._array)
-        
-    def __getitem__(self, index):
-        if type(index) == slice:
-            return self._array.__getitem__(index)
-        else:
-            # Use [] directly which is faster than calling __getitem__
-            return self._array[index]
-
     _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) == int)
         
 class _memoryviewWrapper(object):

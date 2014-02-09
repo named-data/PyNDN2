@@ -58,7 +58,7 @@ class Name(object):
         result = StringIO()
         for component in self._components:
             result.write("/")
-            self.toEscapedString(component.getValue(), result)
+            self.toEscapedString(component._value.buf(), result)
   
         return result.getvalue()
         
