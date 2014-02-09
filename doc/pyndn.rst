@@ -31,5 +31,6 @@ Subpackages
 .. toctree::
 
     pyndn.encoding
+    pyndn.transport
     pyndn.util
 
