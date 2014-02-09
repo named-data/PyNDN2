@@ -124,15 +124,15 @@ class TcpTransport(Transport):
         # Loop until there is no more data in the receive buffer.
         while True:
             if self._poll != None:
+                isReady = False
                 # Set timeout to 0 for an immediate check.
-                pollResultList = self._poll.poll(0)
-                if len(pollResultList) == 0:
+                for (fd, pollResult) in self._poll.poll(0):
+                    if pollResult > 0 and pollResult & select.POLLIN != 0:
+                        isReady = True
+                        break
+                if not isReady:
+                    # There is no data waiting.
                     return
-                for (fd, pollResult) in pollResultList:
-                    if pollResult < 0 or pollResult & select.POLLIN == 0:
-                        # Timeout, so no data ready. Or the flags indicate 
-                        # no data ready.
-                        return
             else:
                 # Set timeout to 0 for an immediate check.
                 if len(self._kqueue.control(self._kevents, 1, 0)) == 0:
