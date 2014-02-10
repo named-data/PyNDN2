@@ -10,8 +10,7 @@ from pyndn import Interest
 def dump(*list):
     result = ""
     for element in list:
-        result += (element if type(element) is str or type(element) is unicode
-                   else repr(element)) + " "
+        result += (element if type(element) is str else repr(element)) + " "
     print(result)
 
 def dumpInterest(interest):
