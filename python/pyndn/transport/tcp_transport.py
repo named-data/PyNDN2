@@ -13,7 +13,7 @@ communication over TCP.
 import socket
 import select
 from pyndn.util import Blob
-from transport import Transport
+from pyndn.transport.transport import Transport
 
 class TcpTransport(Transport):
     """
@@ -94,7 +94,8 @@ class TcpTransport(Transport):
         else:
             raise RuntimeError("Cannot find a polling utility for sockets")
           
-        #self._elementReader = BinaryXmlElementReader(elementListener)
+        # TODO: Use ElementReader.
+        #self._elementReader = ElementReader(elementListener)
         self._elementListener = elementListener
     
     def send(self, data):
@@ -145,6 +146,7 @@ class TcpTransport(Transport):
                 return
 
             # _bufferView is a memoryview, so we can slice efficienty.
+            # TODO: Use _elementReader.
             #self._elementReader.onReceivedData(self._bufferView[0:nBytesRead])
             self._elementListener.onReceivedData(self._bufferView[0:nBytesRead])
 
