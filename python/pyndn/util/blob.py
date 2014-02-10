@@ -124,10 +124,19 @@ class Blob(object):
         
         array = self.buf()
         result = BytesIO()
+        hexBuffer = bytearray(2)
         for i in range(len(array)):
-            result.write("%02X" % array[i])
+            # Get the hex string and transfer to hexBuffer for writing.
+            hex = "%02X" % array[i]
+            hexBuffer[0] = ord(hex[0])
+            hexBuffer[1] = ord(hex[1])
+            result.write(hexBuffer)
         
-        return result.getvalue()
+        value = result.getvalue()
+        if not type(value) is str:
+            # Assume value is a Python 3 bytes object.  Convert to string.
+            value = str(value, encoding = "Latin-1")
+        return value
 
     # Set this up once at the class level for the constructor to use.
     _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) == int)
