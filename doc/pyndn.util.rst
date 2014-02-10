@@ -33,3 +33,11 @@ util Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`signed_blob` Module
+-------------------------
+
+.. automodule:: pyndn.util.signed_blob
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
