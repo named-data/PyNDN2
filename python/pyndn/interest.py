@@ -4,14 +4,14 @@
 # See COPYING for copyright and distribution information.
 #
 
+"""
+This module defines the NDN Interest class.
+"""
+
 from encoding import WireFormat
 from pyndn.util import Blob
 from pyndn.util import ChangeCounter
 from name import Name
-
-"""
-This module defines the NDN Interest class.
-"""
 
 class Interest(object):
     def __init__(self, name = None):
@@ -60,7 +60,7 @@ class Interest(object):
         return self._interestLifetimeMilliseconds
     
     def setName(self, name):
-        self._name = ChangeCounter(name if type(name) == Name else Name(name))
+        self._name.set(name if type(name) == Name else Name(name))
         self._changeCount += 1
     
     def setNonce(self, nonce):
@@ -87,6 +87,8 @@ class Interest(object):
         :param wireFormat: (optional) A WireFormat object used to encode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
+        :return: The encoded buffer.
+        :rtype: Blob
         """
         return wireFormat.encodeInterest(self)
     
@@ -100,7 +102,9 @@ class Interest(object):
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
         """
-        wireFormat.decodeInterest(self, input)
+        # If input is a blob, get its buf().
+        decodeBuffer = input.buf() if isinstance(input, Blob) else input
+        wireFormat.decodeInterest(self, decodeBuffer)
         
     def getChangeCount(self):
         """
