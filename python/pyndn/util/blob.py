@@ -178,5 +178,3 @@ class _memoryviewWrapper(object):
     elif type(memoryview(bytearray(1))[0]) == bytes:
         # memoryview elements are bytes.
         __getitem__ = _getFromBytes
-    else:
-        raise ValueError("Unexpected type of element for _memoryviewWrapper")
