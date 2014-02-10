@@ -14,8 +14,8 @@ def dump(*list):
     result = ""
     for element in list:
         result += (element if type(element) is str or type(element) is unicode
-                   else `element`) + " "
-    print result
+                   else repr(element)) + " "
+    print(result)
 
 class Counter(object):
     def __init__(self):

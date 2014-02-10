@@ -10,8 +10,9 @@ from pyndn import Interest
 def dump(*list):
     result = ""
     for element in list:
-        result += (element if type(element) is str else `element`) + " "
-    print result
+        result += (element if type(element) is str or type(element) is unicode
+                   else repr(element)) + " "
+    print(result)
 
 def dumpInterest(interest):
     dump("name:", interest.getName().toUri())
@@ -24,8 +25,7 @@ def dumpInterest(interest):
                   else interest.getInterestLifetimeMilliseconds())
     
 interest = Interest()
-interest.getName().append(bytearray([65, 66, 67]))
-interest.getName().append(bytearray([68, 69, 70]))
+interest.getName().append("ABC").append("DEF")
 interest.setScope(1)
 interest.setInterestLifetimeMilliseconds(123456789012345.0)
 encoding = interest.wireEncode()
