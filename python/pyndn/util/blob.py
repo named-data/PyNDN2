@@ -12,7 +12,7 @@ because the new or old owner can't change the bytes.
 Note that the pointer to the buffer can be None.
 """
 
-from StringIO import StringIO
+from io import BytesIO
 
 class Blob(object):
     """
@@ -123,7 +123,7 @@ class Blob(object):
             return ""
         
         array = self.buf()
-        result = StringIO()
+        result = BytesIO()
         for i in range(len(array)):
             result.write("%02X" % array[i])
         

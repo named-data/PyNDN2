@@ -5,7 +5,7 @@
 # See COPYING for copyright and distribution information.
 #
 
-from StringIO import StringIO
+from io import BytesIO
 from pyndn.util import Blob
 
 """
@@ -55,7 +55,7 @@ class Name(object):
         if len(self._components) == 0:
             return "/"
   
-        result = StringIO()
+        result = BytesIO()
         for component in self._components:
             result.write("/")
             self.toEscapedString(component._value.buf(), result)
@@ -79,8 +79,8 @@ class Name(object):
         
         :param value: The buffer with the value to escape.
         :type value: An array type with int elements.
-        :param result: The StringIO stream to write to.
-        :type result: StringIO
+        :param result: The BytesIO stream to write to.
+        :type result: BytesIO
         """
         gotNonDot = False
         for i in range(len(value)):
