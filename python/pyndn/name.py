@@ -58,10 +58,15 @@ class Name(object):
   
         result = BytesIO()
         for component in self._components:
-            result.write(self._slash)
+            # write is required to take a byte buffer.
+            result.write(Name._slash)
             self.toEscapedString(component._value.buf(), result)
   
-        return result.getvalue()
+        value = result.getvalue()
+        if not type(value) is str:
+            # Assume value is a Python 3 bytes object.  Convert to string.
+            value = str(value, encoding = "Latin-1")
+        return value
         
     def getChangeCount(self):
         """
@@ -72,6 +77,7 @@ class Name(object):
         :rtype: int
         """
         
+    _dot = bytearray([ord('.')])
     @staticmethod
     def toEscapedString(value, result):
         """
@@ -85,25 +91,34 @@ class Name(object):
         """
         gotNonDot = False
         for i in range(len(value)):
-            if value[i] != 0x2e:
+            if value[i] != Name._dot[0]:
                 gotNonDot = True
                 break
 
         if not gotNonDot:
             # Special case for component of zero or more periods. Add 3 periods.
-            result.write("...")
-            for i in range(len(value)):
-                result.write('.')
+            for i in range(len(value) + 3):
+                result.write(Name._dot)
         else:
+            charBuffer = bytearray(1)
+            hexBuffer = bytearray(3)
+            hexBuffer[0] = ord('%')
             for i in range(len(value)):
                 x = value[i]
                 # Check for 0-9, A-Z, a-z, (+), (-), (.), (_)
                 if ((x >= 0x30 and x <= 0x39) or (x >= 0x41 and x <= 0x5a) or
                     (x >= 0x61 and x <= 0x7a) or x == 0x2b or x == 0x2d or
                     x == 0x2e or x == 0x5f):
-                    result.write(chr(x))
+                    charBuffer[0] = x
+                    # write is required to take a byte buffer.
+                    result.write(charBuffer)
                 else:
-                    result.write("%%%02X" % x)
+                    # Write '%' followed by the hex value.
+                    hex = "%02X" % x
+                    hexBuffer[1]  = ord(hex[0])
+                    hexBuffer[2]  = ord(hex[1])
+                    # write is required to take a byte buffer.
+                    result.write(hexBuffer)
         
     # Python operators.
 
