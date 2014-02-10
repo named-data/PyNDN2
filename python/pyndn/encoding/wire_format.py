@@ -42,6 +42,43 @@ class WireFormat(object):
         """
         raise RuntimeError("decodeInterest is not implemented")
 
+    def encodeData(self, data):
+        """
+        Encode data and return the encoding and signed offsets.  Your derived 
+        class should override.
+
+        :param data: The Data object to encode.
+        :type data: Data
+        :return: A Tuple of (encoding, signedPortionBeginOffset,
+          signedPortionEndOffset) where encoding is a Blob containing the
+          encoding, signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion.
+        :rtype: (Blob, int, int)
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("encodeData is not implemented")
+        
+    def decodeData(self, data, input):
+        """
+        Decode input as a data packet, set the fields in the data object, and 
+        return the signed offsets.  Your derived class should override.
+
+        :param data: The Data object whose fields are updated.
+        :type data: Data
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements.
+        :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
+          where signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion.
+        :rtype: (int, int)
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("decodeData is not implemented")
+        
     @classmethod
     def setDefaultWireFormat(self, wireFormat):
         """
