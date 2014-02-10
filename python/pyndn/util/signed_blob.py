@@ -10,20 +10,20 @@ This module defines the SignedBlob class which extends Blob to keep the offsets
 of a signed portion (e.g., the bytes of Data packet). 
 """
 
-from blob import Blob
+from pyndn.util.blob import Blob
 
 class SignedBlob(Blob):
     """
     Create a new SignedBlob using the given Blob and offsets.
     
     :param blob: (optional) The Blob with a signed portion.  If omitted,
-    then isNull() is True.
+      then isNull() is True.
     :type blob: Blob or SignedBlob
     :param signedPortionBeginOffset: (optional) The offset in the buffer of the
-    beginning of the signed portion.
+      beginning of the signed portion.
     :type signedPortionBeginOffset: int
     :param signedPortionEndOffset: (optional) The offset in the buffer of the
-    end of the signed portion.
+      end of the signed portion.
     :type signedPortionEndOffset: int
     """
     def __init__(

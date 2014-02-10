@@ -12,7 +12,7 @@ from pyndn.encoding import WireFormat
 from pyndn.util import Blob
 from pyndn.util import SignedBlob
 from pyndn.util import ChangeCounter
-from name import Name
+from pyndn.name import Name
 
 class Data(object):
     def __init__(self, name = None):

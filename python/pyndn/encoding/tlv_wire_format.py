@@ -5,8 +5,8 @@
 # See COPYING for copyright and distribution information.
 #
 
-from wire_format import WireFormat
-from tlv_0_1a2_wire_format import Tlv0_1a2WireFormat
+from pyndn.encoding.wire_format import WireFormat
+from pyndn.encoding.tlv_0_1a2_wire_format import Tlv0_1a2WireFormat
 
 """
 This module defines the TlvWireFormat class which extends Tlv0_1a2WireFormat to 

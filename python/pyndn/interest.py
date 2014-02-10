@@ -11,7 +11,7 @@ This module defines the NDN Interest class.
 from pyndn.encoding import WireFormat
 from pyndn.util import Blob
 from pyndn.util import ChangeCounter
-from name import Name
+from pyndn.name import Name
 
 class Interest(object):
     def __init__(self, name = None):

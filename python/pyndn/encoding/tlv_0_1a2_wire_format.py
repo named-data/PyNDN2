@@ -7,10 +7,10 @@
 
 from random import SystemRandom
 from pyndn.util import Blob
-from wire_format import WireFormat
-from tlv_encoder import TlvEncoder
-from tlv_decoder import TlvDecoder
-from tlv import Tlv
+from pyndn.encoding.wire_format import WireFormat
+from pyndn.encoding.tlv_encoder import TlvEncoder
+from pyndn.encoding.tlv_decoder import TlvDecoder
+from pyndn.encoding.tlv import Tlv
 
 # The Python documentation says "Use SystemRandom if you require a 
 #   cryptographically secure pseudo-random number generator."

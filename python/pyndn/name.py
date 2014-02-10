@@ -45,6 +45,7 @@ class Name(object):
         self._components = []
         self._changeCount += 1
     
+    _slash = bytearray([ord('/')])
     def toUri(self):
         """
         Encode this name as a URI according to the NDN URI Scheme.
@@ -57,7 +58,7 @@ class Name(object):
   
         result = BytesIO()
         for component in self._components:
-            result.write("/")
+            result.write(self._slash)
             self.toEscapedString(component._value.buf(), result)
   
         return result.getvalue()
