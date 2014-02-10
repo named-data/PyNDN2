@@ -45,3 +45,30 @@ class SignedBlob(Blob):
             self._signedPortionBeginOffset = signedPortionBeginOffset
             self._signedPortionEndOffset = signedPortionEndOffset
         
+        if self.isNull():
+            self._signedArray = None
+        else:
+            self._signedArray = self._array[
+              signedPortionBeginOffset:signedPortionEndOffset]
+              
+    def signedSize(self):
+        """
+        Get the length of the signed portion of the immutable byte buffer.
+        
+        :return: The length of the signed portion, or 0 if isNull().
+        :rtype: int
+        """
+        if self._signedArray == None:
+            return 0
+        else:
+            return len(self._signedArray)
+
+    def signedBuf(self):
+        """
+        Return the signed portion of the byte array which you must treat as 
+        immutable and not modify the contents.
+        
+        :return: An array which you should not modify, or None if isNull().
+        :rtype: An array type with int elements, such as bytearray.
+        """
+        return self._signedArray
