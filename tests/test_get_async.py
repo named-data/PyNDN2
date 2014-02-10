@@ -7,22 +7,36 @@
 
 import time
 from pyndn import Interest
+from pyndn import Data
 from pyndn.transport import TcpTransport
+
+def dump(*list):
+    result = ""
+    for element in list:
+        result += (element if type(element) is str or type(element) is unicode
+                   else `element`) + " "
+    print result
 
 class Counter(object):
     def __init__(self):
         self._callbackCount = 0
 
-    def onReceivedData(self, data):
-        print "received len", len(data)
+    def onReceivedData(self, input):
         self._callbackCount += 1
+        data = Data()
+        data.wireDecode(input)
+        dump("Got data packet with name", data.getName().toUri())
+        dump(bytearray(data.getContent().buf()).decode('latin-1'))
 
 counter = Counter()
 transport = TcpTransport()
 transport.connect(TcpTransport.ConnectionInfo("localhost"), counter)
 
 interest = Interest()
-transport.send(interest.wireEncode().buf()._view)
+interest.getName().append("ndn").append("ucla.edu").append("apps").append(
+  "ndn-js-test").append("hello.txt")
+dump("Sending interest", interest.getName().toUri())
+transport.send(interest.wireEncode().toBuffer())
 
 while counter._callbackCount == 0:
     transport.processEvents()

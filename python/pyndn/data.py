@@ -17,6 +17,9 @@ from name import Name
 class Data(object):
     def __init__(self, name = None):
         self._name = ChangeCounter(name if type(name) == Name else Name(name))
+        # TODO: Implement _signature
+        # TODO: Implement _metaInfo
+        self._content = Blob()
         self._defaultWireEncoding = SignedBlob()
 
         self._getDefaultWireEncodingChangeCount = 0
@@ -75,6 +78,12 @@ class Data(object):
     def getName(self):
         return self._name.get()
     
+    # TODO: Implement getMetaInfo.
+    # TODO: Implement getSignature.
+
+    def getContent(self):
+        return self._content
+    
     def getDefaultWireEncoding(self):
         """
         Return the default wire encoding.
@@ -93,6 +102,13 @@ class Data(object):
         
     def setName(self, name):
         self._name.set(name if type(name) == Name else Name(name))
+        self._changeCount += 1
+        
+    # TODO: Implement setSignature.
+    # TODO: Implement setMetaInfo.
+    
+    def setContent(self, content):
+        self._content = content if type(content) == Blob else Blob(content)
         self._changeCount += 1
     
     def getChangeCount(self):

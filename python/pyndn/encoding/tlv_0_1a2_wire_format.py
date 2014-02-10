@@ -120,12 +120,18 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        # TODO: Set signedPortionBeginOffset, signedPortionEndOffset.
-        signedPortionBeginOffset = 0
-        signedPortionEndOffset = 0
+        # TODO: Encode signature bytes.
+        signedPortionEndOffsetFromBack = len(encoder)
+        # TODO: encodeSignatureSha256WithRsa.
+        encoder.writeBlobTlv(Tlv.Content, data.getContent().buf())
+        self.encodeMetaInfo(None, encoder) # TODO: Use getMetaInfo().
         self.encodeName(data.getName(), encoder)
+        signedPortionBeginOffsetFromBack = len(encoder)
 
         encoder.writeTypeAndLength(Tlv.Data, len(encoder) - saveLength)
+        signedPortionBeginOffset = (len(encoder) - 
+                                    signedPortionBeginOffsetFromBack)
+        signedPortionEndOffset = len(encoder) - signedPortionEndOffsetFromBack
         
         return (Blob(encoder.getOutput()), signedPortionBeginOffset, 
                 signedPortionEndOffset)
@@ -148,12 +154,17 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Data)
+        signedPortionBeginOffset = decoder._offset
+        
         self.decodeName(data.getName(), decoder)
-        # TODO: Set signedPortionBeginOffset, signedPortionEndOffset.
-        signedPortionBeginOffset = 0
-        signedPortionEndOffset = 0
+        self.decodeMetaInfo(None, decoder) # TODO: Pass getMetaInfo().
+        data.setContent(Blob(decoder.readBlobTlv(Tlv.Content)))
+        # TODO: decodeSignatureInfo.
+        signedPortionEndOffset = decoder._offset
+        # TODO: Decode signature bits.
 
-        decoder.finishNestedTlvs(endOffset)
+        # TODO: Restore
+        #decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
         
     @staticmethod
@@ -173,3 +184,20 @@ class Tlv0_1a2WireFormat(WireFormat):
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
    
         decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def encodeMetaInfo(metaInfo, encoder):
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        # TODO: Implement MetaInfo.
+    
+        encoder.writeTypeAndLength(Tlv.MetaInfo, len(encoder) - saveLength)
+
+    @staticmethod
+    def decodeMetaInfo(metaInfo, decoder):
+        endOffset = decoder.readNestedTlvsStart(Tlv.MetaInfo)        
+
+        # TODO: Implement MetaInfo.
+        #decoder.finishNestedTlvs(endOffset)
+        decoder.seek(endOffset) # TODO: Remove after implementing MetaInfo.
