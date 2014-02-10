@@ -18,7 +18,8 @@ class Blob(object):
     """
     Create a new Blob which holds an immutable array of bytes.
     
-    :param array: (optional) The array of bytes, or None.
+    :param array: (optional) The array of bytes, or None.  If array is str,
+      then encode using UTF-8.
     :type array: Blob, bytearray, memoryview or other array of int
     :param copy: (optional) If true, copy the contents of array into a new
       bytearray.  If false, just use the existing array without copying.
@@ -34,6 +35,10 @@ class Blob(object):
             # Use the existing _array.  Don't need to check for copy.
             self._array = array._array
         else:
+            if type(array) is str:
+                # Convert from a string to utf-8 byte encoding.
+                array = array.encode('utf-8')
+                
             if copy:
                 # We are copying, so just make another bytearray.
                 # We always use a memoryview so that slicing is efficient.
