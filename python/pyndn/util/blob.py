@@ -67,6 +67,9 @@ class Blob(object):
         """
         Return the byte array which you must treat as immutable and not 
         modify the contents.
+        Note: For compatibility with Python versions before 3.2, if you
+        need an object which implements the buffer protocol (e.g. for writing
+        to a socket) then call toBuffer() instead.
         
         :return: An array which you should not modify, or None if the pointer 
           is None.
@@ -77,6 +80,27 @@ class Blob(object):
         else:
             return self._array
     
+    def _toBufferFromMemoryViewWrapper(self):
+        """
+        This is an internal function (which is only needed by Python versions
+        before 3.2) to check if buf() would return a _memoryviewWrapper and
+        to return its internal memoryview instead, so that it implements
+        the buffer protocol (but doesn't have int elements).
+        """
+        if self._array == None:
+            return None
+        elif type(self._array) == _memoryviewWrapper:
+            # Return the underlying memoryview.
+            return self._array._view
+        else:
+            return self._array
+    
+    if type(memoryview(bytearray(1))[0]) == int:
+        # We can use the normal buf().
+        toBuffer = buf
+    else:
+        toBuffer = _toBufferFromMemoryViewWrapper
+
     def isNull(self):
         """
         Return True if the array is None, otherwise False.
@@ -102,7 +126,8 @@ class Blob(object):
             result.write("%02X" % array[i])
         
         return result.getvalue()
-    
+
+    # Set this up once at the class level for the constructor to use.
     _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) == int)
         
 class _memoryviewWrapper(object):
