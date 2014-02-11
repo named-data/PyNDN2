@@ -25,6 +25,14 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`meta_info` Module
+-----------------------
+
+.. automodule:: pyndn.meta_info
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`name` Module
 ------------------
 

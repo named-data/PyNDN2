@@ -6,13 +6,14 @@
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # See COPYING for copyright and distribution information.
 
-__all__ = ['data', 'interest', 'name']
+__all__ = ['data', 'interest', 'meta_info', 'name']
 
 import sys as _sys
 
 try:
     from pyndn.data import *
     from pyndn.interest import *
+    from pyndn.meta_info import *
     from pyndn.name import *
 except ImportError:
     del _sys.modules[__name__]

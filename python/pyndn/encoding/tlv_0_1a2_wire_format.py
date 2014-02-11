@@ -6,6 +6,7 @@
 #
 
 from random import SystemRandom
+from pyndn.meta_info import ContentType
 from pyndn.util import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv_encoder import TlvEncoder
@@ -126,7 +127,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         signedPortionEndOffsetFromBack = len(encoder)
         # TODO: encodeSignatureSha256WithRsa.
         encoder.writeBlobTlv(Tlv.Content, data.getContent().buf())
-        self._encodeMetaInfo(None, encoder) # TODO: Use getMetaInfo().
+        self._encodeMetaInfo(data.getMetaInfo(), encoder)
         self._encodeName(data.getName(), encoder)
         signedPortionBeginOffsetFromBack = len(encoder)
 
@@ -159,7 +160,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         signedPortionBeginOffset = decoder._offset
         
         self._decodeName(data.getName(), decoder)
-        self._decodeMetaInfo(None, decoder) # TODO: Pass getMetaInfo().
+        self._decodeMetaInfo(data.getMetaInfo(), decoder)
         data.setContent(Blob(decoder.readBlobTlv(Tlv.Content)))
         # TODO: decodeSignatureInfo.
         signedPortionEndOffset = decoder._offset
@@ -205,7 +206,18 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        # TODO: Implement MetaInfo.
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
+          Tlv.FreshnessPeriod, metaInfo.getFreshnessPeriod())
+        if not metaInfo.getType() == ContentType.BLOB:
+            # Not the default, so we need to encode the type.
+            if (metaInfo.getType() == ContentType.LINK or
+                  metaInfo.getType() == ContentType.KEY):
+                # The ContentType enum is set up with the correct integer for 
+                # each NDN-TLV ContentType.
+                encoder.writeNonNegativeIntegerTlv(
+                  Tlv.Content_Type, metaInfo.getType())
+            else:
+                raise RuntimeError("unrecognized TLV ContentType")
     
         encoder.writeTypeAndLength(Tlv.MetaInfo, len(encoder) - saveLength)
 
@@ -213,6 +225,15 @@ class Tlv0_1a2WireFormat(WireFormat):
     def _decodeMetaInfo(metaInfo, decoder):
         endOffset = decoder.readNestedTlvsStart(Tlv.MetaInfo)        
 
+        # The ContentType enum is set up with the correct integer for each 
+        # NDN-TLV ContentType.  If readOptionalNonNegativeIntegerTlv returns
+        # None, then setType will convert it to BLOB.
+        metaInfo.setType(decoder.readOptionalNonNegativeIntegerTlv(
+          Tlv.Content_Type, endOffset))
+        metaInfo.setFreshnessPeriod(
+          decoder.readOptionalNonNegativeIntegerTlvAsFloat(
+            Tlv.FreshnessPeriod, endOffset))
+        
         # TODO: Implement MetaInfo.
         #decoder.finishNestedTlvs(endOffset)
         decoder.seek(endOffset) # TODO: Remove after implementing MetaInfo.

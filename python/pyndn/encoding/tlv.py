@@ -29,7 +29,7 @@ class Tlv(object):
     Content       =   17
     SignatureInfo =   18
     SignatureValue =  19
-    ContentType   =   20
+    Content_Type  =   20
     FreshnessPeriod = 21
     SignatureType =   22
     KeyLocator    =   23
