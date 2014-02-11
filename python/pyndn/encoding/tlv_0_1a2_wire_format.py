@@ -24,6 +24,8 @@ with the NDN-TLV wire format, version 0.1a2.
 """
 
 class Tlv0_1a2WireFormat(WireFormat):
+    _instance = None
+    
     def encodeInterest(self, interest):
         """
         Encode interest in NDN-TLV and return the encoding.
@@ -68,7 +70,7 @@ class Tlv0_1a2WireFormat(WireFormat):
             encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf()[:4])
         
         # TODO: implement Selectors
-        self.encodeName(interest.getName(), encoder)
+        self._encodeName(interest.getName(), encoder)
 
         encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
         
@@ -87,7 +89,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
-        self.decodeName(interest.getName(), decoder)
+        self._decodeName(interest.getName(), decoder)
         # TODO: implement Selectors
 
         # Require a Nonce, but don't force it to be 4 bytes.
@@ -124,8 +126,8 @@ class Tlv0_1a2WireFormat(WireFormat):
         signedPortionEndOffsetFromBack = len(encoder)
         # TODO: encodeSignatureSha256WithRsa.
         encoder.writeBlobTlv(Tlv.Content, data.getContent().buf())
-        self.encodeMetaInfo(None, encoder) # TODO: Use getMetaInfo().
-        self.encodeName(data.getName(), encoder)
+        self._encodeMetaInfo(None, encoder) # TODO: Use getMetaInfo().
+        self._encodeName(data.getName(), encoder)
         signedPortionBeginOffsetFromBack = len(encoder)
 
         encoder.writeTypeAndLength(Tlv.Data, len(encoder) - saveLength)
@@ -156,8 +158,8 @@ class Tlv0_1a2WireFormat(WireFormat):
         endOffset = decoder.readNestedTlvsStart(Tlv.Data)
         signedPortionBeginOffset = decoder._offset
         
-        self.decodeName(data.getName(), decoder)
-        self.decodeMetaInfo(None, decoder) # TODO: Pass getMetaInfo().
+        self._decodeName(data.getName(), decoder)
+        self._decodeMetaInfo(None, decoder) # TODO: Pass getMetaInfo().
         data.setContent(Blob(decoder.readBlobTlv(Tlv.Content)))
         # TODO: decodeSignatureInfo.
         signedPortionEndOffset = decoder._offset
@@ -166,9 +168,22 @@ class Tlv0_1a2WireFormat(WireFormat):
         # TODO: Restore
         #decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
+    
+    @classmethod
+    def get(self):
+        """
+        Get a singleton instance of a Tlv1_0a2WireFormat.  To always use the 
+        preferred version NDN-TLV, you should use TlvWireFormat.get().
+        
+        :return: The singleton instance.
+        :rtype: Tlv1_0a2WireFormat
+        """
+        if self._instance == None:
+            self._instance = Tlv1_0a2WireFormat()
+        return self._instance
         
     @staticmethod
-    def encodeName(name, encoder):
+    def _encodeName(name, encoder):
         saveLength = len(encoder)
         
         # Encode the components backwards.
@@ -178,7 +193,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.Name, len(encoder) - saveLength)
 
     @staticmethod
-    def decodeName(name, decoder):
+    def _decodeName(name, decoder):
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
         while decoder._offset < endOffset:
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
@@ -186,7 +201,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder.finishNestedTlvs(endOffset)
 
     @staticmethod
-    def encodeMetaInfo(metaInfo, encoder):
+    def _encodeMetaInfo(metaInfo, encoder):
         saveLength = len(encoder)
         
         # Encode backwards.
@@ -195,7 +210,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.MetaInfo, len(encoder) - saveLength)
 
     @staticmethod
-    def decodeMetaInfo(metaInfo, decoder):
+    def _decodeMetaInfo(metaInfo, decoder):
         endOffset = decoder.readNestedTlvsStart(Tlv.MetaInfo)        
 
         # TODO: Implement MetaInfo.
