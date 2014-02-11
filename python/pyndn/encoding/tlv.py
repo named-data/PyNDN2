@@ -29,7 +29,7 @@ class Tlv(object):
     Content       =   17
     SignatureInfo =   18
     SignatureValue =  19
-    Content_Type  =   20
+    ContentType   =   20
     FreshnessPeriod = 21
     SignatureType =   22
     KeyLocator    =   23
@@ -37,12 +37,3 @@ class Tlv(object):
 
     AppPrivateBlock1 = 128
     AppPrivateBlock2 = 32767
-    
-    class SignatureType(object):
-        DigestSha256 = 0
-        SignatureSha256WithRsa = 1
-        
-    class ContentType(object):
-        Default = 0
-        Link = 1
-        Key = 2

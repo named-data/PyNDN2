@@ -5,7 +5,7 @@
 # See COPYING for copyright and distribution information.
 #
 
-from pyndn.util import DynamicByteArray
+from pyndn.util.dynamic_byte_array import DynamicByteArray
 
 """
 This module defines the TlvEncoder class for encoding in the NDN-TLV wire 

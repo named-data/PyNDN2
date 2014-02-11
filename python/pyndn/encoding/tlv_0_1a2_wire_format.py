@@ -215,7 +215,7 @@ class Tlv0_1a2WireFormat(WireFormat):
                 # The ContentType enum is set up with the correct integer for 
                 # each NDN-TLV ContentType.
                 encoder.writeNonNegativeIntegerTlv(
-                  Tlv.Content_Type, metaInfo.getType())
+                  Tlv.ContentType, metaInfo.getType())
             else:
                 raise RuntimeError("unrecognized TLV ContentType")
     
@@ -229,7 +229,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         # NDN-TLV ContentType.  If readOptionalNonNegativeIntegerTlv returns
         # None, then setType will convert it to BLOB.
         metaInfo.setType(decoder.readOptionalNonNegativeIntegerTlv(
-          Tlv.Content_Type, endOffset))
+          Tlv.ContentType, endOffset))
         metaInfo.setFreshnessPeriod(
           decoder.readOptionalNonNegativeIntegerTlvAsFloat(
             Tlv.FreshnessPeriod, endOffset))

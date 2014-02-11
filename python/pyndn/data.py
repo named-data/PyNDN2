@@ -8,10 +8,10 @@
 This module defines the NDN Data class.
 """
 
-from pyndn.encoding import WireFormat
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.util import Blob
 from pyndn.util import SignedBlob
-from pyndn.util import ChangeCounter
+from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.meta_info import MetaInfo
 
