@@ -58,7 +58,7 @@ class MetaInfo(object):
         :param type: The content type.  If None, this uses ContentType.BLOB.
         :type type: an int from ContentType
         """
-        self._type = ContentType.BLOB if type == None else type
+        self._type = ContentType.BLOB if type == None or type < 0 else type
         self._changeCount += 1
         
     def setFreshnessPeriod(self, freshnessPeriod):
