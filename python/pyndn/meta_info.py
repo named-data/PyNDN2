@@ -11,7 +11,7 @@ the fields of an NDN MetaInfo.
 
 class MetaInfo(object):
     """
-    Create a new MetaInfo object, possibly copying values from anothe object.
+    Create a new MetaInfo object, possibly copying values from another object.
     
     :param value: (optional) If value is a MetaInfo, copy its values.  If
       value is omitted, the type is the default ContentType.BLOB and the 
