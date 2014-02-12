@@ -28,6 +28,8 @@ class Name(object):
             self._components = value._components[:]
         elif type(value) is str:
             self._components = []
+            # Set _changeCount now because self.set() expects it.
+            self._changeCount = 0
             self.set(value)
         else:
             self._components = []
