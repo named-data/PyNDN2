@@ -11,19 +11,25 @@ the fields of an NDN MetaInfo.
 
 class MetaInfo(object):
     """
-    If value is None (default), create a new MetaInfo object where the type is 
-    the default ContentType.BLOB and the freshness period is not specified. 
-    Otherwise create a copy of the given MetaInfo. The application does not 
-    create a MetaInfo object, but uses aData object's getMetaInfo().
+    Create a new MetaInfo object, possibly copying values from anothe object.
+    
+    :param value: (optional) If value is a MetaInfo, copy its values.  If
+      value is omitted, the type is the default ContentType.BLOB and the 
+      freshness period is not specified.
+    :param value: MetaInfo
     """
     def __init__(self, value = None):
         if value == None:
             self._type = ContentType.BLOB
             self._freshnessPeriod = None
-        else:
-            # Assume value is a MetaInfo. Copy its values.
+        elif type(value) is MetaInfo:
+            # Copy its values.
             self._type = value._type
             self._freshnessPeriod = value._freshnessPeriod
+        else:
+            raise RuntimeError(
+              "Unrecognized type for MetaInfo constructor: " +
+              repr(type(value)))
                     
         self._changeCount = 0
         
