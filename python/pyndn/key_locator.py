@@ -1,0 +1,130 @@
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# See COPYING for copyright and distribution information.
+#
+
+"""
+This module defines the KeyLocator class which represts an NDN KeyLocator which
+is used in a Sha256WithRsaSignature and Interest selectors.
+"""
+
+from pyndn.util.change_counter import ChangeCounter
+from pyndn.util import Blob
+from pyndn.name import Name
+
+class KeyLocator(object):
+    """
+    Create a new KeyLocator object, possibly copying values from 
+    another object.
+    
+    :param value: (optional) If value is a KeyLocator, copy its 
+      values.  If value is omitted, set the fields to unspecified.
+    :param value: KeyLocator
+    """
+    def __init__(self, value = None):
+        if value == None:
+            self._type = None
+            self._keyName = ChangeCounter(Name())
+            self._keyData = Blob()
+        elif type(value) is KeyLocator:
+            # Copy its values.
+            self._type = value._type
+            self._keyName = ChangeCounter(Name(value.getKeyName()))
+            self._keyData = value._keyData
+        else:
+            raise RuntimeError(
+              "Unrecognized type for KeyLocator constructor: " +
+              repr(type(value)))
+            
+        self._changeCount = 0
+
+    def getType(self):
+        """
+        Get the key locator type. If KeyLocatorType.KEYNAME, you may also
+        getKeyName().  If KeyLocatorType.KEY_LOCATOR_DIGEST, you may also
+        getKeyData() to get the digest.
+        
+        :return: The key locator type, or None if not specified.
+        :rtype: an int from KeyLocatorType
+        """
+        return self._type
+        
+    def getKeyName(self):
+        """
+        Get the key name.  This is meaningful if getType() is
+        KeyLocatorType.KEYNAME.
+        
+        :return: The key name. If not specified, the Name is empty.
+        :rtype: Name
+        """
+        return self._keyName.get()
+
+    def getKeyData(self):
+        """
+        Get the key data.  This is the digest bytes if getType() is
+        KeyLocatorType.KEY_LOCATOR_DIGEST.
+        
+        :return: The key data as a Blob, which isNull() if unspecified.
+        :rtype: Blob
+        """
+        return self._keyData
+
+    def setType(self, type):
+        """
+        Set the key locator type.  If KeyLocatorType.KEYNAME, you must also
+        setKeyName().  If KeyLocatorType.KEY_LOCATOR_DIGEST, you must also
+        setKeyData() to the digest.
+        
+        :param type: The key locator type.  If None, the type is unspecified.
+        :type type: an int from KeyLocatorType
+        """
+        self._type = None if type == None or type < 0 else type
+        self._changeCount += 1
+        
+    def setName(self, keyName):
+        """
+        Set key name to a copy of the given Name.  This is the name if 
+        getType() is KeyLocatorType.KEYNAME.
+        
+        :param keyName: The key name which is copied.
+        :type keyName: Name
+        """
+        self._keyName.set(keyName if type(keyName) == Name else Name(keyName))
+        self._changeCount += 1
+        
+    def setKeyData(self, keyData):
+        """
+        Set the key data to the given value.  This is the digest bytes if 
+        getType() is KeyLocatorType.KEY_LOCATOR_DIGEST.
+        
+        :param keyData: The array with the content bytes. If keyData is not a 
+          Blob, then create a new Blob to copy the bytes (otherwise 
+          take another pointer to the same Blob).
+        :type keyData: A Blob or an array type with int elements. 
+        """
+        self._keyData = keyData if type(keyData) == Blob else Blob(keyData)
+        self._changeCount += 1
+
+    def getChangeCount(self):
+        """
+        Get the change count, which is incremented each time this object 
+        (or a child object) is changed.
+        
+        :return: The change count.
+        :rtype: int
+        """
+        # Make sure each of the checkChanged is called.
+        changed = self._keyName.checkChanged()
+        if changed:
+            # A child object has changed, so update the change count.
+            self._changeCount += 1
+
+        return self._changeCount
+
+class KeyLocatorType(object):
+    """
+    A KeyLocatorType specifies the type of a KeyLocator object.
+    """
+    KEYNAME = 1
+    KEY_LOCATOR_DIGEST = 2

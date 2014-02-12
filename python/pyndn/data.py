@@ -14,12 +14,13 @@ from pyndn.util import SignedBlob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.meta_info import MetaInfo
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 
 class Data(object):
     def __init__(self, name = None):
         self._name = ChangeCounter(name if type(name) == Name else Name(name))
         self._metaInfo = ChangeCounter(MetaInfo())
-        # TODO: Implement _signature
+        self._signature = ChangeCounter(Sha256WithRsaSignature())
         self._content = Blob()
         self._defaultWireEncoding = SignedBlob()
         self._defaultWireEncodingFormat = None
@@ -64,7 +65,7 @@ class Data(object):
         :param input: The array with the bytes to decode. If input is not a 
           Blob, then copy the bytes to save the defaultWireEncoding (otherwise 
           take another pointer to the same Blob).
-        :type input: An array type with int elements. 
+        :type input: A Blob or an array type with int elements. 
         :param wireFormat: (optional) A WireFormat object used to decode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
@@ -85,14 +86,39 @@ class Data(object):
             self._setDefaultWireEncoding(SignedBlob(), None)
 
     def getName(self):
+        """
+        Get the data packet's name.
+        
+        :return: The name.
+        :rtype: Name
+        """
         return self._name.get()
     
     def getMetaInfo(self):
+        """
+        Get the data packet's meta info.
+        
+        :return: The meta info.
+        :rtype: MetaInfo
+        """
         return self._metaInfo.get()
 
-    # TODO: Implement getSignature.
+    def getSignature(self):
+        """
+        Get the data packet's signature object.
+        
+        :return: The signature object.
+        :rtype: a subclass of Signature such as Sha256WithRsaSignature
+        """
+        return self._signature.get()
 
     def getContent(self):
+        """
+        Get the data packet's content.
+        
+        :return: The content as a Blob, which isNull() if unspecified.
+        :rtype: Blob
+        """
         return self._content
     
     def getDefaultWireEncoding(self):
@@ -150,9 +176,29 @@ class Data(object):
         self._changeCount += 1
         return self
         
-    # TODO: Implement setSignature.
+    def setSignature(self, signature):
+        """
+        Set the signature to a copy of the given signature.
+        
+        :param signature: The signature object which is cloned.
+        :type signature: a subclass of Signature such as Sha256WithRsaSignature
+        :return: This Data so that you can chain calls to update values.
+        :rtype: Data
+        """
+        self._signature.set(Sha256WithRsaSignature() if signature == None 
+                                                     else signature.clone())
+        self._changeCount += 1
+        return self
     
     def setContent(self, content):
+        """
+        Set the content to the given value.
+        
+        :param content: The array with the content bytes. If content is not a 
+          Blob, then create a new Blob to copy the bytes (otherwise 
+          take another pointer to the same Blob).
+        :type content: A Blob or an array type with int elements. 
+        """
         self._content = content if type(content) == Blob else Blob(content)
         self._changeCount += 1
     
@@ -167,6 +213,7 @@ class Data(object):
         # Make sure each of the checkChanged is called.
         changed = self._name.checkChanged()
         changed = self._metaInfo.checkChanged() or changed
+        changed = self._signature.checkChanged() or changed
         if changed:
             # A child object has changed, so update the change count.
             self._changeCount += 1

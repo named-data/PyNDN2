@@ -25,6 +25,14 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`key_locator` Module
+-------------------------
+
+.. automodule:: pyndn.key_locator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`meta_info` Module
 -----------------------
 
@@ -37,6 +45,22 @@ pyndn Package
 ------------------
 
 .. automodule:: pyndn.name
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`sha256_with_rsa_signature` Module
+---------------------------------------
+
+.. automodule:: pyndn.sha256_with_rsa_signature
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`signature` Module
+-----------------------
+
+.. automodule:: pyndn.signature
     :members:
     :undoc-members:
     :show-inheritance:
