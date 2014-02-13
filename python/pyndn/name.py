@@ -145,6 +145,37 @@ class Name(object):
             
         self._changeCount += 1
         return self
+    
+    def clear(self):
+        """
+        Clear all the components.
+        """
+        self._components = []
+        self._changeCount += 1
+
+    def getSubName(self, iStartComponent, nComponents = None):
+        """
+        Get a new name, constructed as a subset of components.
+        
+        :param iStartComponent: The index if the first component to get.
+        :type iStartComponent: int
+        :param nComponents: (optional) nComponents The number of components 
+          starting at iStartComponent.  If omitted, return components starting 
+          at iStartComponent until the end of the name.
+        :type nComponents: int
+        :return: A new name.
+        :rtype: Name
+        """
+        if nComponents == None:
+            nComponents = len(self._components) - iStartComponent
+
+        result = Name()
+
+        iEnd = min(iStartComponent + nComponents, len(self._components))
+        for i in range(iStartComponent, iEnd):
+            result._components.append(self._components[i])
+
+        return result
 
     def size(self):
         """
@@ -164,13 +195,6 @@ class Name(object):
         :type i: int
         """
         return self._components[i]
-    
-    def clear(self):
-        """
-        Clear all the components.
-        """
-        self._components = []
-        self._changeCount += 1
     
     _slash = bytearray([ord('/')])
     def toUri(self):
