@@ -214,6 +214,8 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
+        encoder.writeOptionalBlobTlv(
+          Tlv.FinalBlockId, metaInfo.getFinalBlockID().getValue())
         encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
           Tlv.FreshnessPeriod, metaInfo.getFreshnessPeriod())
         if metaInfo.getType() != ContentType.BLOB:
@@ -241,6 +243,8 @@ class Tlv0_1a2WireFormat(WireFormat):
         metaInfo.setFreshnessPeriod(
           decoder.readOptionalNonNegativeIntegerTlvAsFloat(
             Tlv.FreshnessPeriod, endOffset))
+        metaInfo.setFinalBlockID(
+          decoder.readOptionalBlobTlv(Tlv.FinalBlockId, endOffset))
         
         decoder.finishNestedTlvs(endOffset)
 

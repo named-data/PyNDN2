@@ -4,6 +4,8 @@
 # See COPYING for copyright and distribution information.
 #
 
+from pyndn.name import Name
+
 """
 This module defines the MetaInfo class which is used by Data and represents
 the fields of an NDN MetaInfo.
@@ -22,10 +24,12 @@ class MetaInfo(object):
         if value == None:
             self._type = ContentType.BLOB
             self._freshnessPeriod = None
+            self._finalBlockID = Name.Component()
         elif type(value) is MetaInfo:
             # Copy its values.
             self._type = value._type
             self._freshnessPeriod = value._freshnessPeriod
+            self._finalBlockID = self._finalBlockID
         else:
             raise RuntimeError(
               "Unrecognized type for MetaInfo constructor: " +
@@ -51,6 +55,16 @@ class MetaInfo(object):
         """
         return self._freshnessPeriod
     
+    def getFinalBlockID(self):
+        """
+        Get the final block ID.
+        
+        :return: The final block ID as a Name.Component.  If the Name.Component
+        getValue(),isNull(), then the final block ID is not specified.
+        :rtype: Name.Component
+        """
+        return self._finalBlockID
+    
     def setType(self, type):
         """
         Set the content type.
@@ -70,6 +84,20 @@ class MetaInfo(object):
         :type freshnessPeriod: float
         """
         self._freshnessPeriod = freshnessPeriod
+        self._changeCount += 1
+
+    def setFinalBlockID(self, finalBlockID):
+        """
+        Set the final block ID.
+        
+        :param finalBlockID: The final block ID.  If it is another 
+          Name.Component, use its value. Otherwise pass value to the 
+          Name.Component constructor.
+        :type finalBlockID: Name.Component or value for Name.Component 
+          constructor
+        """
+        self._finalBlockID = (finalBlockID if type(finalBlockID) is Name.Component 
+                              else Name.Component(finalBlockID))
         self._changeCount += 1
 
     def getChangeCount(self):
