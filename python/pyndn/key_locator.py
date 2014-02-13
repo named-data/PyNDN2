@@ -82,7 +82,7 @@ class KeyLocator(object):
         self._type = None if type == None or type < 0 else type
         self._changeCount += 1
         
-    def setName(self, keyName):
+    def setKeyName(self, keyName):
         """
         Set key name to a copy of the given Name.  This is the name if 
         getType() is KeyLocatorType.KEYNAME.
