@@ -7,6 +7,8 @@
 
 from pyndn import Data
 from pyndn import ContentType
+from pyndn import Sha256WithRsaSignature
+from pyndn import KeyLocatorType
 
 def dump(*list):
     result = ""
@@ -29,12 +31,33 @@ def dumpData(data):
     dump("metaInfo.freshnessPeriod (milliseconds):",
          data.getMetaInfo().getFreshnessPeriod()
          if data.getMetaInfo().getFreshnessPeriod() >= 0 else "<none>")
+    signature = data.getSignature()
+    if type(signature) is Sha256WithRsaSignature:
+        dump("signature.signature:", 
+             "<none>" if signature.getSignature().size() == 0
+                      else signature.getSignature().toHex())
+        if signature.getKeyLocator().getType() != None:
+            if (signature.getKeyLocator().getType() == 
+                KeyLocatorType.KEY_LOCATOR_DIGEST):
+                dump("signature.keyLocator: KeyLocatorDigest:",
+                     signature.getKeyLocator().getKeyData().toHex())
+            elif signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME:
+                dump("signature.keyLocator: KeyName:",
+                     signature.getKeyLocator().getKeyName().toUri())
+            else:
+                dump("signature.keyLocator: <unrecognized KeyLocatorType")
+        else:
+            dump("signature.keyLocator: <none>")
 
 data = Data()
 data.getName().set("/ndn/abc")
-data.getMetaInfo().setType(ContentType.LINK)
-data.getMetaInfo().setFreshnessPeriod(1234.5)
+data.getMetaInfo().setFreshnessPeriod(5000.0)
 data.setContent("SUCCESS!")
+data.getSignature().getKeyLocator().setType(1)
+data.getSignature().getKeyLocator().setName("/key/name")
+data.getSignature().setSignature([1, 2, 3])
+data.getSignature().setKeyLocator(data.getSignature().getKeyLocator())
+data.setSignature(data.getSignature())
 dumpData(data)
 encoding = data.wireEncode()
 decodedData = Data()

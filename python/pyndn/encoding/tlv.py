@@ -37,3 +37,6 @@ class Tlv(object):
 
     AppPrivateBlock1 = 128
     AppPrivateBlock2 = 32767
+
+    SignatureType_DigestSha256 = 0
+    SignatureType_SignatureSha256WithRsa = 1

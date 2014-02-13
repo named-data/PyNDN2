@@ -7,6 +7,8 @@
 
 from random import SystemRandom
 from pyndn.meta_info import ContentType
+from pyndn.key_locator import KeyLocatorType
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.util import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv_encoder import TlvEncoder
@@ -123,9 +125,13 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        # TODO: Encode signature bytes.
+        # TODO: The library needs to handle other signature types than 
+        #   SignatureSha256WithRsa.
+        encoder.writeBlobTlv(Tlv.SignatureValue, 
+                             data.getSignature().getSignature().buf())
         signedPortionEndOffsetFromBack = len(encoder)
-        # TODO: encodeSignatureSha256WithRsa.
+        
+        self._encodeSignatureSha256WithRsaValue(data.getSignature(), encoder)
         encoder.writeBlobTlv(Tlv.Content, data.getContent().buf())
         self._encodeMetaInfo(data.getMetaInfo(), encoder)
         self._encodeName(data.getName(), encoder)
@@ -162,12 +168,14 @@ class Tlv0_1a2WireFormat(WireFormat):
         self._decodeName(data.getName(), decoder)
         self._decodeMetaInfo(data.getMetaInfo(), decoder)
         data.setContent(Blob(decoder.readBlobTlv(Tlv.Content)))
-        # TODO: decodeSignatureInfo.
+        self._decodeSignatureInfo(data, decoder)
+        
         signedPortionEndOffset = decoder._offset
-        # TODO: Decode signature bits.
+        # TODO: The library needs to handle other signature types than 
+        #   SignatureSha256WithRsa.
+        data.getSignature().setSignature(Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
 
-        # TODO: Restore
-        #decoder.finishNestedTlvs(endOffset)
+        decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
     
     @classmethod
@@ -208,7 +216,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         # Encode backwards.
         encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
           Tlv.FreshnessPeriod, metaInfo.getFreshnessPeriod())
-        if not metaInfo.getType() == ContentType.BLOB:
+        if metaInfo.getType() != ContentType.BLOB:
             # Not the default, so we need to encode the type.
             if (metaInfo.getType() == ContentType.LINK or
                   metaInfo.getType() == ContentType.KEY):
@@ -234,6 +242,78 @@ class Tlv0_1a2WireFormat(WireFormat):
           decoder.readOptionalNonNegativeIntegerTlvAsFloat(
             Tlv.FreshnessPeriod, endOffset))
         
-        # TODO: Implement MetaInfo.
-        #decoder.finishNestedTlvs(endOffset)
-        decoder.seek(endOffset) # TODO: Remove after implementing MetaInfo.
+        decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeSignatureSha256WithRsaValue(signature, encoder):
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        Tlv0_1a2WireFormat._encodeKeyLocator(signature.getKeyLocator(), encoder)
+        encoder.writeNonNegativeIntegerTlv(
+          Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
+    
+        encoder.writeTypeAndLength(Tlv.SignatureInfo, len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeSignatureInfo(data, decoder):
+        endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
+
+        signatureType = decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
+        # TODO: The library needs to handle other signature types than 
+        #     SignatureSha256WithRsa.
+        if signatureType == Tlv.SignatureType_SignatureSha256WithRsa:
+            data.setSignature(Sha256WithRsaSignature())
+            # Modify data's signature object because if we create an object
+            #   and set it, then data will have to copy all the fields.
+            signatureInfo = data.getSignature()
+            Tlv0_1a2WireFormat._decodeKeyLocator(signatureInfo.getKeyLocator(), 
+                                                 decoder)
+        else:
+            raise RuntimeError(
+              "decodeSignatureInfo: unrecognized SignatureInfo type" + 
+              repr(signatureType))
+                
+        decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeKeyLocator(keyLocator, encoder):
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        if keyLocator.getType() != None:
+            if keyLocator.getType() == KeyLocatorType.KEYNAME:
+                Tlv0_1a2WireFormat._encodeName(keyLocator.getKeyName(), encoder)
+            elif (keyLocator.getType() == KeyLocatorType.KEY_LOCATOR_DIGEST and
+                  len(keyLocator.getKeyData()) > 0):
+                encoder.writeBlobTlv(Tlv.KeyLocatorDigest, 
+                                     keyLocator.getKeyData().buf())
+            else:
+                raise RuntimeError("Unrecognized KeyLocatorType " + 
+                                   repr(keyLocator.getType()))
+    
+        encoder.writeTypeAndLength(Tlv.KeyLocator, len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeKeyLocator(keyLocator, decoder):
+        endOffset = decoder.readNestedTlvsStart(Tlv.KeyLocator)
+
+        keyLocator.clear()
+
+        if decoder._offset == endOffset:
+            # The KeyLocator is omitted, so leave the fields as none.
+            return
+                
+        if decoder.peekType(Tlv.Name, endOffset):
+            # KeyLocator is a Name.
+            keyLocator.setType(KeyLocatorType.KEYNAME)
+            Tlv0_1a2WireFormat._decodeName(keyLocator.getKeyName(), decoder)
+        elif decoder.peekType(Tlv.KeyLocatorDigest, endOffset):
+            # KeyLocator is a KeyLocatorDigest.
+            keyLocator.setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
+            keyLocator.setKeyData(
+              Blob(decoder.readBlobTlv(Tlv.KeyLocatorDigest)))
+        else:
+            raise RuntimeError("decodeKeyLocator: Unrecognized key locator type")
+
+        decoder.finishNestedTlvs(endOffset)

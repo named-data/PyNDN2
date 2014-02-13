@@ -106,6 +106,15 @@ class KeyLocator(object):
         self._keyData = keyData if type(keyData) == Blob else Blob(keyData)
         self._changeCount += 1
 
+    def clear(self):
+        """
+        Clear the fields and set the type to None.
+        """
+        self._type = None
+        self._keyName.get().clear()
+        self._keyData = Blob()
+        self._changeCount += 1
+
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object 
