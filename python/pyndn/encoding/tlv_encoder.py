@@ -176,9 +176,14 @@ class TlvEncoder(object):
         
         :param type: The type of the TLV.
         :type type: int
-        :param value: The byte array with the bytes of the blob.
+        :param value: The byte array with the bytes of the blob.  If value is
+          None, then just write the type and length 0.
         :type value: bytearray or memoryview
         """
+        if value == None:
+            self.writeTypeAndLength(type, 0)
+            return
+            
         # Write backwards, starting with the blob array.        
         self._length += len(value)
         self._output.copyFromBack(value, self._length)
