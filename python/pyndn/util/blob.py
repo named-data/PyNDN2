@@ -67,7 +67,10 @@ class Blob(object):
             return 0
         else:
             return len(self._array)
-    
+
+    def __len__(self):
+        return self.size()
+
     def buf(self):
         """
         Return the byte array which you must treat as immutable and not 
