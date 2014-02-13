@@ -190,6 +190,20 @@ class TlvEncoder(object):
         
         self.writeTypeAndLength(type, len(value))
 
+    def writeOptionalBlobTlv(self, type, value):
+        """
+        If the byte array is None or zero length then do nothing, otherwise
+        call writeBlobTlv.
+        
+        :param type: The type of the TLV.
+        :type type: int
+        :param value: The byte array with the bytes of the blob.  If value is
+          None, then just write the type and length 0.
+        :type value: bytearray or memoryview
+        """
+        if value != None and len(value) > 0:
+            self.writeBlobTlv(type, value)
+        
     def getOutput(self):
         """
         Get a memoryview slice of the encoded bytes.
