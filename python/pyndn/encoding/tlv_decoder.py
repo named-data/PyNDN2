@@ -145,7 +145,7 @@ class TlvDecoder(object):
         :type expectedType: int
         :param endOffset: The offset of the end of the parent TLV, returned by 
           readNestedTlvsStart.        
-        :param endOffset: int
+        :type endOffset: int
         :return: True if the type of the next TLV is the expectedType, 
           otherwise False.
         :rtype: bool
@@ -225,6 +225,7 @@ class TlvDecoder(object):
         :type expectedType: int
         :param endOffset: The offset of the end of the parent TLV, returned by 
           readNestedTlvsStart.
+        :type endOffset: int
         :return: The integer or None if the next TLV doesn't have the expected 
           type.
         :rtype: int
@@ -246,6 +247,7 @@ class TlvDecoder(object):
         :type expectedType: int
         :param endOffset: The offset of the end of the parent TLV, returned by 
           readNestedTlvsStart.
+        :type endOffset: int
         :return: The integer or None if the next TLV doesn't have the expected 
           type.
         :rtype: float
@@ -279,6 +281,28 @@ class TlvDecoder(object):
         self._offset += length
         return result
     
+    def readOptionalBlobTlv(self, expectedType, endOffset):
+        """
+        Peek at the next TLV, and if it has the expectedType then call 
+        readBlobTlv and return the value.  Otherwise, return None.  
+        However, if self's offset is greater than or equal to endOffset,
+        then return None and don't try to read the type.
+        
+        :param expectedType: The expected type.
+        :type expectedType: int
+        :param endOffset: The offset of the end of the parent TLV, returned by 
+          readNestedTlvsStart.
+        :type endOffset: int
+        :return: The bytes in the value as a slice on the byte array.  This is
+          not necessarily a copy of the bytes in the input buffer.  If you need
+          a copy, then you must make a copy of the return value.
+        :rtype: memoryview or equivalent
+        """
+        if self.peekType(expectedType, endOffset):
+            return self.readBlobTlv(expectedType)
+        else:
+            return None
+        
     def readBooleanTlv(self, expectedType, endOffset):
         """
         Peek at the next TLV, and if it has the expectedType then read a type 
@@ -290,6 +314,7 @@ class TlvDecoder(object):
         :type expectedType: int
         :param endOffset: The offset of the end of the parent TLV, returned by 
           readNestedTlvsStart.
+        :type endOffset: int
         :return: Return True, or else False if the next TLV doesn't have the 
           expected type.
         :rtype: bool
