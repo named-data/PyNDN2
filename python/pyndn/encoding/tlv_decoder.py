@@ -105,7 +105,8 @@ class TlvDecoder(object):
     
     def finishNestedTlvs(self, endOffset):
         """
-        Call this after reading all nested TLVs to check if the current offset 
+        Call this after reading all nested TLVs to skip any remaining 
+        unrecognized TLVs and to check if the offset after the final nested TLV
         matches the endOffset returned by readNestedTlvsStart.
         
         :param endOffset: The offset of the end of the parent TLV, returned by 
@@ -114,6 +115,21 @@ class TlvDecoder(object):
         :raises: ValueError if the TLV length does not equal the total length of
           the nested TLVs
         """
+        # We expect _offset to be endOffset, so check this first.
+        if self._offset == endOffset:
+            return
+        
+        # Skip remaining TLVs.
+        while self._offset < endOffset:
+            # Skip the type VAR-NUMBER.
+            self.readVarNumber()
+            # Read the length and update offset.
+            length = self.readVarNumber()
+            self._offset += length
+
+            if self._offset > len(self._input):
+                raise ValueError("TLV length exceeds the buffer length")
+
         if self._offset != endOffset:
             raise ValueError(
                "TLV length does not equal the total length of the nested TLVs")
