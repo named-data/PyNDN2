@@ -310,7 +310,7 @@ class Name(object):
     @staticmethod
     def _unescape(escaped):
         """
-        A pritave method to return a copy of the escaped string, converting 
+        A private method to return a copy of the escaped string, converting 
         each escaped "%XX" to the char value.
         
         :param escaped: The escaped string.
