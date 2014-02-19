@@ -12,10 +12,19 @@ from pyndn.encoding import WireFormat
 from pyndn.util import Blob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
+from pyndn.key_locator import KeyLocator
 
 class Interest(object):
     def __init__(self, name = None):
         self._name = ChangeCounter(name if type(name) == Name else Name(name))
+        self._minSuffixComponents = None
+        self._maxSuffixComponents = None
+        self._keyLocator = ChangeCounter(KeyLocator())
+        # TODO: Use the following for Exclude.
+        #self._exclude = ChangeCounter(Exclude())
+        self._childSelector = None
+        self._mustBeFresh = False
+
         self._nonce = Blob()
         self._scope = None
         self._interestLifetimeMilliseconds = None
@@ -24,7 +33,62 @@ class Interest(object):
         self._changeCount = 0
 
     def getName(self):
+        """
+        Return the interest Name.
+        
+        :return: The name.  The name size() may be 0 if not specified.
+        :rtype: Name
+        """
         return self._name.get()
+    
+    def getMinSuffixComponents(self):
+        """
+        Get the min suffix components.
+        
+        :return: The min suffix components, or None if not specified.
+        :rtype: int
+        """
+        return self._minSuffixComponents
+    
+    def getMaxSuffixComponents(self):
+        """
+        Get the max suffix components.
+        
+        :return: The max suffix components, or None if not specified.
+        :rtype: int
+        """
+        return self._maxSuffixComponents
+    
+    def getKeyLocator(self):
+        """
+        Return the interest key locator.
+        
+        :return: The key locator. If getType() is None, then the key locator
+          is not specified.
+        :rtype: KeyLocator
+        """
+        return self._keyLocator.get()
+    
+    # TODO: Implement getExclude.
+    
+    def getChildSelector(self):
+        """
+        Get the child selector.
+        
+        :return: The child selector, or None if not specified.
+        :rtype: int
+        """
+        return self._childSelector
+    
+    def getMustBeFresh(self):
+        """
+        Get the must be fresh flag.
+        
+        :return: The must be fresh flag.  If not specified, the default is 
+          False.
+        :rtype: bool
+        """
+        return self._mustBeFresh
     
     def getNonce(self):
         """
@@ -61,6 +125,29 @@ class Interest(object):
     
     def setName(self, name):
         self._name.set(name if type(name) == Name else Name(name))
+        self._changeCount += 1
+    
+    def setMinSuffixComponents(self, minSuffixComponents):
+        self._minSuffixComponents = minSuffixComponents
+        self._changeCount += 1
+    
+    def setMaxSuffixComponents(self, maxSuffixComponents):
+        self._maxSuffixComponents = maxSuffixComponents
+        self._changeCount += 1
+    
+    def setKeyLocator(self, keyLocator):
+        self._keyLocator.set(keyLocator if type(keyLocator) == KeyLocator 
+                             else KeyLocator())
+        self._changeCount += 1
+    
+    # TODO: Implement setExclude.
+    
+    def setChildSelector(self, childSelector):
+        self._childSelector = childSelector
+        self._changeCount += 1
+    
+    def setMustBeFresh(self, mustBeFresh):
+        self._mustBeFresh = True if mustBeFresh else False
         self._changeCount += 1
     
     def setNonce(self, nonce):
@@ -116,6 +203,9 @@ class Interest(object):
         """
         # Make sure each of the checkChanged is called.
         changed = self._name.checkChanged()
+        changed = self._keyLocator.checkChanged() or changed
+        # TODO: Use the following for _exclude.
+        # changed = self._exclude.checkChanged() or changed
         if changed:
             # A child object has changed, so update the change count.
             self._changeCount += 1

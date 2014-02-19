@@ -72,7 +72,7 @@ class Tlv0_1a2WireFormat(WireFormat):
             # Truncate.
             encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf()[:4])
         
-        # TODO: implement Selectors
+        self._encodeSelectors(interest, encoder)
         self._encodeName(interest.getName(), encoder)
 
         encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
@@ -93,8 +93,8 @@ class Tlv0_1a2WireFormat(WireFormat):
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
         self._decodeName(interest.getName(), decoder)
-        # TODO: implement Selectors
-
+        if decoder.peekType(Tlv.Selectors, endOffset):
+            self._decodeSelectors(interest, decoder)
         # Require a Nonce, but don't force it to be 4 bytes.
         nonce = Blob(decoder.readBlobTlv(Tlv.Nonce))
         interest.setScope(decoder.readOptionalNonNegativeIntegerTlv(
@@ -206,6 +206,65 @@ class Tlv0_1a2WireFormat(WireFormat):
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
         while decoder._offset < endOffset:
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
+   
+        decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeSelectors(interest, encoder):
+        """
+        Encode the interest selectors.  If no selectors are written, do not
+        output a Selectors TLV.
+        """
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        if interest.getMustBeFresh():
+            encoder.writeTypeAndLength(Tlv.MustBeFresh, 0)
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ChildSelector, interest.getChildSelector())        
+        # TODO: Use the following to implement Exclude.
+        #if interest.getExclude().size() > 0:
+        #    Tlv0_1a2WireFormat._encodeExclude(interest.getExclude(), encoder)
+        if interest.getKeyLocator().getType() != None:
+            Tlv0_1a2WireFormat._encodeKeyLocator(
+              interest.getKeyLocator(), encoder)
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.MaxSuffixComponents, interest.getMaxSuffixComponents())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.MinSuffixComponents, interest.getMinSuffixComponents())
+
+        # Only output the type and length if values were written.
+        if len(encoder) != saveLength:
+            encoder.writeTypeAndLength(Tlv.Selectors, len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeSelectors(interest, decoder):
+        endOffset = decoder.readNestedTlvsStart(Tlv.Selectors)
+
+        interest.setMinSuffixComponents(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.MinSuffixComponents, endOffset))
+        interest.setMaxSuffixComponents(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.MaxSuffixComponents, endOffset))
+            
+        if decoder.peekType(Tlv.KeyLocator, endOffset):
+            Tlv0_1a2WireFormat._decodeKeyLocator(
+              interest.getKeyLocator(), decoder)
+        else:
+            interest.getKeyLocator().clear()
+            
+        # TODO: Use the following to implement Exclude.
+        #if decoder.peekType(Tlv.Exclude, endOffset):
+        #    Tlv0_1a2WireFormat._decodeExclude(interest.getExclude(), decoder)
+        #else:
+        #    interest.getExclude().clear()
+            
+        interest.setChildSelector(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ChildSelector, endOffset))
+        interest.setMustBeFresh(
+          decoder.readBooleanTlv(Tlv.MustBeFresh, endOffset))
    
         decoder.finishNestedTlvs(endOffset)
 
