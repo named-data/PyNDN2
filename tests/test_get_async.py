@@ -25,7 +25,8 @@ class Counter(object):
         data = Data()
         data.wireDecode(input)
         dump("Got data packet with name", data.getName().toUri())
-        dump(bytearray(data.getContent().buf()).decode('latin-1'))
+        # Use join to convert each byte to chr.
+        dump("".join(map(chr, data.getContent().buf())))
 
 counter = Counter()
 transport = TcpTransport()
