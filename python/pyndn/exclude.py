@@ -158,7 +158,7 @@ class Exclude(object):
         value = result.getvalue()
         if not type(value) is str:
             # Assume value is a Python 3 bytes object.  Convert to string.
-            value = str(value, encoding = "Latin-1")
+            value = str(value, encoding = 'ascii')
         return value
 
     def getChangeCount(self):
