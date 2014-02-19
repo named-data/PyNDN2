@@ -20,7 +20,7 @@ class KeyLocator(object):
     
     :param value: (optional) If value is a KeyLocator, copy its 
       values.  If value is omitted, set the fields to unspecified.
-    :param value: KeyLocator
+    :type value: KeyLocator
     """
     def __init__(self, value = None):
         if value == None:

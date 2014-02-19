@@ -18,7 +18,7 @@ class MetaInfo(object):
     :param value: (optional) If value is a MetaInfo, copy its values.  If
       value is omitted, the type is the default ContentType.BLOB and the 
       freshness period is not specified.
-    :param value: MetaInfo
+    :type value: MetaInfo
     """
     def __init__(self, value = None):
         if value == None:
@@ -93,7 +93,7 @@ class MetaInfo(object):
         :param finalBlockID: The final block ID.  If it is another 
           Name.Component, use its value. Otherwise pass value to the 
           Name.Component constructor.
-        :type finalBlockID: Name.Component or value for Name.Component 
+        :type finalBlockID: Name.Component or value for the Name.Component 
           constructor
         """
         self._finalBlockID = (finalBlockID if type(finalBlockID) is Name.Component 
