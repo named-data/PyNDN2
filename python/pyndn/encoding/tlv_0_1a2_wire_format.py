@@ -6,6 +6,7 @@
 #
 
 from random import SystemRandom
+from pyndn.exclude import Exclude
 from pyndn.meta_info import ContentType
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
@@ -197,7 +198,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         
         # Encode the components backwards.
         for i in range(len(name) - 1, -1, -1):
-            encoder.writeBlobTlv(Tlv.NameComponent, name[i]._value.buf())
+            encoder.writeBlobTlv(Tlv.NameComponent, name[i].getValue().buf())
     
         encoder.writeTypeAndLength(Tlv.Name, len(encoder) - saveLength)
 
@@ -221,10 +222,9 @@ class Tlv0_1a2WireFormat(WireFormat):
         if interest.getMustBeFresh():
             encoder.writeTypeAndLength(Tlv.MustBeFresh, 0)
         encoder.writeOptionalNonNegativeIntegerTlv(
-          Tlv.ChildSelector, interest.getChildSelector())        
-        # TODO: Use the following to implement Exclude.
-        #if interest.getExclude().size() > 0:
-        #    Tlv0_1a2WireFormat._encodeExclude(interest.getExclude(), encoder)
+          Tlv.ChildSelector, interest.getChildSelector())
+        if interest.getExclude().size() > 0:
+            Tlv0_1a2WireFormat._encodeExclude(interest.getExclude(), encoder)
         if interest.getKeyLocator().getType() != None:
             Tlv0_1a2WireFormat._encodeKeyLocator(
               interest.getKeyLocator(), encoder)
@@ -254,11 +254,10 @@ class Tlv0_1a2WireFormat(WireFormat):
         else:
             interest.getKeyLocator().clear()
             
-        # TODO: Use the following to implement Exclude.
-        #if decoder.peekType(Tlv.Exclude, endOffset):
-        #    Tlv0_1a2WireFormat._decodeExclude(interest.getExclude(), decoder)
-        #else:
-        #    interest.getExclude().clear()
+        if decoder.peekType(Tlv.Exclude, endOffset):
+            Tlv0_1a2WireFormat._decodeExclude(interest.getExclude(), decoder)
+        else:
+            interest.getExclude().clear()
             
         interest.setChildSelector(
           decoder.readOptionalNonNegativeIntegerTlv
@@ -266,6 +265,43 @@ class Tlv0_1a2WireFormat(WireFormat):
         interest.setMustBeFresh(
           decoder.readBooleanTlv(Tlv.MustBeFresh, endOffset))
    
+        decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeExclude(exclude, encoder):
+        saveLength = len(encoder)
+        
+        # TODO: Do we want to order the components (except for ANY)?
+        # Encode the entries backwards.
+        for i in range(len(exclude) - 1, -1, -1):
+            entry = exclude[i]
+            
+            if entry.getType() == Exclude.COMPONENT:
+                encoder.writeBlobTlv(Tlv.NameComponent, 
+                                     entry.getComponent().getValue().buf())
+            elif entry.getType() == Exclude.ANY:
+                encoder.writeTypeAndLength(Tlv.Any, 0)
+            else:
+                # We don't expect this to happen, but check anyway.
+                raise RuntimeError("Unrecognized Exclude type" + 
+                                   repr(entry.getType()))
+
+        encoder.writeTypeAndLength(Tlv.Exclude, len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeExclude(exclude, decoder):
+        endOffset = decoder.readNestedTlvsStart(Tlv.Exclude)
+
+        exclude.clear()
+        while True:
+            if decoder.peekType(Tlv.NameComponent, endOffset):
+                exclude.appendComponent(decoder.readBlobTlv(Tlv.NameComponent))
+            elif decoder.readBooleanTlv(Tlv.Any, endOffset):
+                exclude.appendAny()
+            else:
+                # Else no more entries.
+                break
+
         decoder.finishNestedTlvs(endOffset)
 
     @staticmethod

@@ -13,6 +13,7 @@ from pyndn.util import Blob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.key_locator import KeyLocator
+from pyndn.exclude import Exclude
 
 class Interest(object):
     def __init__(self, name = None):
@@ -20,8 +21,7 @@ class Interest(object):
         self._minSuffixComponents = None
         self._maxSuffixComponents = None
         self._keyLocator = ChangeCounter(KeyLocator())
-        # TODO: Use the following for Exclude.
-        #self._exclude = ChangeCounter(Exclude())
+        self._exclude = ChangeCounter(Exclude())
         self._childSelector = None
         self._mustBeFresh = False
 
@@ -69,7 +69,15 @@ class Interest(object):
         """
         return self._keyLocator.get()
     
-    # TODO: Implement getExclude.
+    def getExclude(self):
+        """
+        Return the exclude object.
+        
+        :return: The key exclude object. If the exclude size() is zero, then
+          the exclude is not specified.
+        :rtype: Exclude
+        """
+        return self._exclude.get()
     
     def getChildSelector(self):
         """
@@ -136,11 +144,31 @@ class Interest(object):
         self._changeCount += 1
     
     def setKeyLocator(self, keyLocator):
-        self._keyLocator.set(keyLocator if type(keyLocator) == KeyLocator 
-                             else KeyLocator())
+        """
+        Set this interest to use a copy of the given keyLocator.
+        Note: You can also change this interest's key locator modifying
+        the object from getKeyLocator().
+        
+        :param keyLocator: The KeyLocator that is copied.
+        :type keyLocator: KeyLocator
+        """
+        self._keyLocator.set(
+          keyLocator if type(keyLocator) == KeyLocator(keyLocator) 
+                     else KeyLocator())
         self._changeCount += 1
     
-    # TODO: Implement setExclude.
+    def setExclude(self, exclude):
+        """
+        Set this interest to use a copy of the given exclude object.
+        Note: You can also change this interest's exclude object modifying
+        the object from getExclude().
+        
+        :param exclude: The exlcude object that is copied.
+        :type exclude: Exclude
+        """
+        self._exclude.set(
+          exclude if type(exclude) == Exclude(exclude) else Exclude())
+        self._changeCount += 1
     
     def setChildSelector(self, childSelector):
         self._childSelector = childSelector
@@ -155,7 +183,7 @@ class Interest(object):
         # Set _getNonceChangeCount so that the next call to getNonce() won't 
         #   clear _nonce.
         self._changeCount += 1
-        self._getNonceChangeCount = self.getChangeCount();
+        self._getNonceChangeCount = self.getChangeCount()
     
     def setScope(self, scope):
         self._scope = scope
@@ -193,6 +221,46 @@ class Interest(object):
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
         wireFormat.decodeInterest(self, decodeBuffer)
         
+    def toUri(self):
+        """
+        Encode the name according to the "NDN URI Scheme".  If there are 
+        interest selectors, append "?" and add the selectors as a query string.  
+        For example "/test/name?ndn.ChildSelector=1".
+        :note: This is an experimental feature.  See the API docs for more 
+        detail at http://named-data.net/doc/ndn-ccl-api .
+        
+        :return: The URI string.
+        :rtype: string
+        """
+        selectors = ""
+        if self._minSuffixComponents != None:
+            selectors += "&ndn.MinSuffixComponents=" + repr(
+              self._minSuffixComponents)
+        if self._maxSuffixComponents != None:
+            selectors += "&ndn.MaxSuffixComponents=" + repr(
+              self._maxSuffixComponents)
+        if self._childSelector != None:
+            selectors += "&ndn.ChildSelector=" + repr(self._childSelector)
+        if self._mustBeFresh:
+            selectors += "&ndn.MustBeFresh=true"
+        if self._scope != None:
+            selectors += "&ndn.Scope=" + repr(self._scope)
+        if self._interestLifetimeMilliseconds != None:
+            selectors += "&ndn.InterestLifetime=" + repr(
+              self._interestLifetimeMilliseconds)
+        if self.getNonce().size() > 0:
+            selectors += ("&ndn.Nonce=" +
+              Name.toEscapedString(self.getNonce().buf()))
+        if self.getExclude().size() > 0:
+            selectors += "&ndn.Exclude=" + self.getExclude().toUri()
+            
+        result = self.getName().toUri()
+        if selectors != "":
+            # Replace the first & with ?.
+            result += "?" + selectors[1:]
+            
+        return result
+        
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object 
@@ -204,8 +272,7 @@ class Interest(object):
         # Make sure each of the checkChanged is called.
         changed = self._name.checkChanged()
         changed = self._keyLocator.checkChanged() or changed
-        # TODO: Use the following for _exclude.
-        # changed = self._exclude.checkChanged() or changed
+        changed = self._exclude.checkChanged() or changed
         if changed:
             # A child object has changed, so update the change count.
             self._changeCount += 1
