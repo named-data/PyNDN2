@@ -271,7 +271,7 @@ class Name(object):
         Scheme. This also adds "..." to a value with zero or more ".".
         
         :param value: The buffer with the value to escape.
-        :type value: An array type with int elements.
+        :type value: An array type with int elements
         :param result: (optional) The BytesIO stream to write to.  If omitted,
           return a str with the result.
         :type result: BytesIO

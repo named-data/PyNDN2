@@ -36,7 +36,7 @@ class WireFormat(object):
         :param interest: The Interest object whose fields are updated.
         :type interest: Interest
         :param input: The array with the bytes to decode.
-        :type input: An array type with int elements.
+        :type input: An array type with int elements
         :raises: RuntimeError for unimplemented if the derived class does not 
           override.
         """
@@ -68,7 +68,7 @@ class WireFormat(object):
         :param data: The Data object whose fields are updated.
         :type data: Data
         :param input: The array with the bytes to decode.
-        :type input: An array type with int elements.
+        :type input: An array type with int elements
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
           where signedPortionBeginOffset is the offset in the encoding of 
           the beginning of the signed portion, and signedPortionEndOffset is

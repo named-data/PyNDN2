@@ -84,7 +84,7 @@ class Sha256WithRsaSignature(Signature):
         :param signature: The array with the signature bytes. If signature is 
           not a Blob, then create a new Blob to copy the bytes (otherwise 
           take another pointer to the same Blob).
-        :type signature: A Blob or an array type with int elements. 
+        :type signature: A Blob or an array type with int elements 
         """
         self._signature = (signature if type(signature) == Blob 
                            else Blob(signature))

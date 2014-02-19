@@ -65,7 +65,7 @@ class Data(object):
         :param input: The array with the bytes to decode. If input is not a 
           Blob, then copy the bytes to save the defaultWireEncoding (otherwise 
           take another pointer to the same Blob).
-        :type input: A Blob or an array type with int elements. 
+        :type input: A Blob or an array type with int elements 
         :param wireFormat: (optional) A WireFormat object used to decode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
@@ -197,7 +197,7 @@ class Data(object):
         :param content: The array with the content bytes. If content is not a 
           Blob, then create a new Blob to copy the bytes (otherwise 
           take another pointer to the same Blob).
-        :type content: A Blob or an array type with int elements. 
+        :type content: A Blob or an array type with int elements 
         """
         self._content = content if type(content) == Blob else Blob(content)
         self._changeCount += 1

@@ -101,7 +101,7 @@ class KeyLocator(object):
         :param keyData: The array with the content bytes. If keyData is not a 
           Blob, then create a new Blob to copy the bytes (otherwise 
           take another pointer to the same Blob).
-        :type keyData: A Blob or an array type with int elements. 
+        :type keyData: A Blob or an array type with int elements 
         """
         self._keyData = keyData if type(keyData) == Blob else Blob(keyData)
         self._changeCount += 1

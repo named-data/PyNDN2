@@ -17,7 +17,7 @@ class TlvDecoder(object):
     Create a new TlvDecoder to decode the input using NDN-TLV.
     
     :param input: The array with the bytes to decode.
-    :type input: An array type with int elements.
+    :type input: An array type with int elements
     """
     def __init__(self, input):
         self._input = input

@@ -212,7 +212,7 @@ class Interest(object):
         Decode the input using a particular wire format and update this Interest.
         
         :param input: The array with the bytes to decode.
-        :type input: An array type with int elements.
+        :type input: An array type with int elements
         :param wireFormat: (optional) A WireFormat object used to decode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
