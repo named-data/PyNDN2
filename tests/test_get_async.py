@@ -25,7 +25,7 @@ class Counter(object):
         data = Data()
         data.wireDecode(input)
         dump("Got data packet with name", data.getName().toUri())
-        dump(bytearray(data.getContent().buf()).decode('ascii'))
+        dump(bytearray(data.getContent().buf()).decode('latin-1'))
 
 counter = Counter()
 transport = TcpTransport()
