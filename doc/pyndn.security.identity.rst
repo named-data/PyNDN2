@@ -9,6 +9,14 @@ identity Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`identity_manager` Module
+------------------------------
+
+.. automodule:: pyndn.security.identity.identity_manager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`identity_storage` Module
 ------------------------------
 
