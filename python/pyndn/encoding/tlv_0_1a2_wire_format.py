@@ -8,6 +8,7 @@
 from random import SystemRandom
 from pyndn.exclude import Exclude
 from pyndn.meta_info import ContentType
+from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.util import Blob
@@ -179,6 +180,83 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
     
+    def encodeForwardingEntry(self, forwardingEntry):
+        """
+        Encode forwardingEntry and return the encoding.
+
+        :param forwardingEntry: The ForwardingEntry object to encode.
+        :type forwardingEntry: ForwardingEntry
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
+          Tlv.FreshnessPeriod, forwardingEntry.getFreshnessPeriod())
+        encoder.writeNonNegativeIntegerTlv(
+          Tlv.ForwardingFlags, 
+          forwardingEntry.getForwardingFlags().getForwardingEntryFlags())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.FaceID, forwardingEntry.getFaceId())
+        self._encodeName(forwardingEntry.getPrefix(), encoder)
+        if (forwardingEntry.getAction() != None and
+             len(forwardingEntry.getAction()) > 0):
+            # Convert str to a bytearray.
+            encoder.writeBlobTlv(
+              Tlv.Action, bytearray(forwardingEntry.getAction(), 'ascii'))
+
+        encoder.writeTypeAndLength(Tlv.ForwardingEntry, 
+                                   len(encoder) - saveLength)
+        
+        return Blob(encoder.getOutput())
+    
+    def decodeForwardingEntry(self, forwardingEntry, input):
+        """
+        Decode input as an forwardingEntry and set the fields of the 
+        forwardingEntry object.
+        
+        :param forwardingEntry: The ForwardingEntry object whose fields are 
+          updated.
+        :type forwardingEntry: ForwardingEntry
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        decoder = TlvDecoder(input)
+
+        endOffset = decoder.readNestedTlvsStart(Tlv.ForwardingEntry)
+        
+        actionBytes = decoder.readOptionalBlobTlv(Tlv.Action, endOffset)
+        if actionBytes != None:
+            # Convert bytes to a str.
+            forwardingEntry.setAction("".join(map(chr, actionBytes)))
+        else:
+            forwardingEntry.setAction(None)
+        
+        if decoder.peekType(Tlv.Name, endOffset):
+            self._decodeName(forwardingEntry.getPrefix(), decoder)
+        else:
+            forwardingEntry.getPrefix().clear()
+            
+        forwardingEntry.setFaceId(
+          decoder.readOptionalNonNegativeIntegerTlv(Tlv.FaceID, endOffset))
+
+        forwardingEntryFlags = decoder.readOptionalNonNegativeIntegerTlv(
+          Tlv.ForwardingFlags, endOffset)
+        if forwardingEntryFlags != None:
+            forwardingEntry.getForwardingFlags().setForwardingEntryFlags(
+              forwardingEntryFlags)
+        else:
+            # This sets the default flags.
+            forwardingEntry.setForwardingFlags(ForwardingFlags())
+
+        forwardingEntry.setFreshnessPeriod(
+          decoder.readOptionalNonNegativeIntegerTlvAsFloat(
+            Tlv.FreshnessPeriod, endOffset))
+
+        decoder.finishNestedTlvs(endOffset)
+
     @classmethod
     def get(self):
         """

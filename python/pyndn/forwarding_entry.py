@@ -11,6 +11,8 @@ prefix and other fields for a forwarding entry.
 
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.name import Name
+from pyndn.encoding import WireFormat
+from pyndn.util import Blob
 
 class ForwardingEntry(object):
     def __init__(self):
@@ -33,7 +35,7 @@ class ForwardingEntry(object):
         """
         Get the name prefix.
         
-        :return: The name prefix. If not specified, the Name is empty.
+        :return: The name prefix.
         :rtype: Name
         """
         return self._prefix
@@ -106,3 +108,30 @@ class ForwardingEntry(object):
         :type freshnessPeriod: float
         """
         self._freshnessPeriod = freshnessPeriod
+    
+    def wireEncode(self, wireFormat = WireFormat.getDefaultWireFormat()):
+        """
+        Encode this ForwardingEntry for a particular wire format.
+        
+        :param wireFormat: (optional) A WireFormat object used to encode this 
+           ForwardingEntry. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat.
+        :return: The encoded buffer.
+        :rtype: Blob
+        """
+        return wireFormat.encodeForwardingEntry(self)
+    
+    def wireDecode(self, input, wireFormat = WireFormat.getDefaultWireFormat()):
+        """
+        Decode the input using a particular wire format and update this 
+        ForwardingEntry.
+        
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :param wireFormat: (optional) A WireFormat object used to decode this 
+           ForwardingEntry. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat.
+        """
+        # If input is a blob, get its buf().
+        decodeBuffer = input.buf() if isinstance(input, Blob) else input
+        wireFormat.decodeForwardingEntry(self, decodeBuffer)
