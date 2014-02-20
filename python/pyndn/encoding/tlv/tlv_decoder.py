@@ -327,6 +327,15 @@ class TlvDecoder(object):
         else:
             return False
     
+    def getOffset(self):
+        """
+        Get the offset into the input buffer.
+        
+        :return: The offset
+        :rtype: int
+        """
+        return self._offset
+    
     def seek(self, offset):
         """
         Set the offset into the input, used for the next read.

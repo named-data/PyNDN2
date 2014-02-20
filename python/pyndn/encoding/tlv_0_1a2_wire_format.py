@@ -165,14 +165,14 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Data)
-        signedPortionBeginOffset = decoder._offset
+        signedPortionBeginOffset = decoder.getOffset()
         
         self._decodeName(data.getName(), decoder)
         self._decodeMetaInfo(data.getMetaInfo(), decoder)
         data.setContent(Blob(decoder.readBlobTlv(Tlv.Content)))
         self._decodeSignatureInfo(data, decoder)
         
-        signedPortionEndOffset = decoder._offset
+        signedPortionEndOffset = decoder.getOffset()
         # TODO: The library needs to handle other signature types than 
         #   SignatureSha256WithRsa.
         data.getSignature().setSignature(Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
@@ -283,7 +283,7 @@ class Tlv0_1a2WireFormat(WireFormat):
     @staticmethod
     def _decodeName(name, decoder):
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
-        while decoder._offset < endOffset:
+        while decoder.getOffset() < endOffset:
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
    
         decoder.finishNestedTlvs(endOffset)
@@ -477,7 +477,7 @@ class Tlv0_1a2WireFormat(WireFormat):
 
         keyLocator.clear()
 
-        if decoder._offset == endOffset:
+        if decoder.getOffset() == endOffset:
             # The KeyLocator is omitted, so leave the fields as none.
             return
                 
