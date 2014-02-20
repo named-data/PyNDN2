@@ -25,6 +25,22 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`forwarding_entry` Module
+------------------------------
+
+.. automodule:: pyndn.forwarding_entry
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`forwarding_flags` Module
+------------------------------
+
+.. automodule:: pyndn.forwarding_flags
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`interest` Module
 ----------------------
 

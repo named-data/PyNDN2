@@ -5,6 +5,7 @@
 # See COPYING for copyright and distribution information.
 #
 
+from pyndn import Name
 from pyndn import Data
 from pyndn import ContentType
 from pyndn import KeyLocatorType
@@ -47,7 +48,8 @@ def dump(*list):
 def dumpData(data):
     dump("name:", data.getName().toUri())
     if data.getContent().size() > 0:
-        dump("content (raw):", bytearray(data.getContent().buf()).decode('latin-1'))
+        # Use join to convert each byte to chr.
+        dump("content (raw):", "".join(map(chr, data.getContent().buf())))
         dump("content (hex):", data.getContent().toHex())
     else:
         dump("content: <empty>")
@@ -87,6 +89,8 @@ def main():
     dump("Decoded Data:")
     dumpData(data)
     
+    # Set the content again to clear the cached encoding so we encode again.
+    data.setContent(data.getContent())
     encoding = data.wireEncode()
     
     reDecodedData = Data()
@@ -95,4 +99,29 @@ def main():
     dump("Re-decoded Data:")
     dumpData(reDecodedData)
 
+    freshData = Data(Name("/ndn/abc"))
+    freshData.setContent("SUCCESS!")
+    freshData.getMetaInfo().setFreshnessPeriod(5000)
+    freshData.getMetaInfo().setFinalBlockID(Name("/%00%09")[0])
+    
+    #identityStorage = MemoryIdentityStorage()
+    #privateKeyStorage = MemoryPrivateKeyStorage()
+    #keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
+    #                    SelfVerifyPolicyManager(identityStorage))
+    
+    # Initialize the storage.
+    keyName = Name("/testname/DSK-123")
+    certificateName = keyName.getSubName(0, keyName.size() - 1).append(
+      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
+    #identityStorage.addKey(keyName, KEY_TYPE_RSA, DEFAULT_PUBLIC_KEY_DER)
+    #privateKeyStorage.setKeyPairForKeyName(
+    #  (keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER))
+    
+    #keyChain.sign(freshData, certificateName)
+    dump("")
+    dump("Freshly-signed Data:")
+    dumpData(freshData);
+    
+    #keyChain.verifyData(freshData, bind(&onVerified, "Freshly-signed Data", _1), bind(&onVerifyFailed, "Freshly-signed Data", _1));
+    
 main()

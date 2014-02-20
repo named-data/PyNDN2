@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # PyNDN documentation build configuration file, created by
-# sphinx-quickstart on Wed Feb  5 17:17:01 2014.
+# sphinx-quickstart on Wed Feb 19 20:48:34 2014.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
