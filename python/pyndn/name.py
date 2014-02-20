@@ -134,11 +134,15 @@ class Name(object):
         """
         Append a new component.
         
-        :param value: If value is another Name.Component, use its value.
+        :param value: If value is another Name, append all its components.
+          If value is another Name.Component, use its value.
           Otherwise pass value to the Name.Component constructor.
-        :type value: Name.Component or value for Name.Component constructor
+        :type value: Name, Name.Component or value for Name.Component constructor
         """
-        if isinstance(value, Name.Component):
+        if isinstance(value, Name):
+            for component in value._components:
+                self._components.append(component)
+        elif isinstance(value, Name.Component):
             self._components.append(value)
         else:
             self._components.append(Name.Component(value))
