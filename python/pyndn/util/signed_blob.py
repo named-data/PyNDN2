@@ -11,6 +11,7 @@ of a signed portion (e.g., the bytes of Data packet).
 """
 
 from pyndn.util.blob import Blob
+from pyndn.util.blob import _memoryviewWrapper
 
 class SignedBlob(Blob):
     """
@@ -72,3 +73,26 @@ class SignedBlob(Blob):
         :rtype: An array type with int elements, such as bytearray.
         """
         return self._signedArray
+
+    def _toSignedBufferFromMemoryViewWrapper(self):
+        """
+        This is an internal function (which is only needed by Python versions
+        before 3.2) to check if signedBuf() would return a _memoryviewWrapper and
+        to return its internal memoryview instead, so that it implements
+        the buffer protocol (but doesn't have int elements).  However, if
+        this is a Python version (3.2 or greater) whose memoryview already
+        uses int, then toSignedBuffer() is the same as signedBuf().
+        """
+        if self._signedArray == None:
+            return None
+        elif type(self._signedArray) == _memoryviewWrapper:
+            # Return the underlying memoryview.
+            return self._signedArray._view
+        else:
+            return self._signedArray
+    
+    if type(memoryview(bytearray(1))[0]) == int:
+        # We can use the normal signedBuf().
+        toSignedBuffer = signedBuf
+    else:
+        toSignedBuffer = _toSignedBufferFromMemoryViewWrapper
