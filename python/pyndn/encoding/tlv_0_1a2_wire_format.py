@@ -310,7 +310,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         
         # Encode backwards.
         encoder.writeOptionalBlobTlv(
-          Tlv.FinalBlockId, metaInfo.getFinalBlockID().getValue())
+          Tlv.FinalBlockId, metaInfo.getFinalBlockID().getValue().buf())
         encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
           Tlv.FreshnessPeriod, metaInfo.getFreshnessPeriod())
         if metaInfo.getType() != ContentType.BLOB:
