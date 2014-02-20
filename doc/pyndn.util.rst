@@ -25,6 +25,14 @@ util Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`common` Module
+--------------------
+
+.. automodule:: pyndn.util.common
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`dynamic_byte_array` Module
 --------------------------------
 

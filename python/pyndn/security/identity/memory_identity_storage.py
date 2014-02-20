@@ -1,0 +1,284 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# See COPYING for copyright and distribution information.
+#
+
+"""
+This module defines the MemoryIdentityStorage class which extends 
+IdentityStorage and implements its methods to store identity, public key and 
+certificate objects in memory. The application must get the objects through its 
+own means and add the objects to the MemoryIdentityStorage object.
+To use permanent file-based storage, see BasicIdentityStorage.
+"""
+
+from pyndn.util import Blob
+from pyndn.security.security_exception import SecurityException
+from pyndn.security.identity.identity_storage import IdentityStorage
+
+class MemoryIdentityStorage(IdentityStorage):
+    def __init__(self):
+        super(MemoryIdentityStorage, self).__init__()
+        # A list of name URI.
+        self._identityStore = []
+        # The default identity in identityStore_, or "" if not defined.
+        self._defaultIdentity = ""
+        # The key is the keyName.toUri(). The value is the tuple 
+        #  (KeyType keyType, Blob keyDer).
+        self._keyStore = {}
+        # The key is the key is the certificateName.toUri(). The value is the 
+        #   certificate DER blob.
+        self._certificateStore = {}
+
+    def doesIdentityExist(self, identityName):  
+        """
+        Check if the specified identity already exists.
+        
+        :param identityName: The identity name.
+        :type identityName: Name
+        :return: True if the identity exists, otherwise False.
+        :rtype: bool
+        """
+        return identityName.toUri() in self._identityStore
+    
+    def addIdentity(self, identityName):
+        """
+        Add a new identity. An exception will be thrown if the identity already 
+        exists.
+
+        :param identityName: The identity name.
+        :type identityName: Name
+        """
+        identityUri = identityName.toUri()
+        if identityUri in self._identityStore:
+            raise SecurityException("Identity already exists: " + identityUri)
+  
+        self._identityStore.append(identityUri)
+        
+    def revokeIdentity(self):    
+        """
+        Revoke the identity.
+        
+        :return: True if the identity was revoked, False if not.
+        :rtype: bool
+        """
+        raise RuntimeError(
+          "MemoryIdentityStorage.doesIdentityExist is not implemented")
+
+    def doesKeyExist(self, keyName):    
+        """
+        Check if the specified key already exists.
+        
+        :param keyName: The name of the key.
+        :type keyName: Name
+        :return: True if the key exists, otherwise False.
+        :rtype: bool
+        """
+        return keyName.toUri() in self._keyStore
+
+    def addKey(self, keyName, keyType, publicKeyDer):    
+        """
+        Add a public key to the identity storage.
+        
+        :param keyName: The name of the public key to be added.
+        :type keyName: Name
+        :param keyType: Type of the public key to be added.
+        :type keyType: int from KeyType
+        :param publicKeyDer: A blob of the public key DER to be added.
+        :type publicKeyDer: Blob
+        """
+        identityName = keyName.getSubName(0, keyName.size() - 1);
+
+        if not self.doesIdentityExist(identityName):
+            self.addIdentity(identityName)
+
+        if self.doesKeyExist(keyName):
+            raise SecurityException("A key with the same name already exists!")
+  
+        self._keyStore[keyName.toUri()] = (keyType, Blob(publicKeyDer))
+
+    def getKey(self, keyName):    
+        """
+        Get the public key DER blob from the identity storage.
+        
+        :param keyName: The name of the requested public key.
+        :type keyName: Name
+        :return: The DER Blob. If not found, return a isNull() Blob.
+        :rtype: Blob
+        """
+        keyNameUri = keyName.toUri()
+        if not (keyNameUri in self._keyStore):
+            # Not found.  Silently return a null Blob.
+            return Blob()
+        
+        (_, publicKeyDer) = self._keyStore[keyNameUri]
+        return publicKeyDer
+
+    def activateKey(self, keyName):    
+        """
+        Activate a key. If a key is marked as inactive, its private part will 
+        not be used in packet signing.
+        
+        :param keyName: The name of the key.
+        :type keyName: Name
+        """
+        raise RuntimeError(
+          "MemoryIdentityStorage.activateKey is not implemented")
+
+    def deactivateKey(self, keyName):    
+        """
+        Deactivate a key. If a key is marked as inactive, its private part will 
+        not be used in packet signing.
+        
+        :param keyName: The name of the key.
+        :type keyName: Name
+        """
+        raise RuntimeError(
+         "MemoryIdentityStorage.deactivateKey is not implemented")
+
+    def doesCertificateExist(self, certificateName):    
+        """
+        Check if the specified certificate already exists.
+        
+        :param certificateName: The name of the certificate.
+        :type certificateName: Name
+        :return: True if the certificate exists, otherwise False.
+        :rtype: bool
+        """
+        return certificateName.toUri() in self._certificateStore
+
+    def addCertificate(self, certificate):    
+        """
+        Add a certificate to the identity storage.
+        
+        :param certificate: The certificate to be added. This makes a copy of 
+          the certificate.
+        :type certificate: IdentityCertificate
+        """
+        certificateName = certificate.getName()
+        keyName = certificate.getPublicKeyName()
+
+        if not self.doesKeyExist(keyName):
+            raise SecurityException(
+              "No corresponding Key record for certificate! " + 
+              keyName.toUri() + " " + certificateName.toUri())
+
+        # Check if the certificate has already exists.
+        if self.doesCertificateExist(certificateName):
+            raise SecurityException("Certificate has already been installed!")
+
+        # Check if the public key of certificate is the same as the key record.
+        keyBlob = getKey(keyName)
+        if (keyBlob.isNull() or 
+              # Note: In Python, != should do a byte-by-byte comparison.
+              keyBlob.toBuffer() != 
+              certificate.getPublicKeyInfo().getKeyDer().toBuffer()):
+            raise SecurityException(
+              "Certificate does not match the public key!")
+  
+        # Insert the certificate.
+        if certificate.getDefaultWireEncoding().isNull():
+            certificate.wireEncode()
+        self._certificateStore[certificateName.toUri()] = (
+           certificate.getDefaultWireEncoding())
+
+    def getCertificate(self, certificateName, allowAny = False):    
+        """
+        Get a certificate from the identity storage.
+        
+        :param certificateName: The name of the requested certificate.
+        :type certificateName: Name
+        :param allowAny: (optional) If False, only a valid certificate will be 
+          returned, otherwise validity is disregarded.  If omitted, 
+          allowAny is False.
+        :type allowAny: bool
+        :return: The requested certificate. If not found, return None.
+        :rtype: Data
+        """
+        certificateNameUri = certificateName.toUri()
+        if not (certificateNameUri in self._certificateStore):
+            # Not found.  Silently return None.
+            return None
+  
+        data = Data()
+        data.wireDecode(self._certificateStore[certificateNameUri]);
+        return data;
+
+    #
+    # Get/Set Default
+    #
+
+    def getDefaultIdentity(self):    
+        """
+        Get the default identity.
+        
+        :return: The name of default identity, or an empty name if there is no 
+          default.
+        :rtype: Name
+        """
+        return Name(self._defaultIdentity)
+
+    def getDefaultKeyNameForIdentity(self, identityName):    
+        """
+        Get the default key name for the specified identity.
+        
+        :param identityName: The identity name.
+        :type identityName: Name
+        :return: The default key name.
+        :rtype: Name
+        """
+        raise RuntimeError(
+          "MemoryIdentityStorage.getDefaultKeyNameForIdentity is not implemented")
+
+    def getDefaultCertificateNameForKey(self, keyName):    
+        """
+        Get the default certificate name for the specified key.
+        
+        :param keyName: The key name.
+        :type keyName: Name
+        :return: The default certificate name.
+        :rtype: Name
+        """
+        raise RuntimeError(
+          "MemoryIdentityStorage.getDefaultCertificateNameForKey is not implemented")
+
+    def setDefaultIdentity(self, identityName):    
+        """
+        Set the default identity. If the identityName does not exist, then clear
+        the default identity so that getDefaultIdentity() returns an empty name.
+        
+        :param identityName: The default identity name.
+        :type identityName: Name
+        """
+        identityUri = identityName.toUri()
+        if identityUri in self._identityStore:
+            self._defaultIdentity = identityUri
+        else:
+            # The identity doesn't exist, so clear the default.
+            self._defaultIdentity = ""
+
+    def setDefaultKeyNameForIdentity(self, keyName, identityNameCheck = None):    
+        """
+        Set the default key name for the specified identity.
+        
+        
+        :param keyName: The key name.
+        :type keyName: Name
+        :param identityNameCheck: (optional) The identity name to check the keyName.
+        :type identityNameCheck: Name
+        """
+        raise RuntimeError(
+          "MemoryIdentityStorage.setDefaultKeyNameForIdentity is not implemented")
+
+    def setDefaultCertificateNameForKey(self, keyName, certificateName):        
+        """
+        Set the default key name for the specified identity.
+                
+        :param keyName: The key name.
+        :type keyName: Name
+        :param certificateName: The certificate name.
+        :type certificateName: Name
+        """
+        raise RuntimeError(
+          "MemoryIdentityStorage.setDefaultCertificateNameForKey is not implemented")
