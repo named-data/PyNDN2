@@ -48,6 +48,23 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
             privateKeyDer = "".join(map(chr, privateKeyDer))
         self._privateKeyStore[keyName.toUri()] = RSA.importKey(privateKeyDer)
         
+    def getPublicKey(self, keyName):
+        """
+        Get the public key with the keyName.
+        
+        :param keyName: The name of public key.
+        :type keyName: Name
+        :return: The public key.
+        :rtype: PublicKey
+        """
+        keyNameUri = keyName.toUri()
+        if not (keyNameUri in self._publicKeyStore):
+            raise SecurityException(
+              "MemoryPrivateKeyStorage: Cannot find public key " + 
+              keyName.toUri())
+              
+        return self._publicKeyStore[keyNameUri]
+
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
         Fetch the private key for keyName and sign the data, returning a 
