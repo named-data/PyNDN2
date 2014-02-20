@@ -6,16 +6,21 @@
 #
 
 import time
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
 from pyndn.util import Blob
 from pyndn import Name
 from pyndn import Data
 from pyndn import KeyLocatorType
-from pyndn import Name
+from pyndn import Sha256WithRsaSignature
+from pyndn.security.identity import MemoryPrivateKeyStorage
 
 def getNowSeconds():
     return time.clock()
 
-DEFAULT_PUBLIC_KEY_DER = bytearray([
+# Get a raw string.
+DEFAULT_PUBLIC_KEY_DER = "".join(map(chr, bytearray([
 0x30, 0x81, 0x9F, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00, 0x03, 0x81,
 0x8D, 0x00, 0x30, 0x81, 0x89, 0x02, 0x81, 0x81, 0x00, 0xE1, 0x7D, 0x30, 0xA7, 0xD8, 0x28, 0xAB, 0x1B, 0x84, 0x0B, 0x17,
 0x54, 0x2D, 0xCA, 0xF6, 0x20, 0x7A, 0xFD, 0x22, 0x1E, 0x08, 0x6B, 0x2A, 0x60, 0xD1, 0x6C, 0xB7, 0xF5, 0x44, 0x48, 0xBA,
@@ -25,9 +30,10 @@ DEFAULT_PUBLIC_KEY_DER = bytearray([
 0xFA, 0xF5, 0x56, 0x14, 0x4F, 0x9A, 0x98, 0xAF, 0x71, 0x86, 0xB0, 0x27, 0x86, 0x85, 0xB8, 0xE2, 0xC0, 0x8B, 0xEA, 0x87,
 0x17, 0x1B, 0x4D, 0xEE, 0x58, 0x5C, 0x18, 0x28, 0x29, 0x5B, 0x53, 0x95, 0xEB, 0x4A, 0x17, 0x77, 0x9F, 0x02, 0x03, 0x01,
 0x00, 0x01  
-  ])
+  ])))
 
-DEFAULT_PRIVATE_KEY_DER = bytearray([
+# Get a raw string.
+DEFAULT_PRIVATE_KEY_DER = "".join(map(chr, bytearray([
 0x30, 0x82, 0x02, 0x5d, 0x02, 0x01, 0x00, 0x02, 0x81, 0x81, 0x00, 0xe1, 0x7d, 0x30, 0xa7, 0xd8, 0x28, 0xab, 0x1b, 0x84,
 0x0b, 0x17, 0x54, 0x2d, 0xca, 0xf6, 0x20, 0x7a, 0xfd, 0x22, 0x1e, 0x08, 0x6b, 0x2a, 0x60, 0xd1, 0x6c, 0xb7, 0xf5, 0x44,
 0x48, 0xba, 0x9f, 0x3f, 0x08, 0xbc, 0xd0, 0x99, 0xdb, 0x21, 0xdd, 0x16, 0x2a, 0x77, 0x9e, 0x61, 0xaa, 0x89, 0xee, 0xe5,
@@ -59,7 +65,7 @@ DEFAULT_PRIVATE_KEY_DER = bytearray([
 0x6d, 0x32, 0xec, 0x28, 0xf2, 0x8b, 0xd8, 0x70, 0xc5, 0xed, 0xe1, 0x7b, 0xff, 0x2d, 0x66, 0x8c, 0x86, 0x77, 0x43, 0xeb,
 0xb6, 0xf6, 0x50, 0x66, 0xb0, 0x40, 0x24, 0x6a, 0xaf, 0x98, 0x21, 0x45, 0x30, 0x01, 0x59, 0xd0, 0xc3, 0xfc, 0x7b, 0xae,
 0x30, 0x18, 0xeb, 0x90, 0xfb, 0x17, 0xd3, 0xce, 0xb5
-  ])
+  ])))
 
 def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
     """
@@ -94,21 +100,22 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
         # Use a small name and content.
         name = Name("/test")
         content = Name.fromEscapedString("abc")
+    finalBlockId = Name("/%00")[0]
     
-    # Initialize the KeyChain storage in case useCrypto is true.
-    #identityStorage = MemoryIdentityStorage()
-    #privateKeyStorage = MemoryPrivateKeyStorage()
+    # Initialize the private key storage in case useCrypto is true.
+    privateKeyStorage = MemoryPrivateKeyStorage()
     #keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
     #                    SelfVerifyPolicyManager(identityStorage))
     keyName = Name("/testname/DSK-123")
     certificateName = keyName.getSubName(0, keyName.size() - 1).append(
       "KEY").append(keyName.get(keyName.size() - 1)).append("ID-CERT").append(
       "0")
-    #privateKeyStorage.setKeyPairForKeyName(
-    #  keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER)
+    privateKeyStorage.setKeyPairForKeyName(
+      keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER)
     
-    # Set up publisherPublicKeyDigest and signatureBits in case useCrypto is false.
+    # Set up signatureBits in case useCrypto is false.
     signatureBits = Blob(bytearray(128))
+    emptyBlob = Blob([])
 
     start = getNowSeconds()
     for i in range(nIterations):
@@ -116,17 +123,20 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
         data.setContent(content)
         if useComplex:
             data.getMetaInfo().setFreshnessPeriod(1000)
+            data.getMetaInfo().setFinalBlockID(finalBlockId)
 
+        sha256Signature = data.getSignature()
+        keyLocator = sha256Signature.getKeyLocator()
+        keyLocator.setType(KeyLocatorType.KEYNAME)
+        keyLocator.setKeyName(certificateName)
         if useCrypto:
-            # This sets the signature fields.
-            keyChain.sign(data, certificateName)
+            # Encode once to get the signed portion.
+            sha256Signature.setSignature(emptyBlob)
+            unsignedEncoding = data.wireEncode()
+            sha256Signature.setSignature(privateKeyStorage.sign
+              (unsignedEncoding.toSignedBuffer(), keyName))
         else:
-            # Imitate IdentityManager::signByCertificate to set up the signature
-            # fields, but don't sign.
-            sha256Signature = data.getSignature()
-            keyLocator = sha256Signature.getKeyLocator()
-            keyLocator.setType(KeyLocatorType.KEYNAME)
-            keyLocator.setKeyName(certificateName)
+            # Set the signature field, but don't sign.
             sha256Signature.setSignature(signatureBits)
 
         encoding = data.wireEncode()
@@ -134,6 +144,31 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
     finish = getNowSeconds()
         
     return (finish - start, encoding)
+
+# Depending on the Python version, PyCrypto uses str or bytes.
+PyCryptoUsesStr = type(SHA256.new().digest()) is str
+def verifyData(data, publicKeyDer):
+    # Set the data packet's default wire encoding if it is not already there.
+    if data.getDefaultWireEncoding().isNull():
+      data.wireEncode()
+
+    if not type(data.getSignature()) is Sha256WithRsaSignature:
+      raise RuntimeError("signature is not Sha256WithRsaSignature.")
+    signatureInfo = data.getSignature()
+
+    # Get the public key.
+    publicKey = RSA.importKey(publicKeyDer)
+    # Get the bytes to verify.
+    signedPortion = data.getDefaultWireEncoding().toSignedBuffer()
+    # Convert the signature bits to a raw string.
+    if PyCryptoUsesStr:
+        signatureBits = "".join(map(chr, signatureInfo.getSignature().buf()))
+    else:
+        signatureBits = bytes(signatureInfo.getSignature().buf())
+        
+    # Hash and verify.
+    return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion), 
+                                            signatureBits)
 
 def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
     """
@@ -146,21 +181,14 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
     :param encoding: The wire encoding to decode.
     :type encoding: Blob
     """
-    # Initialize the KeyChain storage in case useCrypto is true.
-    #identityStorage = MemoryIdentityStorage()
-    #privateKeyStorage = MemoryPrivateKeyStorage()
-    #keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
-    #                    SelfVerifyPolicyManager(identityStorage))
-    keyName = Name("/testname/DSK-123")
-    #identityStorage.addKey(keyName, KEY_TYPE_RSA, Blob(DEFAULT_PUBLIC_KEY_DER))
-
     start = getNowSeconds()
     for i in range(nIterations):
         data = Data()
         data.wireDecode(encoding)
         
         if useCrypto:
-            keyChain.verifyData(data, onVerified, onVerifyFailed)
+            if not verifyData(data, DEFAULT_PUBLIC_KEY_DER):
+                raise RuntimeError("Signature verification: FAILED")
 
     finish = getNowSeconds()
  
@@ -176,7 +204,7 @@ def benchmarkEncodeDecodeData(useComplex, useCrypto):
     :param useCrypto: See benchmarkEncodeDataSeconds.
     :type useCrypto: bool
     """
-    nIterations = 200 if useCrypto else 20000
+    nIterations = 1000 if useCrypto else 20000
     (duration, encoding) = benchmarkEncodeDataSeconds(nIterations, useComplex, 
                                                       useCrypto)
     print("Encode " + ("complex" if useComplex else "simple ") + 
@@ -184,7 +212,7 @@ def benchmarkEncodeDecodeData(useComplex, useCrypto):
           ", Duration sec, Hz: " + repr(duration) + ", " + 
           repr(nIterations / duration))
 
-    nIterations = 1000 if useCrypto else 10000
+    nIterations = 5000 if useCrypto else 20000
     duration = benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding)
     print("Decode " + ("complex" if useComplex else "simple ") + 
           " data: Crypto? " + ("yes" if useCrypto else "no ") +
@@ -192,7 +220,9 @@ def benchmarkEncodeDecodeData(useComplex, useCrypto):
           repr(nIterations / duration))
 
 def main():
-    benchmarkEncodeDecodeData(False, False);
-    benchmarkEncodeDecodeData(True, False);
+    benchmarkEncodeDecodeData(False, False)
+    benchmarkEncodeDecodeData(True, False)
+    benchmarkEncodeDecodeData(False, True)
+    benchmarkEncodeDecodeData(True, True)
 
 main()
