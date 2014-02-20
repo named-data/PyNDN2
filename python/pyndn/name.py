@@ -191,7 +191,7 @@ class Name(object):
         :type nComponents: int
         """
         if nComponents < 0:
-            return self.getSubName(0, components_.size() + nComponents)
+            return self.getSubName(0, len(self._components) + nComponents)
         else:
             return self.getSubName(0, nComponents)
   
