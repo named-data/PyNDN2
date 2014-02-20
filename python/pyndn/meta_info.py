@@ -4,12 +4,12 @@
 # See COPYING for copyright and distribution information.
 #
 
-from pyndn.name import Name
-
 """
 This module defines the MetaInfo class which is used by Data and represents
 the fields of an NDN MetaInfo.
 """
+
+from pyndn.name import Name
 
 class MetaInfo(object):
     """
