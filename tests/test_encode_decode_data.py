@@ -11,6 +11,7 @@ from pyndn import ContentType
 from pyndn import KeyLocatorType
 from pyndn import Sha256WithRsaSignature
 from pyndn.security import KeyType
+from pyndn.security.identity import IdentityManager
 from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
 from pyndn.util import Blob
@@ -155,7 +156,8 @@ def main():
     
     identityStorage = MemoryIdentityStorage()
     privateKeyStorage = MemoryPrivateKeyStorage()
-    #keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
+    identityManager = IdentityManager(identityStorage, privateKeyStorage)
+    #keyChain = KeyChain(identityManager, 
     #                    SelfVerifyPolicyManager(identityStorage))
     
     # Initialize the storage.
@@ -166,11 +168,11 @@ def main():
     privateKeyStorage.setKeyPairForKeyName(
       keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER)
     
-    #keyChain.sign(freshData, certificateName)
+    identityManager.signByCertificate(freshData, certificateName)
     dump("")
     dump("Freshly-signed Data:")
-    dumpData(freshData);
+    dumpData(freshData)
     
-    #keyChain.verifyData(freshData, bind(&onVerified, "Freshly-signed Data", _1), bind(&onVerifyFailed, "Freshly-signed Data", _1));
+    #keyChain.verifyData(freshData, bind(&onVerified, "Freshly-signed Data", _1), bind(&onVerifyFailed, "Freshly-signed Data", _1))
     
 main()
