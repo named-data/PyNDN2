@@ -181,6 +181,20 @@ class Name(object):
 
         return result
 
+    def getPrefix(self, nComponents):
+        """
+        Return a new Name with the first nComponents components of this Name.
+        
+        :param nComponents: The number of prefix components.  If nComponents is 
+          -N then return the prefix up to name.size() - N. For example 
+          getPrefix(-1) returns the name without the final component.
+        :type nComponents: int
+        """
+        if nComponents < 0:
+            return self.getSubName(0, components_.size() + nComponents)
+        else:
+            return self.getSubName(0, nComponents)
+  
     def size(self):
         """
         Get the number of components.
