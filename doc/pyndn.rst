@@ -73,6 +73,14 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`node` Module
+------------------
+
+.. automodule:: pyndn.node
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`sha256_with_rsa_signature` Module
 ---------------------------------------
 

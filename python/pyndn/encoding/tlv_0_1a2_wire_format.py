@@ -13,9 +13,9 @@ from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.util import Blob
 from pyndn.encoding.wire_format import WireFormat
-from pyndn.encoding.tlv_encoder import TlvEncoder
-from pyndn.encoding.tlv_decoder import TlvDecoder
-from pyndn.encoding.tlv import Tlv
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
+from pyndn.encoding.tlv.tlv import Tlv
 
 # The Python documentation says "Use SystemRandom if you require a 
 #   cryptographically secure pseudo-random number generator."
