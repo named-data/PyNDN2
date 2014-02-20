@@ -109,7 +109,7 @@ class ForwardingEntry(object):
         """
         self._freshnessPeriod = freshnessPeriod
     
-    def wireEncode(self, wireFormat = WireFormat.getDefaultWireFormat()):
+    def wireEncode(self, wireFormat = None):
         """
         Encode this ForwardingEntry for a particular wire format.
         
@@ -119,9 +119,13 @@ class ForwardingEntry(object):
         :return: The encoded buffer.
         :rtype: Blob
         """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
         return wireFormat.encodeForwardingEntry(self)
     
-    def wireDecode(self, input, wireFormat = WireFormat.getDefaultWireFormat()):
+    def wireDecode(self, input, wireFormat = None):
         """
         Decode the input using a particular wire format and update this 
         ForwardingEntry.
@@ -132,6 +136,10 @@ class ForwardingEntry(object):
            ForwardingEntry. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
         """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
         # If input is a blob, get its buf().
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
         wireFormat.decodeForwardingEntry(self, decodeBuffer)

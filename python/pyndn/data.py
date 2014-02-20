@@ -28,7 +28,7 @@ class Data(object):
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
     
-    def wireEncode(self, wireFormat = WireFormat.getDefaultWireFormat()):
+    def wireEncode(self, wireFormat = None):
         """
         Encode this Data for a particular wire format. If wireFormat is the 
         default wire format, also set the defaultWireEncoding field to the 
@@ -40,6 +40,10 @@ class Data(object):
         :return: The encoded buffer.
         :rtype: Blob
         """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+        
         if (not self.getDefaultWireEncoding().isNull() and
             self.getDefaultWireEncodingFormat() == wireFormat):
             # We already have an encoding in the desired format.
@@ -56,7 +60,7 @@ class Data(object):
               wireEncoding, WireFormat.getDefaultWireFormat())
         return wireEncoding
     
-    def wireDecode(self, input, wireFormat = WireFormat.getDefaultWireFormat()):
+    def wireDecode(self, input, wireFormat = None):
         """
         Decode the input using a particular wire format and update this Data. 
         If wireFormat is the default wire format, also set the 
@@ -70,6 +74,10 @@ class Data(object):
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
         """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
         # If input is a blob, get its buf().
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
         (signedPortionBeginOffset, signedPortionEndOffset) = \
