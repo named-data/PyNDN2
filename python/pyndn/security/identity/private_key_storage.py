@@ -1,0 +1,141 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# See COPYING for copyright and distribution information.
+#
+
+"""
+This module defines the PrivateKeyStorage abstract class which declares
+methods for working with a private key storage.  You should use a subclass.
+"""
+
+from pyndn.security.security_types import KeyType
+from pyndn.security.security_types import DigestAlgorithm
+
+class PrivateKeyStorage(object):
+    def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
+        """
+        Generate a pair of asymmetric keys.
+        Your derived class should override.
+        
+        :param keyName: The name of the key pair.
+        :type keyName: Name
+        :param keyType: (optional) The type of the key pair.  If omitted, use
+          KeyType.RSA
+        :type keyType: int from KeyType
+        :param keySize: (optional) The size of the key pair.  If omitted, use
+          2048.
+        :type keySize: int
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("generateKeyPair is not implemented")
+
+    def getPublicKey(self, keyName):
+        """
+        Get the public key with the keyName.
+        Your derived class should override.
+        
+        :param keyName: The name of public key.
+        :type keyName: Name
+        :return: The public key.
+        :rtype: PublicKey
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("getPublicKey is not implemented")        
+    
+    def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
+        """
+        Fetch the private key for keyName and sign the data, returning a 
+        signature Blob.
+        Your derived class should override.
+
+        :param data: Pointer the input byte buffer to sign.
+        :type data: An array type with int elements
+        :param keyName: The name of the signing key.
+        :type keyName: Name
+        :param digestAlgorithm: (optional) the digest algorithm. If omitted,
+          use DigestAlgorithm.SHA256.
+        :type digestAlgorithm: int from DigestAlgorithm
+        :return: The signature, or an isNull() Blob pointer if signing fails.
+        :rtype: Blob
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("sign is not implemented")        
+
+    def decrypt(self, keyName, data, isSymmetric = False):
+        """
+        Decrypt data.
+        Your derived class should override.
+        
+        :param keyName: The name of the decrypting key.
+        :type keyName: Name
+        :param data: The byte buffer to be decrypted.
+        :type data: An array type with int elements
+        :param isSymmetric: (optional) If True symmetric encryption is used, 
+          otherwise asymmetric encryption is used. If omitted, use
+          asymmetric encryption.
+        :type isSymmetric: bool
+        :return: The decrypted data.
+        :rtype: Blob
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.        
+        """
+        raise RuntimeError("decrypt is not implemented")                        
+
+    def encrypt(self, keyName, data, isSymmetric = False):
+        """
+        Encrypt data.
+        Your derived class should override.
+
+        :param keyName: The name of the encrypting key.
+        :type keyName: Name
+        :param data: The byte buffer to be encrypted.
+        :type data: An array type with int elements
+        :param isSymmetric: (optional) If True symmetric encryption is used, 
+          otherwise asymmetric encryption is used. If omitted, use
+          asymmetric encryption.
+        :type isSymmetric: bool
+        :return: The encrypted data.
+        :rtype: Blob
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("encrypt is not implemented")                        
+
+    def generateKey(self, keyName, keyType = KeyType.AES, keySize = 256):
+        """
+        Generate a symmetric key.
+        Your derived class should override.
+
+        :param keyName: The name of the key.
+        :type keyName: Name
+        :param keyType: (optional) The type of the key. If omitted, use
+          KeyType.AES .
+        :type keyType: int from KeyType
+        :param keySize: (optional) The size of the key. If omitted, use 256.
+        :type keySize: int
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("generateKey is not implemented")                        
+    
+    def doesKeyExist(self, keyName, keyClass):
+        """
+        Check if a particular key exists.
+        Your derived class should override.
+        
+        :param keyName: The name of the key.
+        :type keyName: Name
+        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC, 
+           KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
+        :type keyClass: int from KeyClass
+        :return: True if the key exists, otherwise false.
+        :rtype: bool
+        :raises: RuntimeError for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("doesKeyExist is not implemented")                        

@@ -17,6 +17,14 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`exclude` Module
+---------------------
+
+.. automodule:: pyndn.exclude
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`interest` Module
 ----------------------
 
@@ -71,6 +79,7 @@ Subpackages
 .. toctree::
 
     pyndn.encoding
+    pyndn.security
     pyndn.transport
     pyndn.util
 
