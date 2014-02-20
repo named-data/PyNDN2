@@ -160,7 +160,7 @@ def verifyData(data, publicKeyDer):
     publicKey = RSA.importKey(publicKeyDer)
     # Get the bytes to verify.
     signedPortion = data.getDefaultWireEncoding().toSignedBuffer()
-    # Convert the signature bits to a raw string.
+    # Convert the signature bits to a raw string or bytes as required.
     if PyCryptoUsesStr:
         signatureBits = "".join(map(chr, signatureInfo.getSignature().buf()))
     else:

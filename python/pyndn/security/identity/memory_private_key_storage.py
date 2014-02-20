@@ -77,7 +77,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         # Sign the hash of the data.
         signature = PKCS1_v1_5.new(privateKey).sign(SHA256.new(data))
         # Convert the string to a Blob.
-        return Blob(bytearray(bytes(signature)), False)
+        return Blob(bytearray(signature), False)
         
     def doesKeyExist(self, keyName, keyClass):
         """
