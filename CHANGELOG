@@ -1,1 +1,8 @@
-This is the initial release, with support for the NDN-TLV wire format.
+PyNDN v2.0alpha1 (2014-02-21)
+
+This is the initial release, with support for the NDN-TLV wire format in pure Python.
+
+Support to be added soon:
+* Security library support for verifying a data packet signature.
+* UDP transport
+* Package install support
