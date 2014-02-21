@@ -92,7 +92,9 @@ class Node(object):
         Send the Interest through the transport, read the entire response and 
         call onData(interest, data).
         
-        :param interest: The Interest. This copies the Interest.
+        :param interest: The Interest which is NOT copied for this internal
+          Node method.  The Face expressInterest is reponsible for making a
+          copy for Node to use.
         :type interest: Interest
         :param onData: A function object to call when a matching data packet is 
           received.
@@ -109,7 +111,7 @@ class Node(object):
   
         pendingInterestId = Node._PendingInterest.getNextPendingInterestId()
         self._pendingInterestTable.append(
-          Node._PendingInterest(pendingInterestId, Interest(interest), onData, 
+          Node._PendingInterest(pendingInterestId, interest, onData, 
                           onTimeout))
         
         self._transport.send(interest.wireEncode(wireFormat).toBuffer())
