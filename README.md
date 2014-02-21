@@ -20,6 +20,6 @@ the NDN-TLV package: https://github.com/named-data/ndnd-tlv .
 
 The API follows the NDN Common Client Library API also used by ndn-cpp (C++) and ndn-js (JavaScript).
 See http://named-data.net/doc/ndn-ccl-api .
-Since PyNDN 2.0 conforms to the new Common Client Library API, applications written in pre-2.0 version
-of PyNDN need to be upgraded.
 
+Since PyNDN 2.0 conforms to the new Common Client Library API, applications written in the pre-2.0 version
+of PyNDN need to be upgraded.
