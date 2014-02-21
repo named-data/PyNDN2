@@ -77,10 +77,10 @@ class SignedBlob(Blob):
     def _toSignedBufferFromMemoryViewWrapper(self):
         """
         This is an internal function (which is only needed by Python versions
-        before 3.2) to check if signedBuf() would return a _memoryviewWrapper and
+        before 3.3) to check if signedBuf() would return a _memoryviewWrapper and
         to return its internal memoryview instead, so that it implements
         the buffer protocol (but doesn't have int elements).  However, if
-        this is a Python version (3.2 or greater) whose memoryview already
+        this is a Python version (3.3 or greater) whose memoryview already
         uses int, then toSignedBuffer() is the same as signedBuf().
         """
         if self._signedArray == None:

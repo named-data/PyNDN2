@@ -52,7 +52,7 @@ class Blob(object):
                     self._array = array
                     
             if not Blob._memoryviewUsesInt and type(self._array) == memoryview:
-                # memoryview elements are not int (Python versions before 3.2)
+                # memoryview elements are not int (Python versions before 3.3)
                 #   so we need a wrapper which will return int elements.
                 self._array = _memoryviewWrapper(self._array)
                 
@@ -75,7 +75,7 @@ class Blob(object):
         """
         Return the byte array which you must treat as immutable and not 
         modify the contents.
-        Note: For compatibility with Python versions before 3.2, if you
+        Note: For compatibility with Python versions before 3.3, if you
         need an object which implements the buffer protocol (e.g. for writing
         to a socket) then call toBuffer() instead.
         
@@ -91,10 +91,10 @@ class Blob(object):
     def _toBufferFromMemoryViewWrapper(self):
         """
         This is an internal function (which is only needed by Python versions
-        before 3.2) to check if buf() would return a _memoryviewWrapper and
+        before 3.3) to check if buf() would return a _memoryviewWrapper and
         to return its internal memoryview instead, so that it implements
         the buffer protocol (but doesn't have int elements).  However, if
-        this is a Python version (3.2 or greater) whose memoryview already
+        this is a Python version (3.3 or greater) whose memoryview already
         uses int, then toBuffer() is the same as buf().
         """
         if self._array == None:
@@ -147,13 +147,14 @@ class Blob(object):
         return value
 
     # Set this up once at the class level for the constructor to use.
+    # Expect that this is True for Python version 3.3 or later.
     _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) == int)
         
 class _memoryviewWrapper(object):
     """
     _memoryviewWrapper is an internal class used by Blob which wraps a 
     memoryview to override  __getitem__ so that it returns int instead of str 
-    (Python 2.7) or bytes (Python 3.1).  (When we only support Python 3.2 or 
+    (Python 2.7) or bytes (Python 3.2).  (When we only support Python 3.3 or 
     later, this class is not necessary.)
     
     :param view: The memoryview to wrap.
