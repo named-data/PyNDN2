@@ -173,6 +173,7 @@ def main():
     dump("Freshly-signed Data:")
     dumpData(freshData)
     
-    #keyChain.verifyData(freshData, bind(&onVerified, "Freshly-signed Data", _1), bind(&onVerifyFailed, "Freshly-signed Data", _1))
+    # TODO: Use verifyData.
+    #keyChain.verifyData(freshData, onVerified, onVerifyFailed)
     
 main()
