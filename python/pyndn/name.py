@@ -237,6 +237,30 @@ class Name(object):
             value = str(value, encoding = 'ascii')
         return value
         
+    def match(self, name):
+        """
+        Check if the N components of this name are the same as the first N 
+        components of the given name.
+        
+        :param name: The Name to check.
+        :type name: Name
+        :return: True if this matches the given name, otherwise False.  This 
+          always returns True if this name is empty.
+        :rtype: bool
+        """
+        # Check if this name is longer than the name we are checking it against.
+        if len(self._components) > len(name._components):
+            return False
+
+        # Check if at least one of given components doesn't match.
+        for i in range(len(self._components)):
+            # Note: In Python, != should do a byte-by-byte comparison.
+            if (self._components[i].getValue().toBuffer() != 
+                  name._components[i].getValue().toBuffer()):
+                return False
+
+        return True
+        
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object is 
