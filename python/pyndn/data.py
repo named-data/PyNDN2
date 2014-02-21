@@ -19,13 +19,22 @@ from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 
 class Data(object):
     def __init__(self, value = None):
-        self._name = ChangeCounter(Name(value) if type(value) is Name 
-                                               else Name())
-        self._metaInfo = ChangeCounter(MetaInfo())
-        self._signature = ChangeCounter(Sha256WithRsaSignature())
-        self._content = Blob()
-        self._defaultWireEncoding = SignedBlob()
-        self._defaultWireEncodingFormat = None
+        if isinstance(value, Data):
+            # Copy the values.
+            self._name = ChangeCounter(Name(value.getName()))
+            self._metaInfo = ChangeCounter(MetaInfo(value.getMetaInfo()))
+            self._signature = ChangeCounter(value.getSignature().clone())
+            self._content = value._content
+            self._defaultWireEncoding = value._defaultWireEncoding
+            self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
+        else:
+            self._name = ChangeCounter(Name(value) if type(value) is Name 
+                                                   else Name())
+            self._metaInfo = ChangeCounter(MetaInfo())
+            self._signature = ChangeCounter(Sha256WithRsaSignature())
+            self._content = Blob()
+            self._defaultWireEncoding = SignedBlob()
+            self._defaultWireEncodingFormat = None
 
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
