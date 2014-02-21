@@ -211,5 +211,6 @@ class TlvEncoder(object):
         :return: a memoryview backed by the bytearray encoding buffer.
         :rtype: memoryview
         """
-        return memoryview(self._output._array)[-self._length:]
+        # Create a memoryview from getArray() to make sure we don't copy.
+        return memoryview(self._output.getArray())[-self._length:]
     
