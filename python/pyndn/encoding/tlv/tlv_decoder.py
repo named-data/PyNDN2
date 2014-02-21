@@ -37,8 +37,23 @@ class TlvDecoder(object):
         firstOctet = self._input[self._offset]
         self._offset += 1
         if firstOctet < 253:
-            result = firstOctet
-        elif firstOctet == 253:
+            return firstOctet
+        else:
+            return self.readExtendedVarNumber(firstOctet)
+        
+    def readExtendedVarNumber(self, firstOctet):
+        """
+        A private function to do the work of readVarNumber, given the firstOctet
+        which is >= 253.
+        
+        :param firstOctet: The first octet which is >= 253, used to decode the 
+          remaining bytes.
+        :type firstOctet: int
+        :return: The decoded VAR-NUMBER.
+        :rtype: int
+        """
+        # This is a private function so we know firstOctet >= 253.
+        if firstOctet == 253:
             result = ((self._input[self._offset] << 8) +
                        self._input[self._offset + 1])
             self._offset += 2
