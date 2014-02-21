@@ -17,18 +17,33 @@ from pyndn.key_locator import KeyLocator
 from pyndn.exclude import Exclude
 
 class Interest(object):
-    def __init__(self, name = None):
-        self._name = ChangeCounter(name if type(name) == Name else Name(name))
-        self._minSuffixComponents = None
-        self._maxSuffixComponents = None
-        self._keyLocator = ChangeCounter(KeyLocator())
-        self._exclude = ChangeCounter(Exclude())
-        self._childSelector = None
-        self._mustBeFresh = False
+    def __init__(self, value = None):
+        if type(value) is Interest:
+            # Copy the values.
+            self._name = ChangeCounter(Name(value))
+            self._minSuffixComponents = value._minSuffixComponents
+            self._maxSuffixComponents = value._maxSuffixComponents
+            self._keyLocator = ChangeCounter(KeyLocator(value._keyLocator))
+            self._exclude = ChangeCounter(Exclude(value._exclude))
+            self._childSelector = value._childSelector
+            self._mustBeFresh = value._mustBeFresh
 
-        self._nonce = Blob()
-        self._scope = None
-        self._interestLifetimeMilliseconds = None
+            self._nonce = value._nonce
+            self._scope = value._scope
+            self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
+        else:
+            self._name = ChangeCounter(Name(value) if type(value) == Name 
+                                                   else Name())
+            self._minSuffixComponents = None
+            self._maxSuffixComponents = None
+            self._keyLocator = ChangeCounter(KeyLocator())
+            self._exclude = ChangeCounter(Exclude())
+            self._childSelector = None
+            self._mustBeFresh = False
+
+            self._nonce = Blob()
+            self._scope = None
+            self._interestLifetimeMilliseconds = None            
         
         self._getNonceChangeCount = 0
         self._changeCount = 0

@@ -24,7 +24,7 @@ class Exclude(object):
     def __init__(self, value = None):
         if value == None:
             self._entries = []
-        elif type(value) is Interest:
+        elif type(value) is Exclude:
             # Copy its values.  Each entry is read-only, so do a shallow copy.
             self._entries = value._entries[:]
         else:
