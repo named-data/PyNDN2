@@ -61,7 +61,7 @@ class Face(object):
           the Interest.
         :type interest: Interest
         :param name: A name for the Interest (if the second form is used).
-        :type interest: Name
+        :type name: Name
         :param interestTemplate: (optional) if not None, copy interest selectors 
           from the template (if the second form is used).  If omitted, use a
           default interest lifetime.
