@@ -9,6 +9,7 @@ import time
 from pyndn import Name
 from pyndn import Interest
 from pyndn import Face
+from pyndn.encoding import TlvWireFormat
 
 def dump(*list):
     result = ""
@@ -37,9 +38,7 @@ def main():
 
     name1 = Name("/test");    
     dump("Express name ", name1.toUri())
-    interest = Interest(name1)
-    interest.setInterestLifetimeMilliseconds(4000.0)
-    face.expressInterest(interest, counter.onData, counter.onTimeout)
+    face.expressInterest(name1, counter.onData, counter.onTimeout)
 
     while counter._callbackCount < 1:
         face.processEvents()
