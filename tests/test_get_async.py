@@ -6,9 +6,11 @@
 #
 
 import time
+from pyndn import Name
 from pyndn import Interest
-from pyndn import Data
 from pyndn.transport import TcpTransport
+from pyndn.node import Node
+from pyndn.encoding.tlv_wire_format import TlvWireFormat
 
 def dump(*list):
     result = ""
@@ -20,27 +22,32 @@ class Counter(object):
     def __init__(self):
         self._callbackCount = 0
 
-    def onReceivedData(self, input):
+    def onData(self, interest, data):
         self._callbackCount += 1
-        data = Data()
-        data.wireDecode(input)
         dump("Got data packet with name", data.getName().toUri())
         # Use join to convert each byte to chr.
         dump("".join(map(chr, data.getContent().buf())))
 
-counter = Counter()
-transport = TcpTransport()
-transport.connect(TcpTransport.ConnectionInfo("localhost"), counter)
+    def onTimeout(self, interest):
+        self._callbackCount += 1
+        dump("Time out for interest", interest.getName().toUri()) 
 
-interest = Interest()
-interest.getName().append("ndn").append("ucla.edu").append("apps").append(
-  "ndn-js-test").append("hello.txt")
-dump("Sending interest", interest.getName().toUri())
-transport.send(interest.wireEncode().toBuffer())
+def main():
+    node = Node(TcpTransport(), TcpTransport.ConnectionInfo("localhost"))
+    
+    counter = Counter()
 
-while counter._callbackCount == 0:
-    transport.processEvents()
-    # We need to sleep for a few milliseconds so we don't use 100% of the CPU.
-    time.sleep(0.01)    
+    name1 = Name("/testzzz");    
+    dump("Express name ", name1.toUri())
+    interest = Interest(name1)
+    interest.setInterestLifetimeMilliseconds(4000.0)
+    node.expressInterest(interest, counter.onData, counter.onTimeout, TlvWireFormat.get())
 
-transport.close()
+    while counter._callbackCount < 1:
+        node.processEvents()
+        # We need to sleep for a few milliseconds so we don't use 100% of the CPU.
+        time.sleep(0.01)    
+
+    node.shutdown()
+
+main()

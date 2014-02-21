@@ -14,6 +14,7 @@ import socket
 import select
 from pyndn.util import Blob
 from pyndn.transport.transport import Transport
+from pyndn.encoding.element_reader import ElementReader
 
 class TcpTransport(Transport):
     """
@@ -28,7 +29,7 @@ class TcpTransport(Transport):
         # Create a Blob and take its buf() since this creates a memoryview
         #   which is more efficient for slicing.
         self._bufferView = Blob(self._buffer, False).buf()
-        self._elementListener = None
+        self._elementReader = None
 
     class ConnectionInfo(Transport.ConnectionInfo):
         """
@@ -94,9 +95,7 @@ class TcpTransport(Transport):
         else:
             raise RuntimeError("Cannot find a polling utility for sockets")
           
-        # TODO: Use ElementReader.
-        #self._elementReader = ElementReader(elementListener)
-        self._elementListener = elementListener
+        self._elementReader = ElementReader(elementListener)
     
     def send(self, data):
         """
@@ -146,9 +145,7 @@ class TcpTransport(Transport):
                 return
 
             # _bufferView is a memoryview, so we can slice efficienty.
-            # TODO: Use _elementReader.
-            #self._elementReader.onReceivedData(self._bufferView[0:nBytesRead])
-            self._elementListener.onReceivedData(self._bufferView[0:nBytesRead])
+            self._elementReader.onReceivedData(self._bufferView[0:nBytesRead])
 
     def getIsConnected(self):
         """
