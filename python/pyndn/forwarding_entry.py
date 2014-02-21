@@ -78,6 +78,15 @@ class ForwardingEntry(object):
         """
         self._action = action
         
+    def setPrefix(self, prefix):
+        """
+        Set the prefix to a copy of the give Name.
+        
+        :param prefix: The new prefix Name to copy, or None for not specified.
+        :type prefix: Name
+        """
+        self._prefix = Name(prefix) if type(prefix) is Name else Name()
+        
     def setFaceId(self, faceId):
         """
         Set the Face ID.

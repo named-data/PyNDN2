@@ -6,6 +6,7 @@
 #
 
 from pyndn import ForwardingEntry
+from pyndn import Name
 
 def dump(*list):
     result = ""
@@ -47,7 +48,7 @@ def dumpForwardingEntry(forwardingEntry):
 def main():
     forwardingEntry = ForwardingEntry()
     forwardingEntry.setAction("selfreg")
-    forwardingEntry.getPrefix().set("/meki")
+    forwardingEntry.setPrefix(Name("/meki"))
     forwardingEntry.setFaceId(1)
     forwardingEntry.getForwardingFlags().setForwardingEntryFlags(255)
     forwardingEntry.setFreshnessPeriod(1000000)
