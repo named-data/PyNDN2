@@ -85,13 +85,13 @@ class SignedBlob(Blob):
         """
         if self._signedArray == None:
             return None
-        elif type(self._signedArray) == _memoryviewWrapper:
+        elif type(self._signedArray) is _memoryviewWrapper:
             # Return the underlying memoryview.
             return self._signedArray._view
         else:
             return self._signedArray
     
-    if type(memoryview(bytearray(1))[0]) == int:
+    if type(memoryview(bytearray(1))[0]) is int:
         # We can use the normal signedBuf().
         toSignedBuffer = signedBuf
     else:

@@ -18,8 +18,9 @@ from pyndn.meta_info import MetaInfo
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 
 class Data(object):
-    def __init__(self, name = None):
-        self._name = ChangeCounter(name if type(name) == Name else Name(name))
+    def __init__(self, value = None):
+        self._name = ChangeCounter(Name(value) if type(value) is Name 
+                                               else Name())
         self._metaInfo = ChangeCounter(MetaInfo())
         self._signature = ChangeCounter(Sha256WithRsaSignature())
         self._content = Blob()
@@ -167,7 +168,7 @@ class Data(object):
         :return: This Data so that you can chain calls to update values.
         :rtype: Data
         """
-        self._name.set(name if type(name) == Name else Name(name))
+        self._name.set(name if type(name) is Name else Name(name))
         self._changeCount += 1
         return self
         
@@ -208,7 +209,7 @@ class Data(object):
           take another pointer to the same Blob).
         :type content: A Blob or an array type with int elements 
         """
-        self._content = content if type(content) == Blob else Blob(content)
+        self._content = content if type(content) is Blob else Blob(content)
         self._changeCount += 1
     
     def getChangeCount(self):

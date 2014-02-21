@@ -190,7 +190,7 @@ class Exclude(object):
         return len(self._entries)
         
     def __getitem__(self, key):
-        if type(key) == int:
+        if type(key) is int:
             return self._entries[key]
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))

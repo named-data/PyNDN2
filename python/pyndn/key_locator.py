@@ -91,7 +91,7 @@ class KeyLocator(object):
         :param keyName: The key name which is copied.
         :type keyName: Name
         """
-        self._keyName.set(keyName if type(keyName) == Name else Name(keyName))
+        self._keyName.set(keyName if type(keyName) is Name else Name(keyName))
         self._changeCount += 1
         
     def setKeyData(self, keyData):
@@ -104,7 +104,7 @@ class KeyLocator(object):
           take another pointer to the same Blob).
         :type keyData: A Blob or an array type with int elements 
         """
-        self._keyData = keyData if type(keyData) == Blob else Blob(keyData)
+        self._keyData = keyData if type(keyData) is Blob else Blob(keyData)
         self._changeCount += 1
 
     def clear(self):

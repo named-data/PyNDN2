@@ -46,7 +46,7 @@ class Name(object):
         :type value: Blob or Name.Component or value for Blob constructor
         """
         def __init__(self, value = None):
-            if type(value) == Name.Component:
+            if type(value) is Name.Component:
                 # Use the existing Blob in the other Component.
                 self._value = value._value
             else:
@@ -368,7 +368,7 @@ class Name(object):
         return len(self._components)
         
     def __getitem__(self, key):
-        if type(key) == int:
+        if type(key) is int:
             return self._components[key]
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))

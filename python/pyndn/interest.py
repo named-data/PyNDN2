@@ -32,7 +32,7 @@ class Interest(object):
             self._scope = value._scope
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
         else:
-            self._name = ChangeCounter(Name(value) if type(value) == Name 
+            self._name = ChangeCounter(Name(value) if type(value) is Name 
                                                    else Name())
             self._minSuffixComponents = None
             self._maxSuffixComponents = None
@@ -148,7 +148,7 @@ class Interest(object):
         return self._interestLifetimeMilliseconds
     
     def setName(self, name):
-        self._name.set(name if type(name) == Name else Name(name))
+        self._name.set(name if type(name) is Name else Name(name))
         self._changeCount += 1
     
     def setMinSuffixComponents(self, minSuffixComponents):
@@ -169,7 +169,7 @@ class Interest(object):
         :type keyLocator: KeyLocator
         """
         self._keyLocator.set(
-          keyLocator if type(keyLocator) == KeyLocator(keyLocator) 
+          keyLocator if type(keyLocator) is KeyLocator(keyLocator) 
                      else KeyLocator())
         self._changeCount += 1
     
@@ -183,7 +183,7 @@ class Interest(object):
         :type exclude: Exclude
         """
         self._exclude.set(
-          exclude if type(exclude) == Exclude(exclude) else Exclude())
+          exclude if type(exclude) is Exclude(exclude) else Exclude())
         self._changeCount += 1
     
     def setChildSelector(self, childSelector):
@@ -195,7 +195,7 @@ class Interest(object):
         self._changeCount += 1
     
     def setNonce(self, nonce):
-        self._nonce = nonce if type(nonce) == Blob else Blob(nonce)
+        self._nonce = nonce if type(nonce) is Blob else Blob(nonce)
         # Set _getNonceChangeCount so that the next call to getNonce() won't 
         #   clear _nonce.
         self._changeCount += 1

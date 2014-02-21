@@ -44,14 +44,14 @@ class Blob(object):
                 # We always use a memoryview so that slicing is efficient.
                 self._array = memoryview(bytearray(array))
             else:
-                if type(array) == bytearray:
+                if type(array) is bytearray:
                     # We always use a memoryview so that slicing is efficient.
                     self._array = memoryview(array)
                 else:
                     # Can't take a memoryview, so use as-is.
                     self._array = array
                     
-            if not Blob._memoryviewUsesInt and type(self._array) == memoryview:
+            if not Blob._memoryviewUsesInt and type(self._array) is memoryview:
                 # memoryview elements are not int (Python versions before 3.3)
                 #   so we need a wrapper which will return int elements.
                 self._array = _memoryviewWrapper(self._array)
@@ -99,13 +99,13 @@ class Blob(object):
         """
         if self._array == None:
             return None
-        elif type(self._array) == _memoryviewWrapper:
+        elif type(self._array) is _memoryviewWrapper:
             # Return the underlying memoryview.
             return self._array._view
         else:
             return self._array
     
-    if type(memoryview(bytearray(1))[0]) == int:
+    if type(memoryview(bytearray(1))[0]) is int:
         # We can use the normal buf().
         toBuffer = buf
     else:
@@ -148,7 +148,7 @@ class Blob(object):
 
     # Set this up once at the class level for the constructor to use.
     # Expect that this is True for Python version 3.3 or later.
-    _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) == int)
+    _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) is int)
         
 class _memoryviewWrapper(object):
     """
@@ -173,7 +173,7 @@ class _memoryviewWrapper(object):
         return len(self._view)
 
     def _getFromStr(self, index):
-        if type(index) == slice:
+        if type(index) is slice:
             # Return a new _memoryviewWrapper for the slice.
             return _memoryviewWrapper(self._view.__getitem__(index))
         else:
@@ -181,7 +181,7 @@ class _memoryviewWrapper(object):
             return ord(self._view[index])
 
     def _getFromBytes(self, index):
-        if type(index) == slice:
+        if type(index) is slice:
             # Return a new _memoryviewWrapper for the slice.
             return _memoryviewWrapper(self._view.__getitem__(index))
         else:
@@ -190,9 +190,9 @@ class _memoryviewWrapper(object):
 
     # Different versions of Python implement memoryarray with elements
     #   of different types, so define __getitem__ accordingly.
-    if type(memoryview(bytearray(1))[0]) == str:
+    if type(memoryview(bytearray(1))[0]) is str:
         # memoryview elements are str.
         __getitem__ = _getFromStr
-    elif type(memoryview(bytearray(1))[0]) == bytes:
+    elif type(memoryview(bytearray(1))[0]) is bytes:
         # memoryview elements are bytes.
         __getitem__ = _getFromBytes
