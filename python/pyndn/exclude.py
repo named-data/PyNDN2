@@ -162,6 +162,18 @@ class Exclude(object):
             value = str(value, encoding = 'ascii')
         return value
 
+    def matches(self, component):
+        """
+        Check if the component matches any of the exclude criteria.
+        
+        :param component: The name component to check.
+        :type component: Name.Component
+        :return: True if the component matches any of the exclude criteria, 
+          otherwise False.
+        """
+        # TODO: Implement Exclude.matches
+        raise RuntimeError("Exclude.matches is not implemented")
+
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object is 
