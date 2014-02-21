@@ -46,7 +46,7 @@ class Data(object):
         encoded result.
         
         :param wireFormat: (optional) A WireFormat object used to encode this 
-           Interest. If omitted, use WireFormat.getDefaultWireFormat().
+           Data object. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
         :return: The encoded buffer.
         :rtype: Blob
@@ -82,7 +82,7 @@ class Data(object):
           take another pointer to the same Blob).
         :type input: A Blob or an array type with int elements 
         :param wireFormat: (optional) A WireFormat object used to decode this 
-           Interest. If omitted, use WireFormat.getDefaultWireFormat().
+           Data object. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
         """
         if wireFormat == None:
