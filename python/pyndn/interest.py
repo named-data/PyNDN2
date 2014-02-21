@@ -270,6 +270,36 @@ class Interest(object):
             
         return result
         
+    def matchesName(self, name):
+        """
+        Check if this interest's name matches the given name (using Name.match) 
+        and the given name also conforms to the interest selectors.
+        
+        :param name: The name to check.
+        :type name: Name
+        :return: True if the name and interest selectors match, False otherwise.
+        :rtype: bool
+        """
+        if not self.getName().match(name):
+            return False
+  
+        if (self._minSuffixComponents != None and
+              # Add 1 for the implicit digest.
+              not (name.size() + 1 - self.getName.size() >= 
+                   self._minSuffixComponents)):
+            return False
+        if (self._maxSuffixComponents != None and
+              # Add 1 for the implicit digest.
+              not (name.size() + 1 - self.getName().size() <= 
+                   self._maxSuffixComponents)):
+            return False
+        if (self.getExclude().size() > 0 and 
+              name.size() > self.getName().size() and
+              self.getExclude().match(name[self.getName().size()])):
+            return False
+
+        return True
+        
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object 
