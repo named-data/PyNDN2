@@ -7,9 +7,7 @@
 
 import time
 from pyndn import Name
-from pyndn import Interest
 from pyndn import Face
-from pyndn.encoding import TlvWireFormat
 
 def dump(*list):
     result = ""
