@@ -4,7 +4,10 @@ This is the Python 2.0 initial release, with support for the NDN-TLV wire format
 
 Support to be added soon:
 * Security library support for verifying a data packet signature.
-* UDP transport
+* UDP transport.
+* Right now, registerPrefix only works the first time it registers with ndnd-tlv. To get it 
+  to work again, in is necessary to restart with ndnd-tlv-stop; ndnd-tlv-start and then it
+  is possible to do registerPrefix again.  This will be fixed soon.
 * Name utility methods like appendVersion.
 * Name Python methods like __lt__.
-* Package install support
+* Package install support.
