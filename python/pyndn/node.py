@@ -10,6 +10,7 @@ This module defines the Node class which provides functionality for the Face
 class.
 """
 
+from random import SystemRandom
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
@@ -70,6 +71,8 @@ SELFREG_PRIVATE_KEY_DER = bytearray([
 0xb6, 0xf6, 0x50, 0x66, 0xb0, 0x40, 0x24, 0x6a, 0xaf, 0x98, 0x21, 0x45, 0x30, 0x01, 0x59, 0xd0, 0xc3, 0xfc, 0x7b, 0xae,
 0x30, 0x18, 0xeb, 0x90, 0xfb, 0x17, 0xd3, 0xce, 0xb5
   ])
+
+_systemRandom = SystemRandom()
 
 class Node(object):
     """
@@ -369,6 +372,11 @@ class Node(object):
         # Set the ForwardingEntry as the content of a Data packet and sign.
         data = Data()
         data.setContent(content)
+        # Set the name to a random value so that each request is unique.
+        nonce = bytearray(4)
+        for i in range(len(nonce)):
+            nonce[i] = _systemRandom.randint(0, 0xff)                
+        data.getName().append(nonce)
         # For now, self sign with an arbirary key. In the future, we may not 
         # require a signature to register.
         self._selfregSign(data, wireFormat)

@@ -7,9 +7,6 @@ Support to be added soon:
 * Performance improvements for Python versions before 3.3.
 # Support for Python asyncio for the main process loop.
 * UDP transport.
-* Right now, registerPrefix only works the first time it registers with ndnd-tlv. To get it 
-  to work again, it is necessary to restart with ndnd-tlv-stop; ndnd-tlv-start and then it
-  is possible to do registerPrefix again.  This will be fixed soon.
 * Name utility methods like appendVersion.
 * Name Python methods like __lt__.
 * Package install support.
