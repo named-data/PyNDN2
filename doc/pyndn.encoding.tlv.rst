@@ -33,3 +33,11 @@ tlv Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`tlv_structure_decoder` Module
+-----------------------------------
+
+.. automodule:: pyndn.encoding.tlv.tlv_structure_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

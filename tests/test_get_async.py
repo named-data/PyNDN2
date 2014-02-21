@@ -8,9 +8,7 @@
 import time
 from pyndn import Name
 from pyndn import Interest
-from pyndn.transport import TcpTransport
-from pyndn.node import Node
-from pyndn.encoding.tlv_wire_format import TlvWireFormat
+from pyndn import Face
 
 def dump(*list):
     result = ""
@@ -33,21 +31,21 @@ class Counter(object):
         dump("Time out for interest", interest.getName().toUri()) 
 
 def main():
-    node = Node(TcpTransport(), TcpTransport.ConnectionInfo("localhost"))
+    face = Face("localhost")
     
     counter = Counter()
 
-    name1 = Name("/testzzz");    
+    name1 = Name("/test");    
     dump("Express name ", name1.toUri())
     interest = Interest(name1)
     interest.setInterestLifetimeMilliseconds(4000.0)
-    node.expressInterest(interest, counter.onData, counter.onTimeout, TlvWireFormat.get())
+    face.expressInterest(interest, counter.onData, counter.onTimeout)
 
     while counter._callbackCount < 1:
-        node.processEvents()
+        face.processEvents()
         # We need to sleep for a few milliseconds so we don't use 100% of the CPU.
         time.sleep(0.01)    
 
-    node.shutdown()
+    face.shutdown()
 
 main()

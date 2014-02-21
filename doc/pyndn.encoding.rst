@@ -9,6 +9,14 @@ encoding Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`element_reader` Module
+----------------------------
+
+.. automodule:: pyndn.encoding.element_reader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`tlv_0_1a2_wire_format` Module
 -----------------------------------
 

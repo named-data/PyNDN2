@@ -25,6 +25,14 @@ pyndn Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`face` Module
+------------------
+
+.. automodule:: pyndn.face
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`forwarding_entry` Module
 ------------------------------
 
