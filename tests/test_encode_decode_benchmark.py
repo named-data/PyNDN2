@@ -14,6 +14,10 @@ from pyndn import Name
 from pyndn import Data
 from pyndn import KeyLocatorType
 from pyndn import Sha256WithRsaSignature
+from pyndn.security import KeyType
+from pyndn.security import KeyChain
+from pyndn.security.identity import IdentityManager
+from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
 
 def getNowSeconds():
@@ -101,13 +105,14 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
     finalBlockId = Name("/%00")[0]
     
     # Initialize the private key storage in case useCrypto is true.
+    identityStorage = MemoryIdentityStorage()
     privateKeyStorage = MemoryPrivateKeyStorage()
-    #keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
-    #                    SelfVerifyPolicyManager(identityStorage))
+    identityManager = IdentityManager(identityStorage, privateKeyStorage)
+    keyChain = KeyChain(identityManager, None)
     keyName = Name("/testname/DSK-123")
     certificateName = keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName.get(keyName.size() - 1)).append("ID-CERT").append(
-      "0")
+      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
+    identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_PUBLIC_KEY_DER))
     privateKeyStorage.setKeyPairForKeyName(
       keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER)
     
@@ -123,18 +128,16 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
             data.getMetaInfo().setFreshnessPeriod(1000)
             data.getMetaInfo().setFinalBlockID(finalBlockId)
 
-        sha256Signature = data.getSignature()
-        keyLocator = sha256Signature.getKeyLocator()
-        keyLocator.setType(KeyLocatorType.KEYNAME)
-        keyLocator.setKeyName(certificateName)
         if useCrypto:
-            # Encode once to get the signed portion.
-            sha256Signature.setSignature(emptyBlob)
-            unsignedEncoding = data.wireEncode()
-            sha256Signature.setSignature(privateKeyStorage.sign
-              (unsignedEncoding.toSignedBuffer(), keyName))
+            # This sets the signature fields.
+            keyChain.sign(data, certificateName)
         else:
-            # Set the signature field, but don't sign.
+            # Imitate IdentityManager.signByCertificate to set up the signature 
+            # fields, but don't sign.
+            sha256Signature = data.getSignature()
+            keyLocator = sha256Signature.getKeyLocator()
+            keyLocator.setType(KeyLocatorType.KEYNAME)
+            keyLocator.setKeyName(certificateName)
             sha256Signature.setSignature(signatureBits)
 
         encoding = data.wireEncode()
