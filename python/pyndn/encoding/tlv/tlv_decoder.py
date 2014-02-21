@@ -23,7 +23,7 @@ class TlvDecoder(object):
         self._input = input
         # Create a Blob and take its buf() since this creates a memoryview
         #   which is more efficient for slicing.
-        self._inputView = Blob(input).buf()
+        self._inputView = Blob(input, False).buf()
         self._offset = 0
         
     def readVarNumber(self):
