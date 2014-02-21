@@ -28,7 +28,7 @@ class Interest(object):
             self._childSelector = value._childSelector
             self._mustBeFresh = value._mustBeFresh
 
-            self._nonce = value._nonce
+            self._nonce = value.getNonce()
             self._scope = value._scope
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
         else:
