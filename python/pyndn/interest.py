@@ -20,11 +20,11 @@ class Interest(object):
     def __init__(self, value = None):
         if type(value) is Interest:
             # Copy the values.
-            self._name = ChangeCounter(Name(value))
+            self._name = ChangeCounter(Name(value.getName()))
             self._minSuffixComponents = value._minSuffixComponents
             self._maxSuffixComponents = value._maxSuffixComponents
-            self._keyLocator = ChangeCounter(KeyLocator(value._keyLocator))
-            self._exclude = ChangeCounter(Exclude(value._exclude))
+            self._keyLocator = ChangeCounter(KeyLocator(value.getKeyLocator()))
+            self._exclude = ChangeCounter(Exclude(value.getExclude()))
             self._childSelector = value._childSelector
             self._mustBeFresh = value._mustBeFresh
 
