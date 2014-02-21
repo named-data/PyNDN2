@@ -10,9 +10,16 @@ This module defines the Node class which provides functionality for the Face
 class.
 """
 
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.key_locator import KeyLocatorType
+from pyndn.forwarding_entry import ForwardingEntry
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
@@ -83,7 +90,8 @@ class Node(object):
         self._pendingInterestTable = []
         # An array of RegisteredPrefix
         self._registeredPrefixTable = []
-        self._ndndIdFetcherInterest = Interest(Name("/%C1.M.S.localhost/%C1.M.SRV/ndnd/KEY"))
+        self._ndndIdFetcherInterest = Interest(
+          Name("/%C1.M.S.localhost/%C1.M.SRV/ndnd/KEY"))
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
         self._ndndId = None
         
@@ -136,7 +144,47 @@ class Node(object):
                 self._pendingInterestTable.pop(i)
             i -= 1
         
-    # TODO: registerPrefix
+    def registerPrefix(
+      self, prefix, onInterest, onRegisterFailed, flags, wireFormat):
+        """
+        Register prefix with the connected NDN hub and call onInterest when a 
+          matching interest is received.
+          
+        :param prefix: The Name for the prefix to register which is NOT copied 
+          for this internal Node method. The Face registerPrefix is reponsible
+          for making a copy for Node to use..
+        :type prefix: Name
+        :param onInterest: A function object to call when a matching interest is
+          received.
+        :type onInterest: function object
+        :param onRegisterFailed: A function object to call if failed to retrieve
+          the connected hub's ID or failed to register the prefix.
+        :type onRegisterFailed: function object
+        :param flags: The flags for finer control of which interests are 
+          forwardedto the application.
+        :type flags: ForwardingFlags
+        :param wireFormat: A WireFormat object used to encode the message.
+        :type wireFormat: a subclass of WireFormat
+        """
+        # Get the registeredPrefixId now so we can return it to the caller.
+        registeredPrefixId = Node._RegisteredPrefix.getNextRegisteredPrefixId()
+
+        if self._ndndId == None:
+            # First fetch the ndndId of the connected hub.
+            fetcher = Node._NdndIdFetcher(
+              self, registeredPrefixId, prefix, onInterest, onRegisterFailed, 
+              flags, wireFormat)
+            # We send the interest using the given wire format so that the hub 
+            # receives (and sends) in the application's desired wire format.
+            self.expressInterest(
+              self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout, 
+              wireFormat)
+        else:
+            _registerPrefixHelper(
+              registeredPrefixId, prefix, onInterest, onRegisterFailed, flags, 
+              wireFormat)
+  
+        return registeredPrefixId
     
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -296,6 +344,84 @@ class Node(object):
         else:
             return None
     
+    def _registerPrefixHelper(
+      self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags, 
+      wireFormat):
+        """
+        Do the work of registerPrefix once we know we are connected with an 
+        _ndndId.
+        
+        :param registeredPrefixId: The 
+          _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
+          so it could return it to the caller.
+        :type registeredPrefixId: int
+        """
+        # Create a ForwardingEntry.
+        # Note: ndnd ignores any freshness that is larger than 3600 seconds and 
+        #   sets 300 seconds instead. To register "forever", (=2000000000 sec),
+        #   the freshness period must be omitted.
+        forwardingEntry = ForwardingEntry()
+        forwardingEntry.setAction("selfreg")
+        forwardingEntry.setPrefix(prefix)
+        forwardingEntry.setForwardingFlags(flags)
+        content = forwardingEntry.wireEncode(wireFormat)
+
+        # Set the ForwardingEntry as the content of a Data packet and sign.
+        data = Data()
+        data.setContent(content)
+        # For now, self sign with an arbirary key. In the future, we may not 
+        # require a signature to register.
+        self._selfregSign(data, wireFormat)
+        encodedData = data.wireEncode(wireFormat)
+
+        # Create an interest where the name has the encoded Data packet.
+        interestName = Name().append("ndnx").append(self._ndndId).append(
+          "selfreg").append(encodedData)
+
+        interest = Interest(interestName)
+        interest.setScope(1)
+        encodedInterest = interest.wireEncode(wireFormat)
+
+        # Save the onInterest callback and send the registration interest.
+        self._registeredPrefixTable.append(Node._RegisteredPrefix(
+          registeredPrefixId, prefix, onInterest))
+
+        self._transport.send(encodedInterest.toBuffer())
+        
+    @staticmethod
+    def _selfregSign(data, wireFormat):
+        """
+        Set the KeyLocator using the full SELFREG_PUBLIC_KEY_DER, sign the 
+        data packet using SELFREG_PRIVATE_KEY_DER and set the signature.
+        This is a temporary function, because we expect in the future that 
+        registerPrefix will not require a signature on the packet.
+
+        :param data: The Data packet to sign.
+        :type data: Data
+        :param wireFormat: A WireFormat object used to encode the Data 
+          object.
+        :type wireFormat: A subclass of WireFormat.
+        """
+        data.setSignature(Sha256WithRsaSignature())
+        signature = data.getSignature()
+
+        # Set the public key.
+        publicKeyDigest = bytearray(
+          SHA256.new(SELFREG_PUBLIC_KEY_DER).digest())
+        # Set the KEY_LOCATOR_DIGEST.
+        signature.getKeyLocator().setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
+        signature.getKeyLocator().setKeyData(Blob(publicKeyDigest, False))
+
+        # Sign the fields.
+        encoding = data.wireEncode(wireFormat)
+        # Convert the DER bytearray to a str for importKey.
+        privateKey = RSA.importKey(
+          "".join(map(chr, SELFREG_PRIVATE_KEY_DER)))
+        signatureStr = PKCS1_v1_5.new(privateKey).sign(
+          SHA256.new(encoding.toSignedBuffer()))
+        # Convert the string to a Blob.
+        signature.setSignature(Blob(bytearray(signatureStr), False))
+
     class _PendingInterest(object):
         """
         _PendingInterest is a private class for the members of the 
@@ -454,4 +580,47 @@ class Node(object):
             """
             return self._onInterest
             
-        
+    class _NdndIdFetcher(object):
+        """
+        An NdndIdFetcher receives the Data packet with the publisher public key 
+        digest for the connected NDN hub.
+        """
+        def __init__(self, node, registeredPrefixId, prefix, onInterest, 
+                     onRegisterFailed, flags, wireFormat):
+            self._node = node
+            self._registeredPrefixId = registeredPrefixId
+            self._prefix = prefix
+            self._onInterest = onInterest
+            self._onRegisterFailed = onRegisterFailed
+            self._flags = flags
+            self._wireFormat = wireFormat
+            
+        def onData(self, interest, ndndIdData):
+            """
+            We received the ndnd ID.
+            """
+            # Assume that the content is a DER encoded public key of the ndnd.  
+            #   Do a quick check that the first byte is for DER encoding.
+            if (ndndIdData.getContent().size() < 1 or 
+                  ndndIdData.getContent().buf()[0] != 0x30):
+                self._onRegisterFailed(self._prefix)
+                return
+
+            # Get the digest of the public key.
+            digest = bytearray(
+              SHA256.new(ndndIdData.getContent().toBuffer()).digest())
+
+            # Set the _ndndId and continue.
+            # TODO: If there are multiple connected hubs, the NDN ID is really 
+            #   stored per connected hub.
+            self._node._ndndId = Blob(digest, False)
+            self._node._registerPrefixHelper(
+              self._registeredPrefixId, self._prefix, self._onInterest, 
+              self._onRegisterFailed, self._flags, self._wireFormat)
+
+        def onTimeout(self, interest):
+            """
+            We timed out fetching the ndnd ID.
+            """
+            self._onRegisterFailed(self._prefix)
+            

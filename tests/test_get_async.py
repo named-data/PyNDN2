@@ -30,11 +30,11 @@ class Counter(object):
         dump("Time out for interest", interest.getName().toUri()) 
 
 def main():
-    face = Face("spurs.cs.ucla.edu")
+    face = Face("localhost")
     
     counter = Counter()
 
-    name1 = Name("/ndn/ucla.edu");    
+    name1 = Name("/testecho/hello11");    
     dump("Express name ", name1.toUri())
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 

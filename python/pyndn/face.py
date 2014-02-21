@@ -11,6 +11,7 @@ communication.
 """
 
 from pyndn.interest import Interest
+from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.transport.tcp_transport import TcpTransport
 from pyndn.node import Node
@@ -75,6 +76,9 @@ class Face(object):
         :param wireFormat: (optional) A WireFormat object used to encode the 
            message. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
+        :return:  The pending interest ID which can be used with 
+          removePendingInterest.
+        :rtype: int
         """
         # expressInterest(interest, onData)
         # expressInterest(interest, onData, wireFormat)
@@ -153,8 +157,39 @@ class Face(object):
         """
         self._node.removePendingInterest(pendingInterestId)
         
-    # TODO: registerPrefix
-    
+    def registerPrefix(
+      self, prefix, onInterest, onRegisterFailed, flags = None, 
+      wireFormat = None):
+        """
+        Register prefix with the connected NDN hub and call onInterest when a 
+        matching interest is received.
+        
+        :param prefix: The Name for the prefix to register which is NOT copied 
+          for this internal Node method. The Face registerPrefix is reponsible
+          for making a copy for Node to use..
+        :type prefix: Name
+        :param onInterest: A function object to call when a matching interest is
+          received.
+        :type onInterest: function object
+        :param onRegisterFailed: A function object to call if failed to retrieve
+          the connected hub's ID or failed to register the prefix.
+        :type onRegisterFailed: function object
+        :param flags: The flags for finer control of which interests are 
+          forwardedto the application.
+        :type flags: ForwardingFlags
+        :param wireFormat: A WireFormat object used to encode the message.
+        :type wireFormat: a subclass of WireFormat        
+        """
+        if flags == None:
+            flags = ForwardingFlags()
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        # Node.expressInterest requires a copy of the prefix.
+        self._node.registerPrefix(
+          prefix, onInterest, onRegisterFailed, flags, wireFormat)
+        
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
         Remove the registered prefix entry with the registeredPrefixId from the
