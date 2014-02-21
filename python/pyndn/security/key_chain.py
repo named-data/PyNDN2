@@ -43,3 +43,12 @@ class KeyChain(object):
         self._identityManager.signByCertificate(
           data, certificateName, wireFormat)
           
+    def setFace(self, face):
+        """
+        Set the Face which will be used to fetch required certificates.
+        
+        :param face: The Face object.
+        :type face: Face
+        """
+        self._face = face
+        
