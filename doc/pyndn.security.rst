@@ -9,6 +9,14 @@ security Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`key_chain` Module
+-----------------------
+
+.. automodule:: pyndn.security.key_chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`security_exception` Module
 --------------------------------
 

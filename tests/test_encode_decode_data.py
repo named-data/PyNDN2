@@ -11,6 +11,7 @@ from pyndn import ContentType
 from pyndn import KeyLocatorType
 from pyndn import Sha256WithRsaSignature
 from pyndn.security import KeyType
+from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
 from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
@@ -157,8 +158,7 @@ def main():
     identityStorage = MemoryIdentityStorage()
     privateKeyStorage = MemoryPrivateKeyStorage()
     identityManager = IdentityManager(identityStorage, privateKeyStorage)
-    #keyChain = KeyChain(identityManager, 
-    #                    SelfVerifyPolicyManager(identityStorage))
+    keyChain = KeyChain(identityManager, None)
     
     # Initialize the storage.
     keyName = Name("/testname/DSK-123")
@@ -168,7 +168,7 @@ def main():
     privateKeyStorage.setKeyPairForKeyName(
       keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER)
     
-    identityManager.signByCertificate(freshData, certificateName)
+    keyChain.sign(freshData, certificateName)
     dump("")
     dump("Freshly-signed Data:")
     dumpData(freshData)
