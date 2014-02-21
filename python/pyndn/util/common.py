@@ -9,6 +9,8 @@
 This module defines the Common class which has static utility functions.
 """
 
+import time
+
 class Common(object):
     @staticmethod
     def getNowMilliseconds():
@@ -19,6 +21,5 @@ class Common(object):
           fractions of a millisecond.
         :rtype: float
         """
-        # TODO: Implement getNowMilliseconds.
-        raise RuntimeError("getNowMilliseconds is not implemented")
+        return time.time() * 1000.0
     
