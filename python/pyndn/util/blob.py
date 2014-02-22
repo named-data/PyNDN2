@@ -172,27 +172,10 @@ class _memoryviewWrapper(object):
         """
         return len(self._view)
 
-    def _getFromStr(self, index):
+    def __getitem__(self, index):
         if type(index) is slice:
             # Return a new _memoryviewWrapper for the slice.
             return _memoryviewWrapper(self._view.__getitem__(index))
         else:
-            # Convert str to int.
+            # Convert str or bytes to int.
             return ord(self._view[index])
-
-    def _getFromBytes(self, index):
-        if type(index) is slice:
-            # Return a new _memoryviewWrapper for the slice.
-            return _memoryviewWrapper(self._view.__getitem__(index))
-        else:
-            # Convert bytes to int.
-            return self._view[index][0]
-
-    # Different versions of Python implement memoryarray with elements
-    #   of different types, so define __getitem__ accordingly.
-    if type(memoryview(bytearray(1))[0]) is str:
-        # memoryview elements are str.
-        __getitem__ = _getFromStr
-    elif type(memoryview(bytearray(1))[0]) is bytes:
-        # memoryview elements are bytes.
-        __getitem__ = _getFromBytes
