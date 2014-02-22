@@ -212,5 +212,6 @@ class TlvEncoder(object):
         :rtype: memoryview
         """
         # Create a memoryview from getArray() to make sure we don't copy.
-        return memoryview(self._output.getArray())[-self._length:]
+        return memoryview(
+         self._output.getArray())[len(self._output.getArray()) - self._length:]
     
