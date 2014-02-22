@@ -17,7 +17,6 @@ _BytesIOValueIsStr = type(BytesIO().getvalue()) is str
 
 # _bytesElementIsInt if an element of a bytes is an int.
 _bytesElementIsInt = type(bytes([0])[0]) is int
-print("_bytesElementIsInt " + repr(_bytesElementIsInt))
 
 def _chr_ord(x):
     """
