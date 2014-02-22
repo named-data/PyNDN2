@@ -38,7 +38,11 @@ class Blob(object):
         else:
             if type(array) is str:
                 # Convert from a string to utf-8 byte encoding.
-                array = array.encode('utf-8')
+                if _encodeResultIsStr:
+                    # encode produces a str. Force it to be an array of int.
+                    array = map(ord, array.encode('utf-8'))
+                else:
+                    array = array.encode('utf-8')
                 
             if copy:
                 # We are copying, so just make another bytearray.
@@ -52,7 +56,7 @@ class Blob(object):
                     # Can't take a memoryview, so use as-is.
                     self._array = array
                     
-            if not Blob._memoryviewUsesInt and type(self._array) is memoryview:
+            if not _memoryviewUsesInt and type(self._array) is memoryview:
                 # memoryview elements are not int (Python versions before 3.3)
                 #   so we need a wrapper which will return int elements.
                 self._array = _memoryviewWrapper(self._array)
@@ -143,10 +147,12 @@ class Blob(object):
         
         return Common.getBytesIOString(result)
 
-    # Set this up once at the class level for the constructor to use.
-    # Expect that this is True for Python version 3.3 or later.
-    _memoryviewUsesInt = (type(memoryview(bytearray(1))[0]) is int)
-        
+# Set this up once at the class level for the constructor to use.
+# Expect that this is True for Python version 3.3 or later.
+_memoryviewUsesInt = type(memoryview(bytearray(1))[0]) is int
+
+_encodeResultIsStr = type("A".encode('utf-8')) is str
+
 class _memoryviewWrapper(object):
     """
     _memoryviewWrapper is an internal class used by Blob which wraps a 
