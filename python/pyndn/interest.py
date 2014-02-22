@@ -300,7 +300,7 @@ class Interest(object):
   
         if (self._minSuffixComponents != None and
               # Add 1 for the implicit digest.
-              not (name.size() + 1 - self.getName.size() >= 
+              not (name.size() + 1 - self.getName().size() >= 
                    self._minSuffixComponents)):
             return False
         if (self._maxSuffixComponents != None and
@@ -310,7 +310,7 @@ class Interest(object):
             return False
         if (self.getExclude().size() > 0 and 
               name.size() > self.getName().size() and
-              self.getExclude().match(name[self.getName().size()])):
+              self.getExclude().matches(name[self.getName().size()])):
             return False
 
         return True

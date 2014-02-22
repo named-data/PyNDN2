@@ -162,6 +162,39 @@ class Exclude(object):
             value = str(value, encoding = 'ascii')
         return value
 
+    @staticmethod
+    def compareComponents(component1, component2):
+        """
+        Compare the components using NDN component ordering. A component is less
+        if it is shorter, otherwise if equal length do a byte comparison.
+        
+        :param component1: The first name component.
+        :type component1: Name.Component
+        :param component2: The first name component.
+        :type component2: Name.Component
+        :return: -1 if component1 is less than component2, 1 if greater or 0 
+          if equal.
+        :rtype: int
+        """
+        buf1 = component1.getValue().buf()
+        buf2 = component2.getValue().buf()
+        if len(buf1) < len(buf2):
+            return -1
+        if len(buf1) > len(buf2):
+            return 1
+
+        # The components are equal length.  Just do a byte compare.  
+        # The Blob buf() is a memoryview which we can't compare.  We could copy
+        #   into a bytearray for comparison but that is inefficient.  So, just
+        #   directly use normal loop.
+        for i in range(len(buf1)):
+            if buf1[i] < buf2[i]:
+                return -1
+            if buf1[i] > buf2[i]:
+                return 1
+            
+        return 0
+
     def matches(self, component):
         """
         Check if the component matches any of the exclude criteria.
@@ -171,8 +204,57 @@ class Exclude(object):
         :return: True if the component matches any of the exclude criteria, 
           otherwise False.
         """
-        # TODO: Implement Exclude.matches
-        raise RuntimeError("Exclude.matches is not implemented")
+        i = 0
+        while i < len(self._entries):
+            if self._entries[i].getType() == Exclude.ANY:
+                lowerBound = None
+                if i > 0:
+                    lowerBound = self._entries[i - 1]
+
+                # Find the upper bound, possibly skipping over multiple ANY in 
+                #  a row.
+                upperBound = None
+                iUpperBound = i + 1
+                while iUpperBound < len(self._entries):
+                    if self._entries[iUpperBound].getType() == Exclude.COMPONENT:
+                        upperBound = self._entries[iUpperBound]
+                        break                    
+                    iUpperBound += 1
+
+                # If lowerBound != 0, we already checked component equals 
+                #   lowerBound on the last pass.
+                # If upperBound != 0, we will check component equals upperBound 
+                #   on the next pass.
+                if upperBound != None:
+                    if lowerBound != None:
+                        if (self.compareComponents(
+                                component, lowerBound.getComponent()) > 0 and
+                              self.compareComponents(
+                                component, upperBound.getComponent()) < 0):
+                            return True
+                    else:
+                        if (self.compareComponents(
+                              component, upperBound.getComponent()) < 0):
+                            return True
+
+                    # Make i equal iUpperBound on the next pass.
+                    i = iUpperBound - 1
+                else:
+                    if lowerBound != None:
+                        if (self.compareComponents(
+                              component, lowerBound.getComponent()) > 0):
+                            return True
+                    else:
+                        # this.values has only ANY.
+                        return True
+            else: 
+                if (self.compareComponents(
+                      component, self._entries[i].getComponent()) == 0):
+                    return True
+            
+            i +=1 
+
+        return False        
 
     def getChangeCount(self):
         """
