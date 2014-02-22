@@ -74,11 +74,6 @@ def dumpInterest(interest):
                   else interest.getInterestLifetimeMilliseconds())
   
 def main():
-    buffer = BytesIO()
-    buffer.write(bytearray([1]))
-    v = buffer.getvalue()
-    dump("type(v[0])", type(v[0]))
-
     interest = Interest()
     interest.wireDecode(TlvInterest)
     dump("Interest:")
