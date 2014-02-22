@@ -11,6 +11,7 @@ This module defines the NDN Name class.
 
 from io import BytesIO
 from pyndn.util import Blob
+from pyndn.util.common import Common
 
 class Name(object):
     """
@@ -231,11 +232,7 @@ class Name(object):
             result.write(Name._slash)
             component.toEscapedString(result)
   
-        value = result.getvalue()
-        if not type(value) is str:
-            # Assume value is a Python 3 bytes object.  Convert to string.
-            value = str(value, encoding = 'ascii')
-        return value
+        return Common.getBytesIOString(result)
         
     def match(self, name):
         """
@@ -323,12 +320,7 @@ class Name(object):
         if result == None:
             result = BytesIO()
             Name.toEscapedString(value, result)
-            
-            value = result.getvalue()
-            if not type(value) is str:
-                # Assume value is a Python 3 bytes object.  Convert to string.
-                value = str(value, encoding = 'ascii')
-            return value            
+            return Common.getBytesIOString(result)            
             
         gotNonDot = False
         for i in range(len(value)):

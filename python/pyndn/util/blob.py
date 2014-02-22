@@ -13,6 +13,7 @@ Note that the pointer to the buffer can be None.
 """
 
 from io import BytesIO
+from pyndn.util.common import Common
 
 class Blob(object):
     """
@@ -140,11 +141,7 @@ class Blob(object):
             hexBuffer[1] = ord(hex[1])
             result.write(hexBuffer)
         
-        value = result.getvalue()
-        if not type(value) is str:
-            # Assume value is a Python 3 bytes object.  Convert to string.
-            value = str(value, encoding = 'ascii')
-        return value
+        return Common.getBytesIOString(result)
 
     # Set this up once at the class level for the constructor to use.
     # Expect that this is True for Python version 3.3 or later.

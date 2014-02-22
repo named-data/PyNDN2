@@ -7,6 +7,7 @@
 
 from io import BytesIO
 from pyndn.name import Name
+from pyndn.util.common import Common
 
 """
 This module defines the Exclude class which is used by Interest and represents
@@ -156,11 +157,7 @@ class Exclude(object):
                 entry.getComponent().toEscapedString(result)
             didFirst = True
   
-        value = result.getvalue()
-        if not type(value) is str:
-            # Assume value is a Python 3 bytes object.  Convert to string.
-            value = str(value, encoding = 'ascii')
-        return value
+        return Common.getBytesIOString(result)
 
     @staticmethod
     def compareComponents(component1, component2):

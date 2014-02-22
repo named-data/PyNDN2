@@ -9,6 +9,7 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn import KeyLocatorType
 from pyndn.util import Blob
+from io import BytesIO
 
 TlvInterest = Blob(bytearray([
 0x05, 0x53, # Interest
@@ -73,6 +74,11 @@ def dumpInterest(interest):
                   else interest.getInterestLifetimeMilliseconds())
   
 def main():
+    buffer = BytesIO()
+    buffer.write(bytearray([1]))
+    v = buffer.getvalue()
+    dump("type(v[0])", type(v[0]))
+
     interest = Interest()
     interest.wireDecode(TlvInterest)
     dump("Interest:")
