@@ -143,9 +143,7 @@ class TcpTransport(Transport):
             else:
                 # Use the select fallback which is less efficient.
                 # Set timeout to 0 for an immediate check.
-                print("calling select")
                 (isReady, _, _) = select.select([self._socket], [], [], 0)
-                print("select len(isReady) " + repr(len(isReady)))
                 if len(isReady) == 0:
                     # There is no data waiting.
                     return
