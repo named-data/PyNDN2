@@ -99,6 +99,8 @@ class TcpTransport(Transport):
           
         self._elementReader = ElementReader(elementListener)
     
+    # This will be set True if send gets a TypeError.
+    _sendNeedsStr = False
     def send(self, data):
         """
         Set data to the host.
@@ -106,7 +108,16 @@ class TcpTransport(Transport):
         :param data: The buffer of data to send.
         :type data: An array type accepted by socket.send.
         """
-        self._socket.sendall(data)
+        if TcpTransport._sendNeedsStr:
+            # This version of sendall can't use a memoryview, etc., so convert.
+            self._socket.sendall(str(bytearray(data)))
+        else:
+            try:
+                self._socket.sendall(data)
+            except TypeError:
+                # Assume we need to convert to a str.
+                TcpTransport._sendNeedsStr = True
+                self.send(data)
 
     def processEvents(self):
         """
