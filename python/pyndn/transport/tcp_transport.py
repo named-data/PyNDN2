@@ -92,7 +92,9 @@ class TcpTransport(Transport):
               self._socket.fileno(), filter = select.KQ_FILTER_READ,
               flags = select.KQ_EV_ADD | select.KQ_EV_ENABLE | 
                       select.KQ_EV_CLEAR)]
-        else:
+        elif not hasattr(select, "select"):
+            # Most Python implementations have this fallback, so we
+            #   don't expect this error.
             raise RuntimeError("Cannot find a polling utility for sockets")
           
         self._elementReader = ElementReader(elementListener)
@@ -133,9 +135,18 @@ class TcpTransport(Transport):
                 if not isReady:
                     # There is no data waiting.
                     return
-            else:
+            elif self._kqueue != None:
                 # Set timeout to 0 for an immediate check.
                 if len(self._kqueue.control(self._kevents, 1, 0)) == 0:
+                    # There is no data waiting.
+                    return
+            else:
+                # Use the select fallback which is less efficient.
+                # Set timeout to 0 for an immediate check.
+                print("calling select")
+                (isReady, _, _) = select.select([self._socket], [], [], 0)
+                print("select len(isReady) " + repr(len(isReady)))
+                if len(isReady) == 0:
                     # There is no data waiting.
                     return
             
