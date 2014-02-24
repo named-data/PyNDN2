@@ -10,14 +10,11 @@ This module defines the Node class which provides functionality for the Face
 class.
 """
 
+import hashlib
 from random import SystemRandom
-from Crypto.Hash import SHA256
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
-from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.key_locator import KeyLocatorType
 from pyndn.forwarding_entry import ForwardingEntry
 from pyndn.util.blob import Blob
@@ -377,9 +374,12 @@ class Node(object):
         for i in range(len(nonce)):
             nonce[i] = _systemRandom.randint(0, 0xff)                
         data.getName().append(nonce)
-        # For now, self sign with an arbirary key. In the future, we may not 
-        # require a signature to register.
-        self._selfregSign(data, wireFormat)
+        # The ndnd ignores the signature, so set to blank values.
+        data.getSignature().getKeyLocator().setType(
+          KeyLocatorType.KEY_LOCATOR_DIGEST)
+        data.getSignature().getKeyLocator().setKeyData(
+          Blob(bytearray(32), False))
+        data.getSignature().setSignature(Blob(bytearray(128), False))
         encodedData = data.wireEncode(wireFormat)
 
         # Create an interest where the name has the encoded Data packet.
@@ -396,40 +396,6 @@ class Node(object):
 
         self._transport.send(encodedInterest.toBuffer())
         
-    @staticmethod
-    def _selfregSign(data, wireFormat):
-        """
-        Set the KeyLocator using the full SELFREG_PUBLIC_KEY_DER, sign the 
-        data packet using SELFREG_PRIVATE_KEY_DER and set the signature.
-        This is a temporary function, because we expect in the future that 
-        registerPrefix will not require a signature on the packet.
-
-        :param data: The Data packet to sign.
-        :type data: Data
-        :param wireFormat: A WireFormat object used to encode the Data 
-          object.
-        :type wireFormat: A subclass of WireFormat.
-        """
-        data.setSignature(Sha256WithRsaSignature())
-        signature = data.getSignature()
-
-        # Set the public key.
-        publicKeyDigest = bytearray(
-          SHA256.new(SELFREG_PUBLIC_KEY_DER).digest())
-        # Set the KEY_LOCATOR_DIGEST.
-        signature.getKeyLocator().setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
-        signature.getKeyLocator().setKeyData(Blob(publicKeyDigest, False))
-
-        # Sign the fields.
-        encoding = data.wireEncode(wireFormat)
-        # Convert the DER bytearray to a str for importKey.
-        privateKey = RSA.importKey(
-          "".join(map(chr, SELFREG_PRIVATE_KEY_DER)))
-        signatureStr = PKCS1_v1_5.new(privateKey).sign(
-          SHA256.new(encoding.toSignedBuffer()))
-        # Convert the string to a Blob.
-        signature.setSignature(Blob(bytearray(signatureStr), False))
-
     class _PendingInterest(object):
         """
         _PendingInterest is a private class for the members of the 
@@ -616,7 +582,7 @@ class Node(object):
 
             # Get the digest of the public key.
             digest = bytearray(
-              SHA256.new(ndndIdData.getContent().toBuffer()).digest())
+              hashlib.sha256(ndndIdData.getContent().toBuffer()).digest())
 
             # Set the _ndndId and continue.
             # TODO: If there are multiple connected hubs, the NDN ID is really 
