@@ -74,25 +74,29 @@ class SignedBlob(Blob):
         """
         return self._signedArray
 
-    def _toSignedBufferFromMemoryViewWrapper(self):
+    def toSignedBuffer(self):
         """
-        This is an internal function (which is only needed by Python versions
-        before 3.3) to check if signedBuf() would return a _memoryviewWrapper and
-        to return its internal memoryview instead, so that it implements
-        the buffer protocol (but doesn't have int elements).  However, if
-        this is a Python version (3.3 or greater) whose memoryview already
-        uses int, then toSignedBuffer() is the same as signedBuf().
+        Return an array of the signed portion which implements the buffer 
+        protocol (but for Python versions before 3.3 it doesn't have int elements).
+        This method is only needed by Python versions before 3.3 to check if 
+        signedBuf() would return a _memoryviewWrapper and to return its internal 
+        memoryview instead.  However, if this is a Python version 
+        (3.3 or greater) whose memoryview already uses int, then 
+        toSignedBuffer() is the same as signedBuf().
         """
-        if self._signedArray == None:
-            return None
-        elif type(self._signedArray) is _memoryviewWrapper:
-            # Return the underlying memoryview.
-            return self._signedArray._view
+        if _memoryviewUsesInt:
+            # We can use the normal signedBuf().
+            return self.signedBuf()
         else:
-            return self._signedArray
-    
-    if type(memoryview(bytearray(1))[0]) is int:
-        # We can use the normal signedBuf().
-        toSignedBuffer = signedBuf
-    else:
-        toSignedBuffer = _toSignedBufferFromMemoryViewWrapper
+            if self._signedArray == None:
+                return None
+            elif type(self._signedArray) is _memoryviewWrapper:
+                # Return the underlying memoryview (which doesn't have int 
+                #   elements) but implements the buffer protocol.
+                return self._signedArray._view
+            else:
+                return self._signedArray
+
+# Set this up once at the module level for the constructor to use.
+# Expect that this is True for Python version 3.3 or later.
+_memoryviewUsesInt = type(memoryview(bytearray(1))[0]) is int
