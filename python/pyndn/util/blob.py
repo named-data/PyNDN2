@@ -92,29 +92,29 @@ class Blob(object):
             return None
         else:
             return self._array
-    
-    def _toBufferFromMemoryViewWrapper(self):
+        
+    def toBuffer(self):
         """
-        This is an internal function (which is only needed by Python versions
-        before 3.3) to check if buf() would return a _memoryviewWrapper and
-        to return its internal memoryview instead, so that it implements
-        the buffer protocol (but doesn't have int elements).  However, if
-        this is a Python version (3.3 or greater) whose memoryview already
-        uses int, then toBuffer() is the same as buf().
+        Return an array which implements the buffer protocol (but for Python
+        versions before 3.3 it doesn't have int elements).
+        This method is only needed by Python versions before 3.3 to check if 
+        buf() would return a _memoryviewWrapper and to return its internal 
+        memoryview instead.  However, if this is a Python version 
+        (3.3 or greater) whose memoryview already uses int, then toBuffer() is 
+        the same as buf().
         """
-        if self._array == None:
-            return None
-        elif type(self._array) is _memoryviewWrapper:
-            # Return the underlying memoryview.
-            return self._array._view
+        if _memoryviewUsesInt:
+            # We can use the normal buf().
+            return self.buf()
         else:
-            return self._array
-    
-    if type(memoryview(bytearray(1))[0]) is int:
-        # We can use the normal buf().
-        toBuffer = buf
-    else:
-        toBuffer = _toBufferFromMemoryViewWrapper
+            if self._array == None:
+                return None
+            elif type(self._array) is _memoryviewWrapper:
+                # Return the underlying memoryview (which doesn't have int 
+                #   elements) but implements the buffer protocol.
+                return self._array._view
+            else:
+                return self._array
 
     def isNull(self):
         """
@@ -147,7 +147,7 @@ class Blob(object):
         
         return Common.getBytesIOString(result)
 
-# Set this up once at the class level for the constructor to use.
+# Set this up once at the module level for the constructor to use.
 # Expect that this is True for Python version 3.3 or later.
 _memoryviewUsesInt = type(memoryview(bytearray(1))[0]) is int
 
