@@ -1,12 +1,19 @@
+Changes since PyNDN v2.0alpha1 (2014-02-24)
+
+Changes
+* In Blob, added method toRawStr and static method fromRawStr.
+
 PyNDN v2.0alpha1 (2014-02-21)
+-----------------------------
 
 This is the Python 2.0 initial release, with support for the NDN-TLV wire format in pure Python.
 
 Support to be added soon:
 * Security library support for verifying a data packet signature.
 * Performance improvements for Python versions before 3.3.
-# Support for Python asyncio for the main process loop.
+* Support for Python asyncio for the main process loop.
 * UDP transport.
 * Name utility methods like appendVersion.
 * Name Python methods like __lt__.
 * Package install support.
+* Instructions for building the Sphinx documentation.

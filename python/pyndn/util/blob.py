@@ -20,7 +20,8 @@ class Blob(object):
     Create a new Blob which holds an immutable array of bytes.
     
     :param array: (optional) The array of bytes, or None.  If array is str,
-      then encode using UTF-8.
+      then encode using UTF-8.  If you just want a Blob from a raw str
+      without encoding, use Blob.fromRawStr.
     :type array: Blob, bytearray, memoryview or other array of int
     :param copy: (optional) If true, copy the contents of array into a new
       bytearray.  If false, just use the existing array without copying.
@@ -84,8 +85,7 @@ class Blob(object):
         need an object which implements the buffer protocol (e.g. for writing
         to a socket) then call toBuffer() instead.
         
-        :return: An array which you should not modify, or None if the pointer 
-          is None.
+        :return: An array which you should not modify, or None if isNull().
         :rtype: An array type with int elements, such as bytearray.
         """
         if self._array == None:
@@ -102,6 +102,10 @@ class Blob(object):
         memoryview instead.  However, if this is a Python version 
         (3.3 or greater) whose memoryview already uses int, then toBuffer() is 
         the same as buf().
+        
+        :return: The array which implements the buffer protocol, or None if 
+          isNull().
+        :rtype: an array which implements the buffer protocol
         """
         if _memoryviewUsesInt:
             # We can use the normal buf().
@@ -121,10 +125,27 @@ class Blob(object):
         Return the bytes of the byte array as a raw str of the same length.
         This does not do any character encoding such as UTF-8.
         
-        :return: The array as a str.
+        :return: The array as a str, or None if isNull().
         :rtype: str
         """
-        return "".join(map(chr, self.buf()))
+        if self._array == None:
+            return None
+        else:
+            return "".join(map(chr, self.buf()))
+
+    @staticmethod
+    def fromRawStr(rawStr):
+        """
+        Convert rawStr to a Blob.  This does not do any character decoding 
+        such as UTF-8.  If you want decode the string such as UTF-8, then
+        just pass the string to the Blob constructor.
+        
+        :param rawStr: The raw string to convert to a Blob.
+        :type rawStr: str
+        :return: A new Blob created from rawStr.
+        :rtype: Blob
+        """
+        return Blob(bytearray(map(ord, rawStr)), False)
 
     def isNull(self):
         """
