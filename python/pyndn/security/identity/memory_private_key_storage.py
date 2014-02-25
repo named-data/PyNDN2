@@ -10,6 +10,7 @@ This module defines the MemoryPrivateKeyStorage class which extends
 PrivateKeyStorage to implement private key storage in memory.
 """
 
+import sys
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
@@ -70,8 +71,8 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         Fetch the private key for keyName and sign the data, returning a 
         signature Blob.
 
-        :param data: Pointer the input byte buffer to sign.
-        :type data: An array type with int elements
+        :param data: The input byte buffer to sign.
+        :type data: an array which implements the buffer protocol
         :param keyName: The name of the signing key.
         :type keyName: Name
         :param digestAlgorithm: (optional) the digest algorithm. If omitted,
@@ -92,6 +93,9 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         privateKey = self._privateKeyStore[keyUri]
         
         # Sign the hash of the data.
+        if sys.version_info[0] == 2:
+            # In Python 2.x, we need a str.  Use Blob to convert data.
+            data = Blob(data, False).toRawStr()
         signature = PKCS1_v1_5.new(privateKey).sign(SHA256.new(data))
         # Convert the string to a Blob.
         return Blob(bytearray(signature), False)
