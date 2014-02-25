@@ -198,8 +198,8 @@ class TlvEncoder(object):
         
         :param type: The type of the TLV.
         :type type: int
-        :param value: The byte array with the bytes of the blob.  If value is
-          None, then just write the type and length 0.
+        :param value: If None or zero length do nothing, otherwise the byte 
+          array with the bytes of the blob.
         :type value: bytearray or memoryview
         """
         if value != None and len(value) > 0:
