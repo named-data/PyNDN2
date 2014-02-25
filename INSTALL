@@ -21,6 +21,16 @@ In a terminal, enter:
 sudo easy_install pip
 sudo pip install pycrypto
 
+* Ubuntu 12.04 (64 bit)
+Need to build/install the latest PyCrypto. In a terminal, enter:
+cd ~
+sudo apt-get install git
+git clone https://github.com/dlitz/pycrypto.git
+cd pycrypto
+sudo apt-get install python-dev
+python setup.py build
+sudo python setup.py install
+
 * Ubuntu 13.04 (64 bit)
 (PyCrypto is already installed.)
 
