@@ -231,15 +231,10 @@ class Node(object):
                   entry.getPrefix(), interest, self._transport, 
                   entry.getRegisteredPrefixId())
         elif data != None:
-            iPendingInterest = self._getEntryIndexForExpressedInterest(
+            pendingInterests = self._extractEntriesForExpressedInterest(
               data.getName())
-            if iPendingInterest >= 0:
-                # Copy pointers to the needed objects and remove the PIT entry 
-                #   before the calling the callback.
-                onData = self._pendingInterestTable[iPendingInterest].getOnData()
-                interest = self._pendingInterestTable[iPendingInterest].getInterest()
-                self._pendingInterestTable.pop(iPendingInterest)
-                onData(interest, data)
+            for pendingInterest in pendingInterests:
+                pendingInterest.getOnData()(pendingInterest.getInterest(), data)
         
     def shutdown(self):
         """
@@ -247,30 +242,30 @@ class Node(object):
         """
         self._transport.close()
     
-    def _getEntryIndexForExpressedInterest(self, name):
+    def _extractEntriesForExpressedInterest(self, name):
         """
-        Find the entry from the _pendingInterestTable where the name conforms to
-        the entry's interest selectors, and the entry interest name is the 
-        longest that matches name.
+        Find all entries from the _pendingInterestTable where the name conforms 
+        to the entry's interest selectors, remove the entries from the table
+        and return them.
         
         :param name: The name to find the interest for (from the incoming data 
           packet).
         :type name: Name
-        :return: The index in _pendingInterestTable of the pit entry, or -1 if 
-          not found.
-        :rtype: int
+        :return: The matching entries from the _pendingInterestTable, or []
+          if none are found.
+        :rtype: array of _PendingInterest
         """
-        iResult = -1
+        result = []
     
-        for i in range(len(self._pendingInterestTable)):
+        # Go backwards through the list so we can erase entries.
+        i = len(self._pendingInterestTable) - 1
+        while i >= 0:
             if self._pendingInterestTable[i].getInterest().matchesName(name):
-                if (iResult < 0 or
-                    self._pendingInterestTable[i].getInterest().getName().size() > 
-                    self._pendingInterestTable[iResult].getInterest().getName().size()):
-                    # Update to the longer match.
-                    iResult = i
+                result.append(self._pendingInterestTable[i])
+                self._pendingInterestTable.pop(i)
+            i -= 1
     
-        return iResult
+        return result
     
     def _getEntryForRegisteredPrefix(self, name):
         """
