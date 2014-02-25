@@ -128,7 +128,7 @@ class TlvDecoder(object):
           readNestedTlvsStart.
         :type endOffset: int
         :raises: ValueError if the TLV length does not equal the total length of
-          the nested TLVs
+          the nested TLVs.
         """
         # We expect _offset to be endOffset, so check this first.
         if self._offset == endOffset:
@@ -186,7 +186,7 @@ class TlvDecoder(object):
         :return: The integer.
         :rtype: int (or long if a large integer on a 32-bit system)
         :raises: ValueError if length is an invalid length for a TLV 
-          .nonNegativeInteger
+          non-negative integer.
         """
         if length == 1:
             result = self._input[self._offset]
@@ -308,9 +308,10 @@ class TlvDecoder(object):
         :param endOffset: The offset of the end of the parent TLV, returned by 
           readNestedTlvsStart.
         :type endOffset: int
-        :return: The bytes in the value as a slice on the byte array.  This is
-          not necessarily a copy of the bytes in the input buffer.  If you need
-          a copy, then you must make a copy of the return value.
+        :return: The bytes in the value as a slice on the byte array or None if 
+          the next TLV doesn't have the expected type.  This is not necessarily 
+          a copy of the bytes in the input buffer.  If you need a copy, then you
+          must make a copy of the return value.
         :rtype: memoryview or equivalent
         """
         if self.peekType(expectedType, endOffset):
@@ -344,9 +345,9 @@ class TlvDecoder(object):
     
     def getOffset(self):
         """
-        Get the offset into the input buffer.
+        Get the offset into the input buffer, used for the next read.
         
-        :return: The offset
+        :return: The offset.
         :rtype: int
         """
         return self._offset
