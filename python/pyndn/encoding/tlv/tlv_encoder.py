@@ -146,7 +146,8 @@ class TlvEncoder(object):
  
         :param type: The type of the TLV.
         :type type: int
-        :param value: Negative for none, otherwise the integer to encode.
+        :param value: If negative or None do nothing, otherwise the integer to 
+          encode.
         :type value: int
         """
         if value != None and value >= 0:
@@ -159,7 +160,7 @@ class TlvEncoder(object):
  
         :param type: The type of the TLV.
         :type type: int
-        :param value: Negative for none, otherwise otherwise use 
+        :param value: If negative or None do nothing, otherwise use 
           int(round(value)).
         :type value: float
         """
