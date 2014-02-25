@@ -116,6 +116,16 @@ class Blob(object):
             else:
                 return self._array
 
+    def toRawStr(self):
+        """
+        Return the bytes of the byte array as a raw str of the same length.
+        This does not do any character encoding such as UTF-8.
+        
+        :return: The array as a str.
+        :rtype: str
+        """
+        return "".join(map(chr, self.buf()))
+
     def isNull(self):
         """
         Return True if the array is None, otherwise False.
