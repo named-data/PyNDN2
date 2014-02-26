@@ -50,7 +50,7 @@ class Interest(object):
 
     def getName(self):
         """
-        Return the interest Name.
+        Get the interest Name.
         
         :return: The name.  The name size() may be 0 if not specified.
         :rtype: Name
@@ -77,7 +77,7 @@ class Interest(object):
     
     def getKeyLocator(self):
         """
-        Return the interest key locator.
+        Get the interest key locator.
         
         :return: The key locator. If getType() is None, then the key locator
           is not specified.
@@ -87,9 +87,9 @@ class Interest(object):
     
     def getExclude(self):
         """
-        Return the exclude object.
+        Get the exclude object.
         
-        :return: The key exclude object. If the exclude size() is zero, then
+        :return: The exclude object. If the exclude size() is zero, then
           the exclude is not specified.
         :rtype: Exclude
         """
@@ -133,7 +133,7 @@ class Interest(object):
         """
         Get the interest scope.
         
-        :return: The scope, or None for none.
+        :return: The scope, or None if not specified.
         :rtype: int
         """
         return self._scope
@@ -142,7 +142,7 @@ class Interest(object):
         """
         Get the interest lifetime.
         
-        :return: The interest lifetime in milliseconds, or None for none.
+        :return: The interest lifetime in milliseconds, or None if not specified.
         :rtype: float
         """
         return self._interestLifetimeMilliseconds
