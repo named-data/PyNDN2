@@ -282,6 +282,8 @@ class Tlv0_1a2WireFormat(WireFormat):
 
     @staticmethod
     def _decodeName(name, decoder):
+        name.clear()
+        
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
         while decoder.getOffset() < endOffset:
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
