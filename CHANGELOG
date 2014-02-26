@@ -3,6 +3,9 @@ Changes since PyNDN v2.0alpha1 (2014-02-24)
 Changes
 * In Blob, added method toRawStr and static method fromRawStr.
 
+Bug fixes
+* Fix Interest.setExclude to properly copy the Exclude object.
+
 PyNDN v2.0alpha1 (2014-02-21)
 -----------------------------
 

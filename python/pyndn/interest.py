@@ -183,7 +183,7 @@ class Interest(object):
         :type exclude: Exclude
         """
         self._exclude.set(
-          exclude if type(exclude) is Exclude(exclude) else Exclude())
+          Exclude(exclude) if type(exclude) is Exclude else Exclude())
         self._changeCount += 1
     
     def setChildSelector(self, childSelector):
