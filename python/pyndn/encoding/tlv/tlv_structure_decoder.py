@@ -139,7 +139,7 @@ class TlvStructureDecoder(object):
                  "Cannot store more header bytes than the size of headerBuffer")
                         self._headerBuffer[
                           self._headerLength:self._headerLength + nRemainingBytes] = \
-                          input[self._offset:,self._offset + nRemainingBytes]
+                          input[self._offset:self._offset + nRemainingBytes]
                         self._offset += nRemainingBytes
                         self._headerLength += nRemainingBytes
 
@@ -158,9 +158,9 @@ class TlvStructureDecoder(object):
                     self._offset += nNeededBytes
 
                     # Use a local decoder just for the headerBuffer.
-                    bufferDecoder = ndn_TlvDecoder(self._headerBuffer)
+                    bufferDecoder = TlvDecoder(self._headerBuffer)
                     # Replace nBytesToRead with the length of the value.
-                    self._nBytesToRead = bufferDecoder/readExtendedVarNumber(
+                    self._nBytesToRead = bufferDecoder.readExtendedVarNumber(
                       self._firstOctet)
 
                 if self._nBytesToRead == 0:
