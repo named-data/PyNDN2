@@ -48,8 +48,8 @@ class Data(object):
         :param wireFormat: (optional) A WireFormat object used to encode this 
            Data object. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat.
-        :return: The encoded buffer.
-        :rtype: Blob
+        :return: The encoded buffer in a SignedBlob object.
+        :rtype: SignedBlob
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
