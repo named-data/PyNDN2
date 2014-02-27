@@ -99,7 +99,7 @@ class KeyLocator(object):
         Set the key data to the given value.  This is the digest bytes if 
         getType() is KeyLocatorType.KEY_LOCATOR_DIGEST.
         
-        :param keyData: The array with the content bytes. If keyData is not a 
+        :param keyData: The array with the key data bytes. If keyData is not a 
           Blob, then create a new Blob to copy the bytes (otherwise 
           take another pointer to the same Blob).
         :type keyData: A Blob or an array type with int elements 
