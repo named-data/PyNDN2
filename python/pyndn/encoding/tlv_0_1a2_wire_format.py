@@ -79,7 +79,7 @@ class Tlv0_1a2WireFormat(WireFormat):
 
         encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
         
-        return Blob(encoder.getOutput())
+        return Blob(encoder.getOutput(), False)
 
     def decodeInterest(self, interest, input):
         """
@@ -144,7 +144,7 @@ class Tlv0_1a2WireFormat(WireFormat):
                                     signedPortionBeginOffsetFromBack)
         signedPortionEndOffset = len(encoder) - signedPortionEndOffsetFromBack
         
-        return (Blob(encoder.getOutput()), signedPortionBeginOffset, 
+        return (Blob(encoder.getOutput(), False), signedPortionBeginOffset, 
                 signedPortionEndOffset)
         
     def decodeData(self, data, input):
