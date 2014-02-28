@@ -7,14 +7,16 @@
 
 """
 This module defines the ElementReader class which lets you call onReceivedData 
-multiple times which uses a TlvStructureDecoder or other wire format decoder as 
-needed to detect the end of a binary TLV or other type of element, and calls 
+multiple times which uses a TlvStructureDecoder or BinaryXmlStructureDecoder as 
+needed to detect the end of a TLV or Binary XML element, and calls 
 elementListener.onReceivedElement(element) with the element. 
 This handles the case where a single call to onReceivedData may contain multiple
 elements.
 """
 
 from pyndn.util import Blob
+from pyndn.encoding.binary_xml_structure_decoder import BinaryXmlStructureDecoder
+from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_structure_decoder import TlvStructureDecoder
 from pyndn.util.dynamic_byte_array import DynamicByteArray
 
@@ -25,9 +27,11 @@ class ElementReader(object):
     """
     def __init__(self, elementListener):
         self._elementListener = elementListener
+        self._binaryXmlStructureDecoder = BinaryXmlStructureDecoder()
         self._tlvStructureDecoder = TlvStructureDecoder()
         self._usePartialData = False
         self._partialData = DynamicByteArray(1000)
+        self._useTlv = None
 
     def onReceivedData(self, data):
         """
@@ -46,15 +50,34 @@ class ElementReader(object):
         # Process multiple objects in the data.
         while True:
             if not self._usePartialData:
-                # This is the beginning of an element.
+                # This is the beginning of an element. Check whether it is 
+                #  Binary XML or TLV.
                 if len(data) <= 0:
                     # Wait for more data.
                     return
 
-            # Scan the input to check if a whole TLV element has been read.
-            self._tlvStructureDecoder.seek(0)        
-            if self._tlvStructureDecoder.findElementEnd(data):
+                # The type codes for TLV Interest and Data packets are chosen to not
+                #   conflict with the first byte of a binary XML packet, so we can
+                #   just look at the first byte.
+                if data[0] == Tlv.Interest or data[0] == Tlv.Data:
+                    self._useTlv = True
+                else:
+                    # Binary XML.
+                    self._useTlv = False
+
+            if self._useTlv:
+                # Scan the input to check if a whole TLV element has been read.
+                self._tlvStructureDecoder.seek(0)    
+                gotElementEnd = self._tlvStructureDecoder.findElementEnd(data)
                 offset = self._tlvStructureDecoder.getOffset()
+            else:
+                # Scan the input to check if a whole Binary XML element has been 
+                #   read.
+                self._binaryXmlStructureDecoder.seek(0)    
+                gotElementEnd = self._binaryXmlStructureDecoder.findElementEnd(data)
+                offset = self._binaryXmlStructureDecoder.getOffset()
+            
+            if gotElementEnd:
                 # Got the remainder of an element. Report to the caller.
                 if self._usePartialData:
                     # We have partial data from a previous call, so append this 
@@ -79,6 +102,7 @@ class ElementReader(object):
 
                 # Need to read a new object.
                 data = data[offset:]
+                self._binaryXmlStructureDecoder = BinaryXmlStructureDecoder()
                 self._tlvStructureDecoder = TlvStructureDecoder()
                 if len(data) == 0:
                     # No more data in the packet.
