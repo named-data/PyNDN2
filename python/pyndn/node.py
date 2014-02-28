@@ -212,6 +212,13 @@ class Node(object):
         :param element: The bytes of the incoming element.
         :type element: An array type with int elements
         """
+        # The type codes for TLV Interest and Data packets are chosen to not
+        #   conflict with the first byte of a binary XML packet, so we canjust 
+        #   look at the first byte.
+        if not (element[0] == Tlv.Interest or element[0] == Tlv.Data):
+            # Ignore non-TLV elements.
+            return
+
         # First, decode as Interest or Data.
         interest = None
         data = None
