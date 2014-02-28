@@ -4,13 +4,14 @@
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # See COPYING for copyright and distribution information.
 
-__all__ = ['tcp_transport', 'transport']
+__all__ = ['tcp_transport', 'transport', 'udp_transport']
 
 import sys as _sys
 
 try:
     from pyndn.transport.tcp_transport import *
     from pyndn.transport.transport import *
+    from pyndn.transport.udp_transport import *
 except ImportError:
     del _sys.modules[__name__]
     raise
