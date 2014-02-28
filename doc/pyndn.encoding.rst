@@ -9,6 +9,22 @@ encoding Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`binary_xml_decoder` Module
+--------------------------------
+
+.. automodule:: pyndn.encoding.binary_xml_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`binary_xml_structure_decoder` Module
+------------------------------------------
+
+.. automodule:: pyndn.encoding.binary_xml_structure_decoder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`element_reader` Module
 ----------------------------
 
