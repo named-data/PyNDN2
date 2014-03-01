@@ -28,7 +28,7 @@ class MemoryIdentityStorage(IdentityStorage):
         #  (KeyType keyType, Blob keyDer).
         self._keyStore = {}
         # The key is the key is the certificateName.toUri(). The value is the 
-        #   certificate DER blob.
+        #   public key DER blob.
         self._certificateStore = {}
 
     def doesIdentityExist(self, identityName):  
