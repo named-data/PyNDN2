@@ -15,6 +15,7 @@ from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
 from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security.policy import SelfVerifyPolicyManager
 from pyndn.util import Blob
 
 DEFAULT_PUBLIC_KEY_DER = bytearray([
@@ -134,6 +135,16 @@ def dumpData(data):
         else:
             dump("signature.keyLocator: <none>")
 
+def makeOnVerified(prefix):
+    def onVerified(data):
+        dump(prefix, "signature verification: VERIFIED")
+    return onVerified
+
+def makeOnVerifyFailed(prefix):
+    def onVerifyFailed(data):
+        dump(prefix, "signature verification: FAILED")
+    return onVerifyFailed
+
 def main():
     data = Data()
     data.wireDecode(TlvData)
@@ -157,8 +168,8 @@ def main():
     
     identityStorage = MemoryIdentityStorage()
     privateKeyStorage = MemoryPrivateKeyStorage()
-    identityManager = IdentityManager(identityStorage, privateKeyStorage)
-    keyChain = KeyChain(identityManager, None)
+    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
+                        SelfVerifyPolicyManager(identityStorage))
     
     # Initialize the storage.
     keyName = Name("/testname/DSK-123")
@@ -173,7 +184,7 @@ def main():
     dump("Freshly-signed Data:")
     dumpData(freshData)
     
-    # TODO: Use verifyData.
-    #keyChain.verifyData(freshData, onVerified, onVerifyFailed)
+    keyChain.verifyData(freshData, makeOnVerified("Freshly-signed Data"), 
+                        makeOnVerifyFailed("Freshly-signed Data"))
     
 main()

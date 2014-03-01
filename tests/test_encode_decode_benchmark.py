@@ -19,6 +19,7 @@ from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
 from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security.policy import SelfVerifyPolicyManager
 
 def getNowSeconds():
     return time.clock()
@@ -107,8 +108,8 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
     # Initialize the private key storage in case useCrypto is true.
     identityStorage = MemoryIdentityStorage()
     privateKeyStorage = MemoryPrivateKeyStorage()
-    identityManager = IdentityManager(identityStorage, privateKeyStorage)
-    keyChain = KeyChain(identityManager, None)
+    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
+                        SelfVerifyPolicyManager(identityStorage))
     keyName = Name("/testname/DSK-123")
     certificateName = keyName.getSubName(0, keyName.size() - 1).append(
       "KEY").append(keyName[-1]).append("ID-CERT").append("0")
@@ -146,33 +147,12 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
         
     return (finish - start, encoding)
 
-# Depending on the Python version, PyCrypto uses str or bytes.
-PyCryptoUsesStr = type(SHA256.new().digest()) is str
-def verifyData(data, publicKeyDer):
-    # Set the data packet's default wire encoding if it is not already there.
-    if data.getDefaultWireEncoding().isNull():
-      data.wireEncode()
+def onVerified(data):
+    # Do nothing since we expect it to verify.
+    pass
 
-    if not type(data.getSignature()) is Sha256WithRsaSignature:
-      raise RuntimeError("signature is not Sha256WithRsaSignature.")
-    signatureInfo = data.getSignature()
-
-    # Get the public key.
-    if not type(publicKeyDer) is str:
-        # PyCrypto in Python 2 requires a str.
-        publicKeyDer = "".join(map(chr, publicKeyDer))
-    publicKey = RSA.importKey(publicKeyDer)
-    # Get the bytes to verify.
-    signedPortion = data.getDefaultWireEncoding().toSignedBuffer()
-    # Convert the signature bits to a raw string or bytes as required.
-    if PyCryptoUsesStr:
-        signatureBits = "".join(map(chr, signatureInfo.getSignature().buf()))
-    else:
-        signatureBits = bytes(signatureInfo.getSignature().buf())
-        
-    # Hash and verify.
-    return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion), 
-                                            signatureBits)
+def onVerifyFailed(data):
+    print("Signature verification: FAILED")
 
 def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
     """
@@ -185,14 +165,23 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
     :param encoding: The wire encoding to decode.
     :type encoding: Blob
     """
+    # Initialize the private key storage in case useCrypto is true.
+    identityStorage = MemoryIdentityStorage()
+    privateKeyStorage = MemoryPrivateKeyStorage()
+    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage), 
+                        SelfVerifyPolicyManager(identityStorage))
+    keyName = Name("/testname/DSK-123")
+    certificateName = keyName.getSubName(0, keyName.size() - 1).append(
+      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
+    identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_PUBLIC_KEY_DER))
+
     start = getNowSeconds()
     for i in range(nIterations):
         data = Data()
         data.wireDecode(encoding)
         
         if useCrypto:
-            if not verifyData(data, DEFAULT_PUBLIC_KEY_DER):
-                raise RuntimeError("Signature verification: FAILED")
+            keyChain.verifyData(data, onVerified, onVerifyFailed)
 
     finish = getNowSeconds()
  
