@@ -1,4 +1,20 @@
+Interim changes since PyNDN v2.0alpha2 (2014-02-28)
+---------------------------------------------------
+
+Changes
+* Implemented SelfVerifyPolicyManager for use with KeyChain.verifyData, and use
+  it in the sample test_encode_decode_data.
+
+Support to be added soon:
+* Name utility methods like appendVersion.
+* Name Python methods like __lt__.
+* Performance improvements for Python versions before 3.3.
+* Support for Python asyncio for the main process loop.
+* Package install support.
+* Instructions for building the Sphinx documentation.
+
 PyNDN v2.0alpha2 (2014-02-27)
+-----------------------------
 
 Changes
 * Added UdpTransport in module pyndn.transport to support a UDP connection.
@@ -6,15 +22,6 @@ Changes
 
 Bug fixes
 * Fix Interest.setExclude to properly copy the Exclude object.
-
-Support to be added soon:
-* Security library support for verifying a data packet signature.
-* Name utility methods like appendVersion.
-* Name Python methods like __lt__.
-* Performance improvements for Python versions before 3.3.
-* Support for Python asyncio for the main process loop.
-* Package install support.
-* Instructions for building the Sphinx documentation.
 
 PyNDN v2.0alpha1 (2014-02-21)
 -----------------------------
