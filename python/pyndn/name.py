@@ -80,6 +80,120 @@ class Name(object):
             else:
                 Name.toEscapedString(self._value.buf(), result)
 
+        def toNumber(self):
+            """
+            Interpret this name component as a network-ordered number and return an integer.
+            
+            :return: The integer number.
+            :rtype: int
+            """
+            result = 0
+            for i in range(self._value.size()):
+                result *= 256
+                result += self._value.buf()[i]
+            return result
+        
+        def toNumberWithMarker(self, marker):
+            """
+            Interpret this name component as a network-ordered number with a 
+            marker and return an integer.
+            
+            :param marker: The required first byte of the component.
+            :type marker: int
+            :return: The integer number.
+            :rtype: int
+            :raises: RuntimeError If the first byte of the component does not 
+              equal the marker.
+            """
+            if self._value.size() <= 0 or self._value.buf()[0] != marker:
+                raise RuntimeError(
+                       "Name component does not begin with the expected marker")
+
+            result = 0
+            for i in range(1, self._value.size()):
+                result *= 256
+                result += self._value.buf()[i]
+            return result
+        
+        def toSegment(self):
+            """
+            Interpret this name component as a segment number according to NDN 
+            name conventions (a network-ordered number where the first byte is 
+            the marker 0x00).
+            
+            :return: The integer segment number.
+            :rtype: int
+            :raises: RuntimeError If the first byte of the component is not the 
+              expected marker.
+            """
+            return self.toNumberWithMarker(0x00)
+        
+        def toVersion(self):
+            """
+            Interpret this name component as a version number according to NDN 
+            name conventions (a network-ordered number where the first byte is 
+            the marker 0xFD).  Note that this returns the exact number from the 
+            component without converting it to a time representation.
+            
+            :return: The integer version number.
+            :rtype: int
+            :raises: RuntimeError If the first byte of the component is not the 
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFD);
+        
+        @staticmethod
+        def fromNumber(number):
+            """
+            Create a component whose value is the network-ordered encoding of 
+            the number. Note: if the number is zero, the result is empty.
+            
+            :param number: The number to be encoded.
+            :type number: int
+            :return: The component value.
+            :rtype: Name.Component
+            """
+            value = []
+
+            # First encode in little endian.
+            while number != 0:
+                value.append(number & 0xff)
+                number >>= 8
+                
+            # Make it big endian.
+            value.reverse()
+            return Name.Component(Blob(value, False))
+        
+        @staticmethod
+        def fromNumberWithMarker(number, marker):
+            """
+            Create a component whose value is the marker appended with the 
+            network-ordered encoding of the number. Note: if the number is zero, 
+            no bytes are used for the number - the result will have only the 
+            marker.
+
+            :param number: The number to be encoded.
+            :type number: int
+            :param marker: The marker to use as the first byte of the component.
+            :type marker: int
+            :return: The component value.
+            :rtype: Name.Component
+            """
+            value = []
+
+            # First encode in little endian.
+            while number != 0:
+                value.append(number & 0xff)
+                number >>= 8
+                
+            # Make it big endian.
+            value.reverse()
+            
+            # Prepend the leading marker.
+            value.insert(0, marker)
+            
+            return Name.Component(Blob(value, False))
+
     def set(self, uri):
         """
         Parse the uri according to the NDN URI Scheme and set the name with 
@@ -233,6 +347,29 @@ class Name(object):
             component.toEscapedString(result)
   
         return Common.getBytesIOString(result)
+        
+        
+    def appendSegment(self, segment):
+        """
+        Append a component with the encoded segment number.
+        
+        :param segment: The segment number.
+        :type segment: int
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(segment, 0x00))
+    
+    def appendVersion(self, version):
+        """
+        Append a component with the encoded version number.
+        
+        :param version: The version number.
+        :type version: int
+        :return: This name so that you can chain calls to append.
+        :rtype: Name        
+        """
+        return self.append(Name.Component.fromNumberWithMarker(version, 0xFD))
         
     def match(self, name):
         """
