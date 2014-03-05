@@ -1,9 +1,10 @@
-Interim changes since PyNDN v2.0alpha2 (2014-02-28)
+Interim changes since PyNDN v2.0alpha2 (2014-03-05)
 ---------------------------------------------------
 
 Changes
 * Implemented SelfVerifyPolicyManager for use with KeyChain.verifyData, and use
   it in the sample test_encode_decode_data.
+* Performance improvements for Python versions before 3.3.
 
 Bug fixes
 * For TLV packets over UDP, ignore packets starting with 0x80.
@@ -11,7 +12,6 @@ Bug fixes
 Support to be added soon:
 * Name utility methods like appendVersion.
 * Name Python methods like __lt__.
-* Performance improvements for Python versions before 3.3.
 * Support for Python asyncio for the main process loop.
 * Package install support.
 * Instructions for building the Sphinx documentation.
