@@ -10,6 +10,8 @@ This module defines the DynamicByteArray class which holds a
 bytearray which can be expanded as needed.
 """
 
+from pyndn.util.blob import _memoryviewWrapper
+
 class DynamicByteArray(object):
     """
     Create a new DynamicByteArray with an initial bytearray.
@@ -55,7 +57,12 @@ class DynamicByteArray(object):
         :type offset: int
         """
         self.ensureLength(offset + len(value))
-        self._array[offset:offset + len(value)] = value
+        if type(value) is _memoryviewWrapper:
+            # Use the underlying memoryview directly.  (When we only support 
+            #   Python 3.3 or later, this check is not necessary.)
+            self._array[offset:offset + len(value._view)] = value._view
+        else:
+            self._array[offset:offset + len(value)] = value
 
     def ensureLengthFromBack(self, length):
         """
@@ -93,7 +100,12 @@ class DynamicByteArray(object):
         """
         self.ensureLengthFromBack(offsetFromBack)
         startIndex = len(self._array) - offsetFromBack
-        self._array[startIndex:startIndex + len(value)] = value
+        if type(value) is _memoryviewWrapper:
+            # Use the underlying memoryview directly.  (When we only support 
+            #   Python 3.3 or later, this check is not necessary.)
+            self._array[startIndex:startIndex + len(value._view)] = value._view
+        else:
+            self._array[startIndex:startIndex + len(value)] = value
         
     def getArray(self):
         """
