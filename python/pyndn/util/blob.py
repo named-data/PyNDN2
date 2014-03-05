@@ -48,7 +48,12 @@ class Blob(object):
             if copy:
                 # We are copying, so just make another bytearray.
                 # We always use a memoryview so that slicing is efficient.
-                self._array = memoryview(bytearray(array))
+                if type(array) is _memoryviewWrapper:
+                    # Use the underlying memoryview directly. (When we only 
+                    # support Python 3.3 or later, this check is not necessary.)
+                    self._array = memoryview(bytearray(array._view))
+                else:
+                    self._array = memoryview(bytearray(array))                    
             else:
                 if type(array) is bytearray:
                     # We always use a memoryview so that slicing is efficient.
