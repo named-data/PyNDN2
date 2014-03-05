@@ -164,7 +164,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         # Get the public key.
         if _PyCryptoUsesStr:
             # PyCrypto in Python 2 requires a str.
-            publicKeyDerBytes = "".join(map(chr, publicKeyDer.buf()))
+            publicKeyDerBytes = publicKeyDer.toRawStr()
         else:
             publicKeyDerBytes = publicKeyDer.toBuffer()
         publicKey = RSA.importKey(publicKeyDerBytes)
@@ -173,7 +173,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         signedPortion = data.getDefaultWireEncoding().toSignedBuffer()
         # Convert the signature bits to a raw string or bytes as required.
         if _PyCryptoUsesStr:
-            signatureBits = "".join(map(chr, signature.getSignature().buf()))
+            signatureBits = signature.getSignature().toRawStr()
         else:
             signatureBits = bytes(signature.getSignature().buf())
 
