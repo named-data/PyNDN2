@@ -23,7 +23,7 @@ class Counter(object):
         self._callbackCount += 1
         dump("Got data packet with name", data.getName().toUri())
         # Use join to convert each byte to chr.
-        dump("".join(map(chr, data.getContent().buf())))
+        dump(data.getContent().toRawStr())
 
     def onTimeout(self, interest):
         self._callbackCount += 1

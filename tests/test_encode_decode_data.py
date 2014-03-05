@@ -100,8 +100,7 @@ def dump(*list):
 def dumpData(data):
     dump("name:", data.getName().toUri())
     if data.getContent().size() > 0:
-        # Use join to convert each byte to chr.
-        dump("content (raw):", "".join(map(chr, data.getContent().buf())))
+        dump("content (raw):", data.getContent().toRawStr())
         dump("content (hex):", data.getContent().toHex())
     else:
         dump("content: <empty>")
