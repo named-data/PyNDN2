@@ -59,7 +59,8 @@ class ElementReader(object):
                 # The type codes for TLV Interest and Data packets are chosen to not
                 #   conflict with the first byte of a binary XML packet, so we can
                 #   just look at the first byte.
-                if data[0] == Tlv.Interest or data[0] == Tlv.Data:
+                if (data[0] == Tlv.Interest or data[0] == Tlv.Data or 
+                    data[0] == 0x80):
                     self._useTlv = True
                 else:
                     # Binary XML.
