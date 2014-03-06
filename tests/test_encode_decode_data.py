@@ -114,8 +114,7 @@ def dumpData(data):
          if data.getMetaInfo().getFreshnessPeriod() >= 0 else "<none>")
     dump("metaInfo.finalBlockID:",
          data.getMetaInfo().getFinalBlockID().toEscapedString()
-         if (not data.getMetaInfo().getFinalBlockID().getValue().isNull() and
-             data.getMetaInfo().getFinalBlockID().getValue().size() >= 0) 
+         if data.getMetaInfo().getFinalBlockID().getValue().size() > 0
          else "<none>")
     signature = data.getSignature()
     if type(signature) is Sha256WithRsaSignature:
