@@ -9,7 +9,6 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn import KeyLocatorType
 from pyndn.util import Blob
-from io import BytesIO
 
 TlvInterest = Blob(bytearray([
 0x05, 0x53, # Interest
