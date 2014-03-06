@@ -34,7 +34,7 @@ def main():
     
     counter = Counter()
 
-    name1 = Name("/ndn/ucla.edu"); 
+    name1 = Name("/"); 
     dump("Express name ", name1.toUri())
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 
