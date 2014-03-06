@@ -89,7 +89,7 @@ def main():
     dumpInterest(reDecodedInterest)
 
     freshInterest = Interest(Name("/ndn/abc"))
-    freshInterest.setMustBeFresh(True)
+    freshInterest.setMustBeFresh(False)
     dump(freshInterest.toUri())
     freshInterest.setMinSuffixComponents(4)
     freshInterest.setMaxSuffixComponents(6)
@@ -100,7 +100,6 @@ def main():
     freshInterest.getExclude().appendComponent(Name("abc")[0]).appendAny()
     freshInterest.setInterestLifetimeMilliseconds(30000)
     freshInterest.setChildSelector(1)
-    freshInterest.setMustBeFresh(True)
     freshInterest.setScope(2)
 
     reDecodedFreshInterest = Interest()
