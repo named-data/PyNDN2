@@ -39,7 +39,7 @@ class Interest(object):
             self._keyLocator = ChangeCounter(KeyLocator())
             self._exclude = ChangeCounter(Exclude())
             self._childSelector = None
-            self._mustBeFresh = False
+            self._mustBeFresh = True
 
             self._nonce = Blob()
             self._scope = None
