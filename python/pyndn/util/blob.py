@@ -161,6 +161,42 @@ class Blob(object):
         """
         return self._array == None
     
+    def equals(self, other):
+        """
+        Check if this is byte-wise equal to the other Blob.  If this and other
+        are both isNull(), then this returns True.
+
+        :param other: The other Blob to compare with.
+        :type other: Blob
+        :return: True if the blobs are equal, otherwise False.
+        :rtype: bool
+        """
+        if self._array == None and other._array == None:
+            return True
+        if self._array == None or other._array == None:
+            # One of the blobs is null and the other isn't.
+            return False
+        
+        if len(self._array) != len(other._array):
+            return False
+        
+        buffer1 = self.toBuffer()
+        buffer1Type = type(buffer1)
+        buffer2 = other.toBuffer()
+        buffer2Type = type(buffer2)
+        if  ((buffer1Type is memoryview or buffer1Type is bytearray) and
+             (buffer2Type is memoryview or buffer2Type is bytearray) or
+             buffer1Type is str and buffer2Type is str or
+             buffer1Type is list and buffer2Type is list):
+            # We can compare directly.
+            return buffer1 == buffer2
+        else:
+            # Manually compare int elements.
+            for i in range(len(self._array)):
+                if self._array[i] != other._array[i]:
+                    return False
+            return True
+
     def toHex(self):
         """
         Return the hex representation of the bytes in array.
