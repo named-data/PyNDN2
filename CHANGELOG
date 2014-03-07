@@ -8,6 +8,7 @@ Changes
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.
+* http://redmine.named-data.net/issues/1337 Fix FinalBlockID encoding.
 * For TLV packets over UDP, ignore packets starting with 0x80.
 
 Support to be added soon:
