@@ -153,6 +153,26 @@ class Name(object):
             """
             return self._value.equals(other._value)
         
+        def compare(self, other):
+            """
+            Compare this to the other Component using NDN canonical ordering.
+            
+            :param other: The other Component to compare with.
+            :type other: Name.Component
+            :return: 0 If they compare equal, -1 if self comes before other in 
+              the canonical ordering, or 1 if self comes after other in the 
+              canonical ordering.
+            :rtype: int
+            :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
+            """
+            if self._value.size() < other._value.size():
+                return -1
+            if self._value.size() > other._value.size():
+                return 1
+
+            # The components are equal length. Just do a byte compare.
+            return self._value.compare(other._value)
+        
         @staticmethod
         def fromNumber(number):
             """
@@ -212,6 +232,18 @@ class Name(object):
         
         def __ne__(self, other):
             return not self == other
+
+        def __le__(self, other):
+            return self.compare(other) <= 0
+
+        def __lt__(self, other):
+            return self.compare(other) < 0
+
+        def __ge__(self, other):
+            return self.compare(other) >= 0
+
+        def __gt__(self, other):
+            return self.compare(other) > 0
 
     def set(self, uri):
         """
@@ -409,6 +441,47 @@ class Name(object):
 
         return True
         
+    def compare(self, other):
+        """
+        Compare this to the other Name using NDN canonical ordering.  If the 
+        first components of each name are not equal, this returns -1 if the 
+        first comes before the second using the NDN canonical ordering for name 
+        components, or 1 if it comes after. If they are equal, this compares the 
+        second components of each name, etc.  If both names are the same up to
+        the size of the shorter name, this returns -1 if the first name is 
+        shorter than the second or 1 if it is longer.  For example, sorted 
+        gives: /a/b/d /a/b/cc /c /c/a /bb .  This is intuitive because all names
+        with the prefix /a are next to each other.  But it may be also be 
+        counter-intuitive because /c comes before /bb according to NDN canonical 
+        ordering since it is shorter.
+        
+        :param other: The other Name to compare with.
+        :type other: Name
+        :return: 0 If they compare equal, -1 if self comes before other in the 
+          canonical ordering, or 1 if self comes after other in the canonical 
+          ordering.
+        :rtype: int
+        :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
+        """
+        for i in range(min(len(self._components), len(other._components))):
+            comparison = self._components[i].compare(other._components[i])
+            if comparison == 0:
+                # The components at this index are equal, so check the next 
+                #   components.
+                continue
+
+            # Otherwise, the result is based on the components at this index.
+            return comparison
+
+        # The components up to min(self.size(), other.size()) are equal, so the 
+        #   shorter name is less.
+        if len(self._components) < len(other._components):
+            return -1
+        elif len(self._components) > len(other._components):
+            return 1
+        else:
+            return 0
+        
     def match(self, name):
         """
         Check if the N components of this name are the same as the first N 
@@ -545,6 +618,18 @@ class Name(object):
 
     def __ne__(self, other):
         return not self == other
+
+    def __le__(self, other):
+        return self.compare(other) <= 0
+
+    def __lt__(self, other):
+        return self.compare(other) < 0
+
+    def __ge__(self, other):
+        return self.compare(other) >= 0
+
+    def __gt__(self, other):
+        return self.compare(other) > 0
 
     @staticmethod
     def _unescape(escaped):

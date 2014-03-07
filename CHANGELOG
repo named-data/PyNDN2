@@ -5,7 +5,9 @@ Changes
 * Implemented SelfVerifyPolicyManager for use with KeyChain.verifyData, and use
   it in the sample test_encode_decode_data.
 * Performance improvements for Python versions before 3.3.
+* Name: Added methods appendSegment and appendVersion.
 * Name: Added method equals(name) and operators __eq__ and __ne__.
+* Name: Added method compare(other) and operators __lt__, etc.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.
@@ -13,8 +15,6 @@ Bug fixes
 * For TLV packets over UDP, ignore packets starting with 0x80.
 
 Support to be added soon:
-* Name utility methods like appendVersion.
-* Name Python methods like __lt__.
 * Support for Python asyncio for the main process loop.
 * Package install support.
 * Instructions for building the Sphinx documentation.
