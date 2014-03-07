@@ -163,8 +163,10 @@ class Blob(object):
     
     def equals(self, other):
         """
-        Check if this is byte-wise equal to the other Blob.  If this and other
-        are both isNull(), then this returns True.
+        Check if this is byte-wise equal to the other Blob. If this and other
+        are both isNull(), then this returns True. We compare explicitly 
+        because a Blob uses a memoryview which doesn't have built-in comparison
+        operators.
 
         :param other: The other Blob to compare with.
         :type other: Blob
@@ -180,22 +182,47 @@ class Blob(object):
         if len(self._array) != len(other._array):
             return False
         
-        buffer1 = self.toBuffer()
-        buffer1Type = type(buffer1)
-        buffer2 = other.toBuffer()
-        buffer2Type = type(buffer2)
-        if  ((buffer1Type is memoryview or buffer1Type is bytearray) and
-             (buffer2Type is memoryview or buffer2Type is bytearray) or
-             buffer1Type is str and buffer2Type is str or
-             buffer1Type is list and buffer2Type is list):
-            # We can compare directly.
-            return buffer1 == buffer2
-        else:
-            # Manually compare int elements.
-            for i in range(len(self._array)):
-                if self._array[i] != other._array[i]:
-                    return False
-            return True
+        # Manually compare int elements.
+        for i in range(len(self._array)):
+            if self._array[i] != other._array[i]:
+                return False
+        return True
+
+    def compare(self, other):
+        """
+        Compare this to the other Blob using byte-by-byte comparison. If this 
+        and other are both isNull(), then this returns 0. If this isNull() and
+        the other is not, return -1. If this is not isNull() and the other is,
+        return 1. We compare explicitly because a Blob uses a memoryview which 
+        doesn't have built-in comparison operators.
+
+        :param other: The other Blob to compare with.
+        :type other: Blob
+        :return: 0 If they compare equal, -1 if self is less than other, or 1 
+          if self is greater than other.  If both are equal up to the shortest,
+          then return -1 if self is shorter than other, or 1 of self is longer
+          than other.
+        :rtype: int
+        """
+        if self._array == None and other._array == None:
+            return 0
+        if self._array == None and other._array != None:
+            return -1
+        if self._array != None and other._array == None:
+            return 1
+
+        # Manually compare int elements.
+        for i in range(min(len(self._array), len(other._array))):
+            if self._array[i] < other._array[i]:
+                return -1
+            if self._array[i] > other._array[i]:
+                return 1
+        # They are equal up to the shorter.
+        if len(self._array) < len(other._array):
+            return -1
+        if len(self._array) > len(other._array):
+            return 1
+        return 0
 
     def toHex(self):
         """
