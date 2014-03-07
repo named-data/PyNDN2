@@ -142,6 +142,17 @@ class Name(object):
             """
             return self.toNumberWithMarker(0xFD);
         
+        def equals(self, other):
+            """
+            Check if this is the same component as other.
+            
+            :param other: The other Component to compare with.
+            :type other: Name.Component
+            :return: True if the components are equal, otherwise False.
+            :rtype: bool
+            """
+            return self._value.equals(other._value)
+        
         @staticmethod
         def fromNumber(number):
             """
@@ -193,6 +204,14 @@ class Name(object):
             value.insert(0, marker)
             
             return Name.Component(Blob(value, False))
+
+        # Python operators
+        
+        def __eq__(self, other):
+            return type(other) is Name.Component and self.equals(other)
+        
+        def __ne__(self, other):
+            return not self == other
 
     def set(self, uri):
         """
