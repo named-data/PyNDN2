@@ -428,6 +428,8 @@ class Tlv0_1a2WireFormat(WireFormat):
             finalBlockIdEndOffset = decoder.readNestedTlvsStart(Tlv.FinalBlockId)
             metaInfo.setFinalBlockID(decoder.readBlobTlv(Tlv.NameComponent))
             decoder.finishNestedTlvs(finalBlockIdEndOffset)
+        else:
+            metaInfo.setFinalBlockID(None)
         
         decoder.finishNestedTlvs(endOffset)
 
