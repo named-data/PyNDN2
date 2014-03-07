@@ -154,12 +154,12 @@ class UdpTransport(Transport):
             else:
                 # Use the select fallback which is less efficient.
                 # Set timeout to 0 for an immediate check.
-                (isReady, _, _) = select.select([self._socket], [], [], 0)
+                isReady, _, _ = select.select([self._socket], [], [], 0)
                 if len(isReady) == 0:
                     # There is no data waiting.
                     return
             
-            (nBytesRead, _) = self._socket.recvfrom_into(self._buffer)
+            nBytesRead, _ = self._socket.recvfrom_into(self._buffer)
             if nBytesRead <= 0:
                 # Since we checked for data ready, we don't expect this.
                 return

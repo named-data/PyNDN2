@@ -154,7 +154,7 @@ class TcpTransport(Transport):
             else:
                 # Use the select fallback which is less efficient.
                 # Set timeout to 0 for an immediate check.
-                (isReady, _, _) = select.select([self._socket], [], [], 0)
+                isReady, _, _ = select.select([self._socket], [], [], 0)
                 if len(isReady) == 0:
                     # There is no data waiting.
                     return
