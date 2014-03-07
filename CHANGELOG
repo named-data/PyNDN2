@@ -1,10 +1,11 @@
-Interim changes since PyNDN v2.0alpha2 (2014-03-06)
+Interim changes since PyNDN v2.0alpha2 (2014-03-07)
 ---------------------------------------------------
 
 Changes
 * Implemented SelfVerifyPolicyManager for use with KeyChain.verifyData, and use
   it in the sample test_encode_decode_data.
 * Performance improvements for Python versions before 3.3.
+* Name: Added method equals(name) and operators __eq__ and __ne__.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.

@@ -390,6 +390,25 @@ class Name(object):
         """
         return self.append(Name.Component.fromNumberWithMarker(version, 0xFD))
         
+    def equals(self, name):
+        """
+        Check if this name has the same component count and components as the 
+        given name.
+        
+        :param name: 
+        :type name: Name
+        :return: True if the names are equal, otherwise False.
+        :rtype: bool
+        """
+        if len(self._components) != len(name._components):
+            return False
+
+        for i in range(len(self._components)):
+            if not self._components[i].equals(name._components[i]):
+                return False
+
+        return True
+        
     def match(self, name):
         """
         Check if the N components of this name are the same as the first N 
@@ -520,6 +539,12 @@ class Name(object):
             return self._components[key]
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
+
+    def __eq__(self, other):
+        return type(other) is Name and self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
 
     @staticmethod
     def _unescape(escaped):
