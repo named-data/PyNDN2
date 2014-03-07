@@ -13,10 +13,12 @@ searching a certificate chain. If the public key can't be found, the
 verification fails.
 """
 
+import sys
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from pyndn.name import Name
+from pyndn.util import Blob
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security import SecurityException
@@ -171,6 +173,11 @@ class SelfVerifyPolicyManager(PolicyManager):
         
         # Get the bytes to verify.
         signedPortion = data.getDefaultWireEncoding().toSignedBuffer()
+        # Sign the hash of the data.
+        if sys.version_info[0] == 2:
+            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
+            signedPortion = Blob(signedPortion, False).toRawStr()
+
         # Convert the signature bits to a raw string or bytes as required.
         if _PyCryptoUsesStr:
             signatureBits = signature.getSignature().toRawStr()
