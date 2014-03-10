@@ -22,7 +22,7 @@ class WireFormat(object):
         :param Interest interest: The Interest object to encode.
         :return: A Blob containing the encoding.
         :rtype: Blob
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("encodeInterest is not implemented")
@@ -35,7 +35,7 @@ class WireFormat(object):
         :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("decodeInterest is not implemented")
@@ -52,7 +52,7 @@ class WireFormat(object):
           the beginning of the signed portion, and signedPortionEndOffset is
           the offset in the encoding of the end of the signed portion.
         :rtype: (Blob, int, int)
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("encodeData is not implemented")
@@ -70,7 +70,7 @@ class WireFormat(object):
           the beginning of the signed portion, and signedPortionEndOffset is
           the offset in the encoding of the end of the signed portion.
         :rtype: (int, int)
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("decodeData is not implemented")
@@ -84,7 +84,7 @@ class WireFormat(object):
         :type forwardingEntry: ForwardingEntry
         :return: A Blob containing the encoding.
         :rtype: Blob
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("encodeForwardingEntry is not implemented")
@@ -99,7 +99,7 @@ class WireFormat(object):
         :type forwardingEntry: ForwardingEntry
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("decodeForwardingEntry is not implemented")

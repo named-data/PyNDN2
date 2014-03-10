@@ -25,7 +25,7 @@ class PrivateKeyStorage(object):
         :type keyType: int from KeyType
         :param int keySize: (optional) The size of the key pair.  If omitted, 
           use 2048.
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("generateKeyPair is not implemented")
@@ -38,7 +38,7 @@ class PrivateKeyStorage(object):
         :param Name keyName: The name of public key.
         :return: The public key.
         :rtype: PublicKey
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("getPublicKey is not implemented")        
@@ -57,7 +57,7 @@ class PrivateKeyStorage(object):
         :type digestAlgorithm: int from DigestAlgorithm
         :return: The signature, or an isNull() Blob pointer if signing fails.
         :rtype: Blob
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("sign is not implemented")        
@@ -75,7 +75,7 @@ class PrivateKeyStorage(object):
           asymmetric encryption.
         :return: The decrypted data.
         :rtype: Blob
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.        
         """
         raise RuntimeError("decrypt is not implemented")                        
@@ -93,7 +93,7 @@ class PrivateKeyStorage(object):
           asymmetric encryption.
         :return: The encrypted data.
         :rtype: Blob
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("encrypt is not implemented")                        
@@ -108,7 +108,7 @@ class PrivateKeyStorage(object):
           KeyType.AES .
         :type keyType: int from KeyType
         :param int keySize: (optional) The size of the key. If omitted, use 256.
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("generateKey is not implemented")                        
@@ -124,7 +124,7 @@ class PrivateKeyStorage(object):
         :type keyClass: int from KeyClass
         :return: True if the key exists, otherwise false.
         :rtype: bool
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("doesKeyExist is not implemented")                        

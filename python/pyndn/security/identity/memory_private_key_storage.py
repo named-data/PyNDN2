@@ -77,7 +77,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :type digestAlgorithm: int from DigestAlgorithm
         :return: The signature, or an isNull() Blob pointer if signing fails.
         :rtype: Blob
-        :raises: SecurityException if can't find the private key with keyName.
+        :raises SecurityException: if can't find the private key with keyName.
         """
         if digestAlgorithm != DigestAlgorithm.SHA256:
           return Blob()

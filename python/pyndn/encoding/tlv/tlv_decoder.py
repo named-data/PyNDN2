@@ -85,7 +85,7 @@ class TlvDecoder(object):
         :param int expectedType: The expected type.
         :return: The length of the TLV.
         :rtype: int
-        :raises: ValueError if did not get the expected TLV type or
+        :raises ValueError: if did not get the expected TLV type or
           the TLV length exceeds the buffer length.
         """
         type = self.readVarNumber()
@@ -110,7 +110,7 @@ class TlvDecoder(object):
         :param int expectedType: The expected type.
         :return: The offset of the end of the parent TLV.
         :rtype: int
-        :raises: ValueError if did not get the expected TLV type or
+        :raises ValueError: if did not get the expected TLV type or
           the TLV length exceeds the buffer length.
         """
         return self.readTypeAndLength(expectedType) + self._offset
@@ -123,7 +123,7 @@ class TlvDecoder(object):
         
         :param int endOffset: The offset of the end of the parent TLV, returned 
           by readNestedTlvsStart.
-        :raises: ValueError if the TLV length does not equal the total length of
+        :raises ValueError: if the TLV length does not equal the total length of
           the nested TLVs.
         """
         # We expect _offset to be endOffset, so check this first.
@@ -178,7 +178,7 @@ class TlvDecoder(object):
         :param int length: The number of bytes in the encoded integer.
         :return: The integer.
         :rtype: int (or long if a large integer on a 32-bit system)
-        :raises: ValueError if length is an invalid length for a TLV 
+        :raises ValueError: if length is an invalid length for a TLV 
           non-negative integer.
         """
         if length == 1:
@@ -215,7 +215,7 @@ class TlvDecoder(object):
         :param int expectedType: The expected type.
         :return: The integer.
         :rtype: int
-        :raises: ValueError if did not get the expected TLV type or
+        :raises ValueError: if did not get the expected TLV type or
           can't decode the value.
         """
         length = self.readTypeAndLength(expectedType)
@@ -273,7 +273,7 @@ class TlvDecoder(object):
           not necessarily a copy of the bytes in the input buffer.  If you need
           a copy, then you must make a copy of the return value.
         :rtype: memoryview or equivalent
-        :raises: ValueError if did not get the expected TLV type.
+        :raises ValueError: if did not get the expected TLV type.
         """
         length = self.readTypeAndLength(expectedType)
         # Use _inputView to get the slice.

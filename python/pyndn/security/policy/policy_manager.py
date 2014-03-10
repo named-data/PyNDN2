@@ -22,7 +22,7 @@ class PolicyManager(object):
         :return: True if the data does not need to be verified to be trusted as 
           valid, otherwise False.
         :rtype: boolean
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("skipVerifyAndTrust is not implemented")
@@ -36,7 +36,7 @@ class PolicyManager(object):
         :param Data data: The received data packet.
         :return: True if the data must be verified, otherwise False.
         :rtype: boolean
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("requireVerify is not implemented")
@@ -60,7 +60,7 @@ class PolicyManager(object):
         :return: The indication of next verification step, or None if there is 
           no further step.
         :rtype: ValidationRequest
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("checkVerificationPolicy is not implemented")
@@ -76,7 +76,7 @@ class PolicyManager(object):
         :return: True if the signing certificate can be used to sign the data, 
           otherwise False.
         :rtype: boolean
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("checkSigningPolicy is not implemented")
@@ -90,7 +90,7 @@ class PolicyManager(object):
         :param Name dataName: The name of data to be signed.
         :return: The signing identity or an empty name if cannot infer. 
         :rtype: Name
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("inferSigningIdentity is not implemented")

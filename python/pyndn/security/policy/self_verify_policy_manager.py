@@ -143,7 +143,7 @@ class SelfVerifyPolicyManager(PolicyManager):
           signature.
         :return: True if the signature verifies, False if not.
         :rtype: boolean
-        :raises: SecurityException if data does not have a 
+        :raises SecurityException: if data does not have a 
           Sha256WithRsaSignature.
         """
         signature = data.getSignature()

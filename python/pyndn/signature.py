@@ -19,7 +19,7 @@ class Signature(object):
 
         :return: A new object which is a copy of this object.
         :rtype: A subclass of Signature
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("Signature.clone is not implemented")
@@ -32,7 +32,7 @@ class Signature(object):
 
         :return: The change count.
         :rtype: int
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("Signature.getChangeCount is not implemented")

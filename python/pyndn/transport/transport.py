@@ -28,7 +28,7 @@ class Transport(object):
         :param elementListener: The elementListener must remain valid during the 
           life of this object.
         :type elementListener: An object with onReceivedData
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("connect is not implemented")
@@ -39,7 +39,7 @@ class Transport(object):
         
         :param data: The buffer of data to send.
         :type data: An array type
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("send is not implemented")
@@ -56,7 +56,7 @@ class Transport(object):
         If you call this from an main event loop, you may want to catch and 
         log/disregard all exceptions.
 
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("processEvents is not implemented")
@@ -67,7 +67,7 @@ class Transport(object):
         
         :return: True if connected.
         :rtype: bool
-        :raises: RuntimeError for unimplemented if the derived class does not 
+        :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("getIsConnected is not implemented")

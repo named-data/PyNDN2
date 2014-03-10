@@ -101,7 +101,7 @@ class Name(object):
             :param int marker: The required first byte of the component.
             :return: The integer number.
             :rtype: int
-            :raises: RuntimeError If the first byte of the component does not 
+            :raises RuntimeError: If the first byte of the component does not 
               equal the marker.
             """
             if self._value.size() <= 0 or self._value.buf()[0] != marker:
@@ -122,7 +122,7 @@ class Name(object):
             
             :return: The integer segment number.
             :rtype: int
-            :raises: RuntimeError If the first byte of the component is not the 
+            :raises RuntimeError: If the first byte of the component is not the 
               expected marker.
             """
             return self.toNumberWithMarker(0x00)
@@ -136,7 +136,7 @@ class Name(object):
             
             :return: The integer version number.
             :rtype: int
-            :raises: RuntimeError If the first byte of the component is not the 
+            :raises RuntimeError: If the first byte of the component is not the 
               expected marker.
             """
             return self.toNumberWithMarker(0xFD);
