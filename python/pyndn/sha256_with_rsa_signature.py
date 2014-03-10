@@ -72,8 +72,7 @@ class Sha256WithRsaSignature(Signature):
         """
         Set the key locator to a copy of the given keyLocator.
         
-        :param keyLocator: The KeyLocator to copy.
-        :type keyLocator: KeyLocator
+        :param KeyLocator keyLocator: The KeyLocator to copy.
         """
         self._keyLocator.set(KeyLocator(keyLocator)) 
         self._changeCount += 1

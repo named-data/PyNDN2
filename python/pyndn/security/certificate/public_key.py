@@ -16,10 +16,8 @@ class PublicKey(object):
     """
     Create a new PublicKey with the given values.
     
-    :param algorithm: The algorithm of the public key.
-    :type algorithm: OID
-    :param keyDer: The blob of the PublicKeyInfo in terms of DER.
-    :type keyDer: Blob
+    :param OID algorithm: The algorithm of the public key.
+    :param Blob keyDer: The blob of the PublicKeyInfo in terms of DER.
     """
     def __init__(self, algorithm, keyDer):
         self._algorithm = algorithm
@@ -39,8 +37,7 @@ class PublicKey(object):
         """
         Decode the public key from DER blob.
         
-        :param keyDer: The DER blob.
-        :type keyDer: Blob
+        :param Blob keyDer: The DER blob.
         :return: The decoded public key.
         :rtype: PublicKey
         """

@@ -38,7 +38,7 @@ class Transport(object):
         Set data to the host.
         
         :param data: The buffer of data to send.
-        :type data: An array type.
+        :type data: An array type
         :raises: RuntimeError for unimplemented if the derived class does not 
           override.
         """

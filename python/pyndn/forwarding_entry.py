@@ -73,8 +73,7 @@ class ForwardingEntry(object):
         """
         Set the action string.
         
-        :param action: The new action string, or None for not specified.
-        :type action: str
+        :param str action: The new action string, or None for not specified.
         """
         self._action = action
         
@@ -82,8 +81,8 @@ class ForwardingEntry(object):
         """
         Set the prefix to a copy of the give Name.
         
-        :param prefix: The new prefix Name to copy, or None for not specified.
-        :type prefix: Name
+        :param Name prefix: The new prefix Name to copy, or None for not 
+          specified.
         """
         self._prefix = Name(prefix) if type(prefix) is Name else Name()
         
@@ -91,8 +90,7 @@ class ForwardingEntry(object):
         """
         Set the Face ID.
         
-        :param faceId: The new face ID, or None for not specified.
-        :type faceId: int
+        :param int faceId: The new face ID, or None for not specified.
         """
         self._faceId = faceId
         
@@ -102,8 +100,7 @@ class ForwardingEntry(object):
         You can use getForwardingFlags() and change the existing 
         ForwardingFlags object.
         
-        :param forwardingFlags: The new ForwardingFlace object.
-        :type forwardingFlags: ForwardingFlags
+        :param ForwardingFlags forwardingFlags: The new ForwardingFlace object.
         """
         self._forwardingFlags = (ForwardingFlags(forwardingFlags)
                                  if type(forwardingFlags) is ForwardingFlags
@@ -113,9 +110,8 @@ class ForwardingEntry(object):
         """
         Set the freshness period.
         
-        :param freshnessPeriod: The freshness period in milliseconds, or None 
-          for not specified.
-        :type freshnessPeriod: float
+        :param float freshnessPeriod: The freshness period in milliseconds, or 
+          None for not specified.
         """
         self._freshnessPeriod = freshnessPeriod
     
@@ -125,7 +121,7 @@ class ForwardingEntry(object):
         
         :param wireFormat: (optional) A WireFormat object used to encode this 
            ForwardingEntry. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         :return: The encoded buffer.
         :rtype: Blob
         """
@@ -144,7 +140,7 @@ class ForwardingEntry(object):
         :type input: An array type with int elements
         :param wireFormat: (optional) A WireFormat object used to decode this 
            ForwardingEntry. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.

@@ -17,10 +17,9 @@ class ForwardingFlags(object):
     Create a new ForwardingFlags object, possibly copying values from another 
     object.
     
-    :param value: (optional) If value is a ForwardingFlags, copy its values.  If
-      value is omitted, the type is the default with "active" and "childInherit"
-      True and other flags False.
-    :type value: MetaInfo
+    :param ForwardingFlags value: (optional) If value is a ForwardingFlags, copy 
+      its values.  If value is omitted, the type is the default with "active" 
+      and "childInherit" True and other flags False.
     """
     def __init__(self, value = None):
         if value == None:
@@ -90,8 +89,7 @@ class ForwardingFlags(object):
         Set the flags according to the bits in forwardingEntryFlags as used by 
         the ForwardingEntry message.
         
-        :param forwardingEntryFlags: An integer with the bits set.
-        :type forwardingEntryFlags: int
+        :param int forwardingEntryFlags: An integer with the bits set.
         """
         self._active = True if (forwardingEntryFlags & 
                                 ForwardingFlags.ACTIVE) else False

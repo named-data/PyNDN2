@@ -19,8 +19,7 @@ class WireFormat(object):
         Encode interest and return the encoding.  Your derived class should 
         override.
 
-        :param interest: The Interest object to encode.
-        :type interest: Interest
+        :param Interest interest: The Interest object to encode.
         :return: A Blob containing the encoding.
         :rtype: Blob
         :raises: RuntimeError for unimplemented if the derived class does not 
@@ -33,8 +32,7 @@ class WireFormat(object):
         Decode input as an interest and set the fields of the interest object.  
         Your derived class should override.
         
-        :param interest: The Interest object whose fields are updated.
-        :type interest: Interest
+        :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         :raises: RuntimeError for unimplemented if the derived class does not 
@@ -47,8 +45,7 @@ class WireFormat(object):
         Encode data and return the encoding and signed offsets.  Your derived 
         class should override.
 
-        :param data: The Data object to encode.
-        :type data: Data
+        :param Data data: The Data object to encode.
         :return: A Tuple of (encoding, signedPortionBeginOffset,
           signedPortionEndOffset) where encoding is a Blob containing the
           encoding, signedPortionBeginOffset is the offset in the encoding of 
@@ -65,8 +62,7 @@ class WireFormat(object):
         Decode input as a data packet, set the fields in the data object, and 
         return the signed offsets.  Your derived class should override.
 
-        :param data: The Data object whose fields are updated.
-        :type data: Data
+        :param Data data: The Data object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
@@ -115,7 +111,7 @@ class WireFormat(object):
         methods.
         
         :param wireFormat: An object of a subclass of WireFormat.
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         """
         self._defaultWireFormat = wireFormat
         

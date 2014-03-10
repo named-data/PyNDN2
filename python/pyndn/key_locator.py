@@ -19,9 +19,8 @@ class KeyLocator(object):
     Create a new KeyLocator object, possibly copying values from 
     another object.
     
-    :param value: (optional) If value is a KeyLocator, copy its 
+    :param KeyLocator value: (optional) If value is a KeyLocator, copy its 
       values.  If value is omitted, set the fields to unspecified.
-    :type value: KeyLocator
     """
     def __init__(self, value = None):
         if value == None:
@@ -88,8 +87,7 @@ class KeyLocator(object):
         Set key name to a copy of the given Name.  This is the name if 
         getType() is KeyLocatorType.KEYNAME.
         
-        :param keyName: The key name which is copied.
-        :type keyName: Name
+        :param Name keyName: The key name which is copied.
         """
         self._keyName.set(keyName if type(keyName) is Name else Name(keyName))
         self._changeCount += 1

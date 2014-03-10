@@ -32,8 +32,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         """
         Set the public and private key for the keyName.
         
-        :param keyName: The key name.
-        :type keyName: Name
+        :param Name keyName: The key name.
         :param publicKeyDer: The public key DER byte array.
         :type publicKeyDer: str, or an array type with int elements which is
           converted to str
@@ -53,8 +52,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         """
         Get the public key with the keyName.
         
-        :param keyName: The name of public key.
-        :type keyName: Name
+        :param Name keyName: The name of public key.
         :return: The public key.
         :rtype: PublicKey
         """
@@ -73,8 +71,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
 
         :param data: The input byte buffer to sign.
         :type data: an array which implements the buffer protocol
-        :param keyName: The name of the signing key.
-        :type keyName: Name
+        :param Name keyName: The name of the signing key.
         :param digestAlgorithm: (optional) the digest algorithm. If omitted,
           use DigestAlgorithm.SHA256.
         :type digestAlgorithm: int from DigestAlgorithm
@@ -104,8 +101,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         """
         Check if a particular key exists.
         
-        :param keyName: The name of the key.
-        :type keyName: Name
+        :param Name keyName: The name of the key.
         :param keyClass: The class of the key, e.g. KeyClass.PUBLIC, 
            KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
         :type keyClass: int from KeyClass

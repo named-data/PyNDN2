@@ -30,12 +30,11 @@ class SelfVerifyPolicyManager(PolicyManager):
     Create a new SelfVerifyPolicyManager which will look up the public key in 
     the given identityStorage.
     
-    :param identityStorage: (optional) The IdentityStorage for looking up the 
-      public key. This object must remain valid during the life of this 
-      SelfVerifyPolicyManager. If omitted, then don't look for a public key 
-      with the name in the KeyLocator and rely on the KeyLocator having the full 
-      public key DER.
-    :type identityStorage: IdentityStorage
+    :param IdentityStorage identityStorage: (optional) The IdentityStorage for 
+      looking up the public key. This object must remain valid during the life 
+      of this SelfVerifyPolicyManager. If omitted, then don't look for a public 
+      key with the name in the KeyLocator and rely on the KeyLocator having the 
+      full public key DER.
     """
     def __init__(self, identityStorage = None):
         self._identityStorage = identityStorage
@@ -44,8 +43,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         """
         Never skip verification.
 
-        :param data: The received data packet.
-        :type data: Data
+        :param Data data: The received data packet.
         :return: False.
         :rtype: boolean
         """
@@ -56,8 +54,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         Always return true to use the self-verification rule for the received 
         data.
 
-        :param data: The received data packet.
-        :type data: Data
+        :param Data data: The received data packet.
         :return: True.
         :rtype: boolean
         """
@@ -70,11 +67,9 @@ class SelfVerifyPolicyManager(PolicyManager):
         KeyLocator (if available) and use it to verify the data packet. If the 
         public key can't be found, call onVerifyFailed.
 
-        :param data: The Data object with the signature to check.
-        :type data: Data
-        :param stepCount: The number of verification steps that have been done, 
-           used to track the verification progress. (stepCount is ignored.)
-        :type stepCount: int
+        :param Data data: The Data object with the signature to check.
+        :param int stepCount: The number of verification steps that have been 
+          done, used to track the verification progress. (stepCount is ignored.)
         :param onVerified: If the signature is verified, this calls 
           onVerified(data).
         :type onVerified: function object
@@ -115,10 +110,8 @@ class SelfVerifyPolicyManager(PolicyManager):
         Override to always indicate that the signing certificate name and data 
         name satisfy the signing policy.
 
-        :param dataName: The name of data to be signed.
-        :type dataName: Name
-        :param certificateName: The name of signing certificate.
-        :type certificateName: Name
+        :param Name dataName: The name of data to be signed.
+        :param Name certificateName: The name of signing certificate.
         :return: True to indicate that the signing certificate can be used to 
           sign the data.
         :rtype: boolean
@@ -129,8 +122,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         """
         Override to indicate that the signing identity cannot be inferred.
 
-        :param dataName: The name of data to be signed.
-        :type dataName: Name
+        :param Name dataName: The name of data to be signed.
         :return: An empty name because cannot infer. 
         :rtype: Name
         """
@@ -144,12 +136,11 @@ class SelfVerifyPolicyManager(PolicyManager):
         to set it.
         TODO: Move this general verification code to a more central location.
  
-        :param data: The data packet with the signed portion and the signature 
-          to verify. The data packet must have a Sha256WithRsaSignature.
-        :type data: Data
-        :param publicKeyDer: The DER-encoded public key used to verify the 
+        :param Data data: The data packet with the signed portion and the 
+          signature to verify. The data packet must have a 
+          Sha256WithRsaSignature.
+        :param Blob publicKeyDer: The DER-encoded public key used to verify the 
           signature.
-        :type publicKeyDer: Blob
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         :raises: SecurityException if data does not have a 

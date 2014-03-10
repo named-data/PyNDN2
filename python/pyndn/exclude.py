@@ -18,9 +18,8 @@ class Exclude(object):
     """
     Create a new Interest object, possibly copying values from another object.
     
-    :param value: (optional) If value is an Exclude, copy its values.  If
+    :param Exclude value: (optional) If value is an Exclude, copy its values.  If
       value is omitted, this creates an object with no entries.
-    :type value: Exclude
     """
     def __init__(self, value = None):
         if value == None:
@@ -91,8 +90,7 @@ class Exclude(object):
         """
         Get the entry at the given index.
         
-        :param i: The index of the entry, starting from 0.
-        :type i: int
+        :param int i: The index of the entry, starting from 0.
         :return: The entry at the index.
         :rtype: Exclude.Entry
         """
@@ -165,10 +163,8 @@ class Exclude(object):
         Compare the components using NDN component ordering. A component is less
         if it is shorter, otherwise if equal length do a byte comparison.
         
-        :param component1: The first name component.
-        :type component1: Name.Component
-        :param component2: The first name component.
-        :type component2: Name.Component
+        :param Name.Component component1: The first name component.
+        :param Name.Component component2: The first name component.
         :return: -1 if component1 is less than component2, 1 if greater or 0 
           if equal.
         :rtype: int
@@ -196,8 +192,7 @@ class Exclude(object):
         """
         Check if the component matches any of the exclude criteria.
         
-        :param component: The name component to check.
-        :type component: Name.Component
+        :param Name.Component component: The name component to check.
         :return: True if the component matches any of the exclude criteria, 
           otherwise False.
         """

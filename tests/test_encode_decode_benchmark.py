@@ -74,14 +74,12 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
     """
     Loop to encode a data packet nIterations times.
     
-    :param nIterations: The number of iterations.
-    :type nIterations: int
-    :param useComplex: If true, use a large name, large content and all fields.
-      If false, use a small name, small content and only required fields.
-    :type useComplex: bool
-    :param useCrypto: If true, sign the data packet.  If false, use a blank 
+    :param int nIterations: The number of iterations.
+    :param bool useComplex: If true, use a large name, large content and all 
+      fields. If false, use a small name, small content and only required 
+      fields.
+    :param bool useCrypto: If true, sign the data packet.  If false, use a blank 
       signature.
-    :type useCrypto: bool
     :return: A tuple (duration, encoding) where duration is the number of 
       seconds for all iterations and encoding is the wire encoding.
     :rtype: (float, Blob)
@@ -158,12 +156,10 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
     """
     Loop to decode a data packet nIterations times.
     
-    :param nIterations: The number of iterations.
-    :type nIterations: int
-    :param useCrypto: If true, verify the signature.  If false, don't verify.
-    :type useCrypto: bool
-    :param encoding: The wire encoding to decode.
-    :type encoding: Blob
+    :param int nIterations: The number of iterations.
+    :param bool useCrypto: If true, verify the signature.  If false, don't 
+      verify.
+    :param Blob encoding: The wire encoding to decode.
     """
     # Initialize the private key storage in case useCrypto is true.
     identityStorage = MemoryIdentityStorage()
@@ -192,10 +188,8 @@ def benchmarkEncodeDecodeData(useComplex, useCrypto):
     Call benchmarkEncodeDataSeconds and benchmarkDecodeDataSeconds with 
     appropriate nInterations.  Print the results to stdout.
     
-    :param useComplex: See benchmarkEncodeDataSeconds.
-    :type useComplex: bool
-    :param useCrypto: See benchmarkEncodeDataSeconds.
-    :type useCrypto: bool
+    :param bool useComplex: See benchmarkEncodeDataSeconds.
+    :param bool useCrypto: See benchmarkEncodeDataSeconds.
     """
     nIterations = 1000 if useCrypto else 20000
     (duration, encoding) = benchmarkEncodeDataSeconds(nIterations, useComplex, 

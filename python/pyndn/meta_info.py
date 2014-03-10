@@ -16,10 +16,9 @@ class MetaInfo(object):
     """
     Create a new MetaInfo object, possibly copying values from another object.
     
-    :param value: (optional) If value is a MetaInfo, copy its values.  If
-      value is omitted, the type is the default ContentType.BLOB and the 
+    :param MetaInfo value: (optional) If value is a MetaInfo, copy its values.  
+      If value is omitted, the type is the default ContentType.BLOB and the 
       freshness period is not specified.
-    :type value: MetaInfo
     """
     def __init__(self, value = None):
         if value == None:
@@ -80,9 +79,8 @@ class MetaInfo(object):
         """
         Set the freshness period.
         
-        :param freshnessPeriod: The freshness period in milliseconds, or None 
-          for not specified.
-        :type freshnessPeriod: float
+        :param float freshnessPeriod: The freshness period in milliseconds, or 
+          None for not specified.
         """
         self._freshnessPeriod = freshnessPeriod
         self._changeCount += 1

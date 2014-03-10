@@ -46,9 +46,8 @@ class TlvDecoder(object):
         A private function to do the work of readVarNumber, given the firstOctet
         which is >= 253.
         
-        :param firstOctet: The first octet which is >= 253, used to decode the 
-          remaining bytes.
-        :type firstOctet: int
+        :param int firstOctet: The first octet which is >= 253, used to decode 
+          the remaining bytes.
         :return: The decoded VAR-NUMBER.
         :rtype: int
         """
@@ -83,8 +82,7 @@ class TlvDecoder(object):
         Update offset.  Also make sure the decoded length does not exceed the 
         number of bytes remaining in the input.
         
-        :param expectedType: The expected type.
-        :type expectedType: int
+        :param int expectedType: The expected type.
         :return: The length of the TLV.
         :rtype: int
         :raises: ValueError if did not get the expected TLV type or
@@ -109,8 +107,7 @@ class TlvDecoder(object):
         decoding optional nested TLVs. After reading all nested TLVs, call 
         finishNestedTlvs.
         
-        :param expectedType: The expected type.
-        :type expectedType: int
+        :param int expectedType: The expected type.
         :return: The offset of the end of the parent TLV.
         :rtype: int
         :raises: ValueError if did not get the expected TLV type or
@@ -124,9 +121,8 @@ class TlvDecoder(object):
         unrecognized TLVs and to check if the offset after the final nested TLV
         matches the endOffset returned by readNestedTlvsStart.
         
-        :param endOffset: The offset of the end of the parent TLV, returned by 
-          readNestedTlvsStart.
-        :type endOffset: int
+        :param int endOffset: The offset of the end of the parent TLV, returned 
+          by readNestedTlvsStart.
         :raises: ValueError if the TLV length does not equal the total length of
           the nested TLVs.
         """
@@ -156,11 +152,9 @@ class TlvDecoder(object):
         is greater than or equal to endOffset, then return False and don't try 
         to read the type. Do not update offset.
         
-        :param expectedType: The expected type.
-        :type expectedType: int
-        :param endOffset: The offset of the end of the parent TLV, returned by 
-          readNestedTlvsStart.        
-        :type endOffset: int
+        :param int expectedType: The expected type.
+        :param int endOffset: The offset of the end of the parent TLV, returned 
+          by readNestedTlvsStart.        
         :return: True if the type of the next TLV is the expectedType, 
           otherwise False.
         :rtype: bool
@@ -181,8 +175,7 @@ class TlvDecoder(object):
         Decode a non-negative integer in NDN-TLV and return it. Update offset 
         by length.
 
-        :param length: The number of bytes in the encoded integer.
-        :type length: int
+        :param int length: The number of bytes in the encoded integer.
         :return: The integer.
         :rtype: int (or long if a large integer on a 32-bit system)
         :raises: ValueError if length is an invalid length for a TLV 
@@ -219,8 +212,7 @@ class TlvDecoder(object):
         expecting the type to be expectedType. Then decode a non-negative 
         integer in NDN-TLV and return it.  Update offset.
 
-        :param expectedType: The expected type.
-        :type expectedType: int
+        :param int expectedType: The expected type.
         :return: The integer.
         :rtype: int
         :raises: ValueError if did not get the expected TLV type or
@@ -236,11 +228,9 @@ class TlvDecoder(object):
         None.  However, if self's offset is greater than or equal to endOffset,
         then return None and don't try to read the type.
 
-        :param expectedType: The expected type.
-        :type expectedType: int
-        :param endOffset: The offset of the end of the parent TLV, returned by 
-          readNestedTlvsStart.
-        :type endOffset: int
+        :param int expectedType: The expected type.
+        :param int endOffset: The offset of the end of the parent TLV, returned 
+          by readNestedTlvsStart.
         :return: The integer or None if the next TLV doesn't have the expected 
           type.
         :rtype: int
@@ -258,11 +248,9 @@ class TlvDecoder(object):
         However, if self's offset is greater than or equal to endOffset,
         then return None and don't try to read the type.
 
-        :param expectedType: The expected type.
-        :type expectedType: int
-        :param endOffset: The offset of the end of the parent TLV, returned by 
-          readNestedTlvsStart.
-        :type endOffset: int
+        :param int expectedType: The expected type.
+        :param int endOffset: The offset of the end of the parent TLV, returned 
+          by readNestedTlvsStart.
         :return: The integer or None if the next TLV doesn't have the expected 
           type.
         :rtype: float
@@ -280,8 +268,7 @@ class TlvDecoder(object):
         expecting the type to be expectedType. Then return an array of the bytes
         in the value.  Update offset.
 
-        :param expectedType: The expected type.
-        :type expectedType: int
+        :param int expectedType: The expected type.
         :return: The bytes in the value as a slice on the byte array.  This is
           not necessarily a copy of the bytes in the input buffer.  If you need
           a copy, then you must make a copy of the return value.
@@ -303,11 +290,9 @@ class TlvDecoder(object):
         However, if self's offset is greater than or equal to endOffset,
         then return None and don't try to read the type.
         
-        :param expectedType: The expected type.
-        :type expectedType: int
-        :param endOffset: The offset of the end of the parent TLV, returned by 
-          readNestedTlvsStart.
-        :type endOffset: int
+        :param int expectedType: The expected type.
+        :param int endOffset: The offset of the end of the parent TLV, returned 
+          by readNestedTlvsStart.
         :return: The bytes in the value as a slice on the byte array or None if 
           the next TLV doesn't have the expected type.  This is not necessarily 
           a copy of the bytes in the input buffer.  If you need a copy, then you
@@ -326,11 +311,9 @@ class TlvDecoder(object):
         However, if self's offset is greater than or equal to endOffset,
         then return False and don't try to read the type.
 
-        :param expectedType: The expected type.
-        :type expectedType: int
-        :param endOffset: The offset of the end of the parent TLV, returned by 
-          readNestedTlvsStart.
-        :type endOffset: int
+        :param int expectedType: The expected type.
+        :param int endOffset: The offset of the end of the parent TLV, returned 
+          by readNestedTlvsStart.
         :return: Return True, or else False if the next TLV doesn't have the 
           expected type.
         :rtype: bool
@@ -356,7 +339,6 @@ class TlvDecoder(object):
         """
         Set the offset into the input, used for the next read.
         
-        :param offset: The new offset.
-        :type offset: int        
+        :param int offset: The new offset.
         """
         self._offset = offset

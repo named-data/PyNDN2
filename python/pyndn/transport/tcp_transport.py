@@ -37,11 +37,9 @@ class TcpTransport(Transport):
         Transport.ConnectionInfo to hold the host and port info for the TCP 
         connection.
         
-        :param host: The host for the connection.
-        :type host: str
-        :param port: (optional) The port number for the connection. If omitted, 
-          use 6363.
-        :type port: int
+        :param str host: The host for the connection.
+        :param int port: (optional) The port number for the connection. If 
+          omitted, use 6363.
         """
         def __init__(self, host, port = 6363):
             self._host = host
@@ -70,8 +68,8 @@ class TcpTransport(Transport):
         Connect according to the info in connectionInfo, and use 
         elementListener.
         
-        :param connectionInfo: A TcpTransport.ConnectionInfo.
-        :type connectionInfo: TcpTransport.ConnectionInfo
+        :param TcpTransport.ConnectionInfo connectionInfo: A 
+          TcpTransport.ConnectionInfo.
         :param elementListener: The elementListener must remain valid during the 
           life of this object.
         :type elementListener: An object with onReceivedData
@@ -106,7 +104,7 @@ class TcpTransport(Transport):
         Set data to the host.
         
         :param data: The buffer of data to send.
-        :type data: An array type accepted by socket.send.
+        :type data: An array type accepted by socket.send
         """
         if TcpTransport._sendNeedsStr:
             # This version of sendall can't use a memoryview, etc., so convert.

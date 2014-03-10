@@ -30,12 +30,10 @@ class Node(object):
     Create a new Node for communication with an NDN hub with the given Transport
     object and connectionInfo.
     
-    :param transport: An object of a subclass of Transport used for 
+    :param Transport transport: An object of a subclass of Transport used for 
       communication.
-    :type transport: Transport
-    :param connectionInfo: An object of a subclass of Transport.ConnectionInfo
-      to be used to connect to the transport.
-    :type connectionInfo: Transport.ConnectionInfo
+    :param Transport.ConnectionInfo connectionInfo: An object of a subclass of 
+      Transport.ConnectionInfo to be used to connect to the transport.
     """
     def __init__(self, transport, connectionInfo):
         self._transport = transport
@@ -54,10 +52,9 @@ class Node(object):
         Send the Interest through the transport, read the entire response and 
         call onData(interest, data).
         
-        :param interest: The Interest which is NOT copied for this internal
-          Node method.  The Face expressInterest is reponsible for making a
-          copy for Node to use.
-        :type interest: Interest
+        :param Interest interest: The Interest which is NOT copied for this 
+          internal Node method.  The Face expressInterest is reponsible for 
+          making a copy for Node to use.
         :param onData: A function object to call when a matching data packet is 
           received.
         :type onData: function object
@@ -86,8 +83,7 @@ class Node(object):
         with a different pendingInterestId, even it if has the same interest 
         name. If there is no entry with the pendingInterestId, do nothing.
         
-        :param pendingInterestId: The ID returned from expressInterest.
-        :type pendingInterestId: int
+        :param int pendingInterestId: The ID returned from expressInterest.
         """
         # Go backwards through the list so we can erase entries.
         # Remove all entries even though pendingInterestId should be unique.
@@ -104,19 +100,17 @@ class Node(object):
         Register prefix with the connected NDN hub and call onInterest when a 
           matching interest is received.
           
-        :param prefix: The Name for the prefix to register which is NOT copied 
-          for this internal Node method. The Face registerPrefix is reponsible
-          for making a copy for Node to use..
-        :type prefix: Name
+        :param Name prefix: The Name for the prefix to register which is NOT 
+          copied for this internal Node method. The Face registerPrefix is 
+          reponsible for making a copy for Node to use..
         :param onInterest: A function object to call when a matching interest is
           received.
         :type onInterest: function object
         :param onRegisterFailed: A function object to call if failed to retrieve
           the connected hub's ID or failed to register the prefix.
         :type onRegisterFailed: function object
-        :param flags: The flags for finer control of which interests are 
-          forwardedto the application.
-        :type flags: ForwardingFlags
+        :param ForwardingFlags flags: The flags for finer control of which 
+          interests are forwardedto the application.
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
         """
@@ -147,8 +141,7 @@ class Node(object):
         with a different registeredPrefixId, even it if has the same prefix 
         name. If there is no entry with the registeredPrefixId, do nothing.
         
-        :param registeredPrefixId: The ID returned from registerPrefix.
-        :type registeredPrefixId: int
+        :param int registeredPrefixId: The ID returned from registerPrefix.
         """
         # Go backwards through the list so we can erase entries.
         # Remove all entries even though registeredPrefixId should be unique.
@@ -255,9 +248,8 @@ class Node(object):
         to the entry's interest selectors, remove the entries from the table
         and return them.
         
-        :param name: The name to find the interest for (from the incoming data 
-          packet).
-        :type name: Name
+        :param Name name: The name to find the interest for (from the incoming 
+          data packet).
         :return: The matching entries from the _pendingInterestTable, or []
           if none are found.
         :rtype: array of _PendingInterest
@@ -279,9 +271,8 @@ class Node(object):
         Find the first entry from the _registeredPrefixTable where the entry 
         prefix is the longest that matches name.
         
-        :param name: The name to find the RegisteredPrefix for (from the 
+        :param Name name: The name to find the RegisteredPrefix for (from the 
           incoming interest packet).
-        :type name: Name
         :return: The registered prefix entry, or None of not found.
         :rtype: _RegisteredPrefix
         """
@@ -307,10 +298,9 @@ class Node(object):
         Do the work of registerPrefix once we know we are connected with an 
         _ndndId.
         
-        :param registeredPrefixId: The 
+        :param int registeredPrefixId: The 
           _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
           so it could return it to the caller.
-        :type registeredPrefixId: int
         """
         # Create a ForwardingEntry.
         # Note: ndnd ignores any freshness that is larger than 3600 seconds and 
@@ -358,11 +348,9 @@ class Node(object):
         _pendingInterestTable.  Create a new PendingInterest and set the 
         _timeoutTime based on the current time and the interest lifetime.
         
-        :param pendingInterestId: A unique ID for this entry, which you should 
-          get with getNextPendingInteresId().
-        :type pendingInterestId: int
-        :param interest: The interest.
-        :type interest: Interest
+        :param int pendingInterestId: A unique ID for this entry, which you 
+          should get with getNextPendingInteresId().
+        :param Interest interest: The interest.
         :param onData: A function object to call when a matching data packet is 
           received.
         :type onData: function object
@@ -429,9 +417,8 @@ class Node(object):
             """
             Check if this interest is timed out.
             
-            :param nowMilliseconds: The current time in milliseconds from 
+            :param float nowMilliseconds: The current time in milliseconds from 
               Common.getNowMilliseconds().
-            :type nowMilliseconds: float
             :return: True if this interest timed out, otherwise False.
             :rtype: bool
             """
@@ -456,11 +443,9 @@ class Node(object):
         _registeredPrefixTable. Create a new RegisteredPrefix with the
         given values.
 
-        :param registeredPrefixId: A unique ID for this entry, which you should
-          get with getNextRegisteredPrefixId().
-        :type registeredPrefixId: int
-        :param prefix: The name prefix.
-        :type prefix: Name
+        :param int registeredPrefixId: A unique ID for this entry, which you
+          should get with getNextRegisteredPrefixId().
+        :param Name prefix: The name prefix.
         :param onInterest: A function object to call when a matching data packet
           is received.
         :type onInterest: function object

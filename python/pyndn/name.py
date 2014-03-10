@@ -69,9 +69,8 @@ class Name(object):
             to the NDN URI Scheme. This also adds "..." to a value with zero or
             more ".".
 
-            :param result: (optional) The BytesIO stream to write to.  If 
-              omitted, return a str with the result.
-            :type result: BytesIO
+            :param BytesIO result: (optional) The BytesIO stream to write to.  
+              If omitted, return a str with the result.
             :return: The result as a string (only if result is omitted).
             :rtype: str
             """
@@ -82,7 +81,8 @@ class Name(object):
 
         def toNumber(self):
             """
-            Interpret this name component as a network-ordered number and return an integer.
+            Interpret this name component as a network-ordered number and return 
+            an integer.
             
             :return: The integer number.
             :rtype: int
@@ -98,8 +98,7 @@ class Name(object):
             Interpret this name component as a network-ordered number with a 
             marker and return an integer.
             
-            :param marker: The required first byte of the component.
-            :type marker: int
+            :param int marker: The required first byte of the component.
             :return: The integer number.
             :rtype: int
             :raises: RuntimeError If the first byte of the component does not 
@@ -146,8 +145,7 @@ class Name(object):
             """
             Check if this is the same component as other.
             
-            :param other: The other Component to compare with.
-            :type other: Name.Component
+            :param Name.Component other: The other Component to compare with.
             :return: True if the components are equal, otherwise False.
             :rtype: bool
             """
@@ -157,8 +155,7 @@ class Name(object):
             """
             Compare this to the other Component using NDN canonical ordering.
             
-            :param other: The other Component to compare with.
-            :type other: Name.Component
+            :param Name.Component other: The other Component to compare with.
             :return: 0 If they compare equal, -1 if self comes before other in 
               the canonical ordering, or 1 if self comes after other in the 
               canonical ordering.
@@ -179,8 +176,7 @@ class Name(object):
             Create a component whose value is the network-ordered encoding of 
             the number. Note: if the number is zero, the result is empty.
             
-            :param number: The number to be encoded.
-            :type number: int
+            :param int number: The number to be encoded.
             :return: The component value.
             :rtype: Name.Component
             """
@@ -203,10 +199,9 @@ class Name(object):
             no bytes are used for the number - the result will have only the 
             marker.
 
-            :param number: The number to be encoded.
-            :type number: int
-            :param marker: The marker to use as the first byte of the component.
-            :type marker: int
+            :param int number: The number to be encoded.
+            :param int marker: The marker to use as the first byte of the 
+              component.
             :return: The component value.
             :rtype: Name.Component
             """
@@ -250,8 +245,7 @@ class Name(object):
         Parse the uri according to the NDN URI Scheme and set the name with 
         the components.
         
-        :param uri: The URI string.
-        :type uri: str
+        :param str uri: The URI string.
         """
         self.clear()
   
@@ -327,12 +321,10 @@ class Name(object):
         """
         Get a new name, constructed as a subset of components.
         
-        :param iStartComponent: The index if the first component to get.
-        :type iStartComponent: int
-        :param nComponents: (optional) nComponents The number of components 
+        :param int iStartComponent: The index if the first component to get.
+        :param int nComponents: (optional) nComponents The number of components 
           starting at iStartComponent.  If omitted, return components starting 
           at iStartComponent until the end of the name.
-        :type nComponents: int
         :return: A new name.
         :rtype: Name
         """
@@ -351,10 +343,9 @@ class Name(object):
         """
         Return a new Name with the first nComponents components of this Name.
         
-        :param nComponents: The number of prefix components.  If nComponents is 
-          -N then return the prefix up to name.size() - N. For example 
+        :param int nComponents: The number of prefix components.  If nComponents 
+          is -N then return the prefix up to name.size() - N. For example 
           getPrefix(-1) returns the name without the final component.
-        :type nComponents: int
         """
         if nComponents < 0:
             return self.getSubName(0, len(self._components) + nComponents)
@@ -374,9 +365,8 @@ class Name(object):
         """
         Get the component at the given index.
         
-        :param i: The index of the component, starting from 0.  However, if i is
-          negative, return the component at size() - (-i).
-        :type i: int
+        :param int i: The index of the component, starting from 0.  However, if 
+          i is negative, return the component at size() - (-i).
         """
         return self._components[i]
     
@@ -404,8 +394,7 @@ class Name(object):
         """
         Append a component with the encoded segment number.
         
-        :param segment: The segment number.
-        :type segment: int
+        :param int segment: The segment number.
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
@@ -415,8 +404,7 @@ class Name(object):
         """
         Append a component with the encoded version number.
         
-        :param version: The version number.
-        :type version: int
+        :param int version: The version number.
         :return: This name so that you can chain calls to append.
         :rtype: Name        
         """
@@ -427,8 +415,7 @@ class Name(object):
         Check if this name has the same component count and components as the 
         given name.
         
-        :param name: 
-        :type name: Name
+        :param Name name: 
         :return: True if the names are equal, otherwise False.
         :rtype: bool
         """
@@ -455,8 +442,7 @@ class Name(object):
         counter-intuitive because /c comes before /bb according to NDN canonical 
         ordering since it is shorter.
         
-        :param other: The other Name to compare with.
-        :type other: Name
+        :param Name other: The other Name to compare with.
         :return: 0 If they compare equal, -1 if self comes before other in the 
           canonical ordering, or 1 if self comes after other in the canonical 
           ordering.
@@ -487,8 +473,7 @@ class Name(object):
         Check if the N components of this name are the same as the first N 
         components of the given name.
         
-        :param name: The Name to check.
-        :type name: Name
+        :param Name name: The Name to check.
         :return: True if this matches the given name, otherwise False.  This 
           always returns True if this name is empty.
         :rtype: bool
@@ -525,8 +510,7 @@ class Name(object):
         then return a Blob with a null pointer, which means the component should
         be skipped in a URI name.
         
-        :param escapedString: The escaped string.
-        :type escapedString: str
+        :param str escapedString: The escaped string.
         :return: The unescaped Blob value. If the escapedString is not a valid 
           escaped component, then the Blob isNull().
         """
@@ -559,9 +543,8 @@ class Name(object):
         
         :param value: The buffer with the value to escape.
         :type value: An array type with int elements
-        :param result: (optional) The BytesIO stream to write to.  If omitted,
-          return a str with the result.
-        :type result: BytesIO
+        :param BytesIO result: (optional) The BytesIO stream to write to.  If 
+          omitted, return a str with the result.
         :return: The result as a string (only if result is omitted).
         :rtype: str
         """
@@ -637,8 +620,7 @@ class Name(object):
         A private method to return a copy of the escaped string, converting 
         each escaped "%XX" to the char value.
         
-        :param escaped: The escaped string.
-        :type escaped: str
+        :param str escaped: The escaped string.
         :return: The unescaped buffer
         :rtype: bytearray
         """

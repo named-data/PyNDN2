@@ -11,8 +11,7 @@ class IdentityCertificate(object):
         """
         Get the public key name from the full certificate name.
         
-        :param certificateName: The full certificate name.
-        :type name: Name
+        :param Name certificateName: The full certificate name.
         :return: The related public key name.
         :rtype: Name
         """

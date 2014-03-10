@@ -19,10 +19,10 @@ class IdentityManager(object):
     Create a new IdentityManager to use the identityStorage and 
     privateKeyStorage.
     
-    :param identityStorage: An object of a subclass of IdentityStorage.
-    :type identityStorage: IdentityStorage
-    :param privateKeyStorage: An object of a subclass of PrivateKeyStorage.
-    :type privateKeyStorage: PrivateKeyStorage
+    :param IdentityStorage identityStorage: An object of a subclass of 
+      IdentityStorage.
+    :param PrivateKeyStorage privateKeyStorage: An object of a subclass of 
+      PrivateKeyStorage.
     """
     def __init__(self, identityStorage, privateKeyStorage):
         self._identityStorage = identityStorage
@@ -32,14 +32,12 @@ class IdentityManager(object):
         """
         Sign data packet based on the certificate name.
 
-        :param data: The Data object to sign and update its signature.
-        :type data: Data
-        :param certificateName: The Name identifying the certificate which 
+        :param Data data: The Data object to sign and update its signature.
+        :param Name certificateName: The Name identifying the certificate which 
           identifies the signing key.
-        :type certificateName: Name
         :param wireFormat: (optional) The WireFormat for calling encodeData, or
           WireFormat.getDefaultWireFormat() if omitted.
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
@@ -70,8 +68,7 @@ class IdentityManager(object):
         """
         Get the public key name from the full certificate name.
         
-        :param certificateName: The full certificate name.
-        :type certificateName: Name
+        :param Name certificateName: The full certificate name.
         :return: The related public key name.
         :rtype: Name
         """

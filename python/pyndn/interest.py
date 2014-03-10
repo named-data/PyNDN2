@@ -165,8 +165,7 @@ class Interest(object):
         Note: You can also change this interest's key locator modifying
         the object from getKeyLocator().
         
-        :param keyLocator: The KeyLocator that is copied.
-        :type keyLocator: KeyLocator
+        :param KeyLocator keyLocator: The KeyLocator that is copied.
         """
         self._keyLocator.set(
           keyLocator if type(keyLocator) is KeyLocator(keyLocator) 
@@ -179,8 +178,7 @@ class Interest(object):
         Note: You can also change this interest's exclude object modifying
         the object from getExclude().
         
-        :param exclude: The exlcude object that is copied.
-        :type exclude: Exclude
+        :param Exclude exclude: The exlcude object that is copied.
         """
         self._exclude.set(
           Exclude(exclude) if type(exclude) is Exclude else Exclude())
@@ -217,7 +215,7 @@ class Interest(object):
         
         :param wireFormat: (optional) A WireFormat object used to encode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         :return: The encoded buffer.
         :rtype: Blob
         """
@@ -235,7 +233,7 @@ class Interest(object):
         :type input: An array type with int elements
         :param wireFormat: (optional) A WireFormat object used to decode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
@@ -290,8 +288,7 @@ class Interest(object):
         Check if this interest's name matches the given name (using Name.match) 
         and the given name also conforms to the interest selectors.
         
-        :param name: The name to check.
-        :type name: Name
+        :param Name name: The name to check.
         :return: True if the name and interest selectors match, False otherwise.
         :rtype: bool
         """

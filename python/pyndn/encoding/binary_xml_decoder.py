@@ -88,7 +88,6 @@ class BinaryXmlDecoder(object):
         """
         Set the offset into the input, used for the next read.
         
-        :param offset: The new offset.
-        :type offset: int        
+        :param int offset: The new offset.
         """
         self._offset = offset

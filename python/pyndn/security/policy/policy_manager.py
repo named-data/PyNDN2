@@ -18,8 +18,7 @@ class PolicyManager(object):
         trusted as valid.
         Your derived class should override.
 
-        :param data: The received data packet.
-        :type data: Data
+        :param Data data: The received data packet.
         :return: True if the data does not need to be verified to be trusted as 
           valid, otherwise False.
         :rtype: boolean
@@ -34,8 +33,7 @@ class PolicyManager(object):
         data.
         Your derived class should override.
 
-        :param data: The received data packet.
-        :type data: Data
+        :param Data data: The received data packet.
         :return: True if the data must be verified, otherwise False.
         :rtype: boolean
         :raises: RuntimeError for unimplemented if the derived class does not 
@@ -50,11 +48,9 @@ class PolicyManager(object):
         policy, and get the indication of the next verification step.
         Your derived class should override.
 
-        :param data: The Data object with the signature to check.
-        :type data: Data
-        :param stepCount: The number of verification steps that have been done, 
-           used to track the verification progress.
-        :type stepCount: int
+        :param Data data: The Data object with the signature to check.
+        :param int stepCount: The number of verification steps that have been 
+          done, used to track the verification progress.
         :param onVerified: If the signature is verified, this calls 
           onVerified(data).
         :type onVerified: function object
@@ -75,10 +71,8 @@ class PolicyManager(object):
         policy.
         Your derived class should override.
 
-        :param dataName: The name of data to be signed.
-        :type dataName: Name
-        :param certificateName: The name of signing certificate.
-        :type certificateName: Name
+        :param Name dataName: The name of data to be signed.
+        :param Name certificateName: The name of signing certificate.
         :return: True if the signing certificate can be used to sign the data, 
           otherwise False.
         :rtype: boolean
@@ -93,8 +87,7 @@ class PolicyManager(object):
         identity cannot be inferred, return an empty name.
         Your derived class should override.
 
-        :param dataName: The name of data to be signed.
-        :type dataName: Name
+        :param Name dataName: The name of data to be signed.
         :return: The signing identity or an empty name if cannot infer. 
         :rtype: Name
         :raises: RuntimeError for unimplemented if the derived class does not 

@@ -17,9 +17,8 @@ class TlvEncoder(object):
     """
     Create a new TlvEncoder with an initialCapacity for the encoding buffer.
     
-    :param initialCapacity: (optional) The initial capacity of the encoding 
+    :param int initialCapacity: (optional) The initial capacity of the encoding 
       buffer. If omitted, use a default value.
-    :type initialCapacity: int
     """
     def __init__(self, initialCapacity = 16):
         self._output = DynamicByteArray(initialCapacity)
@@ -44,8 +43,7 @@ class TlvEncoder(object):
         self._output just before self._length from the back.  
         Advance self._length.
         
-        :param varNumber: The non-negative number to encode.
-        :type varNumber: int
+        :param int varNumber: The non-negative number to encode.
         """
         if varNumber < 253:
             self._length += 1
@@ -84,10 +82,8 @@ class TlvEncoder(object):
         self._output just before self._length from the back.  
         Advance self._length.
         
-        :param type: The type of the TLV.
-        :type type: int
-        :param length: The non-negative length of the TLV.
-        :type length: int
+        :param int type: The type of the TLV.
+        :param int length: The non-negative length of the TLV.
         """
         # Write backwards.
         self.writeVarNumber(length)
@@ -99,10 +95,8 @@ class TlvEncoder(object):
         as a non-negative integer and write it to self._output just before 
         self._length from the back. Advance self._length.
  
-        :param type: The type of the TLV.
-        :type type: int
-        :param value: The non-negative integer to encode.
-        :type value: int
+        :param int type: The type of the TLV.
+        :param int value: The non-negative integer to encode.
         """
         if value < 0:
             raise ValueError("TLV integer value may not be negative")
@@ -144,11 +138,9 @@ class TlvEncoder(object):
         If value is negative or None then do nothing, otherwise call 
         writeNonNegativeIntegerTlv.
  
-        :param type: The type of the TLV.
-        :type type: int
-        :param value: If negative or None do nothing, otherwise the integer to 
-          encode.
-        :type value: int
+        :param int type: The type of the TLV.
+        :param int value: If negative or None do nothing, otherwise the integer 
+          to encode.
         """
         if value != None and value >= 0:
             self.writeNonNegativeIntegerTlv(type, value)
@@ -158,11 +150,9 @@ class TlvEncoder(object):
         If value is negative or None then do nothing, otherwise call 
         writeNonNegativeIntegerTlv.
  
-        :param type: The type of the TLV.
-        :type type: int
-        :param value: If negative or None do nothing, otherwise use 
+        :param int type: The type of the TLV.
+        :param float value: If negative or None do nothing, otherwise use 
           int(round(value)).
-        :type value: float
         """
         if value != None and value >= 0:
             # Note: int() will return int, or long if value is large and this 
@@ -175,8 +165,7 @@ class TlvEncoder(object):
         to self._output just before self._length from the back. 
         Advance self._length.
         
-        :param type: The type of the TLV.
-        :type type: int
+        :param int type: The type of the TLV.
         :param value: The byte array with the bytes of the blob.  If value is
           None, then just write the type and length 0.
         :type value: bytearray or memoryview
@@ -196,8 +185,7 @@ class TlvEncoder(object):
         If the byte array is None or zero length then do nothing, otherwise
         call writeBlobTlv.
         
-        :param type: The type of the TLV.
-        :type type: int
+        :param int type: The type of the TLV.
         :param value: If None or zero length do nothing, otherwise the byte 
           array with the bytes of the blob.
         :type value: bytearray or memoryview

@@ -16,9 +16,8 @@ class DynamicByteArray(object):
     """
     Create a new DynamicByteArray with an initial bytearray.
 
-    :param length: (optional) The initial length of the bytearray.  If omitted, 
-      use a default value.
-    :type length: int
+    :param int length: (optional) The initial length of the bytearray.  If 
+      omitted, use a default value.
     """
     def __init__(self, length = 16):
         self._array = bytearray(length)
@@ -28,8 +27,7 @@ class DynamicByteArray(object):
         Ensure length.  If necessary, reallocate the bytearray and copy
         existing data to the front of the new array.
         
-        :param length: The minimum length for the bytearray.
-        :type length: int
+        :param int length: The minimum length for the bytearray.
         """
         if len(self._array) >= length:
             return
@@ -53,8 +51,7 @@ class DynamicByteArray(object):
 
         :param value: The byte array with the bytes to copy.
         :type value: bytearray or memoryview
-        :param offset: The offset in the array to start copying into.
-        :type offset: int
+        :param int offset: The offset in the array to start copying into.
         """
         self.ensureLength(offset + len(value))
         if type(value) is _memoryviewWrapper:
@@ -69,8 +66,7 @@ class DynamicByteArray(object):
         Ensure length.  If necessary, reallocate the bytearray and shift
         existing data to the back of the new array.
         
-        :param length: The minimum length for the bytearray.
-        :type length: int
+        :param int length: The minimum length for the bytearray.
         """
         if len(self._array) >= length:
             return
@@ -94,9 +90,8 @@ class DynamicByteArray(object):
 
         :param value: The byte array with the bytes to copy.
         :type value: bytearray or memoryview
-        :param offsetFromBack: The offset from the back of the array to start
-          copying.
-        :type offsetFromBack: int
+        :param int offsetFromBack: The offset from the back of the array to 
+          start copying.
         """
         self.ensureLengthFromBack(offsetFromBack)
         startIndex = len(self._array) - offsetFromBack

@@ -15,10 +15,10 @@ class KeyChain(object):
     """
     Create a new KeyChain to use the identityManager and policyManager.
     
-    :param identityManager: The identity manager.
-    :type identityManager: IdentityManager
-    :param policyManager: The policy manager.
-    :type policyManager: PolicyManager
+    :param IdentityManager identityManager: The identity manager as a subclass
+      of IdentityManager.
+    :param PolicyManager policyManager: The policy manager as a subclass of 
+      PolicyManager.
     """
     def __init__(self, identityManager, policyManager):
         self._identityManager = identityManager
@@ -30,15 +30,13 @@ class KeyChain(object):
         """
         Wire encode the Data object, sign it and set its signature.
         
-        :param data: The Data object to be signed. This updates its signature 
-          and key locator field and wireEncoding.
-        :type data: Data
-        :param certificateName: The certificate name of the key to use for 
+        :param Data data: The Data object to be signed. This updates its 
+          signature and key locator field and wireEncoding.
+        :param Name certificateName: The certificate name of the key to use for 
           signing.
-        :type certificateName: Name
         :param wireFormat: (optional) A WireFormat object used to encode the 
            Data object. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         """
         self._identityManager.signByCertificate(
           data, certificateName, wireFormat)
@@ -50,19 +48,17 @@ class KeyChain(object):
         onVerifyFailed. We use callback functions because verify may fetch 
         information to check the signature.
         
-        :param data: The Data object with the signature to check. It is an error
-          if data does not have a wireEncoding. To set the wireEncoding, you can 
-          call data.wireDecode.
-        :type data: Data
+        :param Data data: The Data object with the signature to check. It is an 
+          error if data does not have a wireEncoding. To set the wireEncoding, 
+          you can call data.wireDecode.
         :param onVerified: If the signature is verified, this calls 
           onVerified(data).
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails or can't find the 
           public key, this calls onVerifyFailed(data).
         :type onVerifyFailed: function object
-        :param stepCount: (optional) The number of verification steps that have 
-          been done. If omitted, use 0.
-        :type stepCount: int
+        :param int stepCount: (optional) The number of verification steps that 
+          have been done. If omitted, use 0.
         :return: 
         :rtype: boolean
         """
@@ -112,8 +108,7 @@ class KeyChain(object):
         """
         Set the Face which will be used to fetch required certificates.
         
-        :param face: The Face object.
-        :type face: Face
+        :param Face face: The Face object.
         """
         self._face = face
         

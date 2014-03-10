@@ -20,12 +20,10 @@ class SignedBlob(Blob):
     :param blob: (optional) The Blob with a signed portion.  If omitted,
       then isNull() is True.
     :type blob: Blob or SignedBlob
-    :param signedPortionBeginOffset: (optional) The offset in the buffer of the
-      beginning of the signed portion.
-    :type signedPortionBeginOffset: int
-    :param signedPortionEndOffset: (optional) The offset in the buffer of the
-      end of the signed portion.
-    :type signedPortionEndOffset: int
+    :param int signedPortionBeginOffset: (optional) The offset in the buffer of 
+      the beginning of the signed portion.
+    :param int signedPortionEndOffset: (optional) The offset in the buffer of 
+      the end of the signed portion.
     """
     def __init__(
           self, blob = None, signedPortionBeginOffset = None, 

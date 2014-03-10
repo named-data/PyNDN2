@@ -23,12 +23,11 @@ class Blob(object):
       then encode using UTF-8.  If you just want a Blob from a raw str
       without encoding, use Blob.fromRawStr.
     :type array: Blob, bytearray, memoryview or other array of int
-    :param copy: (optional) If true, copy the contents of array into a new
+    :param bool copy: (optional) If true, copy the contents of array into a new
       bytearray.  If false, just use the existing array without copying.
       If omitted, then copy the contents (unless value is already a Blob).
       IMPORTANT: If copy is false, if you keep a pointer to the array then you 
       must treat the array as immutable and promise not to change it.
-    :type copy: bool
     """
     def __init__(self, array = None, copy = True):
         if array == None:
@@ -145,8 +144,7 @@ class Blob(object):
         such as UTF-8.  If you want decode the string such as UTF-8, then
         just pass the string to the Blob constructor.
         
-        :param rawStr: The raw string to convert to a Blob.
-        :type rawStr: str
+        :param str rawStr: The raw string to convert to a Blob.
         :return: A new Blob created from rawStr.
         :rtype: Blob
         """
@@ -168,8 +166,7 @@ class Blob(object):
         because a Blob uses a memoryview which doesn't have built-in comparison
         operators.
 
-        :param other: The other Blob to compare with.
-        :type other: Blob
+        :param Blob other: The other Blob to compare with.
         :return: True if the blobs are equal, otherwise False.
         :rtype: bool
         """
@@ -196,8 +193,7 @@ class Blob(object):
         return 1. We compare explicitly because a Blob uses a memoryview which 
         doesn't have built-in comparison operators.
 
-        :param other: The other Blob to compare with.
-        :type other: Blob
+        :param Blob other: The other Blob to compare with.
         :return: 0 If they compare equal, -1 if self is less than other, or 1 
           if self is greater than other.  If both are equal up to the shortest,
           then return -1 if self is shorter than other, or 1 of self is longer
@@ -259,8 +255,7 @@ class _memoryviewWrapper(object):
     (Python 2.7) or bytes (Python 3.2).  (When we only support Python 3.3 or 
     later, this class is not necessary.)
     
-    :param view: The memoryview to wrap.
-    :type view: memoryview
+    :param memoryview view: The memoryview to wrap.
     """
     def __init__(self, view):
         self._view = view

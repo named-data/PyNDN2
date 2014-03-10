@@ -35,8 +35,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         """
         Encode interest in NDN-TLV and return the encoding.
 
-        :param interest: The Interest object to encode.
-        :type interest: Interest
+        :param Interest interest: The Interest object to encode.
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
@@ -86,8 +85,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         Decode input as an NDN-TLV interest and set the fields of the interest 
         object.  
         
-        :param interest: The Interest object whose fields are updated.
-        :type interest: Interest
+        :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         """
@@ -114,8 +112,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         """
         Encode data in NDN-TLV and return the encoding and signed offsets.
 
-        :param data: The Data object to encode.
-        :type data: Data
+        :param Data data: The Data object to encode.
         :return: A Tuple of (encoding, signedPortionBeginOffset,
           signedPortionEndOffset) where encoding is a Blob containing the
           encoding, signedPortionBeginOffset is the offset in the encoding of 
@@ -152,8 +149,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         Decode input as an NDN-TLV data packet, set the fields in the data 
         object, and return the signed offsets.  
 
-        :param data: The Data object whose fields are updated.
-        :type data: Data
+        :param Data data: The Data object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 

@@ -19,14 +19,12 @@ class PrivateKeyStorage(object):
         Generate a pair of asymmetric keys.
         Your derived class should override.
         
-        :param keyName: The name of the key pair.
-        :type keyName: Name
+        :param Name keyName: The name of the key pair.
         :param keyType: (optional) The type of the key pair.  If omitted, use
           KeyType.RSA
         :type keyType: int from KeyType
-        :param keySize: (optional) The size of the key pair.  If omitted, use
-          2048.
-        :type keySize: int
+        :param int keySize: (optional) The size of the key pair.  If omitted, 
+          use 2048.
         :raises: RuntimeError for unimplemented if the derived class does not 
           override.
         """
@@ -37,8 +35,7 @@ class PrivateKeyStorage(object):
         Get the public key with the keyName.
         Your derived class should override.
         
-        :param keyName: The name of public key.
-        :type keyName: Name
+        :param Name keyName: The name of public key.
         :return: The public key.
         :rtype: PublicKey
         :raises: RuntimeError for unimplemented if the derived class does not 
@@ -54,8 +51,7 @@ class PrivateKeyStorage(object):
 
         :param data: Pointer the input byte buffer to sign.
         :type data: An array type with int elements
-        :param keyName: The name of the signing key.
-        :type keyName: Name
+        :param Name keyName: The name of the signing key.
         :param digestAlgorithm: (optional) the digest algorithm. If omitted,
           use DigestAlgorithm.SHA256.
         :type digestAlgorithm: int from DigestAlgorithm
@@ -71,14 +67,12 @@ class PrivateKeyStorage(object):
         Decrypt data.
         Your derived class should override.
         
-        :param keyName: The name of the decrypting key.
-        :type keyName: Name
+        :param Name keyName: The name of the decrypting key.
         :param data: The byte buffer to be decrypted.
         :type data: An array type with int elements
-        :param isSymmetric: (optional) If True symmetric encryption is used, 
-          otherwise asymmetric encryption is used. If omitted, use
+        :param bool isSymmetric: (optional) If True symmetric encryption is 
+          used, otherwise asymmetric encryption is used. If omitted, use
           asymmetric encryption.
-        :type isSymmetric: bool
         :return: The decrypted data.
         :rtype: Blob
         :raises: RuntimeError for unimplemented if the derived class does not 
@@ -91,14 +85,12 @@ class PrivateKeyStorage(object):
         Encrypt data.
         Your derived class should override.
 
-        :param keyName: The name of the encrypting key.
-        :type keyName: Name
+        :param Name keyName: The name of the encrypting key.
         :param data: The byte buffer to be encrypted.
         :type data: An array type with int elements
-        :param isSymmetric: (optional) If True symmetric encryption is used, 
-          otherwise asymmetric encryption is used. If omitted, use
+        :param bool isSymmetric: (optional) If True symmetric encryption is 
+          used, otherwise asymmetric encryption is used. If omitted, use
           asymmetric encryption.
-        :type isSymmetric: bool
         :return: The encrypted data.
         :rtype: Blob
         :raises: RuntimeError for unimplemented if the derived class does not 
@@ -111,13 +103,11 @@ class PrivateKeyStorage(object):
         Generate a symmetric key.
         Your derived class should override.
 
-        :param keyName: The name of the key.
-        :type keyName: Name
+        :param Name keyName: The name of the key.
         :param keyType: (optional) The type of the key. If omitted, use
           KeyType.AES .
         :type keyType: int from KeyType
-        :param keySize: (optional) The size of the key. If omitted, use 256.
-        :type keySize: int
+        :param int keySize: (optional) The size of the key. If omitted, use 256.
         :raises: RuntimeError for unimplemented if the derived class does not 
           override.
         """
@@ -128,8 +118,7 @@ class PrivateKeyStorage(object):
         Check if a particular key exists.
         Your derived class should override.
         
-        :param keyName: The name of the key.
-        :type keyName: Name
+        :param Name keyName: The name of the key.
         :param keyClass: The class of the key, e.g. KeyClass.PUBLIC, 
            KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
         :type keyClass: int from KeyClass

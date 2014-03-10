@@ -22,18 +22,14 @@ class Face(object):
     has the forms Face(transport, connectionInfo) or 
     Face(host, port)
     
-    :param transport: An object of a subclass of Transport used for 
+    :param Transport transport: An object of a subclass of Transport used for 
       communication.
-    :type transport: Transport
-    :param connectionInfo: An object of a subclass of Transport.ConnectionInfo
-      to be used to connect to the transport.
-    :type connectionInfo: Transport.ConnectionInfo
-    :param host: In the Face(host, port) form of the constructor, host is
+    :param Transport.ConnectionInfo connectionInfo: An object of a subclass of 
+      Transport.ConnectionInfo to be used to connect to the transport.
+    :param str host: In the Face(host, port) form of the constructor, host is
       the host of the NDN hub with a TcpTransport.
-    :type host: str
-    :param port: (optional) In the Face(host, port) form of the constructor, 
+    :param int port: (optional) In the Face(host, port) form of the constructor, 
       port is the port of the NDN hub. If omitted. use 6363.
-    :type port: int
     """
     def __init__(self, arg1, arg2 = None):
         if type(arg1) is str:
@@ -58,15 +54,12 @@ class Face(object):
         expressInterest(name [, interestTemplate], onData [, onTimeout] 
         [, wireFormat]).
         
-        :param interest: The Interest (if the first form is used). This copies 
-          the Interest.
-        :type interest: Interest
-        :param name: A name for the Interest (if the second form is used).
-        :type name: Name
-        :param interestTemplate: (optional) if not None, copy interest selectors 
-          from the template (if the second form is used).  If omitted, use a
-          default interest lifetime.
-        :type interestTemplate: Interest
+        :param Interest interest: The Interest (if the first form is used). This 
+          copies the Interest.
+        :param Name name: A name for the Interest (if the second form is used).
+        :param Interest interestTemplate: (optional) if not None, copy interest 
+          selectors from the template (if the second form is used).  If omitted, 
+          use a default interest lifetime.
         :param onData: A function object to call when a matching data packet is 
           received.
         :type onData: function object
@@ -75,7 +68,7 @@ class Face(object):
         :type onTimeout: function object
         :param wireFormat: (optional) A WireFormat object used to encode the 
            message. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         :return:  The pending interest ID which can be used with 
           removePendingInterest.
         :rtype: int
@@ -152,8 +145,7 @@ class Face(object):
         with a different pendingInterestId, even it if has the same interest 
         name. If there is no entry with the pendingInterestId, do nothing.
         
-        :param pendingInterestId: The ID returned from expressInterest.
-        :type pendingInterestId: int
+        :param int pendingInterestId: The ID returned from expressInterest.
         """
         self._node.removePendingInterest(pendingInterestId)
         
@@ -164,19 +156,17 @@ class Face(object):
         Register prefix with the connected NDN hub and call onInterest when a 
         matching interest is received.
         
-        :param prefix: The Name for the prefix to register which is NOT copied 
-          for this internal Node method. The Face registerPrefix is reponsible
-          for making a copy for Node to use..
-        :type prefix: Name
+        :param Name prefix: The Name for the prefix to register which is NOT 
+          copied for this internal Node method. The Face registerPrefix is 
+          reponsible for making a copy for Node to use..
         :param onInterest: A function object to call when a matching interest is
           received.
         :type onInterest: function object
         :param onRegisterFailed: A function object to call if failed to retrieve
           the connected hub's ID or failed to register the prefix.
         :type onRegisterFailed: function object
-        :param flags: The flags for finer control of which interests are 
-          forwardedto the application.
-        :type flags: ForwardingFlags
+        :param ForwardingFlags flags: The flags for finer control of which 
+          interests are forwardedto the application.
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat        
         """
@@ -197,8 +187,7 @@ class Face(object):
         with a different registeredPrefixId, even it if has the same prefix 
         name. If there is no entry with the registeredPrefixId, do nothing.
         
-        :param registeredPrefixId: The ID returned from registerPrefix.
-        :type registeredPrefixId: int
+        :param int registeredPrefixId: The ID returned from registerPrefix.
         """
         self._node.removeRegisteredPrefix(registeredPrefixId)
         

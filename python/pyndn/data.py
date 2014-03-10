@@ -47,7 +47,7 @@ class Data(object):
         
         :param wireFormat: (optional) A WireFormat object used to encode this 
            Data object. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         :return: The encoded buffer in a SignedBlob object.
         :rtype: SignedBlob
         """
@@ -83,7 +83,7 @@ class Data(object):
         :type input: A Blob or an array type with int elements 
         :param wireFormat: (optional) A WireFormat object used to decode this 
            Data object. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat.
+        :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
@@ -172,8 +172,7 @@ class Data(object):
         """
         Set name to a copy of the given Name.
         
-        :param name: The Name which is copied.
-        :type name: Name
+        :param Name name: The Name which is copied.
         :return: This Data so that you can chain calls to update values.
         :rtype: Data
         """
@@ -185,8 +184,7 @@ class Data(object):
         """
         Set metaInfo to a copy of the given MetaInfo.
         
-        :param metaInfo: The MetaInfo which is copied.
-        :type meatInfo: MetaInfo
+        :param MetaInfo metaInfo: The MetaInfo which is copied.
         :return: This Data so that you can chain calls to update values.
         :rtype: Data
         """

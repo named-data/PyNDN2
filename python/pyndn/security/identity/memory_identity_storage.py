@@ -35,8 +35,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Check if the specified identity already exists.
         
-        :param identityName: The identity name.
-        :type identityName: Name
+        :param Name identityName: The identity name.
         :return: True if the identity exists, otherwise False.
         :rtype: bool
         """
@@ -47,8 +46,7 @@ class MemoryIdentityStorage(IdentityStorage):
         Add a new identity. An exception will be thrown if the identity already 
         exists.
 
-        :param identityName: The identity name.
-        :type identityName: Name
+        :param Name identityName: The identity name.
         """
         identityUri = identityName.toUri()
         if identityUri in self._identityStore:
@@ -70,8 +68,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Check if the specified key already exists.
         
-        :param keyName: The name of the key.
-        :type keyName: Name
+        :param Name keyName: The name of the key.
         :return: True if the key exists, otherwise False.
         :rtype: bool
         """
@@ -81,12 +78,10 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Add a public key to the identity storage.
         
-        :param keyName: The name of the public key to be added.
-        :type keyName: Name
+        :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
-        :param publicKeyDer: A blob of the public key DER to be added.
-        :type publicKeyDer: Blob
+        :param Blob publicKeyDer: A blob of the public key DER to be added.
         """
         identityName = keyName.getSubName(0, keyName.size() - 1);
 
@@ -102,8 +97,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Get the public key DER blob from the identity storage.
         
-        :param keyName: The name of the requested public key.
-        :type keyName: Name
+        :param Name keyName: The name of the requested public key.
         :return: The DER Blob. If not found, return a isNull() Blob.
         :rtype: Blob
         """
@@ -120,8 +114,7 @@ class MemoryIdentityStorage(IdentityStorage):
         Activate a key. If a key is marked as inactive, its private part will 
         not be used in packet signing.
         
-        :param keyName: The name of the key.
-        :type keyName: Name
+        :param Name keyName: The name of the key.
         """
         raise RuntimeError(
           "MemoryIdentityStorage.activateKey is not implemented")
@@ -131,8 +124,7 @@ class MemoryIdentityStorage(IdentityStorage):
         Deactivate a key. If a key is marked as inactive, its private part will 
         not be used in packet signing.
         
-        :param keyName: The name of the key.
-        :type keyName: Name
+        :param Name keyName: The name of the key.
         """
         raise RuntimeError(
          "MemoryIdentityStorage.deactivateKey is not implemented")
@@ -141,8 +133,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Check if the specified certificate already exists.
         
-        :param certificateName: The name of the certificate.
-        :type certificateName: Name
+        :param Name certificateName: The name of the certificate.
         :return: True if the certificate exists, otherwise False.
         :rtype: bool
         """
@@ -152,9 +143,8 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Add a certificate to the identity storage.
         
-        :param certificate: The certificate to be added. This makes a copy of 
-          the certificate.
-        :type certificate: IdentityCertificate
+        :param IdentityCertificate certificate: The certificate to be added. 
+          This makes a copy of the certificate.
         """
         certificateName = certificate.getName()
         keyName = certificate.getPublicKeyName()
@@ -187,12 +177,10 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Get a certificate from the identity storage.
         
-        :param certificateName: The name of the requested certificate.
-        :type certificateName: Name
-        :param allowAny: (optional) If False, only a valid certificate will be 
-          returned, otherwise validity is disregarded.  If omitted, 
+        :param Name certificateName: The name of the requested certificate.
+        :param bool allowAny: (optional) If False, only a valid certificate will 
+          be returned, otherwise validity is disregarded.  If omitted, 
           allowAny is False.
-        :type allowAny: bool
         :return: The requested certificate. If not found, return None.
         :rtype: Data
         """
@@ -223,8 +211,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Get the default key name for the specified identity.
         
-        :param identityName: The identity name.
-        :type identityName: Name
+        :param Name identityName: The identity name.
         :return: The default key name.
         :rtype: Name
         """
@@ -235,8 +222,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Get the default certificate name for the specified key.
         
-        :param keyName: The key name.
-        :type keyName: Name
+        :param Name keyName: The key name.
         :return: The default certificate name.
         :rtype: Name
         """
@@ -248,8 +234,7 @@ class MemoryIdentityStorage(IdentityStorage):
         Set the default identity. If the identityName does not exist, then clear
         the default identity so that getDefaultIdentity() returns an empty name.
         
-        :param identityName: The default identity name.
-        :type identityName: Name
+        :param Name identityName: The default identity name.
         """
         identityUri = identityName.toUri()
         if identityUri in self._identityStore:
@@ -263,10 +248,9 @@ class MemoryIdentityStorage(IdentityStorage):
         Set the default key name for the specified identity.
         
         
-        :param keyName: The key name.
-        :type keyName: Name
-        :param identityNameCheck: (optional) The identity name to check the keyName.
-        :type identityNameCheck: Name
+        :param Name keyName: The key name.
+        :param Name identityNameCheck: (optional) The identity name to check the 
+          keyName.
         """
         raise RuntimeError(
           "MemoryIdentityStorage.setDefaultKeyNameForIdentity is not implemented")
@@ -275,10 +259,8 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Set the default key name for the specified identity.
                 
-        :param keyName: The key name.
-        :type keyName: Name
-        :param certificateName: The certificate name.
-        :type certificateName: Name
+        :param Name keyName: The key name.
+        :param Name certificateName: The certificate name.
         """
         raise RuntimeError(
           "MemoryIdentityStorage.setDefaultCertificateNameForKey is not implemented")
