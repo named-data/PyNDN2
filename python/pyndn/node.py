@@ -333,6 +333,7 @@ class Node(object):
           "selfreg").append(encodedData)
 
         interest = Interest(interestName)
+        interest.setInterestLifetimeMilliseconds(4000.0)
         interest.setScope(1)
         encodedInterest = interest.wireEncode(wireFormat)
 
@@ -340,7 +341,9 @@ class Node(object):
         self._registeredPrefixTable.append(Node._RegisteredPrefix(
           registeredPrefixId, prefix, onInterest))
 
-        self._transport.send(encodedInterest.toBuffer())
+        response = Node._RegisterResponse(prefix, onRegisterFailed)
+        self.expressInterest(
+          interest, response.onData, response.onTimeout, wireFormat)
         
     class _PendingInterest(object):
         """
@@ -497,7 +500,7 @@ class Node(object):
             
     class _NdndIdFetcher(object):
         """
-        An NdndIdFetcher receives the Data packet with the publisher public key 
+        An _NdndIdFetcher receives the Data packet with the publisher public key 
         digest for the connected NDN hub.
         """
         def __init__(self, node, registeredPrefixId, prefix, onInterest, 
@@ -536,6 +539,36 @@ class Node(object):
         def onTimeout(self, interest):
             """
             We timed out fetching the ndnd ID.
+            """
+            self._onRegisterFailed(self._prefix)
+            
+    class _RegisterResponse(object):
+        """
+        A _RegisterResponse receives the response Data packet from the register
+        prefix interest sent to the connected NDN hub. If this gets a bad 
+        response or a timeout, call onRegisterFailed.
+        """
+        def __init__(self, prefix, onRegisterFailed):
+            self._prefix = prefix
+            self._onRegisterFailed = onRegisterFailed
+            
+        def onData(self, interest, responseData):
+            """
+            We received the response. Do a quick check of expected name 
+            components.
+            """
+            expectedName = Name("/ndnx/.../selfreg")
+            if (responseData.getName().size() < 4 or
+                  responseData.getName()[0] != expectedName[0] or
+                  responseData.getName()[2] != expectedName[2]):
+                self._onRegisterFailed(self._prefix)
+                return
+
+            # Otherwise, silently succeed.
+
+        def onTimeout(self, interest):
+            """
+            We timed out waiting for the response.
             """
             self._onRegisterFailed(self._prefix)
             
