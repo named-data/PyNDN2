@@ -57,11 +57,10 @@ class Tlv0_1a2WireFormat(WireFormat):
             encoder.writeBlobTlv(Tlv.Nonce, nonce)
         elif interest.getNonce().size() < 4:
             nonce = bytearray(4)
-            if interest.getNonce().size() > 0:
-                # Copy existing nonce bytes.
-                nonce[:interest.getNonce().size()] = interest.getNonce().buf()
+            # Copy existing nonce bytes.
+            nonce[:interest.getNonce().size()] = interest.getNonce().buf()
             
-            # Generate random bytes for remainig bytes in the nonce.
+            # Generate random bytes for remaining bytes in the nonce.
             for i in range(interest.getNonce().size(), 4):
                 nonce[i] = _systemRandom.randint(0, 0xff)
                 
