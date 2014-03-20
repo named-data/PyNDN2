@@ -30,7 +30,7 @@ class Counter(object):
         dump("Time out for interest", interest.getName().toUri()) 
 
 def main():
-    face = Face("spurs.cs.ucla.edu")
+    face = Face("borges.metwi.ucla.edu")
     
     counter = Counter()
 
