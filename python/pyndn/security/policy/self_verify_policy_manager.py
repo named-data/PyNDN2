@@ -150,10 +150,6 @@ class SelfVerifyPolicyManager(PolicyManager):
         if not type(signature) is Sha256WithRsaSignature:
           raise RuntimeError("signature is not Sha256WithRsaSignature.")
 
-        # Set the data packet's default wire encoding if it is not already there.
-        if data.getDefaultWireEncoding().isNull():
-            data.wireEncode()
-
         # Get the public key.
         if _PyCryptoUsesStr:
             # PyCrypto in Python 2 requires a str.
@@ -163,7 +159,8 @@ class SelfVerifyPolicyManager(PolicyManager):
         publicKey = RSA.importKey(publicKeyDerBytes)
         
         # Get the bytes to verify.
-        signedPortion = data.getDefaultWireEncoding().toSignedBuffer()
+        # wireEncode returns the cached encoding if available.
+        signedPortion = data.wireEncode().toSignedBuffer()
         # Sign the hash of the data.
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert signedPortion.

@@ -168,10 +168,9 @@ class MemoryIdentityStorage(IdentityStorage):
               "Certificate does not match the public key!")
   
         # Insert the certificate.
-        if certificate.getDefaultWireEncoding().isNull():
-            certificate.wireEncode()
+        # wireEncode returns the cached encoding if available.
         self._certificateStore[certificateName.toUri()] = (
-           certificate.getDefaultWireEncoding())
+           certificate.wireEncode())
 
     def getCertificate(self, certificateName, allowAny = False):    
         """
