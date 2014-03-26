@@ -8,7 +8,7 @@
 
 __all__ = ['data', 'exclude', 'face', 'forwarding_entry', 'forwarding_flags', 
            'interest', 'key_locator', 'meta_info', 'name', 
-           'sha256_with_rsa_signature', 'signature']
+           'sha256_with_rsa_signature', 'signature', 'threadsafe_face']
 
 import sys as _sys
 
@@ -24,6 +24,7 @@ try:
     from pyndn.name import *
     from pyndn.sha256_with_rsa_signature import *
     from pyndn.signature import *
+    from pyndn.threadsafe_face import *
 except ImportError:
     del _sys.modules[__name__]
     raise
