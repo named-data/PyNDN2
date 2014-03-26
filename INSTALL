@@ -4,7 +4,8 @@ PyNDN: An Named Data Networking client library with TLV wire format support in n
 Prerequisites
 -------------
 Required: Python 2.7 or later
-Required: PyCryopto
+Required: PyCrypto
+Optional: trollius (for asyncio in Python 2.7)
 
 Following are the detailed steps for each platform to install the prerequisites.
 
@@ -22,7 +23,7 @@ sudo easy_install pip
 sudo pip install pycrypto
 
 * Ubuntu 12.04 (64 bit and 32 bit)
-Need to build/install the latest PyCrypto. In a terminal, enter:
+# Need to build/install the latest PyCrypto. In a terminal, enter:
 cd ~
 sudo apt-get install git
 git clone https://github.com/dlitz/pycrypto.git
@@ -30,6 +31,10 @@ cd pycrypto
 sudo apt-get install python-dev
 python setup.py build
 sudo python setup.py install
+
+# Optional: To install trollius, in a terminal enter:
+sudo apt-get install python-pip
+sudo pip install trollius
 
 * Ubuntu 13.04 (64 bit)
 (PyCrypto is already installed.)
