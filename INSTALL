@@ -13,49 +13,49 @@ Following are the detailed steps for each platform to install the prerequisites.
 Install Xcode.
 In Xcode Preferences > Downloads, install "Command Line Tools".
 In a terminal, enter:
-$ sudo easy_install pip
-$ sudo pip install pycrypto
+  sudo easy_install pip
+  sudo pip install pycrypto
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
-$ sudo pip install trollius
+  sudo pip install trollius
 
 * Mac OS X 10.9
 Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)
 In a terminal, enter:
-$ sudo easy_install pip
-$ sudo pip install pycrypto
+  sudo easy_install pip
+  sudo pip install pycrypto
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
-$ sudo pip install trollius
+  sudo pip install trollius
 
 * Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
-$ cd ~
-$ sudo apt-get install git
-$ git clone https://github.com/dlitz/pycrypto.git
-$ cd pycrypto
-$ sudo apt-get install python-dev
-$ python setup.py build
-$ sudo python setup.py install
+  cd ~
+  sudo apt-get install git
+  git clone https://github.com/dlitz/pycrypto.git
+  cd pycrypto
+  sudo apt-get install python-dev
+  python setup.py build
+  sudo python setup.py install
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
-$ sudo apt-get install python-pip
-$ sudo pip install trollius
+  sudo apt-get install python-pip
+  sudo pip install trollius
 
 * Ubuntu 13.10 (64 bit)
 (PyCrypto is already installed.)
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
-$ sudo apt-get install python-pip
-$ sudo pip install trollius
+  sudo apt-get install python-pip
+  sudo pip install trollius
 
 Build
 -----
 You need PyNDN on the Python path.  To temporarily set it, do the following.
 If <PyNDN root> is the path to the root of the PyNDN distribution, in a terminal enter:
-$ export PYTHONPATH=$PYTHONPATH:<PyNDN root>/python
+  export PYTHONPATH=$PYTHONPATH:<PyNDN root>/python
 
 For examples, see the test files in <PyNDN root>/tests.  For example in a terminal enter:
-$ cd <PyNDN root>/tests
-$ python test_encode_decode_data.py
-$ python test_get_async.py
+  cd <PyNDN root>/tests
+  python test_encode_decode_data.py
+  python test_get_async.py
