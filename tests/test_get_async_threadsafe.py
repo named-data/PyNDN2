@@ -31,7 +31,7 @@ class Counter(object):
 
 def main():
     loop = asyncio.get_event_loop()
-    face = ThreadsafeFace(loop, "spurs.cs.ucla.edu")
+    face = ThreadsafeFace(loop, "aleph.ndn.ucla.edu")
 
     counter = Counter()
     face.stopWhen(lambda: counter._callbackCount >= 1)
