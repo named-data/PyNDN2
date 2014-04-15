@@ -157,9 +157,9 @@ class IdentityStorage(object):
         """
         Get the default identity.
         
-        :return: The name of default identity, or an empty name if there is no 
-          default.
+        :return: The name of default identity.
         :rtype: Name
+        :raises: SecurityException if the default identity is not set.
         """
         raise RuntimeError("getDefaultIdentity is not implemented")
 
@@ -197,7 +197,7 @@ class IdentityStorage(object):
     def setDefaultIdentity(self, identityName):    
         """
         Set the default identity. If the identityName does not exist, then clear
-        the default identity so that getDefaultIdentity() returns an empty name.
+        the default identity so that getDefaultIdentity() raises an exception.
         
         :param Name identityName: The default identity name.
         """

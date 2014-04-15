@@ -200,10 +200,14 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         Get the default identity.
         
-        :return: The name of default identity, or an empty name if there is no 
-          default.
+        :return: The name of default identity.
         :rtype: Name
+        :raises: SecurityException if the default identity is not set.
         """
+        if len(self._defaultIdentity) == 0:
+            raise SecurityException(
+          "MemoryIdentityStorage.getDefaultIdentity: The default identity is not defined");
+          
         return Name(self._defaultIdentity)
 
     def getDefaultKeyNameForIdentity(self, identityName):    
@@ -231,7 +235,7 @@ class MemoryIdentityStorage(IdentityStorage):
     def setDefaultIdentity(self, identityName):    
         """
         Set the default identity. If the identityName does not exist, then clear
-        the default identity so that getDefaultIdentity() returns an empty name.
+        the default identity so that getDefaultIdentity() raises an exception.
         
         :param Name identityName: The default identity name.
         """
