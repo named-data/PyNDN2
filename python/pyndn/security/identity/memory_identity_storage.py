@@ -217,6 +217,8 @@ class MemoryIdentityStorage(IdentityStorage):
         :param Name identityName: The identity name.
         :return: The default key name.
         :rtype: Name
+        :raises: SecurityException if the default key name for the identity is 
+          not set.
         """
         raise RuntimeError(
           "MemoryIdentityStorage.getDefaultKeyNameForIdentity is not implemented")
@@ -228,6 +230,8 @@ class MemoryIdentityStorage(IdentityStorage):
         :param Name keyName: The key name.
         :return: The default certificate name.
         :rtype: Name
+        :raises: SecurityException if the default certificate name for the key 
+          name is not set.
         """
         raise RuntimeError(
           "MemoryIdentityStorage.getDefaultCertificateNameForKey is not implemented")

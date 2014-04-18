@@ -170,6 +170,8 @@ class IdentityStorage(object):
         :param Name identityName: The identity name.
         :return: The default key name.
         :rtype: Name
+        :raises: SecurityException if the default key name for the identity is 
+          not set.
         """
         raise RuntimeError("getDefaultKeyNameForIdentity is not implemented")
 
@@ -180,6 +182,8 @@ class IdentityStorage(object):
         :param Name identityName: The identity name.
         :return: The default certificate name.
         :rtype: Name
+        :raises: SecurityException if the default key name for the identity is 
+          not set or the default certificate name for the key name is not set.
         """
         keyName = self.getDefaultKeyNameForIdentity(identityName)   
         return getDefaultCertificateNameForKey(keyName)
@@ -191,6 +195,8 @@ class IdentityStorage(object):
         :param Name keyName: The key name.
         :return: The default certificate name.
         :rtype: Name
+        :raises: SecurityException if the default certificate name for the key 
+          name is not set.
         """
         raise RuntimeError("getDefaultCertificateNameForKey is not implemented")
 
