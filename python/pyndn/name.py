@@ -50,6 +50,8 @@ class Name(object):
             if type(value) is Name.Component:
                 # Use the existing Blob in the other Component.
                 self._value = value._value
+            elif value == None:
+                self._value = Blob([])
             else:
                 # Blob will make a copy.
                 self._value = value if isinstance(value, Blob) else Blob(value)
