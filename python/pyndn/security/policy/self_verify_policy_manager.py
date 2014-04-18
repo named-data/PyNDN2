@@ -22,7 +22,7 @@ from pyndn.util import Blob
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security import SecurityException
-from pyndn.security.policy import PolicyManager
+from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 
 class SelfVerifyPolicyManager(PolicyManager):
