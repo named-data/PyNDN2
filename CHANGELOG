@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0alpha2 (2014-04-18)
+Interim changes since PyNDN v2.0alpha2 (2014-04-21)
 ---------------------------------------------------
 
 Changes
@@ -9,6 +9,7 @@ Changes
 * Name: Added method equals(name) and operators __eq__ and __ne__.
 * Name: Added method compare(other) and operators __lt__, etc.
 * Name: Added a default Name.Component constructor to make a zero-length value.
+* Renamed test_publish_async to test_publish_async_ndnx.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.
