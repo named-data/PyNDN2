@@ -1,43 +1,46 @@
-tlv Package
-===========
+pyndn.encoding.tlv package
+==========================
 
-:mod:`tlv` Package
-------------------
+Submodules
+----------
 
-.. automodule:: pyndn.encoding.tlv
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`tlv` Module
------------------
+pyndn.encoding.tlv.tlv module
+-----------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`tlv_decoder` Module
--------------------------
+pyndn.encoding.tlv.tlv_decoder module
+-------------------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv_decoder
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`tlv_encoder` Module
--------------------------
+pyndn.encoding.tlv.tlv_encoder module
+-------------------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv_encoder
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`tlv_structure_decoder` Module
------------------------------------
+pyndn.encoding.tlv.tlv_structure_decoder module
+-----------------------------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv_structure_decoder
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: pyndn.encoding.tlv
+    :members:
+    :undoc-members:
+    :show-inheritance:

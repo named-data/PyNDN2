@@ -1,27 +1,30 @@
-certificate Package
-===================
+pyndn.security.certificate package
+==================================
 
-:mod:`certificate` Package
---------------------------
+Submodules
+----------
 
-.. automodule:: pyndn.security.certificate
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`identity_certificate` Module
-----------------------------------
+pyndn.security.certificate.identity_certificate module
+------------------------------------------------------
 
 .. automodule:: pyndn.security.certificate.identity_certificate
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`public_key` Module
-------------------------
+pyndn.security.certificate.public_key module
+--------------------------------------------
 
 .. automodule:: pyndn.security.certificate.public_key
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: pyndn.security.certificate
+    :members:
+    :undoc-members:
+    :show-inheritance:

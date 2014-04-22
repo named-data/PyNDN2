@@ -1,35 +1,46 @@
-policy Package
-==============
+pyndn.security.policy package
+=============================
 
-:mod:`policy` Package
----------------------
+Submodules
+----------
 
-.. automodule:: pyndn.security.policy
+pyndn.security.policy.no_verify_policy_manager module
+-----------------------------------------------------
+
+.. automodule:: pyndn.security.policy.no_verify_policy_manager
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`policy_manager` Module
-----------------------------
+pyndn.security.policy.policy_manager module
+-------------------------------------------
 
 .. automodule:: pyndn.security.policy.policy_manager
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`self_verify_policy_manager` Module
-----------------------------------------
+pyndn.security.policy.self_verify_policy_manager module
+-------------------------------------------------------
 
 .. automodule:: pyndn.security.policy.self_verify_policy_manager
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`validation_request` Module
---------------------------------
+pyndn.security.policy.validation_request module
+-----------------------------------------------
 
 .. automodule:: pyndn.security.policy.validation_request
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: pyndn.security.policy
+    :members:
+    :undoc-members:
+    :show-inheritance:

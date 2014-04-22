@@ -1,51 +1,54 @@
-util Package
-============
+pyndn.util package
+==================
 
-:mod:`util` Package
--------------------
+Submodules
+----------
 
-.. automodule:: pyndn.util
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`blob` Module
-------------------
+pyndn.util.blob module
+----------------------
 
 .. automodule:: pyndn.util.blob
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`change_counter` Module
-----------------------------
+pyndn.util.change_counter module
+--------------------------------
 
 .. automodule:: pyndn.util.change_counter
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`common` Module
---------------------
+pyndn.util.common module
+------------------------
 
 .. automodule:: pyndn.util.common
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`dynamic_byte_array` Module
---------------------------------
+pyndn.util.dynamic_byte_array module
+------------------------------------
 
 .. automodule:: pyndn.util.dynamic_byte_array
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`signed_blob` Module
--------------------------
+pyndn.util.signed_blob module
+-----------------------------
 
 .. automodule:: pyndn.util.signed_blob
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: pyndn.util
+    :members:
+    :undoc-members:
+    :show-inheritance:

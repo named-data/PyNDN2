@@ -1,35 +1,38 @@
-transport Package
-=================
+pyndn.transport package
+=======================
 
-:mod:`transport` Package
-------------------------
+Submodules
+----------
 
-.. automodule:: pyndn.transport
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`tcp_transport` Module
----------------------------
+pyndn.transport.tcp_transport module
+------------------------------------
 
 .. automodule:: pyndn.transport.tcp_transport
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`transport` Module
------------------------
+pyndn.transport.transport module
+--------------------------------
 
 .. automodule:: pyndn.transport.transport
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`udp_transport` Module
----------------------------
+pyndn.transport.udp_transport module
+------------------------------------
 
 .. automodule:: pyndn.transport.udp_transport
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: pyndn.transport
+    :members:
+    :undoc-members:
+    :show-inheritance:
