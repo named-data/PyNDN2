@@ -249,7 +249,7 @@ class Interest(object):
         interest selectors, append "?" and add the selectors as a query string.  
         For example "/test/name?ndn.ChildSelector=1".
         :note: This is an experimental feature. See the API docs for more detail at 
-          http://named-data.net/doc/ndn-ccl-api/interest.html#interest-touri-method .
+        http://named-data.net/doc/ndn-ccl-api/interest.html#interest-touri-method .
         
         :return: The URI string.
         :rtype: string

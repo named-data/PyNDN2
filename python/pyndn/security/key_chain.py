@@ -10,7 +10,7 @@ This module defines the KeyChain class which provides a set of interfaces to the
 security library such as identity management, policy configuration  and packet 
 signing and verification.
 Note: This class is an experimental feature. See the API docs for more detail at
-  http://named-data.net/doc/ndn-ccl-api/key-chain.html .
+http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
 class KeyChain(object):
