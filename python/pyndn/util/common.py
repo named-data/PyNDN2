@@ -71,6 +71,7 @@ class Common(object):
         type, but Python 2 does, and we just want to check arguments for str.
         """
         if _haveTypeUnicode and type(input) == unicode:
-            return str(input)
+            # In Python 2, we can't use str(input) since this fails for non-ascii.
+            return "".join(map(_chr_ord, input))
         else:
             return input
