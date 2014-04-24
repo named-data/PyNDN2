@@ -129,7 +129,7 @@ class Tlv0_1a2WireFormat(WireFormat):
                              data.getSignature().getSignature().buf())
         signedPortionEndOffsetFromBack = len(encoder)
         
-        self._encodeSignatureSha256WithRsaValue(data.getSignature(), encoder)
+        self._encodeSignatureSha256WithRsa(data.getSignature(), encoder)
         encoder.writeBlobTlv(Tlv.Content, data.getContent().buf())
         self._encodeMetaInfo(data.getMetaInfo(), encoder)
         self._encodeName(data.getName(), encoder)
@@ -429,7 +429,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder.finishNestedTlvs(endOffset)
 
     @staticmethod
-    def _encodeSignatureSha256WithRsaValue(signature, encoder):
+    def _encodeSignatureSha256WithRsa(signature, encoder):
         saveLength = len(encoder)
         
         # Encode backwards.
