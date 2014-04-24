@@ -24,6 +24,8 @@ class Name(object):
     :type value: Name or str
     """
     def __init__(self, value = None):
+        value = Common.unicodeToString(value)
+        
         if type(value) is Name:
             # Copy the components array, but don't need to copy each Component.
             self._components = value._components[:]
