@@ -202,7 +202,7 @@ class MemoryIdentityStorage(IdentityStorage):
         
         :return: The name of default identity.
         :rtype: Name
-        :raises: SecurityException if the default identity is not set.
+        :raises SecurityException: if the default identity is not set.
         """
         if len(self._defaultIdentity) == 0:
             raise SecurityException(
@@ -217,7 +217,7 @@ class MemoryIdentityStorage(IdentityStorage):
         :param Name identityName: The identity name.
         :return: The default key name.
         :rtype: Name
-        :raises: SecurityException if the default key name for the identity is 
+        :raises SecurityException: if the default key name for the identity is 
           not set.
         """
         raise RuntimeError(
@@ -230,7 +230,7 @@ class MemoryIdentityStorage(IdentityStorage):
         :param Name keyName: The key name.
         :return: The default certificate name.
         :rtype: Name
-        :raises: SecurityException if the default certificate name for the key 
+        :raises SecurityException: if the default certificate name for the key 
           name is not set.
         """
         raise RuntimeError(
