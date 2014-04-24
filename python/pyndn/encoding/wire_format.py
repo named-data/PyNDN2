@@ -20,8 +20,15 @@ class WireFormat(object):
         override.
 
         :param Interest interest: The Interest object to encode.
-        :return: A Blob containing the encoding.
-        :rtype: Blob
+        :return: A Tuple of (encoding, signedPortionBeginOffset,
+          signedPortionEndOffset) where encoding is a Blob containing the
+          encoding, signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The 
+          signed portion starts from the first name component and ends just 
+          before the final name component (which is assumed to be a signature 
+          for a signed interest).
+        :rtype: (Blob, int, int)
         :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
@@ -35,6 +42,14 @@ class WireFormat(object):
         :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
+          where signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The 
+          signed portion starts from the first name component and ends just 
+          before the final name component (which is assumed to be a signature 
+          for a signed interest).
+        :rtype: (int, int)
         :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """

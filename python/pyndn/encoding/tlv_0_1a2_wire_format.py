@@ -36,8 +36,15 @@ class Tlv0_1a2WireFormat(WireFormat):
         Encode interest in NDN-TLV and return the encoding.
 
         :param Interest interest: The Interest object to encode.
-        :return: A Blob containing the encoding.
-        :rtype: Blob
+        :return: A Tuple of (encoding, signedPortionBeginOffset,
+          signedPortionEndOffset) where encoding is a Blob containing the
+          encoding, signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The 
+          signed portion starts from the first name component and ends just 
+          before the final name component (which is assumed to be a signature 
+          for a signed interest).
+        :rtype: (Blob, int, int)
         """
         encoder = TlvEncoder(256)
         saveLength = len(encoder)
@@ -73,11 +80,21 @@ class Tlv0_1a2WireFormat(WireFormat):
             encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf()[:4])
         
         self._encodeSelectors(interest, encoder)
-        self._encodeName(interest.getName(), encoder)
-
-        encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
         
-        return Blob(encoder.getOutput(), False)
+        (tempSignedPortionBeginOffset, tempSignedPortionEndOffset) = \
+          self._encodeName(interest.getName(), encoder)
+        signedPortionBeginOffsetFromBack = (len(encoder) - 
+                                            tempSignedPortionBeginOffset)
+        signedPortionEndOffsetFromBack = (len(encoder) - 
+                                          tempSignedPortionEndOffset)
+        
+        encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
+        signedPortionBeginOffset = (len(encoder) - 
+                                    signedPortionBeginOffsetFromBack)
+        signedPortionEndOffset = len(encoder) - signedPortionEndOffsetFromBack
+        
+        return (Blob(encoder.getOutput(), False), signedPortionBeginOffset, 
+                signedPortionEndOffset)
 
     def decodeInterest(self, interest, input):
         """
@@ -87,6 +104,14 @@ class Tlv0_1a2WireFormat(WireFormat):
         :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
+          where signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The 
+          signed portion starts from the first name component and ends just 
+          before the final name component (which is assumed to be a signature 
+          for a signed interest).
+        :rtype: (int, int)
         """
         decoder = TlvDecoder(input)
 
@@ -267,23 +292,75 @@ class Tlv0_1a2WireFormat(WireFormat):
         
     @staticmethod
     def _encodeName(name, encoder):
+        """
+        Encode the name to the encoder.
+        
+        :param Name name: The name to encode.
+        :param TlvEncoder encoder: The encoder to receive the encoding.
+        :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
+          where signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The 
+          signed portion starts from the first name component and ends just 
+          before the final name component (which is assumed to be a signature 
+          for a signed interest).
+        :rtype: (int, int)
+        """
         saveLength = len(encoder)
         
         # Encode the components backwards.
         for i in range(len(name) - 1, -1, -1):
             encoder.writeBlobTlv(Tlv.NameComponent, name[i].getValue().buf())
-    
+            if i == len(name) - 1:
+                signedPortionEndOffsetFromBack = len(encoder)
+                
+        signedPortionBeginOffsetFromBack = len(encoder)
         encoder.writeTypeAndLength(Tlv.Name, len(encoder) - saveLength)
+
+        signedPortionBeginOffset = (len(encoder) - 
+                                    signedPortionBeginOffsetFromBack)
+        if len(name) == 0:
+            # There is no "final component", so set signedPortionEndOffset 
+            #   arbitrarily.
+            signedPortionEndOffset = signedPortionBeginOffset
+        else:
+            signedPortionEndOffset = len(encoder) - signedPortionEndOffsetFromBack
+        
+        return (signedPortionBeginOffset, signedPortionEndOffset)
 
     @staticmethod
     def _decodeName(name, decoder):
+        """
+        Clear the name, decode a Name from the decoder and set the fields of
+        the name object.
+        
+        :param Name name: The name object whose fields are updated.
+        :param TlvDecode decode: The decoder with the input.
+        :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
+          where signedPortionBeginOffset is the offset in the encoding of 
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The 
+          signed portion starts from the first name component and ends just 
+          before the final name component (which is assumed to be a signature 
+          for a signed interest).
+        :rtype: (int, int)
+        """
         name.clear()
         
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
+        signedPortionBeginOffset = decoder.getOffset()
+        signedPortionEndOffset = signedPortionBeginOffset
+
         while decoder.getOffset() < endOffset:
+            saveOffset = decoder.getOffset()
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
+            
+            if decoder.getOffset() >= endOffset:
+                # This was the last component.
+                signedPortionEndOffset = saveOffset
    
         decoder.finishNestedTlvs(endOffset)
+        return (signedPortionBeginOffset, signedPortionEndOffset)
 
     @staticmethod
     def _encodeSelectors(interest, encoder):

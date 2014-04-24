@@ -11,6 +11,7 @@ This module defines the NDN Interest class.
 
 from pyndn.encoding import WireFormat
 from pyndn.util import Blob
+from pyndn.util import SignedBlob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.key_locator import KeyLocator
@@ -223,7 +224,10 @@ class Interest(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        return wireFormat.encodeInterest(self)
+        (encoding, signedPortionBeginOffset, signedPortionEndOffset) = \
+          wireFormat.encodeInterest(self)
+        return SignedBlob(
+          encoding, signedPortionBeginOffset, signedPortionEndOffset)
     
     def wireDecode(self, input, wireFormat = None):
         """
