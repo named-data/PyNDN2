@@ -36,6 +36,8 @@ class Blob(object):
             # Use the existing _array.  Don't need to check for copy.
             self._array = array._array
         else:
+            array = Common.unicodeToString(array)
+            
             if type(array) is str:
                 # Convert from a string to utf-8 byte encoding.
                 if _encodeResultIsStr:
