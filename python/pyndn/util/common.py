@@ -30,6 +30,14 @@ def _chr_ord(x):
 #   Python 3.
 _bytesElementToChr = chr if _bytesElementIsInt else _chr_ord
 
+# This should only be true in Python 2.
+_haveTypeUnicode = False
+try:
+    x = unicode
+    _haveTypeUnicode = True
+except:
+    pass
+
 class Common(object):
     @staticmethod
     def getNowMilliseconds():
@@ -54,4 +62,15 @@ class Common(object):
         else:
             # Assume value is a Python 3 bytes object. Convert to str.
             return "".join(map(_bytesElementToChr, bytesIO.getvalue()))
-        
+
+    @staticmethod
+    def unicodeToString(input):
+        """
+        If the input is type unicode, return a str. Otherwise, just return the
+        input. This is necessary because Python 3 doesn't have the unicode
+        type, but Python 2 does, and we just want to check arguments for str.
+        """
+        if _haveTypeUnicode and type(input) == unicode:
+            return str(input)
+        else:
+            return input
