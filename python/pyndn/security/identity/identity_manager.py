@@ -33,7 +33,7 @@ class IdentityManager(object):
         if identityStorage == None:
             identityStorage = BasicIdentityStorage()
         if privateKeyStorage == None:
-            privateKeyStorage = FilePrivateKeyStorage
+            privateKeyStorage = FilePrivateKeyStorage()
             
         self._identityStorage = identityStorage
         self._privateKeyStorage = privateKeyStorage
