@@ -36,6 +36,14 @@ pyndn.util.dynamic_byte_array module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.nfd_command_interest_generator module
+------------------------------------------------
+
+.. automodule:: pyndn.util.nfd_command_interest_generator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.signed_blob module
 -----------------------------
 
