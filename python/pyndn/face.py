@@ -184,7 +184,8 @@ class Face(object):
       wireFormat = None):
         """
         Register prefix with the connected NDN hub and call onInterest when a 
-        matching interest is received.
+        matching interest is received. Make sure you have called 
+        setCommandSigningInfo.
         
         :param Name prefix: The Name for the prefix to register which is NOT 
           copied for this internal Node method. The Face registerPrefix is 
@@ -197,8 +198,11 @@ class Face(object):
         :type onRegisterFailed: function object
         :param ForwardingFlags flags: The flags for finer control of which 
           interests are forwardedto the application.
-        :param wireFormat: A WireFormat object used to encode the message.
-        :type wireFormat: a subclass of WireFormat        
+        :param wireFormat: (optional) A WireFormat object used to encode this 
+           ControlParameters. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :raises: This raises an exception if setCommandSigningInfo has not been 
+          called to set the KeyChain, etc. for signing the command interest.
         """
         if flags == None:
             flags = ForwardingFlags()
@@ -208,7 +212,8 @@ class Face(object):
 
         # Node.expressInterest requires a copy of the prefix.
         self._node.registerPrefix(
-          prefix, onInterest, onRegisterFailed, flags, wireFormat)
+          prefix, onInterest, onRegisterFailed, flags, wireFormat, 
+          self._commandKeyChain, self._commandCertificateName)
         
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
