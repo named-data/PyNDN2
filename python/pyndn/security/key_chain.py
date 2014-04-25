@@ -13,6 +13,7 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
+from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
@@ -20,6 +21,8 @@ from pyndn import KeyLocatorType
 from pyndn.security.security_types import EncryptMode
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
+from pyndn.util.blob import Blob
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv_0_1a2_wire_format import Tlv0_1a2WireFormat
@@ -264,7 +267,8 @@ class KeyChain(object):
             self._identityManager.signByCertificate(
               target, certificateName, wireFormat)
         else:
-            return self._identityManager.signByCertificate(array, certificateName)
+            return self._identityManager.signByCertificate(
+              target, certificateName)
           
     def _signInterest(self, interest, certificateName, wireFormat = None):
         """
