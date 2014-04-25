@@ -381,7 +381,7 @@ class Node(object):
         controlParameters = ControlParameters()
         controlParameters.setName(prefix)
 
-        commandInterest = Interest("/localhost/nfd/rib/register")
+        commandInterest = Interest(Name("/localhost/nfd/rib/register"))
         # NFD only accepts TlvWireFormat packets.
         commandInterest.getName().append(controlParameters.wireEncode(TlvWireFormat.get()))
         self._commandInterestGenerator.generate(
