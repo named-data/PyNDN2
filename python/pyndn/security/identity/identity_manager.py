@@ -269,8 +269,8 @@ class IdentityManager(object):
             signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
             signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
 
-            signature.setSignature(self._privateKeyStorage.sign
-              (buffer, keyName))
+            signature.setSignature(
+              self._privateKeyStorage.sign(target, keyName))
 
             return signature
 
