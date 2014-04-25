@@ -14,6 +14,14 @@ Subpackages
 Submodules
 ----------
 
+pyndn.control_parameters module
+-------------------------------
+
+.. automodule:: pyndn.control_parameters
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.data module
 -----------------
 
