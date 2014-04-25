@@ -10,6 +10,7 @@ This module defines the Face class which provides the main methods for NDN
 communication.
 """
 
+from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.encoding.wire_format import WireFormat
@@ -41,6 +42,8 @@ class Face(object):
             connectionInfo = arg2
             
         self._node = Node(transport, connectionInfo)
+        self._commandKeyChain = None
+        self._commandCertificateName = Name()
             
     def expressInterest(
       self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None):
@@ -148,6 +151,33 @@ class Face(object):
         :param int pendingInterestId: The ID returned from expressInterest.
         """
         self._node.removePendingInterest(pendingInterestId)
+        
+    def setCommandSigningInfo(self, keyChain, certificateName):
+        """
+        Set the KeyChain and certificate name used to sign command interests 
+        (e.g. for registerPrefix).
+        
+        :param KeyChain keyChain: The KeyChain object for signing interests, 
+          which must remain valid for the life of this Face. You must create the 
+          KeyChain object and pass it in. You can create a default KeyChain for 
+          your system with the default KeyChain constructor.
+        :param Name certificateName: The certificate name for signing interests.
+          This makes a copy of the Name. You can get the default certificate 
+          name with keyChain.getDefaultCertificateName() .        
+        """
+        self._commandKeyChain = keyChain
+        self._commandCertificateName = certificateName
+        
+    def setCommandCertificateName(self, certificateName):
+        """
+        Set the certificate name used to sign command interest (e.g. for
+        registerPrefix), using the KeyChain that was set with 
+        setCommandSigningInfo.
+        
+        :param Name certificateName: The certificate name for signing interest.
+          This makes a copy of the Name.
+        """
+        self._commandCertificateName = certificateName
         
     def registerPrefix(
       self, prefix, onInterest, onRegisterFailed, flags = None, 
