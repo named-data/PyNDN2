@@ -488,9 +488,8 @@ class Name(object):
 
         # Check if at least one of given components doesn't match.
         for i in range(len(self._components)):
-            # Note: In Python, != should do a byte-by-byte comparison.
-            if (self._components[i].getValue().toBuffer() != 
-                  name._components[i].getValue().toBuffer()):
+            if not self._components[i].getValue().equals( 
+                  name._components[i].getValue()):
                 return False
 
         return True
