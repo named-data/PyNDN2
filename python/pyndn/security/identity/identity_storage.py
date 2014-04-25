@@ -186,7 +186,7 @@ class IdentityStorage(object):
           not set or the default certificate name for the key name is not set.
         """
         keyName = self.getDefaultKeyNameForIdentity(identityName)   
-        return getDefaultCertificateNameForKey(keyName)
+        return self.getDefaultCertificateNameForKey(keyName)
 
     def getDefaultCertificateNameForKey(self, keyName):    
         """
