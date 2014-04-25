@@ -21,7 +21,7 @@ from pyndn.name import Name
 from pyndn.util import Blob
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
-from pyndn.security import SecurityException
+from pyndn.security.security_exception import SecurityException
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 

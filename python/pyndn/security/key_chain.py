@@ -18,20 +18,28 @@ from pyndn.data import Data
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn import KeyLocatorType
 from pyndn.security.security_types import EncryptMode
+from pyndn.security.identity.identity_manager import IdentityManager
+from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv_0_1a2_wire_format import Tlv0_1a2WireFormat
 
 class KeyChain(object):
     """
-    Create a new KeyChain to use the identityManager and policyManager.
+    Create a new KeyChain to use the optional identityManager and policyManager.
     
-    :param IdentityManager identityManager: The identity manager as a subclass
-      of IdentityManager.
-    :param PolicyManager policyManager: The policy manager as a subclass of 
-      PolicyManager.
+    :param IdentityManager identityManager: (optional) The identity manager as a 
+      subclass of IdentityManager. If omitted, use the default IdentityManager
+      constructor.
+    :param PolicyManager policyManager: (optional) The policy manager as a 
+      subclass of PolicyManager. If omitted, use NoVerifyPolicyManager.
     """
-    def __init__(self, identityManager, policyManager):
+    def __init__(self, identityManager = None, policyManager = None):
+        if identityManager == None:
+            identityManager = IdentityManager()
+        if policyManager == None:
+            policyManager = NoVerifyPolicyManager()
+            
         self._identityManager = identityManager
         self._policyManager = policyManager
         self._encryptionManager = None
