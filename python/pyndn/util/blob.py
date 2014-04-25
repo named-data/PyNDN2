@@ -237,7 +237,7 @@ class Blob(object):
         hexBuffer = bytearray(2)
         for i in range(len(array)):
             # Get the hex string and transfer to hexBuffer for writing.
-            hex = "%02X" % array[i]
+            hex = "%02x" % array[i]
             hexBuffer[0] = ord(hex[0])
             hexBuffer[1] = ord(hex[1])
             result.write(hexBuffer)
