@@ -276,6 +276,68 @@ class Tlv0_1a2WireFormat(WireFormat):
             Tlv.FreshnessPeriod, endOffset))
 
         decoder.finishNestedTlvs(endOffset)
+    
+    def encodeControlParameters(self, controlParameters):
+        """
+        Encode controlParameters and return the encoding.
+
+        :param controlParameters: The ControlParameters object to encode.
+        :type controlParameters: ControlParameters
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+        
+        # Encode backwards.
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
+          Tlv.ControlParameters_ExpirationPeriod, 
+          controlParameters.getExpirationPeriod())
+          
+        # TODO: Encode Strategy.
+          
+        flags = controlParameters.getForwardingFlags().getNfdForwardingFlags()
+        if (flags != ForwardingFlags().getNfdForwardingFlags()):
+            # The flags are not the default value.
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.ControlParameters_Flags, flags)
+
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_Cost, controlParameters.getCost())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_Origin, controlParameters.getOrigin())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_LocalControlFeature, 
+          controlParameters.getLocalControlFeature())
+          
+        # TODO: Encode Uri.
+          
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.FaceID, controlParameters.getFaceId())
+        self._encodeName(controlParameters.getName(), encoder)
+
+        encoder.writeTypeAndLength(Tlv.ControlParameters_ControlParameters, 
+                                   len(encoder) - saveLength)
+        
+        return Blob(encoder.getOutput())
+    
+    #def decodeControlParameters(self, controlParameters, input):
+    #    """
+    #    Decode input as an controlParameters and set the fields of the 
+    #    controlParameters object.
+    #    
+    #    :param controlParameters: The ControlParameters object whose fields are 
+    #      updated.
+    #    :type controlParameters: ControlParameters
+    #    :param input: The array with the bytes to decode.
+    #    :type input: An array type with int elements
+    #    """
+    #    decoder = TlvDecoder(input)
+    #
+    #    endOffset = decoder.readNestedTlvsStart(
+    #      Tlv.ControlParameters_ControlParameters)
+    #
+    #    decoder.finishNestedTlvs(endOffset)
 
     @classmethod
     def get(self):

@@ -118,6 +118,35 @@ class WireFormat(object):
           override.
         """
         raise RuntimeError("decodeForwardingEntry is not implemented")
+    
+    def encodeControlParameters(self, controlParameters):
+        """
+        Encode controlParameters and return the encoding.  Your derived class 
+        should override.
+
+        :param controlParameters: The ControlParameters object to encode.
+        :type controlParameters: ControlParameters
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("encodeControlParameters is not implemented")
+    
+    def decodeControlParameters(self, controlParameters, input):
+        """
+        Decode input as an controlParameters and set the fields of the 
+        controlParameters object. Your derived class should override.
+        
+        :param controlParameters: The ControlParameters object whose fields are 
+          updated.
+        :type controlParameters: ControlParameters
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("decodeControlParameters is not implemented")
         
     @classmethod
     def setDefaultWireFormat(self, wireFormat):
