@@ -4,6 +4,22 @@ pyndn.security.identity package
 Submodules
 ----------
 
+pyndn.security.identity.basic_identity_storage module
+-----------------------------------------------------
+
+.. automodule:: pyndn.security.identity.basic_identity_storage
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.identity.file_private_key_storage module
+-------------------------------------------------------
+
+.. automodule:: pyndn.security.identity.file_private_key_storage
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.identity.identity_manager module
 -----------------------------------------------
 
