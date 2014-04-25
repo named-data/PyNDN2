@@ -17,8 +17,10 @@ from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.key_locator import KeyLocatorType
 from pyndn.forwarding_entry import ForwardingEntry
+from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
+from pyndn.util.nfd_command_interest_generator import NfdCommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
@@ -46,6 +48,7 @@ class Node(object):
           Name("/%C1.M.S.localhost/%C1.M.SRV/ndnd/KEY"))
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
         self._ndndId = None
+        self._commandInterestGenerator = NfdCommandInterestGenerator()
         
     def expressInterest(self, interest, onData, onTimeout, wireFormat):
         """
@@ -95,10 +98,11 @@ class Node(object):
             i -= 1
         
     def registerPrefix(
-      self, prefix, onInterest, onRegisterFailed, flags, wireFormat):
+      self, prefix, onInterest, onRegisterFailed, flags, wireFormat, 
+      commandKeyChain, commandCertificateName):
         """
         Register prefix with the connected NDN hub and call onInterest when a 
-          matching interest is received.
+        matching interest is received.
           
         :param Name prefix: The Name for the prefix to register which is NOT 
           copied for this internal Node method. The Face registerPrefix is 
@@ -113,25 +117,37 @@ class Node(object):
           interests are forwardedto the application.
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
+        :param KeyChain commandKeyChain: The KeyChain object for signing 
+          interests. If null, assume we are connected to a legacy NDNx forwarder.
+        :param Name commandCertificateName: The certificate name for signing 
+          interests.
         """
         # Get the registeredPrefixId now so we can return it to the caller.
         registeredPrefixId = Node._RegisteredPrefix.getNextRegisteredPrefixId()
 
-        if self._ndndId == None:
-            # First fetch the ndndId of the connected hub.
-            fetcher = Node._NdndIdFetcher(
-              self, registeredPrefixId, prefix, onInterest, onRegisterFailed, 
-              flags, wireFormat)
-            # We send the interest using the given wire format so that the hub 
-            # receives (and sends) in the application's desired wire format.
-            self.expressInterest(
-              self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout, 
-              wireFormat)
+        if commandKeyChain == None:
+            # Assume we are connected to a legacy NDNx server.
+            
+            if self._ndndId == None:
+                # First fetch the ndndId of the connected hub.
+                fetcher = Node._NdndIdFetcher(
+                  self, registeredPrefixId, prefix, onInterest, onRegisterFailed, 
+                  flags, wireFormat)
+                # We send the interest using the given wire format so that the hub 
+                # receives (and sends) in the application's desired wire format.
+                self.expressInterest(
+                  self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout, 
+                  wireFormat)
+            else:
+                _registerPrefixHelper(
+                  registeredPrefixId, Name(prefix), onInterest, onRegisterFailed, 
+                  flags, wireFormat)
         else:
-            _registerPrefixHelper(
-              registeredPrefixId, prefix, onInterest, onRegisterFailed, flags, 
-              wireFormat)
-  
+            # The application set the KeyChain for signing NFD interests.
+            self._nfdRegisterPrefix(
+              registeredPrefixId, Name(prefix), onInterest, 
+              onRegisterFailed, flags, commandKeyChain, commandCertificateName)
+                
         return registeredPrefixId
     
     def removeRegisteredPrefix(self, registeredPrefixId):
@@ -348,9 +364,40 @@ class Node(object):
         self._registeredPrefixTable.append(Node._RegisteredPrefix(
           registeredPrefixId, prefix, onInterest))
 
-        response = Node._RegisterResponse(prefix, onRegisterFailed)
+        response = Node._RegisterResponse(prefix, onRegisterFailed, False, True)
         self.expressInterest(
           interest, response.onData, response.onTimeout, wireFormat)
+        
+    def _nfdRegisterPrefix(
+      self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags, 
+      commandKeyChain, commandCertificateName):
+        if commandKeyChain == None:
+            raise RuntimeError(
+              "registerPrefix: The command KeyChain has not been set. You must call setCommandSigningInfo.")
+        if commandCertificateName.size() == 0:
+            raise RuntimeError(
+              "registerPrefix: The command certificate name has not been set. You must call setCommandSigningInfo.")
+
+        controlParameters = ControlParameters()
+        controlParameters.setName(prefix)
+
+        commandInterest = Interest("/localhost/nfd/rib/register")
+        # NFD only accepts TlvWireFormat packets.
+        commandInterest.getName().append(controlParameters.wireEncode(TlvWireFormat.get()))
+        self._commandInterestGenerator.generate(
+          commandInterest, commandKeyChain, commandCertificateName,
+          TlvWireFormat.get())
+        # The interest is answered by the local host, so set a short timeout.
+        commandInterest.setInterestLifetimeMilliseconds(1000.0)
+
+        # Save the onInterest callback and send the registration interest.
+        self._registeredPrefixTable.append(Node._RegisteredPrefix(
+          registeredPrefixId, prefix, onInterest))
+
+        response = Node._RegisterResponse(prefix, onRegisterFailed, True, True)
+        self.expressInterest(
+          commandInterest, response.onData, response.onTimeout, 
+          TlvWireFormat.get())    
         
     class _PendingInterest(object):
         """
@@ -555,23 +602,43 @@ class Node(object):
         prefix interest sent to the connected NDN hub. If this gets a bad 
         response or a timeout, call onRegisterFailed.
         """
-        def __init__(self, prefix, onRegisterFailed):
+        def __init__(self, prefix, onRegisterFailed, isNfdCommand, isFirstAttempt):
             self._prefix = prefix
             self._onRegisterFailed = onRegisterFailed
+            self._isNfdCommand = isNfdCommand
+            self._isFirstAttempt = isFirstAttempt
             
         def onData(self, interest, responseData):
             """
             We received the response. Do a quick check of expected name 
             components.
             """
-            expectedName = Name("/ndnx/.../selfreg")
-            if (responseData.getName().size() < 4 or
-                  responseData.getName()[0] != expectedName[0] or
-                  responseData.getName()[2] != expectedName[2]):
-                self._onRegisterFailed(self._prefix)
-                return
+            if self._isNfdCommand:
+                # Decode responseData->getContent() and check for a success code.
+                # TODO: Move this into the TLV code.
+                statusCode = None
+                try:
+                    decoder = TlvDecoder(responseData.getContent().buf())
+                    decoder.readNestedTlvsStart(Tlv.NfdCommand_ControlResponse)
+                    statusCode = decoder.readNonNegativeIntegerTlv(Tlv.NfdCommand_StatusCode)
+                except ValueError:
+                    # Error decoding the ControlResponse.
+                    self._onRegisterFailed_(self._prefix)
 
-            # Otherwise, silently succeed.
+                # Status code 200 is "OK".
+                if statusCode != 200:
+                  self._onRegisterFailed_(self._prefix)
+
+                # Otherwise, silently succeed.
+            else:
+                expectedName = Name("/ndnx/.../selfreg")
+                if (responseData.getName().size() < 4 or
+                      responseData.getName()[0] != expectedName[0] or
+                      responseData.getName()[2] != expectedName[2]):
+                    self._onRegisterFailed(self._prefix)
+                    return
+
+                # Otherwise, silently succeed.
 
         def onTimeout(self, interest):
             """
