@@ -46,14 +46,17 @@ class ForwardingFlags(object):
               "Unrecognized type for ForwardingFlags constructor: " +
               repr(type(value)))
 
-    ACTIVE         = 1
-    CHILD_INHERIT  = 2
-    ADVERTISE      = 4
-    LAST           = 8
-    CAPTURE       = 16
-    LOCAL         = 32
-    TAP           = 64
-    CAPTURE_OK   = 128
+    ForwardingEntryFlags_ACTIVE         = 1
+    ForwardingEntryFlags_CHILD_INHERIT  = 2
+    ForwardingEntryFlags_ADVERTISE      = 4
+    ForwardingEntryFlags_LAST           = 8
+    ForwardingEntryFlags_CAPTURE       = 16
+    ForwardingEntryFlags_LOCAL         = 32
+    ForwardingEntryFlags_TAP           = 64
+    ForwardingEntryFlags_CAPTURE_OK   = 128
+
+    NfdForwardingFlags_CHILD_INHERIT = 1
+    NfdForwardingFlags_CAPTURE       = 2
 
     def getForwardingEntryFlags(self):
         """
@@ -66,21 +69,21 @@ class ForwardingFlags(object):
         result = 0
 
         if self._active :
-            result |= ForwardingFlags.ACTIVE
+            result |= ForwardingFlags.ForwardingEntryFlags_ACTIVE
         if self._childInherit:
-            result |= ForwardingFlags.CHILD_INHERIT
+            result |= ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT
         if self._advertise:
-            result |= ForwardingFlags.ADVERTISE
+            result |= ForwardingFlags.ForwardingEntryFlags_ADVERTISE
         if self._last:
-            result |= ForwardingFlags.LAST
+            result |= ForwardingFlags.ForwardingEntryFlags_LAST
         if self._capture:
-            result |= ForwardingFlags.CAPTURE
+            result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE
         if self._local:
-            result |= ForwardingFlags.LOCAL
+            result |= ForwardingFlags.ForwardingEntryFlags_LOCAL
         if self._tap:
-            result |= ForwardingFlags.TAP
+            result |= ForwardingFlags.ForwardingEntryFlags_TAP
         if self._captureOk:
-            result |= ForwardingFlags.CAPTURE_OK
+            result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK
 
         return result
     
@@ -92,21 +95,50 @@ class ForwardingFlags(object):
         :param int forwardingEntryFlags: An integer with the bits set.
         """
         self._active = True if (forwardingEntryFlags & 
-                                ForwardingFlags.ACTIVE) else False
+                                ForwardingFlags.ForwardingEntryFlags_ACTIVE) else False
         self._childInherit = True if (forwardingEntryFlags & 
-                                      ForwardingFlags.CHILD_INHERIT) else False
+                                      ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT) else False
         self._advertise = True if (forwardingEntryFlags & 
-                                   ForwardingFlags.ADVERTISE) else False
+                                   ForwardingFlags.ForwardingEntryFlags_ADVERTISE) else False
         self._last = True if (forwardingEntryFlags & 
-                              ForwardingFlags.LAST) else False
+                              ForwardingFlags.ForwardingEntryFlags_LAST) else False
         self._capture = True if (forwardingEntryFlags & 
-                                 ForwardingFlags.CAPTURE) else False
+                                 ForwardingFlags.ForwardingEntryFlags_CAPTURE) else False
         self._local = True if (forwardingEntryFlags & 
-                               ForwardingFlags.LOCAL) else False
+                               ForwardingFlags.ForwardingEntryFlags_LOCAL) else False
         self._tap = True if (forwardingEntryFlags & 
-                             ForwardingFlags.TAP) else False
+                             ForwardingFlags.ForwardingEntryFlags_TAP) else False
         self._captureOk = True if (forwardingEntryFlags & 
-                                   ForwardingFlags.CAPTURE_OK) else False
+                                   ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK) else False
+
+    def getNfdForwardingFlags(self):
+        """
+        Get an integer with the bits set according to the NFD forwarding flags 
+        as used in the ControlParameters of the command interest.
+        
+        :return: An integer with the bits set.
+        :rtype: int
+        """
+        result = 0
+
+        if self._childInherit:
+            result |= ForwardingFlags.NfdForwardingFlags_CHILD_INHERIT
+        if self._capture:
+            result |= ForwardingFlags.NfdForwardingFlags_CAPTURE
+
+        return result
+    
+    def setNfdForwardingFlags(self, nfdForwardingFlags):
+        """
+        Set the flags according to the NFD forwarding flags as used in the 
+        ControlParameters of the command interest.
+        
+        :param int nfdForwardingFlags: An integer with the bits set.
+        """
+        self._childInherit = True if (nfdForwardingFlags & 
+                                      ForwardingFlagsNfdForwardingFlags_CHILD_INHERIT) else False
+        self._capture = True if (nfdForwardingFlags & 
+                                 ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
 
     def getActive(self):
         return self._active
