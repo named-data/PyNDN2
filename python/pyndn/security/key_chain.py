@@ -13,6 +13,15 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
+from pyndn.interest import Interest
+from pyndn.data import Data
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn import KeyLocatorType
+from pyndn.security.security_types import EncryptMode
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding.tlv.tlv import Tlv
+from pyndn.encoding.tlv_0_1a2_wire_format import Tlv0_1a2WireFormat
+
 class KeyChain(object):
     """
     Create a new KeyChain to use the identityManager and policyManager.
@@ -25,24 +34,327 @@ class KeyChain(object):
     def __init__(self, identityManager, policyManager):
         self._identityManager = identityManager
         self._policyManager = policyManager
+        self._encryptionManager = None
         self._face = None
         self._maxSteps = 100
     
-    def sign(self, data, certificateName, wireFormat = None):
+    def createIdentity(self, identityName):
         """
-        Wire encode the Data object, sign it and set its signature.
+        Create an identity by creating a pair of Key-Signing-Key (KSK) for this 
+        identity and a self-signed certificate of the KSK.
         
-        :param Data data: The Data object to be signed. This updates its 
-          signature and key locator field and wireEncoding.
+        :param Name identityName: The name of the identity.
+        :return: The key name of the auto-generated KSK of the identity.
+        :rtype: Name
+        """
+        return self._identityManager.createIdentity(identityName)
+    
+    def getDefaultIdentity(self):
+        """
+        Get the default identity.
+        
+        :return: The name of default identity.
+        :rtype: Name
+        :raises SecurityException: if the default identity is not set.
+        """
+        return self._identityManager.getDefaultIdentity()
+    
+    def getDefaultCertificateName(self):
+        """
+        Get the default certificate name of the default identity.
+        
+        :return: The requested certificate name.
+        :rtype: Name
+        :raises SecurityException: if the default identity is not set or the 
+          default key name for the identity is not set or the default 
+          certificate name for the key name is not set.
+        """
+        return self._identityManager.getDefaultCertificateName()
+    
+    def generateRSAKeyPair(self, identityName, isKsk = False, keySize = 2048):
+        """
+        Generate a pair of RSA keys for the specified identity.
+        
+        :param Name identityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key 
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
+          Data-Signing-Key.
+        :param int keySize: (optional) The size of the key. If omitted, use a 
+          default secure key size.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        return self._identityManager.generateRSAKeyPair(
+          identityName, isKsk, keySize)
+    
+    def setDefaultKeyForIdentity(self, keyName, identityName = None):
+        """
+        Set a key as the default key of an identity.
+
+        :param Name keyName: The name of the key.
+        :param Name identityName: (optional) the name of the identity. If not 
+          specified, the identity name is inferred from the keyName.
+        """
+        if identityName == None:
+            identityName = Name()
+        return self._identityManager.setDefaultKeyForIdentity(
+          keyName, identityName)
+    
+    def generateRSAKeyPairAsDefault(
+          self, identityName, isKsk = False, keySize = 2048):
+        """
+        Generate a pair of RSA keys for the specified identity and set it as 
+        default key for the identity.
+        
+        :param NameidentityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key 
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a 
+          Data-Signing-Key.
+        :param int keySize: (optional) The size of the key. If omitted, use a 
+          default secure key size.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        return  self._identityManager.generateRSAKeyPairAsDefault(
+          identityName, isKsk, keySize)
+    
+    def createSigningRequest(self, keyName):
+        """
+        Create a public key signing request.
+        
+        :param Name keyName: The name of the key.
+        :returns: The signing request data.
+        :rtype: Blob
+        """
+        return self._identityManager.getPublicKey(keyName).getKeyDer()
+    
+    def installIdentityCertificate(self, certificate):
+        """
+        Install an identity certificate into the public key identity storage.
+        
+        :param IdentityCertificate certificate: The certificate to to added.
+        """
+        self._identityManager.addCertificate(certificate)
+        
+    def setDefaultCertificateForKey(self, certificate):
+        """
+        Set the certificate as the default for its corresponding key.
+        
+        :param IdentityCertificate certificate: The certificate.
+        """
+        self._identityManager.setDefaultCertificateForKey(certificate)
+        
+    def getCertificate(self, certificateName):
+        """
+        Get a certificate with the specified name.
+        
+        :param Name certificateName: The name of the requested certificate.
+        :return: The requested certificate which is valid.        
+        :rtype: Certificate
+        """
+        return self._identityManager.getCertificate(certificateName)
+    
+    def getAnyCertificate(self, certificateName):
+        """
+        Get a certificate even if the certificate is not valid anymore.
+        
+        :param Name certificateName: The name of the requested certificate.
+        :return: The requested certificate.        
+        :rtype: Certificate
+        """
+        return self._identityManager.getAnyCertificate(certificateName)
+    
+    def getIdentityCertificate(self, certificateName):
+        """
+        Get an identity certificate with the specified name.
+        
+        :param Name certificateName: The name of the requested certificate.
+        :return: The requested certificate which is valid.
+        :rtype: IdentityCertificate
+        """
+        return self._identityManager.getIdentityCertificate(certificateName)
+    
+    def getAnyIdentityCertificate(self, certificateName):
+        """
+        Get an identity certificate even if the certificate is not valid anymore.
+        
+        :param Name certificateName: The name of the requested certificate.
+        :return: The requested certificate.
+        :rtype: IdentityCertificate
+        """
+        return self._identityManager.getAnyIdentityCertificate(certificateName)
+    
+    def revokeKey(self, keyName):
+        """
+        Revoke a key.
+        
+        :param Name keyName: The name of the key that will be revoked.
+        """
+        # TODO: Implement.
+        pass
+    
+    def revokeCertificate(self, certificateName):
+        """
+        Revoke a certificate.
+        
+        :param Name certificateName: The name of the certificate that will be 
+          revoked.
+        """
+        # TODO: Implement.
+        pass
+    
+    def getIdentityManager(self):
+        """
+        Get the identity manager given to or created by the constructor.
+        
+        :return: The identity manager.
+        :rtype: IdentityManager
+        """
+        return self._identityManager
+    
+    #
+    # Policy Management
+    #
+        
+    def getPolicyManager(self):
+        """
+        Get the policy manager given to or created by the constructor.
+        
+        :return: The policy manager.
+        :rtype: PolicyManager
+        """
+        return self._policyManager
+    
+    #
+    # Sign/Verify
+    #
+    
+    def sign(self, target, certificateName, wireFormat = None):
+        """
+        Sign the target. If it is a Data or Interest object, set its signature.
+        If it is an array, return a signature object.
+        
+        :param target: If this is a Data object, wire encode for signing,
+          update its signature and key locator field and wireEncoding. If this 
+          is an Interest object, wire encode for signing, append a SignatureInfo 
+          to the Interest name, sign the name components and append a final name 
+          component with the signature bits. If it is an array, sign it and 
+          return a Signature object.
+        :type target: Data, Interest or an array which implements the 
+          buffer protocol
         :param Name certificateName: The certificate name of the key to use for 
           signing.
         :param wireFormat: (optional) A WireFormat object used to encode the 
-           Data object. If omitted, use WireFormat.getDefaultWireFormat().
+           input. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: The Signature object (only if the target is an array).
+        :rtype: An object of a subclass of Signature
+        """
+        if isinstance(target, Interest):
+            self._signInterest(target, certificateName, wireFormat)
+        elif isinstance(target, Data):
+            self._identityManager.signByCertificate(
+              target, certificateName, wireFormat)
+        else:
+            return self._identityManager.signByCertificate(array, certificateName)
+          
+    def _signInterest(self, interest, certificateName, wireFormat = None):
+        """
+        Append a SignatureInfo to the Interest name, sign the name components 
+        and append a final name component with the signature bits.
+        
+        :param Interest interest: The Interest object to be signed. This appends 
+          name components of SignatureInfo and the signature bits.
+        :param Name certificateName: The certificate name of the key to use for 
+          signing.
+        :param wireFormat: (optional) A WireFormat object used to encode the 
+           input. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         """
-        self._identityManager.signByCertificate(
-          data, certificateName, wireFormat)
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        # TODO: Handle signature algorithms other than Sha256WithRsa.
+        signature = Sha256WithRsaSignature()
+        signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+        signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
+
+        # Append the encoded SignatureInfo.
+        # TODO: Move this into a WireFormat abstraction.
+        encoder = TlvEncoder(256)
+        Tlv0_1a2WireFormat._encodeSignatureSha256WithRsa(signature, encoder)
+
+        interest.getName().append(Blob(encoder.getOutput(), False))
+
+        # Append an empty signature so that the "signedPortion" is correct.
+        interest.getName().append(Name.Component())
+        # Encode once to get the signed portion.
+        encoding = interest.wireEncode(wireFormat)
+        signedSignature = self.sign(encoding.toSignedBuffer(), certificateName)
+
+        # Remove the empty signature and append the real one.
+        # TODO: Move this into a WireFormat abstraction.
+        encoder = TlvEncoder(256)
+        encoder.writeBlobTlv(
+          Tlv.SignatureValue, signedSignature.getSignature().buf())
+        interest.setName(interest.getName().getPrefix(-1).append(
+          Blob(encoder.getOutput(), False)))
           
+    def signByIdentity(self, target, identityName = None, wireFormat = None):
+        """
+        Sign the target. If it is a Data object, set its signature.
+        If it is an array, return a signature object.
+        
+        :param target: If this is a Data object, wire encode for signing,
+          update its signature and key locator field and wireEncoding. If it is 
+          an array, sign it and return a Signature object.
+        :type target: Data or an array which implements the buffer protocol
+        :param Name identityName: (optional) The identity name for the key to 
+          use for signing. If omitted, infer the signing identity from the data 
+          packet name.
+        :param wireFormat: (optional) A WireFormat object used to encode the 
+           input. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: The Signature object (only if the target is an array).
+        :rtype: An object of a subclass of Signature
+        """
+        if identityName == None:
+            identityName = Name()
+        
+            
+        if isinstance(target, Data):
+            if identityName.size() == 0:
+                inferredIdentity = self._policyManager.inferSigningIdentity(
+                  data.getName())
+                if inferredIdentity.size() == 0:
+                    signingCertificateName = self._identityManager.getDefaultCertificateName()
+                else:
+                    signingCertificateName = \
+                      self._identityManager.getDefaultCertificateNameForIdentity(inferredIdentity)
+            else:
+                signingCertificateName = \
+                  self._identityManager.getDefaultCertificateNameForIdentity(identityName)
+                 
+            if signingCertificateName.size() == 0:
+                raise SecurityException("No qualified certificate name found!")
+
+            if not self._policyManager.checkSigningPolicy(
+                  data.getName(), signingCertificateName):
+                raise SecurityException(
+                  "Signing Cert name does not comply with signing policy")
+                  
+            self._identityManager.signByCertificate(
+              data, signingCertificateName, wireFormat)
+        else:
+            signingCertificateName = \
+              self._identityManager.getDefaultCertificateNameForIdentity(identityName)
+    
+            if signingCertificateName.size() == 0:
+                raise SecurityException("No qualified certificate name found!")
+
+            return self._identityManager.signByCertificate(
+              array, signingCertificateName)
           
     def verifyData(self, data, onVerified, onVerifyFailed, stepCount = 0):
         """
@@ -61,8 +373,6 @@ class KeyChain(object):
         :type onVerifyFailed: function object
         :param int stepCount: (optional) The number of verification steps that 
           have been done. If omitted, use 0.
-        :return: 
-        :rtype: boolean
         """
         if self._policyManager.requireVerify(data):
             nextStep = self._policyManager.checkVerificationPolicy(
@@ -77,6 +387,72 @@ class KeyChain(object):
         else:
             onVerifyFailed(data)
             
+    #
+    # Encrypt/Decrypt
+    #
+    
+    def generateSymmetricKey(self, keyName, keyType):
+        """
+        Generate a symmetric key.
+        
+        :param Name keyName: The name of the generated key.
+        :param keyType: The type of the key, e.g. KeyType.AES
+        :type keyType: int from KeyType
+        """
+        self._encryptionManager.createSymmetricKey(keyName, keyType)
+    
+    def encrypt(self, keyName, data, useSymmetric = True, 
+                encryptMode = EncryptMode.DEFAULT):
+        """
+        Encrypt a byte array.
+        
+        :param Name keyName: The name of the encrypting key.
+        :param data: The byte array that will be encrypted.
+        :type data: an array which implements the buffer protocol
+        :param bool useSymmetric: (optional) If true then symmetric encryption 
+          is used, otherwise asymmetric encryption is used. If omitted, use
+          symmetric encryption.
+        :param encryptMode: (optional) The encryption mode. If omitted, use
+          EncryptMode.DEFAULT .
+        :type encryptMode: int from EncryptMode
+        :return: The encrypted data as an immutable Blob.
+        :rtype: Blob        
+        """
+        return self._encryptionManager.encrypt(
+          keyName, data, useSymmetric, encryptMode)
+    
+    def decrypt(self, keyName, data, useSymmetric = True, 
+                encryptMode = EncryptMode.DEFAULT):
+        """
+        Decrypt a byte array.
+        
+        :param Name keyName: The name of the decrypting key.
+        :param data: The byte array that will be decrypted.
+        :type data: an array which implements the buffer protocol
+        :param bool useSymmetric: (optional) If true then symmetric encryption 
+          is used, otherwise asymmetric encryption is used. If omitted, use
+          symmetric encryption.
+        :param encryptMode: (optional) The encryption mode. If omitted, use
+          EncryptMode.DEFAULT .
+        :type encryptMode: int from EncryptMode
+        :return: The decrypted data as an immutable Blob.
+        :rtype: Blob        
+        """
+        return self._encryptionManager.decrypt(
+          keyName, data, useSymmetric, encryptMode)
+    
+    def setFace(self, face):
+        """
+        Set the Face which will be used to fetch required certificates.
+        
+        :param Face face: The Face object.
+        """
+        self._face = face
+    
+    #
+    # Private methods
+    #
+    
     def _makeOnCertificateData(self, nextStep):
         """
         Make and return an onData callback to use in expressInterest.
@@ -102,7 +478,7 @@ class KeyChain(object):
                      self._makeOnCertificateInterestTimeout(
                        retry, onVerifyFailed, data, nextStep))
             else:
-                onVerifyFailed(data);
+                onVerifyFailed(data)
         return onTimeout
             
             
