@@ -13,18 +13,27 @@ operations related to identity, keys, and certificates.
 from pyndn.encoding import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn import KeyLocatorType
+from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
+from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStorage
 
 class IdentityManager(object):
     """
-    Create a new IdentityManager to use the identityStorage and 
+    Create a new IdentityManager to use the optional identityStorage and 
     privateKeyStorage.
     
-    :param IdentityStorage identityStorage: An object of a subclass of 
-      IdentityStorage.
-    :param PrivateKeyStorage privateKeyStorage: An object of a subclass of 
-      PrivateKeyStorage.
+    :param IdentityStorage identityStorage: (optional) An object of a subclass 
+      of IdentityStorage. If omitted, use BasicIdentityStorage.
+    :param PrivateKeyStorage privateKeyStorage: (optional) An object of a 
+      subclass of PrivateKeyStorage. If omitted, use the default 
+      PrivateKeyStorage for your system, which is OSXPrivateKeyStorage for OS X, 
+      otherwise FilePrivateKeyStorage.
     """
-    def __init__(self, identityStorage, privateKeyStorage):
+    def __init__(self, identityStorage = None, privateKeyStorage = None):
+        if identityStorage == None:
+            identityStorage = BasicIdentityStorage()
+        if privateKeyStorage == None:
+            privateKeyStorage = FilePrivateKeyStorage
+            
         self._identityStorage = identityStorage
         self._privateKeyStorage = privateKeyStorage
         

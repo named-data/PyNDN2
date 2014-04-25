@@ -10,6 +10,8 @@ This module defines the FilePrivateKeyStorage class which extends
 PrivateKeyStorage to implement private key storage using files.
 """
 
+from pyndn.security.security_types import KeyType
+from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
 
 class FilePrivateKeyStorage(PrivateKeyStorage):
