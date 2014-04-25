@@ -51,3 +51,21 @@ class Tlv(object):
 
     SignatureType_DigestSha256 = 0
     SignatureType_SignatureSha256WithRsa = 1
+
+    ContentType_Default = 0
+    ContentType_Link = 1
+    ContentType_Key = 2
+
+    NfdCommand_ControlResponse = 101
+    NfdCommand_StatusCode =      102
+    NfdCommand_StatusText =      103
+
+    ControlParameters_ControlParameters =   104
+    ControlParameters_FaceId =              105
+    ControlParameters_Uri =                 114
+    ControlParameters_LocalControlFeature = 110
+    ControlParameters_Origin =              111
+    ControlParameters_Cost =                106
+    ControlParameters_Flags =               108
+    ControlParameters_Strategy =            107
+    ControlParameters_ExpirationPeriod =    109
