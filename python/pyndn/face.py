@@ -184,8 +184,11 @@ class Face(object):
       wireFormat = None):
         """
         Register prefix with the connected NDN hub and call onInterest when a 
-        matching interest is received. Make sure you have called 
-        setCommandSigningInfo.
+        matching interest is received. If you have not called 
+        setCommandSigningInfo, this assumes you are connecting to NDNx. If you 
+        have called setCommandSigningInfo, this first sends an NFD registration 
+        request, and if that times out then this sends an NDNx registration 
+        request.
         
         :param Name prefix: The Name for the prefix to register which is NOT 
           copied for this internal Node method. The Face registerPrefix is 
