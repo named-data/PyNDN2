@@ -188,7 +188,8 @@ class Face(object):
         setCommandSigningInfo, this assumes you are connecting to NDNx. If you 
         have called setCommandSigningInfo, this first sends an NFD registration 
         request, and if that times out then this sends an NDNx registration 
-        request.
+        request. If need to register a prefix with NFD, you must first call 
+        setCommandSigningInfo.
         
         :param Name prefix: The Name for the prefix to register which is NOT 
           copied for this internal Node method. The Face registerPrefix is 
