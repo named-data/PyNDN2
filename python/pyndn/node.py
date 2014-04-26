@@ -125,7 +125,8 @@ class Node(object):
         # Get the registeredPrefixId now so we can return it to the caller.
         registeredPrefixId = Node._RegisteredPrefix.getNextRegisteredPrefixId()
 
-        if commandKeyChain == None:
+        # If we have an _ndndId, we know we already connected to NDNx.
+        if self._ndndId != None or commandKeyChain == None:
             # Assume we are connected to a legacy NDNx server.
             
             if self._ndndId == None:
@@ -318,12 +319,13 @@ class Node(object):
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags, 
       wireFormat):
         """
-        Do the work of registerPrefix once we know we are connected with an 
-        _ndndId.
+        Do the work of registerPrefix to register with NDNx once we have an 
+        ndndId_.
         
         :param int registeredPrefixId: The 
           _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
-          so it could return it to the caller.
+          so it could return it to the caller. If this is 0, then don't add to 
+          registeredPrefixTable_ (assuming it has already been done).  
         """
         # Create a ForwardingEntry.
         # Note: ndnd ignores any freshness that is larger than 3600 seconds and 
@@ -360,17 +362,27 @@ class Node(object):
         interest.setScope(1)
         encodedInterest = interest.wireEncode(wireFormat)
 
-        # Save the onInterest callback and send the registration interest.
-        self._registeredPrefixTable.append(Node._RegisteredPrefix(
-          registeredPrefixId, prefix, onInterest))
+        if registeredPrefixId != 0:
+            # Save the onInterest callback and send the registration interest.
+            self._registeredPrefixTable.append(Node._RegisteredPrefix(
+              registeredPrefixId, prefix, onInterest))
 
-        response = Node._RegisterResponse(prefix, onRegisterFailed, False, True)
+        response = Node._RegisterResponse(
+          self, prefix, onInterest, onRegisterFailed, flags, wireFormat, False)
         self.expressInterest(
           interest, response.onData, response.onTimeout, wireFormat)
         
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags, 
       commandKeyChain, commandCertificateName):
+        """
+        Do the work of registerPrefix to register with NFD.
+        
+        :param int registeredPrefixId: The 
+          _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
+          so it could return it to the caller. If this is 0, then don't add to 
+          registeredPrefixTable_ (assuming it has already been done).  
+        """
         if commandKeyChain == None:
             raise RuntimeError(
               "registerPrefix: The command KeyChain has not been set. You must call setCommandSigningInfo.")
@@ -390,11 +402,14 @@ class Node(object):
         # The interest is answered by the local host, so set a short timeout.
         commandInterest.setInterestLifetimeMilliseconds(1000.0)
 
-        # Save the onInterest callback and send the registration interest.
-        self._registeredPrefixTable.append(Node._RegisteredPrefix(
-          registeredPrefixId, prefix, onInterest))
+        if registeredPrefixId != 0:
+            # Save the onInterest callback and send the registration interest.
+            self._registeredPrefixTable.append(Node._RegisteredPrefix(
+              registeredPrefixId, prefix, onInterest))
 
-        response = Node._RegisterResponse(prefix, onRegisterFailed, True, True)
+        response = Node._RegisterResponse(
+          self, prefix, onInterest, onRegisterFailed, flags, 
+          TlvWireFormat.get(), True)
         self.expressInterest(
           commandInterest, response.onData, response.onTimeout, 
           TlvWireFormat.get())    
@@ -602,11 +617,15 @@ class Node(object):
         prefix interest sent to the connected NDN hub. If this gets a bad 
         response or a timeout, call onRegisterFailed.
         """
-        def __init__(self, prefix, onRegisterFailed, isNfdCommand, isFirstAttempt):
+        def __init__(self, node, prefix, onInterest, onRegisterFailed, flags, 
+                     wireFormat, isNfdCommand):
+            self._node = node
             self._prefix = prefix
+            self._onInterest = onInterest
             self._onRegisterFailed = onRegisterFailed
+            self._flags = flags
+            self._wireFormat = wireFormat
             self._isNfdCommand = isNfdCommand
-            self._isFirstAttempt = isFirstAttempt
             
         def onData(self, interest, responseData):
             """
@@ -644,5 +663,29 @@ class Node(object):
             """
             We timed out waiting for the response.
             """
-            self._onRegisterFailed(self._prefix)
+            if self._isNfdCommand:
+                # The application set the commandKeyChain, but we may be 
+                #   connected to NDNx.
+                if self._node._ndndId == None:
+                    # First fetch the ndndId of the connected hub.
+                    # Pass 0 for registeredPrefixId since the entry was already added to
+                    #   registeredPrefixTable_ on the first try.
+                    fetcher = Node._NdndIdFetcher(
+                      self._node, 0, self._prefix, self._onInterest,
+                      self._onRegisterFailed, self._flags, self._wireFormat)
+                    # We send the interest using the given wire format so that the hub 
+                    # receives (and sends) in the application's desired wire format.
+                    self._node.expressInterest(
+                      self._node._ndndIdFetcherInterest, fetcher.onData, 
+                      fetcher.onTimeout, self._wireFormat)
+                else:
+                    # Pass 0 for registeredPrefixId since the entry was already 
+                    #   added to registeredPrefixTable_ on the first try.
+                    self._node.registerPrefixHelper(
+                      0, self._prefix, self._onInterest, self._onRegisterFailed, 
+                      self._flags, self._wireFormat)
+            else:
+                # An NDNx command was sent because there is no commandKeyChain, 
+                #   so we can't try an NFD command. Fail.
+                self._onRegisterFailed(self._prefix)
             
