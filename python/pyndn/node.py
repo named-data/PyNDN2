@@ -686,6 +686,7 @@ class Node(object):
                       self._flags, self._wireFormat)
             else:
                 # An NDNx command was sent because there is no commandKeyChain, 
-                #   so we can't try an NFD command. Fail.
+                #   so we can't try an NFD command. Or it was sent from this
+                #   callback after trying an NFD command. Fail.
                 self._onRegisterFailed(self._prefix)
             
