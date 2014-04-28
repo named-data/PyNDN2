@@ -643,6 +643,7 @@ class Node(object):
                 except ValueError:
                     # Error decoding the ControlResponse.
                     self._onRegisterFailed_(self._prefix)
+                    return
 
                 # Status code 200 is "OK".
                 if statusCode != 200:
