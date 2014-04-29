@@ -143,7 +143,7 @@ class Name(object):
             :raises RuntimeError: If the first byte of the component is not the 
               expected marker.
             """
-            return self.toNumberWithMarker(0xFD);
+            return self.toNumberWithMarker(0xFD)
         
         def equals(self, other):
             """

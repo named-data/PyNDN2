@@ -67,7 +67,7 @@ class BasicIdentityStorage(IdentityStorage):
         super(BasicIdentityStorage, self).__init__()
 
         if not "HOME" in os.environ:
-            # Don't expect this to happen;
+            # Don't expect this to happen
             home = "."
         else:
             home = os.environ["HOME"]

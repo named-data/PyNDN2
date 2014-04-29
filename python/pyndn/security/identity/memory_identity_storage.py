@@ -83,7 +83,7 @@ class MemoryIdentityStorage(IdentityStorage):
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
         """
-        identityName = keyName.getSubName(0, keyName.size() - 1);
+        identityName = keyName.getSubName(0, keyName.size() - 1)
 
         if not self.doesIdentityExist(identityName):
             self.addIdentity(identityName)
@@ -189,8 +189,8 @@ class MemoryIdentityStorage(IdentityStorage):
             return None
   
         data = Data()
-        data.wireDecode(self._certificateStore[certificateNameUri]);
-        return data;
+        data.wireDecode(self._certificateStore[certificateNameUri])
+        return data
 
     #
     # Get/Set Default
@@ -206,7 +206,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         if len(self._defaultIdentity) == 0:
             raise SecurityException(
-          "MemoryIdentityStorage.getDefaultIdentity: The default identity is not defined");
+          "MemoryIdentityStorage.getDefaultIdentity: The default identity is not defined")
           
         return Name(self._defaultIdentity)
 

@@ -36,7 +36,7 @@ def main():
     counter = Counter()
     face.stopWhen(lambda: counter._callbackCount >= 1)
 
-    name1 = Name("/"); 
+    name1 = Name("/") 
     dump("Express name ", name1.toUri())
     # This call to exressIinterest is thread safe because face is a ThreadsafeFace.
     face.expressInterest(name1, counter.onData, counter.onTimeout)

@@ -83,7 +83,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
           return Blob()
 
         # Find the private key.
-        keyUri = keyName.toUri();
+        keyUri = keyName.toUri()
         if not keyUri in self._privateKeyStore:
           raise SecurityException(
             "MemoryPrivateKeyStorage: Cannot find private key " + keyUri)

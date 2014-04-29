@@ -57,9 +57,9 @@ class IdentityStorage(object):
         nowString = repr(math.floor(
           Common.getNowMilliseconds() / 1000.0)).replace(".0", "")
         if useKsk:
-            keyIdStr = "KSK-" + nowString;
+            keyIdStr = "KSK-" + nowString
         else:
-            keyIdStr = "DSK-" + nowString;
+            keyIdStr = "DSK-" + nowString
 
         keyName = Name(identityName).append(keyIdStr)
 

@@ -34,17 +34,17 @@ def main():
     
     counter = Counter()
 
-    name1 = Name("/ndn/edu/ucla/remap/ndn-js-test/howdy.txt/%FD%052%A1%DF%5E%A4"); 
+    name1 = Name("/ndn/edu/ucla/remap/ndn-js-test/howdy.txt/%FD%052%A1%DF%5E%A4") 
     dump("Express name ", name1.toUri())
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 
     # Try to get anything.
-    name2 = Name("/"); 
+    name2 = Name("/") 
     dump("Express name ", name2.toUri())
     face.expressInterest(name2, counter.onData, counter.onTimeout)
 
     # Expect this to time out.
-    name3 = Name("/test/timeout"); 
+    name3 = Name("/test/timeout") 
     dump("Express name ", name3.toUri())
     face.expressInterest(name3, counter.onData, counter.onTimeout)
 
