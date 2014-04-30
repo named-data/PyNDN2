@@ -10,12 +10,14 @@ This module defines the IdentityManager class which is the interface of
 operations related to identity, keys, and certificates.
 """
 
+import sys
 from pyndn.data import Data
 from pyndn.encoding import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn import KeyLocatorType
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStorage
+from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
 
 class IdentityManager(object):
     """
@@ -33,7 +35,11 @@ class IdentityManager(object):
         if identityStorage == None:
             identityStorage = BasicIdentityStorage()
         if privateKeyStorage == None:
-            privateKeyStorage = FilePrivateKeyStorage()
+            if sys.platform == 'darwin':
+                # Use the OS X Keychain
+                privateKeyStorage = OSXPrivateKeyStorage()
+            else:
+                privateKeyStorage = FilePrivateKeyStorage()
             
         self._identityStorage = identityStorage
         self._privateKeyStorage = privateKeyStorage
