@@ -28,6 +28,32 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         # The key is the keyName.toUri()
         self._privateKeyStore = {}
         
+    def setPublicKeyForKeyName(self, keyName, publicKeyDer):
+        """
+        Set the public key for the keyName.
+        
+        :param Name keyName: The key name.
+        :param publicKeyDer: The public key DER byte array.
+        :type publicKeyDer: str, or an array type with int elements which is
+          converted to str
+        """
+        if not type(publicKeyDer) is str:
+            publicKeyDer = "".join(map(chr, publicKeyDer))
+        self._publicKeyStore[keyName.toUri()] = RSA.importKey(publicKeyDer)
+        
+    def setPrivateKeyForKeyName(self, keyName, privateKeyDer):
+        """
+        Set the private key for the keyName.
+        
+        :param Name keyName: The key name.
+        :param privateKeyDer: The private key DER byte array.
+        :type privateKeyDer: str, or an array type with int elements which is
+          converted to str
+        """
+        if not type(privateKeyDer) is str:
+            privateKeyDer = "".join(map(chr, privateKeyDer))
+        self._privateKeyStore[keyName.toUri()] = RSA.importKey(privateKeyDer)
+        
     def setKeyPairForKeyName(self, keyName, publicKeyDer, privateKeyDer):
         """
         Set the public and private key for the keyName.
@@ -40,13 +66,8 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :type privateKeyDer: str, or an array type with int elements which is
           converted to str
         """
-        if not type(publicKeyDer) is str:
-            publicKeyDer = "".join(map(chr, publicKeyDer))
-        self._publicKeyStore[keyName.toUri()] = RSA.importKey(publicKeyDer)
-        
-        if not type(privateKeyDer) is str:
-            privateKeyDer = "".join(map(chr, privateKeyDer))
-        self._privateKeyStore[keyName.toUri()] = RSA.importKey(privateKeyDer)
+        self.setPublicKeyForKeyName(keyName, publicKeyDer)
+        self.setPrivateKeyForKeyName(keyName, privateKeyDer)
         
     def getPublicKey(self, keyName):
         """
