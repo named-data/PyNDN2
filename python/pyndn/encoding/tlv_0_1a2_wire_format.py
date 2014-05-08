@@ -441,7 +441,7 @@ class Tlv0_1a2WireFormat(WireFormat):
             Tlv0_1a2WireFormat._encodeExclude(interest.getExclude(), encoder)
         if interest.getKeyLocator().getType() != None:
             Tlv0_1a2WireFormat._encodeKeyLocator(
-              interest.getKeyLocator(), encoder)
+              Tlv.PublisherPublicKeyLocator, interest.getKeyLocator(), encoder)
         encoder.writeOptionalNonNegativeIntegerTlv(
           Tlv.MaxSuffixComponents, interest.getMaxSuffixComponents())
         encoder.writeOptionalNonNegativeIntegerTlv(
@@ -462,9 +462,9 @@ class Tlv0_1a2WireFormat(WireFormat):
           decoder.readOptionalNonNegativeIntegerTlv
             (Tlv.MaxSuffixComponents, endOffset))
             
-        if decoder.peekType(Tlv.KeyLocator, endOffset):
+        if decoder.peekType(Tlv.PublisherPublicKeyLocator, endOffset):
             Tlv0_1a2WireFormat._decodeKeyLocator(
-              interest.getKeyLocator(), decoder)
+              Tlv.PublisherPublicKeyLocator, interest.getKeyLocator(), decoder)
         else:
             interest.getKeyLocator().clear()
             
@@ -572,7 +572,8 @@ class Tlv0_1a2WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        Tlv0_1a2WireFormat._encodeKeyLocator(signature.getKeyLocator(), encoder)
+        Tlv0_1a2WireFormat._encodeKeyLocator(
+          Tlv.KeyLocator, signature.getKeyLocator(), encoder)
         encoder.writeNonNegativeIntegerTlv(
           Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
     
@@ -590,8 +591,9 @@ class Tlv0_1a2WireFormat(WireFormat):
             # Modify data's signature object because if we create an object
             #   and set it, then data will have to copy all the fields.
             signatureInfo = data.getSignature()
-            Tlv0_1a2WireFormat._decodeKeyLocator(signatureInfo.getKeyLocator(), 
-                                                 decoder)
+            Tlv0_1a2WireFormat._decodeKeyLocator(
+              Tlv.KeyLocator, signatureInfo.getKeyLocator(), 
+              decoder)
         else:
             raise RuntimeError(
               "decodeSignatureInfo: unrecognized SignatureInfo type" + 
@@ -600,7 +602,7 @@ class Tlv0_1a2WireFormat(WireFormat):
         decoder.finishNestedTlvs(endOffset)
 
     @staticmethod
-    def _encodeKeyLocator(keyLocator, encoder):
+    def _encodeKeyLocator(type, keyLocator, encoder):
         saveLength = len(encoder)
         
         # Encode backwards.
@@ -615,11 +617,11 @@ class Tlv0_1a2WireFormat(WireFormat):
                 raise RuntimeError("Unrecognized KeyLocatorType " + 
                                    repr(keyLocator.getType()))
     
-        encoder.writeTypeAndLength(Tlv.KeyLocator, len(encoder) - saveLength)
+        encoder.writeTypeAndLength(type, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeKeyLocator(keyLocator, decoder):
-        endOffset = decoder.readNestedTlvsStart(Tlv.KeyLocator)
+    def _decodeKeyLocator(expectedType, keyLocator, decoder):
+        endOffset = decoder.readNestedTlvsStart(expectedType)
 
         keyLocator.clear()
 

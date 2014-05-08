@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0alpha2 (2014-04-30)
+Interim changes since PyNDN v2.0alpha2 (2014-05-08)
 ---------------------------------------------------
 
 Changes
@@ -19,6 +19,7 @@ Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.
 * http://redmine.named-data.net/issues/1337 Fix FinalBlockID encoding.
 * For TLV packets over UDP, ignore packets starting with 0x80.
+* Fix bug for encoding/decoding the TLV Interest PublisherPublicKeyLocator.
 
 Support to be added soon:
 * Package install support.
