@@ -273,7 +273,7 @@ class Interest(object):
             selectors += "&ndn.Scope=" + repr(self._scope)
         if self._interestLifetimeMilliseconds != None:
             selectors += "&ndn.InterestLifetime=" + repr(
-              self._interestLifetimeMilliseconds)
+              int(round(self._interestLifetimeMilliseconds)))
         if self.getNonce().size() > 0:
             selectors += ("&ndn.Nonce=" +
               Name.toEscapedString(self.getNonce().buf()))
