@@ -179,6 +179,27 @@ class Face(object):
         """
         self._commandCertificateName = certificateName
         
+    def makeCommandInterest(self, interest, wireFormat = None):
+        """
+        Append a timestamp component and a random value component to interest's
+        name. Then use the keyChain and certificateName from 
+        setCommandSigningInfo to sign the interest. If the interest lifetime is 
+        not set, this sets it.
+
+        :param Interest interest: The interest whose name is append with 
+          components.
+        :param wireFormat: (optional) A WireFormat object used to encode the 
+          SignatureInfo and to encode interest name for signing. If omitted, use 
+          WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+        self._node.makeCommandInterest(
+          interest, self._commandKeyChain, self._commandCertificateName, 
+          wireFormat)
+        
     def registerPrefix(
       self, prefix, onInterest, onRegisterFailed, flags = None, 
       wireFormat = None):
