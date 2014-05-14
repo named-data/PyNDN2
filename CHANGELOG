@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0alpha2 (2014-05-08)
+Interim changes since PyNDN v2.0alpha2 (2014-05-14)
 ---------------------------------------------------
 
 Changes
@@ -14,6 +14,7 @@ Changes
 * Added test-publish-async-nfd.
 * Added ThreadsafeFace which uses asyncio.
 * Added test_get_async_threadsafe 
+* Renamed internal class Tlv1_0a2WireFormat to Tlv0_1WireFormat.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.

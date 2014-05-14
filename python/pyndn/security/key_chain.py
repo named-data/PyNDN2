@@ -25,7 +25,7 @@ from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv import Tlv
-from pyndn.encoding.tlv_0_1a2_wire_format import Tlv0_1a2WireFormat
+from pyndn.encoding.tlv_0_1_wire_format import Tlv0_1WireFormat
 
 class KeyChain(object):
     """
@@ -295,7 +295,7 @@ class KeyChain(object):
         # Append the encoded SignatureInfo.
         # TODO: Move this into a WireFormat abstraction.
         encoder = TlvEncoder(256)
-        Tlv0_1a2WireFormat._encodeSignatureSha256WithRsa(signature, encoder)
+        Tlv0_1WireFormat._encodeSignatureSha256WithRsa(signature, encoder)
 
         interest.getName().append(Blob(encoder.getOutput(), False))
 
