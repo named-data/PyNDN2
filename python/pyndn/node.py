@@ -97,6 +97,24 @@ class Node(object):
                 self._pendingInterestTable.pop(i)
             i -= 1
         
+    def makeCommandInterest(self, interest, keyChain, certificateName, wireFormat):
+        """
+        Append a timestamp component and a random value component to interest's
+        name. Then use the keyChain and certificateName to sign the interest. 
+        If the interest lifetime is not set, this sets it.
+
+        :param Interest interest: The interest whose name is append with 
+          components.
+        :param KeyChain keyChain: The KeyChain for calling sign.
+        :param Name certificateName: The certificate name of the key to use for 
+          signing.
+        :param wireFormat: (optional) A WireFormat object used to encode this 
+           ControlParameters.
+        :type wireFormat: A subclass of WireFormat
+        """
+        self._commandInterestGenerator.generate( 
+          interest, keyChain, certificateName, wireFormat)
+        
     def registerPrefix(
       self, prefix, onInterest, onRegisterFailed, flags, wireFormat, 
       commandKeyChain, commandCertificateName):
@@ -396,7 +414,7 @@ class Node(object):
         commandInterest = Interest(Name("/localhost/nfd/rib/register"))
         # NFD only accepts TlvWireFormat packets.
         commandInterest.getName().append(controlParameters.wireEncode(TlvWireFormat.get()))
-        self._commandInterestGenerator.generate(
+        self.makeCommandInterest(
           commandInterest, commandKeyChain, commandCertificateName,
           TlvWireFormat.get())
         # The interest is answered by the local host, so set a short timeout.
