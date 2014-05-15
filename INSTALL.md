@@ -68,6 +68,27 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
 
     pip install trollius
 
+## Windows 7 (no Cygwin)
+In the following, change `c:\Python27\` or `c:\Python34\` to your correct Python directory
+(or omit if you have python.exe in your PATH).
+
+### Python 2.7 for Windows
+
+To install pip, download the get-pip.py from https://pip.pypa.io/en/latest/installing.html .
+In a command prompt, enter:
+
+    c:\Python27\python.exe get-pip.py
+
+This installs pip.exe in the Scripts subdirectory of the Python directory.
+
+TODO: pip install pycrypto
+
+Optional: To run trollius in Python 2.7, it apparently needs some DLLs from
+Python 3.  So, to run trollius in Python 2.7, install Python 3.  
+To install trollius (Python 2.7), in a terminal enter:
+
+    c:\Python27\Scripts\pip.exe install trollius
+
 Build
 =====
 You need PyNDN on the Python path.  To temporarily set it, do the following.
