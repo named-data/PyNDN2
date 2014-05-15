@@ -10,9 +10,9 @@ Prerequisites
 Following are the detailed steps for each platform to install the prerequisites.
 
 ## Mac OS X 10.7.3, Mac OS X 10.8.5
-Install Xcode.
-In Xcode Preferences > Downloads, install "Command Line Tools".
-In a terminal, enter:
+Install Xcode.  
+In Xcode Preferences > Downloads, install "Command Line Tools".  
+In a terminal, enter:  
 
     sudo easy_install pip
     sudo pip install pycrypto
@@ -22,7 +22,7 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
     sudo pip install trollius
 
 ## Mac OS X 10.9
-Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)
+Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)  
 In a terminal, enter:
 
     sudo easy_install pip
@@ -52,13 +52,14 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
 (PyCrypto is already installed.)
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
+
     sudo apt-get install python-pip
     sudo pip install trollius
 
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
 
-In the Cygwin installer, select and install the "Devel" packages at the top level of the installer.
+In the Cygwin installer, select and install the "Devel" packages at the top level of the installer.  
 In a Cygwin terminal, enter:
 
     easy_install pip
@@ -74,7 +75,7 @@ In the following, change `c:\Python27\` or `c:\Python34\` to your correct Python
 
 ### Python 2.7 for Windows
 
-To install pip, download the get-pip.py from https://pip.pypa.io/en/latest/installing.html .
+To install pip, download get-pip.py from https://pip.pypa.io/en/latest/installing.html .  
 In a command prompt, enter:
 
     c:\Python27\python.exe get-pip.py
@@ -84,7 +85,7 @@ This installs pip.exe in the Scripts subdirectory of the Python directory.
 TODO: pip install pycrypto
 
 Optional: To run trollius in Python 2.7, it apparently needs some DLLs from
-Python 3.  So, to run trollius in Python 2.7, install Python 3.  
+Python 3. So, to run trollius in Python 2.7, install Python 3.  
 To install trollius (Python 2.7), in a terminal enter:
 
     c:\Python27\Scripts\pip.exe install trollius
