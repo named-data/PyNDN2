@@ -90,14 +90,30 @@ class Common(object):
         return type(obj) is str or _haveTypeUnicode and type(obj) is unicode
     
     @staticmethod
-    def unicodeToString(input):
+    def stringToUtf8Array(input):
         """
-        If the input is type unicode, return a str. Otherwise, just return the
-        input. This is necessary because Python 3 doesn't have the unicode
-        type, but Python 2 does, and we just want to check arguments for str.
+        If the input has type str (in Python 3) or unicode (in Python 2), then
+        encode it as UTF8 and return an array of integers. If the input is
+        str (in Python 2) then treat it as a "raw" string and just convert each
+        element to int.  Otherwise, if the input is not str or unicode, just 
+        return the input.  This is necessary because in Python 3 doesn't have 
+        the unicode type and the elements in a string a Unicode characters.
+        But in Python 2 only the unicode type has Unicode characters, and str
+        elements are bytes with value 0 to 255 (and often used to carry binary
+        data).
         """
-        if _haveTypeUnicode and type(input) == unicode:
-            # In Python 2, we can't use str(input) since this fails for non-ascii.
-            return "".join(map(_chr_ord, input))
+        if _haveTypeUnicode:
+            # Assume this is Python 2.
+            if type(input) is str:
+                # Convert the raw string to an int array.
+                return map(ord, input)
+            elif type(input) is unicode:
+                # In Python 2, the result of encode is a str, so convert to int array.
+                return map(ord, input.encode('utf-8'))
+            else:
+                return input
         else:
-            return input
+            if type(input) is str:
+                return input.encode('utf-8')
+            else:
+                return input
