@@ -4,10 +4,6 @@ PyNDN: An Named Data Networking client library with TLV wire format support in n
 PyNDN 2.0 is a new implementation of a Named Data Networking client library written in pure Python.
 It is wire format compatible with the new NDN-TLV encoding, with ndnd-tlv and NFD.
 	
-PyNDN is open source under a license described in the file COPYING.  While the license
-does not require it, we really would appreciate it if others would share their
-contributions to the library if they are willing to do so under the same license. 
-
 See the file INSTALL.md for build and install instructions.
 
 Please submit any bugs or issues to the PyNDN issue tracker:
@@ -23,3 +19,19 @@ See http://named-data.net/doc/ndn-ccl-api .
 
 Since PyNDN 2.0 conforms to the new Common Client Library API, applications written in the pre-2.0 version
 of PyNDN need to be upgraded.
+
+License
+-------
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+A copy of the GNU General Public License is in the file COPYING.
