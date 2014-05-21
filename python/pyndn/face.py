@@ -27,6 +27,7 @@ from pyndn.interest import Interest
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.transport.tcp_transport import TcpTransport
+from pyndn.util.common import Common
 from pyndn.node import Node
 
 class Face(object):
@@ -45,7 +46,7 @@ class Face(object):
       port is the port of the NDN hub. If omitted. use 6363.
     """
     def __init__(self, arg1, arg2 = None):
-        if type(arg1) is str:
+        if Common.typeIsString(arg1):
             transport = TcpTransport()
             connectionInfo = TcpTransport.ConnectionInfo(
               arg1, arg2 if type(arg2) is int else 6363)

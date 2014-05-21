@@ -76,6 +76,20 @@ class Common(object):
             return "".join(map(_bytesElementToChr, bytesIO.getvalue()))
 
     @staticmethod
+    def typeIsString(obj):
+        """
+        Check if obj has type str or (in Python 2) unicode. This is necessary
+        because Python 2 has two string types, str and unicode, but Python 3
+        doesn't have type unicode so we have to be carefor to check for
+        type(obj) is unicode.
+        
+        :param any obj: The object to check if it is str or unicode.
+        :return: True if obj is str or unicode, otherwise false
+        :rtype: bool
+        """
+        return type(obj) is str or _haveTypeUnicode and type(obj) is unicode
+    
+    @staticmethod
     def unicodeToString(input):
         """
         If the input is type unicode, return a str. Otherwise, just return the

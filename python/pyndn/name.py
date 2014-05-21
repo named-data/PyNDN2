@@ -36,12 +36,10 @@ class Name(object):
     :type value: Name or str
     """
     def __init__(self, value = None):
-        value = Common.unicodeToString(value)
-        
         if type(value) is Name:
             # Copy the components array, but don't need to copy each Component.
             self._components = value._components[:]
-        elif type(value) is str:
+        elif Common.typeIsString(value):
             self._components = []
             # Set _changeCount now because self.set() expects it.
             self._changeCount = 0
