@@ -16,6 +16,7 @@ Changes
 * Added test_get_async_threadsafe 
 * Renamed internal class Tlv1_0a2WireFormat to Tlv0_1WireFormat.
 * COPYING: Changed the license to LGPLv3.
+* In Blob, added __str__ operator.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.

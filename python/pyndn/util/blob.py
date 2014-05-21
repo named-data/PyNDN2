@@ -24,6 +24,7 @@ because the new or old owner can't change the bytes.
 Note that the pointer to the buffer can be None.
 """
 
+import sys
 from io import BytesIO
 from pyndn.util.common import Common
 
@@ -144,6 +145,26 @@ class Blob(object):
             return None
         else:
             return "".join(map(chr, self.buf()))
+
+    def __str__(self):
+        """
+        For Python 3, decode the buffer as UTF8 and return the Unicode string
+        Otherwise, for Python 2, return the buffer as a raw string.
+        (For both Python 2 and 3, this is the reverse of calling the Blob 
+        constructor with a str.)
+        
+        :return: The array as a str, or None if isNull().
+        :rtype: str
+        """
+        if self._array == None:
+            return None
+        else:
+            if sys.version_info[0] > 2:
+                # Decode the UTF8 byte array.
+                return str(self.toBuffer(), 'utf8')
+            else:
+                # For Python 2, make a raw string.
+                return "".join(map(chr, self.buf()))
 
     @staticmethod
     def fromRawStr(rawStr):
