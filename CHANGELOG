@@ -22,6 +22,7 @@ Bug fixes
 * http://redmine.named-data.net/issues/1337 Fix FinalBlockID encoding.
 * For TLV packets over UDP, ignore packets starting with 0x80.
 * Fix bug for encoding/decoding the TLV Interest PublisherPublicKeyLocator.
+* In the Blob constructor, Name.append, etc. treat a Python 2 str as a raw string.
 
 Support to be added soon:
 * Package install support.

@@ -31,9 +31,11 @@ class Blob(object):
     """
     Create a new Blob which holds an immutable array of bytes.
     
-    :param array: (optional) The array of bytes, or None.  If array is str,
-      then encode using UTF-8.  If you just want a Blob from a raw str
-      without encoding, use Blob.fromRawStr.
+    :param array: (optional) The array of bytes, or None.  If array is str (in
+      Python 2) or unicode (in Python 2), then encode using UTF-8. (However, if 
+      array is str in Python 2, treat it as a raw string and convert to an
+      array of int.) If you just want a Blob from a raw str without encoding, 
+      use Blob.fromRawStr.
     :type array: Blob, bytearray, memoryview or other array of int
     :param bool copy: (optional) If true, copy the contents of array into a new
       bytearray.  If false, just use the existing array without copying.
@@ -48,16 +50,8 @@ class Blob(object):
             # Use the existing _array.  Don't need to check for copy.
             self._array = array._array
         else:
-            array = Common.unicodeToString(array)
+            array = Common.stringToUtf8Array(array)
             
-            if type(array) is str:
-                # Convert from a string to utf-8 byte encoding.
-                if _encodeResultIsStr:
-                    # encode produces a str. Force it to be an array of int.
-                    array = map(ord, array.encode('utf-8'))
-                else:
-                    array = array.encode('utf-8')
-                
             if copy:
                 # We are copying, so just make another bytearray.
                 # We always use a memoryview so that slicing is efficient.
@@ -259,8 +253,6 @@ class Blob(object):
 # Set this up once at the module level for the constructor to use.
 # Expect that this is True for Python version 3.3 or later.
 _memoryviewUsesInt = type(memoryview(bytearray(1))[0]) is int
-
-_encodeResultIsStr = type("A".encode('utf-8')) is str
 
 class _memoryviewWrapper(object):
     """
