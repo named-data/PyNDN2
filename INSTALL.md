@@ -81,12 +81,29 @@ In a command prompt, enter:
     c:\Python27\python.exe get-pip.py
 
 This installs pip.exe in the Scripts subdirectory of the Python directory.
+To use pip, you must have Visual Studio installed. 
+Pip only looks at the environment variable `VS90COMNTOOLS` so you must set this 
+to your version of Visual Studio as follows:
 
-TODO: pip install pycrypto
+Visual Studio 2010
+
+    SET VS90COMNTOOLS=%VS100COMNTOOLS%
+
+Visual Studio 2012
+
+    SET VS90COMNTOOLS=%VS110COMNTOOLS%
+
+Visual Studio 2013
+
+    SET VS90COMNTOOLS=%VS120COMNTOOLS%
+
+To install pycrypto, in a command prompt enter:
+
+    c:\Python27\Scripts\pip.exe install pycrypto
 
 Optional: To run trollius in Python 2.7, it apparently needs some DLLs from
 Python 3. So, to run trollius in Python 2.7, install Python 3.  
-To install trollius (Python 2.7), in a terminal enter:
+To install trollius (Python 2.7), in a command prompt enter:
 
     c:\Python27\Scripts\pip.exe install trollius
 
