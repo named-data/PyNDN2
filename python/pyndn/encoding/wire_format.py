@@ -107,8 +107,8 @@ class WireFormat(object):
         Encode forwardingEntry and return the encoding.  Your derived class 
         should override.
 
-        :param forwardingEntry: The ForwardingEntry object to encode.
-        :type forwardingEntry: ForwardingEntry
+        :param ForwardingEntry forwardingEntry: The ForwardingEntry object to 
+          encode.
         :return: A Blob containing the encoding.
         :rtype: Blob
         :raises RuntimeError: for unimplemented if the derived class does not 
@@ -121,9 +121,8 @@ class WireFormat(object):
         Decode input as an forwardingEntry and set the fields of the 
         forwardingEntry object. Your derived class should override.
         
-        :param forwardingEntry: The ForwardingEntry object whose fields are 
-          updated.
-        :type forwardingEntry: ForwardingEntry
+        :param ForwardingEntry forwardingEntry: The ForwardingEntry object whose 
+          fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         :raises RuntimeError: for unimplemented if the derived class does not 
@@ -136,8 +135,8 @@ class WireFormat(object):
         Encode controlParameters and return the encoding.  Your derived class 
         should override.
 
-        :param controlParameters: The ControlParameters object to encode.
-        :type controlParameters: ControlParameters
+        :param ControlParameters controlParameters: The ControlParameters object 
+          to encode.
         :return: A Blob containing the encoding.
         :rtype: Blob
         :raises RuntimeError: for unimplemented if the derived class does not 
@@ -150,15 +149,44 @@ class WireFormat(object):
         Decode input as an controlParameters and set the fields of the 
         controlParameters object. Your derived class should override.
         
-        :param controlParameters: The ControlParameters object whose fields are 
-          updated.
-        :type controlParameters: ControlParameters
+        :param ControlParameters controlParameters: The ControlParameters object 
+          whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("decodeControlParameters is not implemented")
+    
+    def encodeSignatureInfo(self, signature):
+        """
+        Encode signature as a SignatureInfo and return the encoding.
+        Your derived class should override.
+
+        :param signature: An object of a subclass of Signature to encode.
+        :type signature: An object of a subclass of Signature
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("encodeSignatureInfo is not implemented")
+    
+    def encodeSignatureValue(self, signature):
+        """
+        Encode the signatureValue in the Signature object as a SignatureValue 
+        (the signature bits) and return the encoding.
+        Your derived class should override.
+
+        :param signature: An object of a subclass of Signature with the 
+          signature value to encode.
+        :type signature: An object of a subclass of Signature
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not 
+          override.
+        """
+        raise RuntimeError("encodeSignatureInfo is not implemented")
         
     @classmethod
     def setDefaultWireFormat(self, wireFormat):

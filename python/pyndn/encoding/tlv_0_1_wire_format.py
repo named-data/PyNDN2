@@ -242,7 +242,7 @@ class Tlv0_1WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.ForwardingEntry, 
                                    len(encoder) - saveLength)
         
-        return Blob(encoder.getOutput())
+        return Blob(encoder.getOutput(), False)
     
     def decodeForwardingEntry(self, forwardingEntry, input):
         """
@@ -331,25 +331,38 @@ class Tlv0_1WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.ControlParameters_ControlParameters, 
                                    len(encoder) - saveLength)
         
-        return Blob(encoder.getOutput())
+        return Blob(encoder.getOutput(), False)
     
-    #def decodeControlParameters(self, controlParameters, input):
-    #    """
-    #    Decode input as an controlParameters and set the fields of the 
-    #    controlParameters object.
-    #    
-    #    :param controlParameters: The ControlParameters object whose fields are 
-    #      updated.
-    #    :type controlParameters: ControlParameters
-    #    :param input: The array with the bytes to decode.
-    #    :type input: An array type with int elements
-    #    """
-    #    decoder = TlvDecoder(input)
-    #
-    #    endOffset = decoder.readNestedTlvsStart(
-    #      Tlv.ControlParameters_ControlParameters)
-    #
-    #    decoder.finishNestedTlvs(endOffset)
+    def encodeSignatureInfo(self, signature):
+        """
+        Encode signature as an NDN-TLV SignatureInfo and return the encoding.
+
+        :param signature: An object of a subclass of Signature to encode.
+        :type signature: An object of a subclass of Signature
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        self._encodeSignatureSha256WithRsa(signature, encoder)
+    
+        return Blob(encoder.getOutput(), False)
+    
+    def encodeSignatureValue(self, signature):
+        """
+        Encode the signatureValue in the Signature object as an NDN-TLV 
+        SignatureValue (the signature bits) and return the encoding.
+
+        :param signature: An object of a subclass of Signature with the 
+          signature value to encode.
+        :type signature: An object of a subclass of Signature
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        # TODO: This assumes it is a Sha256WithRsaSignature.
+        encoder.writeBlobTlv(Tlv.SignatureValue, signature.getSignature().buf())
+    
+        return Blob(encoder.getOutput(), False)
 
     @classmethod
     def get(self):
