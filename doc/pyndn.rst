@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    pyndn.contrib
     pyndn.encoding
     pyndn.security
     pyndn.transport
