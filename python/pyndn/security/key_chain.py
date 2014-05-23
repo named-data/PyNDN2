@@ -305,11 +305,7 @@ class KeyChain(object):
         signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
 
         # Append the encoded SignatureInfo.
-        # TODO: Move this into a WireFormat abstraction.
-        encoder = TlvEncoder(256)
-        Tlv0_1WireFormat._encodeSignatureSha256WithRsa(signature, encoder)
-
-        interest.getName().append(Blob(encoder.getOutput(), False))
+        interest.getName().append(wireFormat.encodeSignatureInfo(signature))
 
         # Append an empty signature so that the "signedPortion" is correct.
         interest.getName().append(Name.Component())
@@ -318,12 +314,11 @@ class KeyChain(object):
         signedSignature = self.sign(encoding.toSignedBuffer(), certificateName)
 
         # Remove the empty signature and append the real one.
-        # TODO: Move this into a WireFormat abstraction.
         encoder = TlvEncoder(256)
         encoder.writeBlobTlv(
           Tlv.SignatureValue, signedSignature.getSignature().buf())
         interest.setName(interest.getName().getPrefix(-1).append(
-          Blob(encoder.getOutput(), False)))
+          wireFormat.encodeSignatureValue(signedSignature)))
           
     def signByIdentity(self, target, identityName = None, wireFormat = None):
         """
