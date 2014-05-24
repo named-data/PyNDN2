@@ -18,7 +18,7 @@
 # A copy of the GNU General Public License is in the file COPYING.
 
 """
-This module defines the NfdCommandInterestGenerator class which keeps track of a 
+This module defines the CommandInterestGenerator class which keeps track of a 
 timestamp and generates command interests according to the NFD Signed Command 
 Interests protocol:
 http://redmine.named-data.net/projects/nfd/wiki/Command_Interests
@@ -34,9 +34,9 @@ from pyndn.util.common import Common
 # http://docs.python.org/2/library/random.html
 _systemRandom = SystemRandom()
 
-class NfdCommandInterestGenerator(object):
+class CommandInterestGenerator(object):
     """
-    Create a new NfdCommandInterestGenerator and initialize the timestamp to now.
+    Create a new CommandInterestGenerator and initialize the timestamp to now.
     """
     def __init__(self):
         self._lastTimestamp = round(Common.getNowMilliseconds())
@@ -72,7 +72,7 @@ class NfdCommandInterestGenerator(object):
             randomBuffer[i] = _systemRandom.randint(0, 0xff)                
         interest.getName().append(Blob(randomBuffer, False))
 
-        keyChain.sign(interest, certificateName)
+        keyChain.sign(interest, certificateName, wireFormat)
 
         if (interest.getInterestLifetimeMilliseconds() == None or
             interest.getInterestLifetimeMilliseconds()< 0):

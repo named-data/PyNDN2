@@ -32,7 +32,7 @@ from pyndn.forwarding_entry import ForwardingEntry
 from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
-from pyndn.util.nfd_command_interest_generator import NfdCommandInterestGenerator
+from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
@@ -60,7 +60,7 @@ class Node(object):
           Name("/%C1.M.S.localhost/%C1.M.SRV/ndnd/KEY"))
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
         self._ndndId = None
-        self._commandInterestGenerator = NfdCommandInterestGenerator()
+        self._commandInterestGenerator = CommandInterestGenerator()
         
     def expressInterest(self, interest, onData, onTimeout, wireFormat):
         """
