@@ -131,4 +131,5 @@ This has the following test files:
 * tests/test_echo_consumer.py: Prompt for a word, send the interest /testecho/word to the local hub which is echoed by test_publish_async_nfd.py (or test_publish_async_ndnx.py).
 * tests/test_encode_decode_interest.py: Encode and decode an interest, testing interest selectors and the name URI.
 * tests/test_encode_decode_data.py: Encode and decode a data packet, including signing the data packet.
-* tests/test_encode_decode_forwarding_entry.py: Encode and decode a forwarding entry packet, including signing the data packet.
+* tests/test_encode_decode_forwarding_entry.py: Encode and decode a forwarding entry packet.
+* tests/test_encode_decode_fib_entry.py: Encode and decode a sample Protobuf message using ProtobufTlv.
