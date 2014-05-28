@@ -28,6 +28,7 @@ class KeyType(object):
     # DES
     # RC4
     # RC2
+    EC = 3
 
 class KeyClass(object):
     PUBLIC = 1
