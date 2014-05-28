@@ -207,14 +207,14 @@ def benchmarkEncodeDecodeData(useComplex, useCrypto):
     (duration, encoding) = benchmarkEncodeDataSeconds(nIterations, useComplex, 
                                                       useCrypto)
     print("Encode " + ("complex" if useComplex else "simple ") + 
-          " data: Crypto? " + ("yes" if useCrypto else "no ") +
+          " data: Crypto? " + ("RSA" if useCrypto else "no ") +
           ", Duration sec, Hz: " + repr(duration) + ", " + 
           repr(nIterations / duration))
 
     nIterations = 5000 if useCrypto else 20000
     duration = benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding)
     print("Decode " + ("complex" if useComplex else "simple ") + 
-          " data: Crypto? " + ("yes" if useCrypto else "no ") +
+          " data: Crypto? " + ("RSA" if useCrypto else "no ") +
           ", Duration sec, Hz: " + repr(duration) + ", " + 
           repr(nIterations / duration))
 
