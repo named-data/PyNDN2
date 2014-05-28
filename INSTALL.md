@@ -6,6 +6,7 @@ Prerequisites
 * Required: Python 2.7 or later
 * Required: PyCrypto
 * Optional: trollius (for asyncio in Python 2.7)
+* Optional: Protobuf (for the ProtobufTlv converter)
 
 Following are the detailed steps for each platform to install the prerequisites.
 
@@ -21,6 +22,10 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
 
     sudo pip install trollius
 
+Optional: To install Protobuf, in a terminal enter:
+
+    sudo pip install protobuf
+
 ## Mac OS X 10.9
 Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)  
 In a terminal, enter:
@@ -31,6 +36,10 @@ In a terminal, enter:
 Optional: To install trollius (Python 2.7), in a terminal enter:
 
     sudo pip install trollius
+
+Optional: To install Protobuf, in a terminal enter:
+
+    sudo pip install protobuf
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
@@ -48,6 +57,8 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
     sudo apt-get install python-pip
     sudo pip install trollius
 
+(Protobuf is already installed.)
+
 ## Ubuntu 13.10 (64 bit)
 (PyCrypto is already installed.)
 
@@ -55,6 +66,8 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install trollius
+
+(Protobuf is already installed.)
 
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
