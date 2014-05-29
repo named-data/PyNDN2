@@ -22,11 +22,13 @@ This module defines the Face class which provides the main methods for NDN
 communication.
 """
 
+import os
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.transport.tcp_transport import TcpTransport
+from pyndn.transport.unix_transport import UnixTransport
 from pyndn.util.common import Common
 from pyndn.node import Node
 
@@ -41,15 +43,30 @@ class Face(object):
     :param Transport.ConnectionInfo connectionInfo: An object of a subclass of 
       Transport.ConnectionInfo to be used to connect to the transport.
     :param str host: In the Face(host, port) form of the constructor, host is
-      the host of the NDN hub with a TcpTransport.
+      the host of the NDN hub to connect using TcpTransport. However, if the 
+      host is "localhost" and the port is the default and the forwarder's Unix 
+      socket file exists, then connect using UnixTransport.
     :param int port: (optional) In the Face(host, port) form of the constructor, 
       port is the port of the NDN hub. If omitted. use 6363.
     """
     def __init__(self, arg1, arg2 = None):
         if Common.typeIsString(arg1):
-            transport = TcpTransport()
-            connectionInfo = TcpTransport.ConnectionInfo(
-              arg1, arg2 if type(arg2) is int else 6363)
+            filePath = ""
+            if arg1 == "localhost" and arg2 == None:
+                # Check if we can connect using UnixSocket.
+                tryFilePath = "/var/run/nfd.sock"
+                # Use listdir because isfile doesn't see socket file types.
+                if  (os.path.basename(tryFilePath) in 
+                     os.listdir(os.path.dirname(tryFilePath))):
+                    filePath = tryFilePath
+            
+            if filePath == "":
+                transport = TcpTransport()
+                connectionInfo = TcpTransport.ConnectionInfo(
+                  arg1, arg2 if type(arg2) is int else 6363)
+            else:
+                transport = UnixTransport()
+                connectionInfo = UnixTransport.ConnectionInfo(filePath)
         else:
             transport = arg1
             connectionInfo = arg2
