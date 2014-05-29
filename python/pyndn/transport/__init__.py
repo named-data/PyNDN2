@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-__all__ = ['tcp_transport', 'transport', 'udp_transport']
+__all__ = ['tcp_transport', 'transport', 'udp_transport', 'unix_transport']
 
 import sys as _sys
 
@@ -25,6 +25,7 @@ try:
     from pyndn.transport.tcp_transport import *
     from pyndn.transport.transport import *
     from pyndn.transport.udp_transport import *
+    from pyndn.transport.unix_transport import *
 except ImportError:
     del _sys.modules[__name__]
     raise
