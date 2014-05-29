@@ -200,7 +200,7 @@ NSApplicationDidHideNotification = c_void_p.in_dll(appkit, 'NSApplicationDidHide
 NSApplicationDidUnhideNotification = c_void_p.in_dll(appkit, 'NSApplicationDidUnhideNotification')
 
 # /System/Library/Frameworks/AppKit.framework/Headers/NSEvent.h
-NSAnyEventMask = 0xFFFFFFFFL     # NSUIntegerMax
+#NSAnyEventMask = 0xFFFFFFFFL     # NSUIntegerMax
 
 NSKeyDown            = 10
 NSKeyUp              = 11
