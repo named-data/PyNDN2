@@ -23,9 +23,9 @@ communication over a Unix socket.
 """
 
 import socket
-import select
 from pyndn.util import Blob
 from pyndn.transport.transport import Transport
+from pyndn.transport.socket_poller import SocketPoller
 from pyndn.encoding.element_reader import ElementReader
 
 class UnixTransport(Transport):
@@ -34,9 +34,7 @@ class UnixTransport(Transport):
     """
     def __init__(self):
         self._socket = None
-        self._poll = None
-        self._kqueue = None
-        self._kevents = None
+        self._socketPoller = None
         self._buffer = bytearray(8000)
         # Create a Blob and take its buf() since this creates a memoryview
         #   which is more efficient for slicing.
@@ -78,22 +76,7 @@ class UnixTransport(Transport):
         self._socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._socket.connect(connectionInfo.getFilePath())
           
-        if hasattr(select, "poll"):
-            # Set up _poll.  (Ubuntu, etc.)
-            self._poll = select.poll()
-            self._poll.register(self._socket.fileno(), select.POLLIN)
-        elif hasattr(select, "kqueue"):
-            ## Set up _kqueue. (BSD and OS X)
-            self._kqueue = select.kqueue()
-            self._kevents = [select.kevent(
-              self._socket.fileno(), filter = select.KQ_FILTER_READ,
-              flags = select.KQ_EV_ADD | select.KQ_EV_ENABLE | 
-                      select.KQ_EV_CLEAR)]
-        elif not hasattr(select, "select"):
-            # Most Python implementations have this fallback, so we
-            #   don't expect this error.
-            raise RuntimeError("Cannot find a polling utility for sockets")
-          
+        self._socketPoller = SocketPoller(self._socket)
         self._elementReader = ElementReader(elementListener)
     
     # This will be set True if send gets a TypeError.
@@ -133,28 +116,9 @@ class UnixTransport(Transport):
 
         # Loop until there is no more data in the receive buffer.
         while True:
-            if self._poll != None:
-                isReady = False
-                # Set timeout to 0 for an immediate check.
-                for (fd, pollResult) in self._poll.poll(0):
-                    if pollResult > 0 and pollResult & select.POLLIN != 0:
-                        isReady = True
-                        break
-                if not isReady:
-                    # There is no data waiting.
-                    return
-            elif self._kqueue != None:
-                # Set timeout to 0 for an immediate check.
-                if len(self._kqueue.control(self._kevents, 1, 0)) == 0:
-                    # There is no data waiting.
-                    return
-            else:
-                # Use the select fallback which is less efficient.
-                # Set timeout to 0 for an immediate check.
-                isReady, _, _ = select.select([self._socket], [], [], 0)
-                if len(isReady) == 0:
-                    # There is no data waiting.
-                    return
+            if not self._socketPoller.isReady():
+                # There is no data waiting.
+                return
             
             nBytesRead = self._socket.recv_into(self._buffer)
             if nBytesRead <= 0:
@@ -181,14 +145,10 @@ class UnixTransport(Transport):
         """
         Close the connection.  If not connected, this does nothing.
         """
+        if self._socketPoller != None:
+            self._socketPoller.close()
+            self._socketPoller = None
+
         if self._socket != None:
-            if self._poll != None:
-                self._poll.unregister(self._socket.fileno())
-                self._poll = None
-                
-            self._kqueue = None
-            self._kevents = None
-            
             self._socket.close()
             self._socket = None            
-            
