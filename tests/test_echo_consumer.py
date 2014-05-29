@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+import sys
 import time
 from pyndn import Name
 from pyndn import Face
@@ -46,7 +47,10 @@ def main():
     
     counter = Counter()
 
-    word = raw_input("Enter a word to echo: ")
+    if sys.version_info[0] <= 2:
+        word = raw_input("Enter a word to echo: ")
+    else:
+        word = input("Enter a word to echo: ")
 
     name = Name("/testecho")
     name.append(word)
