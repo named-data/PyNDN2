@@ -59,6 +59,11 @@ class Face(object):
                 if  (os.path.basename(tryFilePath) in 
                      os.listdir(os.path.dirname(tryFilePath))):
                     filePath = tryFilePath
+                else:
+                    tryFilePath = "/tmp/.ndnd.sock"
+                    if  (os.path.basename(tryFilePath) in 
+                         os.listdir(os.path.dirname(tryFilePath))):
+                        filePath = tryFilePath
             
             if filePath == "":
                 transport = TcpTransport()
