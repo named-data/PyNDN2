@@ -18,14 +18,10 @@
 # A copy of the GNU General Public License is in the file COPYING.
 
 import time
-from Crypto.Hash import SHA256
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
 from pyndn.util import Blob
 from pyndn import Name
 from pyndn import Data
 from pyndn import KeyLocatorType
-from pyndn import Sha256WithRsaSignature
 from pyndn.security import KeyType
 from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
