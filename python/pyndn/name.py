@@ -533,7 +533,7 @@ class Name(object):
         
         gotNonDot = False
         for i in range(len(value)):
-            if value[i] != '.':
+            if value[i] != ord('.'):
                 gotNonDot = True
                 break
 
