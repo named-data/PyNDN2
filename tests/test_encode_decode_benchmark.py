@@ -178,7 +178,7 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
       keyName, DEFAULT_PUBLIC_KEY_DER, DEFAULT_PRIVATE_KEY_DER)
     
     # Set up signatureBits in case useCrypto is false.
-    signatureBits = Blob(bytearray(128))
+    signatureBits = Blob(bytearray(256))
     emptyBlob = Blob([])
 
     start = getNowSeconds()
