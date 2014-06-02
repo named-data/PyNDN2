@@ -155,7 +155,7 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
         count = 1
         contentString += "%d" % count
         count += 1
-        while len(contentString) < 1170:
+        while len(contentString) < 1115:
             contentString += " %d" % count
             count += 1
         content = Name.fromEscapedString(contentString)
