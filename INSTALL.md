@@ -17,7 +17,7 @@ In Xcode Preferences > Downloads, install "Command Line Tools".
 In a terminal, enter:  
 
     sudo easy_install pip
-    sudo pip install pycrypto
+    sudo CFLAGS=-Qunused-arguments pip install pycrypto
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -36,7 +36,7 @@ Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools
 In a terminal, enter:
 
     sudo easy_install pip
-    sudo pip install pycrypto
+    sudo CFLAGS=-Qunused-arguments pip install pycrypto
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -50,10 +50,9 @@ Optional: To install Protobuf, in a terminal enter:
 Need to build/install the latest PyCrypto. In a terminal, enter:
 
     cd ~
-    sudo apt-get install git
+    sudo apt-get install git python-dev
     git clone https://github.com/dlitz/pycrypto.git
     cd pycrypto
-    sudo apt-get install python-dev
     python setup.py build
     sudo python setup.py install
 
