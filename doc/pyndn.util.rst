@@ -20,6 +20,14 @@ pyndn.util.change_counter module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.command_interest_generator module
+--------------------------------------------
+
+.. automodule:: pyndn.util.command_interest_generator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.common module
 ------------------------
 
@@ -32,14 +40,6 @@ pyndn.util.dynamic_byte_array module
 ------------------------------------
 
 .. automodule:: pyndn.util.dynamic_byte_array
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pyndn.util.nfd_command_interest_generator module
-------------------------------------------------
-
-.. automodule:: pyndn.util.nfd_command_interest_generator
     :members:
     :undoc-members:
     :show-inheritance:
