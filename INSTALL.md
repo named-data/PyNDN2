@@ -7,6 +7,7 @@ Prerequisites
 * Required: PyCrypto
 * Optional: trollius (for asyncio in Python 2.7)
 * Optional: Protobuf (for the ProtobufTlv converter)
+* Optional: Sphinx (to make documentation)
 
 Following are the detailed steps for each platform to install the prerequisites.
 
@@ -25,6 +26,10 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
 Optional: To install Protobuf, in a terminal enter:
 
     sudo pip install protobuf
+
+Optional: To install Sphinx, in a terminal enter:
+
+    sudo pip install sphinx
 
 ## Mac OS X 10.9
 Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)  
@@ -57,6 +62,11 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
     sudo apt-get install python-pip
     sudo pip install trollius
 
+Optional: To install Sphinx, in a terminal enter:
+
+    sudo apt-get install python-pip
+    sudo pip install sphinx
+
 (Protobuf is already installed.)
 
 ## Ubuntu 13.10 (64 bit)
@@ -66,6 +76,11 @@ Optional: To install trollius (Python 2.7), in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install trollius
+
+Optional: To install Sphinx, in a terminal enter:
+
+    sudo apt-get install python-pip
+    sudo pip install sphinx
 
 (Protobuf is already installed.)
 
@@ -132,6 +147,12 @@ For examples, see the test files in `<PyNDN root>/tests`.  For example in a term
     cd <PyNDN root>/tests
     python test_encode_decode_data.py
     python test_get_async.py
+
+To make the Sphinx documentation, in a terminal change to the doc subdirectory. Enter:
+  
+    make html
+
+The documentation output is in `doc/_build/html/index.html`.
 
 Files
 =====
