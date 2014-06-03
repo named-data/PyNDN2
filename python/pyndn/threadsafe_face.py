@@ -31,8 +31,9 @@ class ThreadsafeFace(Face):
     to process events, but you must start the loop on the thread in which
     you want the library to call communication callbacks such as onData and
     onInterest.
-    In Python 2.7, you must have the prerequisite Trollius library. See the
-    INSTALL file for installation details.
+    In Python <= 3.2, you must have the prerequisite Trollius library. See the
+    INSTALL file for installation details. For usage, see the sample
+    test_get_async_threadsafe.py.
     """
     def __init__(self, loop, arg1, arg2 = None):
         super(ThreadsafeFace, self).__init__(arg1, arg2)
