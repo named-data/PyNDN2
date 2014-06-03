@@ -5,7 +5,7 @@ Prerequisites
 =============
 * Required: Python 2.7 or later
 * Required: PyCrypto
-* Optional: trollius (for asyncio in Python 2.7)
+* Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter)
 * Optional: Sphinx (to make documentation)
 
@@ -19,7 +19,7 @@ In a terminal, enter:
     sudo easy_install pip
     sudo pip install pycrypto
 
-Optional: To install trollius (Python 2.7), in a terminal enter:
+Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
     sudo pip install trollius
 
@@ -38,7 +38,7 @@ In a terminal, enter:
     sudo easy_install pip
     sudo pip install pycrypto
 
-Optional: To install trollius (Python 2.7), in a terminal enter:
+Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
     sudo pip install trollius
 
@@ -57,7 +57,7 @@ Need to build/install the latest PyCrypto. In a terminal, enter:
     python setup.py build
     sudo python setup.py install
 
-Optional: To install trollius (Python 2.7), in a terminal enter:
+Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install trollius
@@ -72,7 +72,7 @@ Optional: To install Sphinx, in a terminal enter:
 ## Ubuntu 13.10 (64 bit)
 (PyCrypto is already installed.)
 
-Optional: To install trollius (Python 2.7), in a terminal enter:
+Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install trollius
