@@ -17,7 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-import asyncio
+try:
+    # Use builtin asyncio on Python 3.4+, or Tulip on Python 3.3
+    import asyncio
+except ImportError:
+    # Use Trollius on Python <= 3.2
+    import trollius as asyncio
 from pyndn import Name
 from pyndn import ThreadsafeFace
 
