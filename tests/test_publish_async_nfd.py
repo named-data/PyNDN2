@@ -53,7 +53,8 @@ class Echo(object):
         dump("Register failed for prefix", prefix.toUri())
 
 def main():
-    face = Face("localhost")
+    # The default Face will connect using a Unix socket, or to "localhost".
+    face = Face()
 
     # Use the system default key chain and certificate name to sign commands.
     keyChain = KeyChain()

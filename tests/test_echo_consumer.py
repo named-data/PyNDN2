@@ -43,7 +43,8 @@ class Counter(object):
         dump("Time out for interest", interest.getName().toUri()) 
 
 def main():
-    face = Face("localhost")
+    # The default Face will connect using a Unix socket, or to "localhost".
+    face = Face()
     
     counter = Counter()
 

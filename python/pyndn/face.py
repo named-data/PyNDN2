@@ -35,24 +35,24 @@ from pyndn.node import Node
 class Face(object):
     """
     Create a new Face for communication with an NDN hub.  This constructor
-    has the forms Face(transport, connectionInfo) or 
-    Face(host, port)
+    has the forms Face(), Face(transport, connectionInfo) or 
+    Face(host, port). If the default Face() constructor is used, if the 
+    forwarder's Unix socket file exists then connect using UnixTransport, 
+    otherwise connect to "localhost" on port 6363 using TcpTransport.
     
     :param Transport transport: An object of a subclass of Transport used for 
       communication.
     :param Transport.ConnectionInfo connectionInfo: An object of a subclass of 
       Transport.ConnectionInfo to be used to connect to the transport.
     :param str host: In the Face(host, port) form of the constructor, host is
-      the host of the NDN hub to connect using TcpTransport. However, if the 
-      host is "localhost" and the port is the default and the forwarder's Unix 
-      socket file exists, then connect using UnixTransport.
+      the host of the NDN hub to connect using TcpTransport.
     :param int port: (optional) In the Face(host, port) form of the constructor, 
       port is the port of the NDN hub. If omitted. use 6363.
     """
-    def __init__(self, arg1, arg2 = None):
-        if Common.typeIsString(arg1):
+    def __init__(self, arg1 = None, arg2 = None):
+        if arg1 == None or Common.typeIsString(arg1):
             filePath = ""
-            if arg1 == "localhost" and arg2 == None:
+            if arg1 == None and arg2 == None:
                 # Check if we can connect using UnixSocket.
                 tryFilePath = "/var/run/nfd.sock"
                 # Use listdir because isfile doesn't see socket file types.
@@ -67,8 +67,9 @@ class Face(object):
             
             if filePath == "":
                 transport = TcpTransport()
+                host = arg1 if arg1 != None else "localhost"
                 connectionInfo = TcpTransport.ConnectionInfo(
-                  arg1, arg2 if type(arg2) is int else 6363)
+                  host, arg2 if type(arg2) is int else 6363)
             else:
                 transport = UnixTransport()
                 connectionInfo = UnixTransport.ConnectionInfo(filePath)
