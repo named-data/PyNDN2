@@ -122,7 +122,7 @@ class Interest(object):
         Get the must be fresh flag.
         
         :return: The must be fresh flag.  If not specified, the default is 
-          False.
+          True.
         :rtype: bool
         """
         return self._mustBeFresh
