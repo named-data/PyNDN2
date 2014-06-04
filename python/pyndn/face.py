@@ -99,11 +99,16 @@ class Face(object):
         :param Interest interestTemplate: (optional) if not None, copy interest 
           selectors from the template (if the second form is used).  If omitted, 
           use a default interest lifetime.
-        :param onData: A function object to call when a matching data packet is 
-          received.
+        :param onData: When a matching data packet is received, this calls 
+          onData(interest, data) where interest is the interest given to 
+          expressInterest and data is the received Data object. NOTE: You must
+          not change the interest object - if you need to change it then make a
+          copy.
         :type onData: function object
-        :param onTimeout: (optional) A function object to call if the interest 
-          times out. If onTimeout is None or omitted, this does not use it.
+        :param onTimeout: (optional) If the interest times out according to the 
+          interest lifetime, this calls onTimeout(interest) where interest is 
+          the interest given to expressInterest. However, if onTimeout is None 
+          or omitted, this does not use it.
         :type onTimeout: function object
         :param wireFormat: (optional) A WireFormat object used to encode the 
            message. If omitted, use WireFormat.getDefaultWireFormat().
