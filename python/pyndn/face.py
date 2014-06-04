@@ -256,11 +256,14 @@ class Face(object):
         :param Name prefix: The Name for the prefix to register which is NOT 
           copied for this internal Node method. The Face registerPrefix is 
           reponsible for making a copy for Node to use..
-        :param onInterest: A function object to call when a matching interest is
-          received.
+        :param onInterest: When an interest is received which matches the name 
+          prefix, this calls 
+          onInterest(prefix, interest, transport, registeredPrefixId). NOTE: 
+          You must not change the prefix object - if you need to change it then 
+          make a copy.
         :type onInterest: function object
-        :param onRegisterFailed: A function object to call if failed to retrieve
-          the connected hub's ID or failed to register the prefix.
+        :param onRegisterFailed: If register prefix fails for any reason, this 
+          calls onRegisterFailed(prefix).
         :type onRegisterFailed: function object
         :param ForwardingFlags flags: The flags for finer control of which 
           interests are forwardedto the application.
