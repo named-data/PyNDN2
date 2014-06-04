@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0alpha2 (2014-06-02)
+Interim changes since PyNDN v2.0alpha2 (2014-06-03)
 ---------------------------------------------------
 
 Changes
@@ -19,7 +19,7 @@ Changes
 * In Blob, added __str__ operator.
 * Added encoding.ProtobufTlv for converting a Protobuf message object to TLV encoding.
 * In test_encode_decode_data and test_encode_decode_benchmark, change the RSA test key to 2048 bits.
-* Added UnixTransport. If using Face("localhost"), try to connect using a Unix socket.
+* Added UnixTransport. If using the default Face(), try to connect using a Unix socket.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.
