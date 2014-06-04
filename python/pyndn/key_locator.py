@@ -18,7 +18,7 @@
 # A copy of the GNU General Public License is in the file COPYING.
 
 """
-This module defines the KeyLocator class which represts an NDN KeyLocator which
+This module defines the KeyLocator class which represents an NDN KeyLocator which
 is used in a Sha256WithRsaSignature and Interest selectors.
 """
 
