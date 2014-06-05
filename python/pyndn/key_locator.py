@@ -86,7 +86,7 @@ class KeyLocator(object):
         """
         Set the key locator type.  If KeyLocatorType.KEYNAME, you must also
         setKeyName().  If KeyLocatorType.KEY_LOCATOR_DIGEST, you must also
-        setKeyData() to the digest.
+        setKeyData() to set the digest.
         
         :param type: The key locator type.  If None, the type is unspecified.
         :type type: an int from KeyLocatorType
