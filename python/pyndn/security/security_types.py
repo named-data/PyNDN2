@@ -21,14 +21,16 @@
 This module defines constants used by the security library.
 """
 
+# The KeyType integer is used by the Sqlite key storage, so don't change them.
+# Make these the same as ndn-cpp in case the Sqlite file is shared.
 class KeyType(object):
-    RSA = 1
-    AES = 2
+    RSA = 0
+    AES = 1
     # DSA
     # DES
     # RC4
     # RC2
-    EC = 3
+    EC = 2
 
 class KeyClass(object):
     PUBLIC = 1
