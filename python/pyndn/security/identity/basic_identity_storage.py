@@ -200,6 +200,16 @@ class BasicIdentityStorage(IdentityStorage):
         """
         raise RuntimeError("getKey is not implemented")
 
+    def getKeyType(self, keyName):    
+        """
+        Get the KeyType of the public key with the given keyName.
+        
+        :param Name keyName: The name of the requested public key.
+        :return: The KeyType, for example KeyType.RSA.
+        :rtype: an int from KeyType
+        """
+        raise RuntimeError("getKeyType is not implemented")
+
     def activateKey(self, keyName):    
         """
         Activate a key. If a key is marked as inactive, its private part will 
