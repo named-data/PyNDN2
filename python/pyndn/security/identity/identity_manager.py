@@ -139,7 +139,9 @@ class IdentityManager(object):
         :return: The public key.
         :rtype: PublicKey
         """
-        return PublicKey.fromDer(self._identityStorage.getKey(keyName))
+        return PublicKey.fromDer(
+          self._identityStorage.getKeyType(keyName),
+          self._identityStorage.getKey(keyName))
     
     # TODO: Add two versions of createIdentityCertificate.
     

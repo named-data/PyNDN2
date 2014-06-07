@@ -22,17 +22,21 @@ This module defines the PublicKey class which holds an encoded public key
 for use by the security library.
 """
 
+from Crypto.PublicKey import RSA
 from pyndn.security.security_types import DigestAlgorithm
+from pyndn.security.security_types import KeyType
+from pyndn.security.security_exception import SecurityException
 
 class PublicKey(object):
     """
     Create a new PublicKey with the given values.
     
-    :param OID algorithm: The algorithm of the public key.
+    :param keyType: The KeyType, such as KeyType.RSA.
+    :type keyType: an int from KeyType
     :param Blob keyDer: The blob of the PublicKeyInfo in terms of DER.
     """
-    def __init__(self, algorithm, keyDer):
-        self._algorithm = algorithm
+    def __init__(self, keyType, keyDer):
+        self._keyType = keyType
         self._keyDer = keyDer
         
     def toDer(self):
@@ -45,15 +49,22 @@ class PublicKey(object):
         raise RuntimeError("PublicKey.toDer is not implemented")
     
     @staticmethod
-    def fromDer(keyDer):
+    def fromDer(keyType, keyDer):
         """
         Decode the public key from DER blob.
         
+        :param keyType: The KeyType, such as KeyType.RSA.
+        :type keyType: an int from KeyType
         :param Blob keyDer: The DER blob.
         :return: The decoded public key.
         :rtype: PublicKey
         """
-        raise RuntimeError("PublicKey.fromDer is not implemented")
+        if keyType == KeyType.RSA:
+            RSA.importKey(keyDer.toRawStr())
+        else:
+            raise SecurityException("PublicKey::fromDer: Unrecognized keyType")
+        
+        return PublicKey(keyType, keyDer)
     
     def getDigest(self, digestAlgorithm = DigestAlgorithm.SHA256):
         """
@@ -66,6 +77,15 @@ class PublicKey(object):
         :rtype: Blob
         """
         raise RuntimeError("PublicKey.getDigest is not implemented")
+    
+    def getKeyType(self):
+        """
+        Get the key type.
+        
+        :return: The key type
+        :rtype: an int from KeyType
+        """
+        return self._keyType
     
     def getKeyDer(self):
         """
