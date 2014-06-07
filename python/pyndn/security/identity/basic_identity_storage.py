@@ -25,7 +25,6 @@ identity, public keys and certificates using SQLite.
 import os
 import sqlite3
 from pyndn.name import Name
-from pyndn.util import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
 
@@ -208,7 +207,23 @@ class BasicIdentityStorage(IdentityStorage):
         :return: The KeyType, for example KeyType.RSA.
         :rtype: an int from KeyType
         """
-        raise RuntimeError("getKeyType is not implemented")
+        keyId = keyName.get(keyName.size() - 1).toEscapedString()
+        identityName = keyName.getSubName(0, keyName.size() - 1)
+
+        cursor = self._database.cursor()        
+        cursor.execute(
+          "SELECT key_type FROM Key WHERE identity_name=? AND key_identifier=?",
+          (identityName.toUri(), keyId))
+        row = cursor.fetchone()
+        
+        if row != None:
+            (keyType,) = row
+            cursor.close()
+            return keyType
+        else:
+            cursor.close()
+            raise SecurityException(
+              "Cannot get public key type because the keyName doesn't exist")
 
     def activateKey(self, keyName):    
         """
