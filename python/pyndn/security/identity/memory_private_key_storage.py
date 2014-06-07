@@ -29,48 +29,55 @@ from Crypto.Signature import PKCS1_v1_5
 from pyndn.util import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
+from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
+from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
 
 class MemoryPrivateKeyStorage(PrivateKeyStorage):
     def __init__(self):
         super(MemoryPrivateKeyStorage, self).__init__()
-        # The key is the keyName.toUri()
+        # The key is the keyName.toUri(). The value is ecurity.certificate.PublicKey.
         self._publicKeyStore = {}
-        # The key is the keyName.toUri()
+        # The key is the keyName.toUri(). The value is self.PrivateKey.
         self._privateKeyStore = {}
         
-    def setPublicKeyForKeyName(self, keyName, publicKeyDer):
+    def setPublicKeyForKeyName(self, keyName, keyType, publicKeyDer):
         """
         Set the public key for the keyName.
         
         :param Name keyName: The key name.
+        :param keyType: The KeyType, such as KeyType.RSA.
+        :type keyType: an int from KeyType
         :param publicKeyDer: The public key DER byte array.
         :type publicKeyDer: str, or an array type with int elements which is
           converted to str
         """
-        if not type(publicKeyDer) is str:
-            publicKeyDer = "".join(map(chr, publicKeyDer))
-        self._publicKeyStore[keyName.toUri()] = RSA.importKey(publicKeyDer)
+        self._publicKeyStore[keyName.toUri()] = PublicKey.fromDer(
+          keyType, Blob(publicKeyDer, True))
         
-    def setPrivateKeyForKeyName(self, keyName, privateKeyDer):
+    def setPrivateKeyForKeyName(self, keyName, keyType, privateKeyDer):
         """
         Set the private key for the keyName.
         
         :param Name keyName: The key name.
+        :param keyType: The KeyType, such as KeyType.RSA.
+        :type keyType: an int from KeyType
         :param privateKeyDer: The private key DER byte array.
         :type privateKeyDer: str, or an array type with int elements which is
           converted to str
         """
-        if not type(privateKeyDer) is str:
-            privateKeyDer = "".join(map(chr, privateKeyDer))
-        self._privateKeyStore[keyName.toUri()] = RSA.importKey(privateKeyDer)
+        self._privateKeyStore[keyName.toUri()] = self.PrivateKey(
+          keyType, privateKeyDer)
         
-    def setKeyPairForKeyName(self, keyName, publicKeyDer, privateKeyDer):
+    def setKeyPairForKeyName(
+          self, keyName, keyType, publicKeyDer, privateKeyDer = None):
         """
         Set the public and private key for the keyName.
         
         :param Name keyName: The key name.
+        :param keyType: The KeyType, such as KeyType.RSA.
+        :type keyType: an int from KeyType
         :param publicKeyDer: The public key DER byte array.
         :type publicKeyDer: str, or an array type with int elements which is
           converted to str
@@ -78,8 +85,15 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :type privateKeyDer: str, or an array type with int elements which is
           converted to str
         """
-        self.setPublicKeyForKeyName(keyName, publicKeyDer)
-        self.setPrivateKeyForKeyName(keyName, privateKeyDer)
+        if not type(keyType) is int:
+            # Using the deprecated form setKeyPairForKeyName(keyName, publicKeyDer, privateKeyDer).
+            # Shift arguments.
+            privateKeyDer = publicKeyDer
+            publicKeyDer = keyType
+            keyType = KeyType.RSA
+            
+        self.setPublicKeyForKeyName(keyName, keyType, publicKeyDer)
+        self.setPrivateKeyForKeyName(keyName, keyType, privateKeyDer)
         
     def getPublicKey(self, keyName):
         """
@@ -126,7 +140,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert data.
             data = Blob(data, False).toRawStr()
-        signature = PKCS1_v1_5.new(privateKey).sign(SHA256.new(data))
+        signature = PKCS1_v1_5.new(privateKey.getPrivateKey()).sign(SHA256.new(data))
         # Convert the string to a Blob.
         return Blob(bytearray(signature), False)
         
@@ -149,3 +163,27 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         else:
           # KeyClass.SYMMETRIC not implemented yet.
           return False 
+
+    class PrivateKey:
+        """
+        PrivateKey is a simple class to hold a PyCrypto key object along 
+        with a KeyType.
+        """
+        def __init__(self, keyType, keyDer):
+            self._keyType = keyType
+            
+            if not type(keyDer) is str:
+                keyDer = "".join(map(chr, keyDer))
+                
+            if keyType == KeyType.RSA:
+                self._privateKey = RSA.importKey(keyDer)
+            else:
+                raise SecurityException(
+                  "PrivateKey constructor: Unrecognized keyType")
+                  
+        def getKeyType(self):
+            return self._keyType
+        
+        def getPrivateKey(self):
+            return self._privateKey
+        

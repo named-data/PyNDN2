@@ -244,7 +244,7 @@ def main():
       "KEY").append(keyName[-1]).append("ID-CERT").append("0")
     identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
     privateKeyStorage.setKeyPairForKeyName(
-      keyName, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
+      keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
     
     keyChain.sign(freshData, certificateName)
     dump("")

@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0alpha2 (2014-06-03)
+Interim changes since PyNDN v2.0alpha2 (2014-06-06)
 ---------------------------------------------------
 
 Changes
@@ -20,6 +20,11 @@ Changes
 * Added encoding.ProtobufTlv for converting a Protobuf message object to TLV encoding.
 * In test_encode_decode_data and test_encode_decode_benchmark, change the RSA test key to 2048 bits.
 * Added UnixTransport. If using the default Face(), try to connect using a Unix socket.
+* Added instructions for building the Sphinx documentation.
+
+Deprecated
+* MemoryPrivateKeyStorage: Deprecated setKeyPairForKeyName without an explicit keyType. Use
+  setKeyPairForKeyName passing the explicit key type such as KeyType.RSA.
 
 Bug fixes
 * http://redmine.named-data.net/issues/1333 Make Interest MustBeFresh default True.
@@ -31,7 +36,6 @@ Bug fixes
 
 Support to be added soon:
 * Package install support.
-* Instructions for building the Sphinx documentation.
 
 PyNDN v2.0alpha2 (2014-02-27)
 -----------------------------
