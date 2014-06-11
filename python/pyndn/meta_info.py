@@ -72,7 +72,7 @@ class MetaInfo(object):
         Get the final block ID.
         
         :return: The final block ID as a Name.Component.  If the Name.Component
-          getValue(),isNull(), then the final block ID is not specified.
+          getValue().size() is 0, then the final block ID is not specified.
         :rtype: Name.Component
         """
         return self._finalBlockID
