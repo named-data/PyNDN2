@@ -11,6 +11,8 @@ from pyndn.security.identity import MemoryPrivateKeyStorage
 from pyndn.security.policy import SelfVerifyPolicyManager
 from pyndn.util import Blob
 from test_utils import dump
+from mock import Mock
+import unittest as ut
 
 DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
     0x30, 0x82, 0x01, 0x22, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
@@ -143,7 +145,7 @@ codedData = Blob(bytearray([
 
 
 def dumpData(data):
-	result = []
+    result = []
     result.append(dump("name:", data.getName().toUri()))
     if data.getContent().size() > 0:
         result.append(dump("content (raw):", data.getContent().toRawStr()))
@@ -179,6 +181,81 @@ def dumpData(data):
                 result.append(dump("signature.keyLocator: <unrecognized KeyLocatorType"))
         else:
             result.append(dump("signature.keyLocator: <none>"))
-	return result
+    return result
 
 
+
+initialDump = ['name: /ndn/abc',
+        'content (raw): SUCCESS!', 
+        'content (hex): 5355434345535321',
+        'metaInfo.freshnessPeriod (milliseconds): 5000.0',
+        'metaInfo.finalBlockID: %00%09',
+        'signature.signature: 1a03c39c4fc55c36a2e79cee52fe45a7e10cfb95acb49bccb6a0c34aaa45bfbfdf0b51d5a48bf2ab45971c24d8e2c28a4d4012d77701eb7435f14dddd0f3a69ab7a4f17fa78434d7082552808b6c4293041e071f4f764318f2f8511a56afe6a931cb6c1c0aa40110fcc866ce2e9c0b2d7fb464a0ee2282c834f79af551122a84', 
+        'signature.keyLocator: KeyName: /testname/KEY/DSK-123/ID-CERT']
+
+
+def dataDumpsEqual(d1, d2):
+    #ignoring signature, see if two data dumps are equal
+    unequal_set = set(d1) ^ set(d2)
+    for field in unequal_set:
+        if not field.startswith('signature.signature:'):
+            return False
+    return True
+
+class TestDataDump(ut.TestCase):
+    def setUp(self):
+        self.identityStorage = MemoryIdentityStorage()
+        self.privateKeyStorage = MemoryPrivateKeyStorage()
+        self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage), 
+                        SelfVerifyPolicyManager(self.identityStorage))
+        self.freshData = self.createFreshData()
+    
+    def createFreshData(self):
+        freshData = Data(Name("/ndn/abc"))
+        freshData.setContent("SUCCESS!")
+        freshData.getMetaInfo().setFreshnessPeriod(5000.0)
+        freshData.getMetaInfo().setFinalBlockID(Name("/%00%09")[0])
+    
+        # Initialize the storage.
+        keyName = Name("/testname/DSK-123")
+        certificateName = keyName.getSubName(0, keyName.size() - 1).append(
+      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
+        self.identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
+        self.privateKeyStorage.setKeyPairForKeyName(
+      keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
+    
+        self.keyChain.sign(freshData, certificateName)
+        return freshData
+
+    def test_dump(self):
+        data = Data()
+        data.wireDecode(codedData)
+        self.assertEqual(dumpData(data), initialDump, 'Initial dump does not have expected format')
+
+    def test_encode_decode(self):
+        data = Data()
+        data.wireDecode(codedData)
+        data.setContent(data.getContent())
+        encoding = data.wireEncode()
+
+        reDecodedData = Data()
+        reDecodedData.wireDecode(encoding)
+        self.assertEqual(dumpData(reDecodedData), initialDump, 'Re-decoded data does not match original dump')
+
+    def test_create_fresh(self):
+        freshDump = dumpData(self.freshData)
+        self.assertTrue(dataDumpsEqual(freshDump, initialDump), 'Freshly created data does not match original dump')
+
+    def test_verify(self):
+        # we create 'mock' objects to replace callbacks
+        # since we're not interested in the effect of the callbacks themselves
+        failedCallback = Mock()
+        verifiedCallback = Mock()
+
+        self.keyChain.verifyData(self.freshData, verifiedCallback, failedCallback)
+        self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
+        self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
+
+if __name__ == '__main__':
+    suite = ut.TestLoader().loadTestsFromTestCase(TestDataDump)
+    ut.TextTestRunner(verbosity=2).run(suite)

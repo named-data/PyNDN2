@@ -113,10 +113,10 @@ class TestInterestDump(ut.TestCase):
     def test_dump(self):
         # see if the dump format is the same as we expect
         decodedDump = dumpInterest(self.referenceInterest)
-        self.assertEqual(initialDump, decodedDump, 'Dump for blobbed interest does not have expected format')
+        self.assertEqual(initialDump, decodedDump, 'Initial dump does not have expected format')
 
     def test_redecode(self):
-        # check that we encode and decode a blobbed interest correctly
+        # check that we encode and decode correctly
         encoding = self.referenceInterest.wireEncode()
         reDecodedInterest = Interest()
         reDecodedInterest.wireDecode(encoding)
@@ -135,5 +135,6 @@ class TestInterestDump(ut.TestCase):
         self.assertTrue(interestDumpsEqual(freshDump, reDecodedFreshDump), 'Redecoded fresh interest does not match original')
 
 if __name__ == '__main__':
-    ut.main()
+    suite = ut.TestLoader().loadTestsFromTestCase(TestInterestDump)
+    ut.TextTestRunner(verbosity=2).run(suite)
 
