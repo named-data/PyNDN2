@@ -43,8 +43,8 @@ class ProtobufTlv(object):
         Encode the Protobuf message object as NDN-TLV.
         
         :param google.protobuf.message message: The Protobuf message object. 
-          This calls message.IsInitialized() and raises an exception if all 
-          required fields are present.
+          This calls message.IsInitialized() to ensure that all required fields 
+          are present and raises an exception if not.
         :return: The encoded buffer in a Blob object.
         :rtype: Blob
         """
