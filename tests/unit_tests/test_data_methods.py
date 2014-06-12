@@ -11,8 +11,14 @@ from pyndn.security.identity import MemoryPrivateKeyStorage
 from pyndn.security.policy import SelfVerifyPolicyManager
 from pyndn.util import Blob
 from test_utils import dump
-from mock import Mock
 import unittest as ut
+
+# use Python 3's mock library if it's available
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
+
 
 DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
     0x30, 0x82, 0x01, 0x22, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
@@ -217,6 +223,9 @@ class TestDataDump(ut.TestCase):
         freshData.getMetaInfo().setFinalBlockID(Name("/%00%09")[0])
     
         # Initialize the storage.
+        return freshData
+
+    def signData(self, data):
         keyName = Name("/testname/DSK-123")
         certificateName = keyName.getSubName(0, keyName.size() - 1).append(
       "KEY").append(keyName[-1]).append("ID-CERT").append("0")
@@ -224,8 +233,8 @@ class TestDataDump(ut.TestCase):
         self.privateKeyStorage.setKeyPairForKeyName(
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
     
-        self.keyChain.sign(freshData, certificateName)
-        return freshData
+        self.keyChain.sign(data, certificateName)
+
 
     def test_dump(self):
         data = Data()
@@ -242,8 +251,18 @@ class TestDataDump(ut.TestCase):
         reDecodedData.wireDecode(encoding)
         self.assertEqual(dumpData(reDecodedData), initialDump, 'Re-decoded data does not match original dump')
 
-    def test_create_fresh(self):
-        freshDump = dumpData(self.freshData)
+    def test_empty_signature(self):
+        # make sure nothing is set in the signature of newly created data
+        data = Data()
+        signature = data.getSignature()
+        self.assertIsNone(signature.getKeyLocator().getType(), 'Key locator type on unsigned data should not be set')
+        self.assertTrue(signature.getSignature().isNull(), 'Non-empty signature on unsigned data')
+
+    def test_copy_fields(self):
+        data = Data(self.freshData.getName())
+        data.setContent(self.freshData.getContent())
+        data.setMetaInfo(self.freshData.getMetaInfo())
+        self.signData(data)
         self.assertTrue(dataDumpsEqual(freshDump, initialDump), 'Freshly created data does not match original dump')
 
     def test_verify(self):
@@ -251,6 +270,8 @@ class TestDataDump(ut.TestCase):
         # since we're not interested in the effect of the callbacks themselves
         failedCallback = Mock()
         verifiedCallback = Mock()
+
+        self.signData(self.freshData)
 
         self.keyChain.verifyData(self.freshData, verifiedCallback, failedCallback)
         self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')

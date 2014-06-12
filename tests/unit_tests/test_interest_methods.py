@@ -134,7 +134,31 @@ class TestInterestDump(ut.TestCase):
 
         self.assertTrue(interestDumpsEqual(freshDump, reDecodedFreshDump), 'Redecoded fresh interest does not match original')
 
+class TestInterestMethods(ut.TestCase):
+    def setUp(self):
+        self.referenceInterest = Interest()
+        self.referenceInterest.wireDecode(codedInterest) 
+    
+    def test_copy_constructor(self):
+        interest = Interest(self.referenceInterest)
+        self.assertTrue(interestDumpsEqual(dumpInterest(interest), dumpInterest(self.referenceInterest)), 'Interest constructed as deep copy does not match original')
+
+    def test_empty_nonce(self):
+        # make sure a freshly created interest has no nonce
+        freshInterest = createFreshInterest()
+        self.assertTrue(freshInterest.getNonce().isNull(), 'Freshly created interest should not have a nonce')
+
+    def test_set_removes_nonce(self):
+        # ensure that setting a value on an interest clears the nonce
+        self.assertFalse(self.referenceInterest.getNonce().isNull())
+        interest = Interest(self.referenceInterest)
+        interest.setChildSelector(0)
+        self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
+
+
 if __name__ == '__main__':
     suite = ut.TestLoader().loadTestsFromTestCase(TestInterestDump)
+    ut.TextTestRunner(verbosity=2).run(suite)
+    suite = ut.TestLoader().loadTestsFromTestCase(TestInterestMethods)
     ut.TextTestRunner(verbosity=2).run(suite)
 
