@@ -82,7 +82,7 @@ class TcpTransport(Transport):
           TcpTransport.ConnectionInfo.
         :param elementListener: The elementListener must remain valid during the 
           life of this object.
-        :type elementListener: An object with onReceivedData
+        :type elementListener: An object with onReceivedElement
         """
         self.close()
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

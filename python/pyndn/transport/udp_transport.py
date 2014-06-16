@@ -82,7 +82,7 @@ class UdpTransport(Transport):
           UdpTransport.ConnectionInfo.
         :param elementListener: The elementListener must remain valid during the 
           life of this object.
-        :type elementListener: An object with onReceivedData
+        :type elementListener: An object with onReceivedElement
         """
         self.close()
         # Save the _address to use in sendto.

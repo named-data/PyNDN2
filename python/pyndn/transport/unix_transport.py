@@ -70,7 +70,7 @@ class UnixTransport(Transport):
           UnixTransport.ConnectionInfo.
         :param elementListener: The elementListener must remain valid during the 
           life of this object.
-        :type elementListener: An object with onReceivedData
+        :type elementListener: An object with onReceivedElement
         """
         self.close()
         self._socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
