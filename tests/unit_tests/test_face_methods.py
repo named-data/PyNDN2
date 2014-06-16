@@ -134,7 +134,7 @@ class TestFaceRegisterMethods(ut.TestCase):
     
     def test_register_prefix_response(self):
         # gotta sign it (WAT)
-        prefixName = Name("/unit_test")
+        prefixName = Name("/unittest")
         self.face_in.setCommandSigningInfo(self.keyChain, 
                 self.keyChain.getDefaultCertificateName())
 
