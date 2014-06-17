@@ -157,8 +157,5 @@ class TestInterestMethods(ut.TestCase):
 
 
 if __name__ == '__main__':
-    suite = ut.TestLoader().loadTestsFromTestCase(TestInterestDump)
-    ut.TextTestRunner(verbosity=2).run(suite)
-    suite = ut.TestLoader().loadTestsFromTestCase(TestInterestMethods)
-    ut.TextTestRunner(verbosity=2).run(suite)
+    ut.main(verbosity=2)
 

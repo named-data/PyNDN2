@@ -37,7 +37,7 @@ class TestFaceInterestMethods(ut.TestCase):
         def waitForCallbacks():
             while 1:
                 self.face.processEvents()
-                gevent.sleep(0.01)
+                gevent.sleep()
                 if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
                     break
         
@@ -103,7 +103,7 @@ class TestFaceInterestMethods(ut.TestCase):
             self.face.removePendingInterest(interestID)
             while 1:
                 self.face.processEvents()
-                gevent.sleep(0.01)
+                gevent.sleep()
                 currentTime = time.clock()
                 if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
                     break
@@ -171,15 +171,13 @@ class TestFaceRegisterMethods(ut.TestCase):
         self.assertTrue(expectedBlob.equals(data.getContent()), 'Data received on face does not match expected format')
 
 
-        
-
     def face_process_events(self, face, callbacks, name=None):
         # implemented as a 'greenlet': something like a thread, but semi-synchronous
         # callbacks should be a list
         done = False
         while not done:
             face.processEvents()
-            gevent.sleep(0.01)
+            gevent.sleep()
             for c in callbacks:
                 
                 if (c.call_count > 0):
@@ -188,7 +186,4 @@ class TestFaceRegisterMethods(ut.TestCase):
 
 
 if __name__ == '__main__':
-    suite = ut.TestLoader().loadTestsFromTestCase(TestFaceInterestMethods)
-    ut.TextTestRunner(verbosity=2).run(suite)
-    suite = ut.TestLoader().loadTestsFromTestCase(TestFaceRegisterMethods)
-    ut.TextTestRunner(verbosity=2).run(suite)
+    ut.main(verbosity=2)

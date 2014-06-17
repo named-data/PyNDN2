@@ -158,5 +158,4 @@ class TestDataDump(ut.TestCase):
         self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
 
 if __name__ == '__main__':
-    suite = ut.TestLoader().loadTestsFromTestCase(TestDataDump)
-    ut.TextTestRunner(verbosity=2).run(suite)
+    ut.main(verbosity=2)

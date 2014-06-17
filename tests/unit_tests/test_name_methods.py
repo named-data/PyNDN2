@@ -113,8 +113,4 @@ class TestNameMethods(ut.TestCase):
 #       self.assertEqual(name1.toUri(), self.expectedURI)
 
 if __name__ == '__main__':
-    suite = ut.TestLoader().loadTestsFromTestCase(TestNameComponentMethods)
-    ut.TextTestRunner(verbosity=2).run(suite)
-
-    suite = ut.TestLoader().loadTestsFromTestCase(TestNameMethods)
-    ut.TextTestRunner(verbosity=2).run(suite)
+    ut.main(verbosity=2)
