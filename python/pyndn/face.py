@@ -226,11 +226,14 @@ class Face(object):
         name. Then use the keyChain and certificateName from 
         setCommandSigningInfo to sign the interest. If the interest lifetime is 
         not set, this sets it.
+        :note: This method is an experimental feature. See the API docs for more 
+        detail at
+        http://named-data.net/doc/ndn-ccl-api/face.html#face-makecommandinterest-method .
 
-        :param Interest interest: The interest whose name is append with 
+        :param Interest interest: The interest whose name is appended with 
           components.
         :param wireFormat: (optional) A WireFormat object used to encode the 
-          SignatureInfo and to encode interest name for signing. If omitted, use 
+          SignatureInfo and to encode the interest name for signing. If omitted, use 
           WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         """
