@@ -28,6 +28,7 @@ from random import SystemRandom
 from pyndn.name import Name
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 
 # The Python documentation says "Use SystemRandom if you require a 
 #   cryptographically secure pseudo-random number generator."
@@ -66,7 +67,13 @@ class CommandInterestGenerator(object):
         while timestamp <= self._lastTimestamp:
           timestamp += 1.0
 
-        interest.getName().append(Name.Component.fromNumber(int(timestamp)))
+        # The timestamp is encoded as a TLV nonNegativeInteger.
+        encoder = TlvEncoder(8)
+        encoder.writeNonNegativeInteger(int(timestamp))
+        interest.getName().append(Blob(encoder.getOutput(), False))
+        
+        # The random value is a TLV nonNegativeInteger too, but we know it is 8 
+        # bytes, so we don't need to call the nonNegativeInteger encoder.        
         randomBuffer = bytearray(8)
         for i in range(len(randomBuffer)):
             randomBuffer[i] = _systemRandom.randint(0, 0xff)                
