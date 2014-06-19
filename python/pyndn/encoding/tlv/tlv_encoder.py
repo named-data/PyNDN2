@@ -100,21 +100,17 @@ class TlvEncoder(object):
         # Write backwards.
         self.writeVarNumber(length)
         self.writeVarNumber(type)
-        
-    def writeNonNegativeIntegerTlv(self, type, value):
+            
+    def writeNonNegativeInteger(self, value):
         """
-        Write the type, then the length of the encoded value then encode value 
-        as a non-negative integer and write it to self._output just before 
-        self._length from the back. Advance self._length.
+        Encode value as a non-negative integer and write it to self._output 
+        just before self._length from the back. Advance self._length.
  
-        :param int type: The type of the TLV.
         :param int value: The non-negative integer to encode.
         """
         if value < 0:
             raise ValueError("TLV integer value may not be negative")
         
-        # Write backwards.
-        saveNBytes = self._length
         if value < 253:
             self._length += 1
             self._output.ensureLengthFromBack(self._length)
@@ -143,6 +139,18 @@ class TlvEncoder(object):
             self._output._array[-self._length + 6] = (value >> 8) & 0xff
             self._output._array[-self._length + 7] = value & 0xff
 
+    def writeNonNegativeIntegerTlv(self, type, value):
+        """
+        Write the type, then the length of the encoded value then encode value 
+        as a non-negative integer and write it to self._output just before 
+        self._length from the back. Advance self._length.
+ 
+        :param int type: The type of the TLV.
+        :param int value: The non-negative integer to encode.
+        """
+        # Write backwards.
+        saveNBytes = self._length
+        self.writeNonNegativeInteger(value)
         self.writeTypeAndLength(type, self._length - saveNBytes)
 
     def writeOptionalNonNegativeIntegerTlv(self, type, value):
