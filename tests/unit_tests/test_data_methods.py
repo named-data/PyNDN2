@@ -143,6 +143,7 @@ class TestDataDump(ut.TestCase):
         data.setContent(self.freshData.getContent())
         data.setMetaInfo(self.freshData.getMetaInfo())
         self.credentials.signData(data)
+        freshDump = dumpData(data)
         self.assertTrue(dataDumpsEqual(freshDump, initialDump), 'Freshly created data does not match original dump')
 
     def test_verify(self):
