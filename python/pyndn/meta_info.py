@@ -41,7 +41,7 @@ class MetaInfo(object):
             # Copy its values.
             self._type = value._type
             self._freshnessPeriod = value._freshnessPeriod
-            self._finalBlockID = self._finalBlockID
+            self._finalBlockID = value._finalBlockID
         else:
             raise RuntimeError(
               "Unrecognized type for MetaInfo constructor: " +
