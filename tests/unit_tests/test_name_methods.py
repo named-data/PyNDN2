@@ -13,7 +13,8 @@ class TestNameComponentMethods(ut.TestCase):
     def test_unicode(self):
         comp1 = Name.Component(u"entr\u00E9e")
         expected = "entr%C3%A9e"
-        self.assertEqual(comp1.toEscapedString(), expected)
+        #self.assertEqual(comp1.toEscapedString(), expected)
+        self.assertEqual(comp1.toEscapedString(), "test Jenkins alert")
     
     def test_bytearray(self):
         pass
