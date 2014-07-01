@@ -44,6 +44,14 @@ pyndn.util.dynamic_byte_array module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.memory_content_cache module
+--------------------------------------
+
+.. automodule:: pyndn.util.memory_content_cache
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.signed_blob module
 -----------------------------
 
