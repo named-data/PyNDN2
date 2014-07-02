@@ -101,17 +101,17 @@ class MemoryContentCache(object):
               data.getMetaInfo().getFreshnessPeriod() >= 0.0):
             # The content will go stale, so use staleTimeCache.
             content = MemoryContentCache._StaleTimeContent(data)
-            # Insert into _staleTimeCache, sorted on content.staleTimeMilliseconds.
+            # Insert into _staleTimeCache, sorted on content._staleTimeMilliseconds.
             # Search from the back since we expect it to go there.
             i = len(self._staleTimeCache) - 1
             while i >= 0:
-                if (self._staleTimeCache[i].staleTimeMilliseconds <=
-                      content.staleTimeMilliseconds):
+                if (self._staleTimeCache[i]._staleTimeMilliseconds <=
+                      content._staleTimeMilliseconds):
                     break
                 i -= 1
 
             # Element i is the greatest less than or equal to
-            # content.staleTimeMilliseconds, so insert after it.
+            # content._staleTimeMilliseconds, so insert after it.
             self._staleTimeCache.insert(i + 1, content)
         else:
             # The data does not go stale, so use _noStaleTimeCache.
