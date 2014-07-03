@@ -178,7 +178,7 @@ class MemoryContentCache(object):
             if prefix.toUri() in self._onDataNotFoundForPrefix:
                 # TODO: Include registeredPrefixId.
                 self._onDataNotFoundForPrefix[prefix.toUri()](
-                  prefix, interest, transport)
+                  prefix, interest, transport, 0)
 
     def _doCleanup(self):
         """
