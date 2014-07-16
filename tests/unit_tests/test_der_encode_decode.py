@@ -26,6 +26,7 @@ from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger
 from pyndn.util import Blob
 from pyndn.security.certificate import PublicKey, Certificate, CertificateSubjectDescription, CertificateExtension
 from pyndn.security.security_types import KeyType
+from pyndn import Name
 
 import unittest as ut
 
@@ -66,7 +67,9 @@ CERT_DUMP = bytearray([
 
 TEST_OID = "2.5.4.41"
 
-CERT_STRING = "Validity:\n"\
+CERT_STRING = "Certificate name:\n"\
+ + "  /\n"\
+ + "Validity:\n"\
  + "  NotBefore: 20131226T232254\n"\
  + "  NotAfter: 20131226T232254\n"\
  + "Subject Description:\n"\
@@ -75,7 +78,7 @@ CERT_STRING = "Validity:\n"\
  + "MIGdMA0GCSqGSIb3DQEBAQUAA4GLADCBhwKBgQCeBj5HhbI0N6qFR6wDJIO1nKgF\n"\
  + "OiQe64kBu+mbssMirGjj8GwCzmimxNCnBpCcqhsIHYtDmjNnRG0hoxuImpdeWcQV\n"\
  + "C9ksvVEHYYKtwbjXv5vPfSTCY/OXF+v+YiW6W02Kwnq9Q4qPuPLxxWow01CMyJrf\n"\
- + "7+0153pi6nZ8uwgmxwIB\n"
+ + "7+0153pi6nZ8uwgmxwIBEQ==\n"
 
 REAL_CERT = bytearray([
 0x30, 0x82, 0x01, 0x63, 0x30, 0x22, 0x18, 0x0f, 0x32, 0x30, 0x31, 0x33, 0x31, 0x31, 0x30,
@@ -104,11 +107,11 @@ REAL_CERT = bytearray([
 0xce, 0x0b, 0x88, 0xd4, 0x21, 0x93, 0x84, 0x89, 0x55, 0x05, 0xd5, 0x02, 0x01, 0x11
 ])
 
-#REAL_CERT_STRING = "Certificate name:\n"\
-#+"  /tmp\n"\
-REAL_CERT_STRING = "Validity:\n"\
+REAL_CERT_STRING = "Certificate name:\n"\
++"  /tmp\n"\
++"Validity:\n"\
 +"  NotBefore: 20131101T171122\n"\
-+"  NotAfter: 20141101T171122\n"\
++"  NotAfter: 20131101T171122\n"\
 +"Subject Description:\n"\
 +"  2.5.4.41: NDN Testbed Root\n"\
 +"Public key bits:\n"\
@@ -118,9 +121,7 @@ REAL_CERT_STRING = "Validity:\n"\
 +"cBM/T1t9Q6p1CpRyq+GMRbV4EAHvH7MFb6bDrH9t8DHEg7NPUCaSQBrd7PvL72P+\n"\
 +"QdiNH9zs/EiVzAkeMG4iniSXLuYM3z0gMqqcyUUUr6r1F9IBmDO+Kp97nZh8VCL+\n"\
 +"cnIEwyzAFAupQH5GoXUWGiee8oKWwH2vGHX7u6sWZsCp15NMSG3OC4jUIZOEiVUF\n"\
-+"1QIB\n"
-#CERT_STRING = "Certificate name:\n"\
-# + "  /\n"\
++"1QIBEQ==\n"
 
 
 class TestCertificate(ut.TestCase):
@@ -171,9 +172,10 @@ class TestCertificate(ut.TestCase):
 
 
     def test_decode(self):
-        realCert = Certificate()
+        realCert = Certificate(Name("/tmp"))
         realCert.setContent(REAL_CERT)
         realCert.decode()
+
         self.assertEqual(REAL_CERT_STRING, str(realCert))
 
 if __name__ == '__main__':

@@ -53,12 +53,9 @@ class Certificate(Data):
         return false
 
     def __str__(self):
-        #TODO: Should I have subclassed Data like in ndn-cxx
-        # Then there would be a name field
-
-        #s = "Certificate name:\n"
-        #s += "  /\n"
-        s = "Validity:\n"
+        s = "Certificate name:\n"
+        s += "  "+self.getName().toUri()+"\n"
+        s += "Validity:\n"
 
         dateFormat = "%Y%m%dT%H%M%S"
         notBeforeStr = datetime.utcfromtimestamp(self._notBefore/1000).strftime(dateFormat)
@@ -67,7 +64,7 @@ class Certificate(Data):
         s += "  NotBefore: " + notBeforeStr+"\n"
         s += "  NotAfter: " + notAfterStr + "\n"
         for sd in self._subjectDescriptionList:
-            s += "Subject Description: \n"
+            s += "Subject Description:\n"
             s += "  "+sd.getOid()+": " + str(sd.getValue()) + "\n"
 
         s += "Public key bits:\n"
