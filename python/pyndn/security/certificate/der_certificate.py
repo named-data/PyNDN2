@@ -1,6 +1,7 @@
-from pyndn.encoding.der import DerNode, DerSequence, DerGeneralizedTime
+from pyndn.encoding.der import DerNode, DerSequence, DerGeneralizedTime, DerOid, DerPrintableString
 from pyndn.security.certificate import PublicKey
 from pyndn.security.security_types import KeyType
+from pyndn.util import Blob
 from datetime import datetime
 
 import base64
@@ -28,11 +29,12 @@ class DerCertificate():
         return false
 
     def __str__(self):
-        #TODO: where does the name go?!!!
+        #TODO: Should I have subclassed Data like in ndn-cxx
+        # Then there would be a name field
 
-        s = "Certificate name:\n"
-        s += "  /\n"
-        s += "Validity:\n"
+        #s = "Certificate name:\n"
+        #s += "  /\n"
+        s = "Validity:\n"
 
         dateFormat = "%Y%m%dT%H%M%S"
         notBeforeStr = datetime.utcfromtimestamp(self._notBefore/1000).strftime(dateFormat)
@@ -50,6 +52,15 @@ class DerCertificate():
         for idx in range(0, len(encodedKey), 64):
             s += encodedKey[idx:idx+64] + "\n"
 
+        
+        if len(self._extensionList) > 0:
+            s += "Extensions:\n"
+            for ext in self._extensionList:
+                s += "  OID: "+ext.getOid()+"\n"
+                s += "  Is critical: " + ('Y' if ext.isCritical() else 'N') + "\n"
+                
+                s += "  Value: " + str(ext.getValue()).encode('hex') + "\n" 
+            
         return s
 
 
@@ -76,7 +87,7 @@ class DerCertificate():
             subjectList.addChild(child)
 
         root.addChild(subjectList)
-        root.addChild(self._key.toDer())
+        root.addChild(self._publicKey.toDer())
 
         if (len(self._extensionList) > 0):
             extnList = DerSequence()
@@ -108,7 +119,6 @@ class DerCertificate():
         #   (optional) extension list
 
         rootChildren = root.getChildren()
-
         # 1st: validity info
         validityChildren = rootChildren[0].getChildren()
         self._notBefore = validityChildren[0].toVal()
@@ -157,14 +167,13 @@ class CertificateSubjectDescription:
 
         root.addChild(oid)
         root.addChild(value)
-
         return root
 
 class CertificateExtension:
     def __init__(self, oidStr, isCritical, value):
         self._oidStr = oidStr
         self._isCritical = isCritical
-        self._value = value
+        self._value = Blob(value)
 
     def toDer(self):
         root = DerSequence()
@@ -178,3 +187,12 @@ class CertificateExtension:
         root.addChild(extensionValue)
 
         return root
+
+    def getOid(self):
+        return self._oidStr
+
+    def isCritical(self):
+        return self._isCritical
+
+    def getValue(self):
+        return self._value

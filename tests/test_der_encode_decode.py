@@ -3,10 +3,11 @@
           ndn-cxx / tests / unit-tests / security / test-encode-decode-certificate.cpp
 """
 
-from pyndn.encoding.der import DerNode 
+from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger
 from pyndn.util import Blob
-from pyndn.security.certificate import PublicKey, DerCertificate, CertificateSubjectDescription
+from pyndn.security.certificate import PublicKey, DerCertificate, CertificateSubjectDescription, CertificateExtension
 from pyndn.security.security_types import KeyType
+
 
 PUBLIC_KEY = bytearray([
    0x30, 0x81, 0x9d, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
@@ -44,9 +45,9 @@ CERT_DUMP = bytearray([
 
 TEST_OID = "2.5.4.41"
 
-CERT_STRING = "Certificate name:\n"\
- + "  /\n"\
- + "Validity:\n"\
+#CERT_STRING = "Certificate name:\n"\
+# + "  /\n"\
+CERT_STRING = "Validity:\n"\
  + "  NotBefore: 20131226T232254\n"\
  + "  NotAfter: 20131226T232254\n"\
  + "Subject Description:\n"\
@@ -56,7 +57,6 @@ CERT_STRING = "Certificate name:\n"\
  + "OiQe64kBu+mbssMirGjj8GwCzmimxNCnBpCcqhsIHYtDmjNnRG0hoxuImpdeWcQV\n"\
  + "C9ksvVEHYYKtwbjXv5vPfSTCY/OXF+v+YiW6W02Kwnq9Q4qPuPLxxWow01CMyJrf\n"\
  + "7+0153pi6nZ8uwgmxwIB\n"
-
 
 cert = DerCertificate()
 
@@ -74,7 +74,31 @@ print CERT_STRING
 print "======  Actual  Output ======="
 print cert
 
+cert_data = cert.encode()
+decoded_cert = DerCertificate()
+decoded_cert.decode(cert_data)
 
+print "====== After Decoding  ======="
+print decoded_cert
+
+#now add an extension
+extValueRoot = DerSequence()
+extValueName = DerOctetString("/hello/kitty")
+extValueTrustClass = DerInteger(0)
+extValueTrustLevel = DerInteger(10)
+
+extValueRoot.addChild(extValueName)
+extValueRoot.addChild(extValueTrustClass)
+extValueRoot.addChild(extValueTrustLevel)
+
+extValueData = extValueRoot.encode()
+
+certExtension = CertificateExtension("1.3.6.1.5.32.1", True, extValueData)
+
+cert.addExtension(certExtension)
+
+print "====== With Extensions ======="
+print cert
 
 
 REAL_CERT = bytearray([
@@ -104,9 +128,9 @@ REAL_CERT = bytearray([
 0xce, 0x0b, 0x88, 0xd4, 0x21, 0x93, 0x84, 0x89, 0x55, 0x05, 0xd5, 0x02, 0x01, 0x11
 ])
 
-REAL_CERT_STRING = "Certificate name:\n"\
-+"  /tmp\n"\
-+"Validity:\n"\
+#REAL_CERT_STRING = "Certificate name:\n"\
+#+"  /tmp\n"\
+REAL_CERT_STRING = "Validity:\n"\
 +"  NotBefore: 20131101T171122\n"\
 +"  NotAfter: 20141101T171122\n"\
 +"Subject Description:\n"\

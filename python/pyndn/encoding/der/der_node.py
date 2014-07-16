@@ -20,6 +20,7 @@ class DerNode (object):
         return Blob(temp)
 
     def encodeHeader(self, size):
+        self._header = bytearray()
         self._header.append(self._nodeType)
         if size < 0:
             raise NegativeLengthException("DER object has negative length")
@@ -164,7 +165,6 @@ class DerStructure(DerNode):
         temp = self._header[:]
 
         for n in self._nodeList:
-            print self.__class__, n.__class__
             childBlob = n.getRaw()
             temp.extend(childBlob.toRawStr())
 
@@ -174,10 +174,9 @@ class DerStructure(DerNode):
         node._parent = self
         self._nodeList.append(node)
         if notifyParent:
-            if not self._childChanged:
-                self._childChanged = True
             if self._parent is not None:
                 self._parent.setChildChanged()
+        self._childChanged = True
 
     def setChildChanged(self):
         if self._parent is not None:
@@ -242,14 +241,15 @@ class DerBoolean(DerNode):
         return val != 0x00
 
 class DerInteger(DerNode):
-    def __init__(self, inputBuf):
-        # TODO: I think this is not mplemented correctly
+    def __init__(self, integer):
         super(DerInteger, self).__init__(Der.Integer)
-        if type(inputBuf) is Blob:
-            inputBuf = inputBuf.buf()
-        else:
-            inputBuf = bytearray(inputBuf)
-        self._payload.extend(inputBuf)
+        # convert the integer to bytes the esay/slow way
+        temp = bytearray()
+        while integer > 0:
+            temp.insert(0, integer & 0xff)
+            integer >>= 8
+
+        self._payload.extend(temp)
         self.encodeHeader(len(self._payload))
 
 class DerBitString(DerNode):
@@ -263,7 +263,6 @@ class DerBitString(DerNode):
 
             self.encodeHeader(len(self._payload))
 
-
 class DerOctetString(DerByteString):
     def __init__(self, inputData = None):
         super(DerOctetString, self).__init__(inputData, Der.OctetString)
@@ -274,7 +273,6 @@ class DerNull(DerNode):
         self.encodeHeader(0)
 
 class DerOid(DerNode):
-    ### TODO: add setter for OIDStr?
     def __init__(self, oidStr=None):
         super(DerOid, self).__init__(Der.ObjectIdentifier)
         if oidStr is not None:
@@ -284,7 +282,6 @@ class DerOid(DerNode):
 
     def prepareEncoding(self, value):
         firstNumber = 0
-
         if len(value) == 0:
             raise DerEncodingException("No integer in OID")
         else:
@@ -303,7 +300,7 @@ class DerOid(DerNode):
 
         if len(value) > 2:
             for i in range(2,len(value)):
-                encodedStr.append(self.encode128(value[i]))
+                encodedStr.extend(self.encode128(value[i]))
 
         self.encodeHeader(len(encodedStr))
         self._payload.extend(encodedStr)
@@ -312,7 +309,6 @@ class DerOid(DerNode):
         """
             Returns a bytearray with the encoded value
         """
-
         mask = (1 << 7) - 1
         outBytes = bytearray()
         if value < 128:
@@ -352,8 +348,13 @@ class DerOid(DerNode):
         while offset < len(self._payload):
             nextVal,skip = self.decode128(offset)
             offset += skip
-            components.append(str(nextVal))
-        return '.'.join(components)
+            components.append(nextVal)
+        # for some odd reason, the first digits are represented in one byte
+        firstByte = components[0]
+        firstDigit = firstByte/40
+        secondDigit = firstByte%40
+        components = [firstDigit, secondDigit]+components[1:]
+        return '.'.join([str(b) for b in components])
 
 
 
