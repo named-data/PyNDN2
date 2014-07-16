@@ -17,12 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-__all__ = ['public_key']
+__all__ = ['public_key', 'der_certificate']
 
 import sys as _sys
 
 try:
     from pyndn.security.certificate.public_key import *
+    from pyndn.security.certificate.der_certificate import *
 except ImportError:
     del _sys.modules[__name__]
     raise

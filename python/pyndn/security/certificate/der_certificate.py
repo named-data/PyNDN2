@@ -1,10 +1,12 @@
 from pyndn.encoding.der import DerNode, DerSequence, DerGeneralizedTime
-from pyndn.security.certificate.public_key import PublicKey
+from pyndn.security.certificate import PublicKey
 from pyndn.security.security_types import KeyType
-import datetime
+from datetime import datetime
+
+import base64
 
 class DerCertificate():
-    epochStart = datetime.datetime(1970,1,1)
+    epochStart = datetime(1970,1,1)
     def __init__(self):
         self._subjectDescriptionList = []
         self._notBefore = 1e37
@@ -25,9 +27,31 @@ class DerCertificate():
             return true
         return false
 
-    def printCertificate(self):
-        # TODO: for debugging
-        pass
+    def __str__(self):
+        #TODO: where does the name go?!!!
+
+        s = "Certificate name:\n"
+        s += "  /\n"
+        s += "Validity:\n"
+
+        dateFormat = "%Y%m%dT%H%M%S"
+        notBeforeStr = datetime.utcfromtimestamp(self._notBefore/1000).strftime(dateFormat)
+        notAfterStr = datetime.utcfromtimestamp(self._notAfter/1000).strftime(dateFormat)
+
+        s += "  NotBefore: " + notBeforeStr+"\n"
+        s += "  NotAfter: " + notAfterStr + "\n"
+        for sd in self._subjectDescriptionList:
+            s += "Subject Description: \n"
+            s += "  "+sd.getOid()+": " + str(sd.getValue()) + "\n"
+
+        s += "Public key bits:\n"
+        keyDer = self._publicKey.getKeyDer()
+        encodedKey = base64.b64encode(keyDer.toRawStr())
+        for idx in range(0, len(encodedKey), 64):
+            s += encodedKey[idx:idx+64] + "\n"
+
+        return s
+
 
     def addSubjectDescription(self, descr):
         self._subjectDescriptionList.append(descr)
@@ -97,8 +121,8 @@ class DerCertificate():
             oidStr = descriptionChildren[0].toVal()
             value = descriptionChildren[1].toVal()
 
-            subjectDesc = CertificatesubjectDescription(oidStr, value)
-            self.addSubjectDescription(subjectDes)
+            subjectDesc = CertificateSubjectDescription(oidStr, value)
+            self.addSubjectDescription(subjectDesc)
 
         # 3rd: public key
         publicKeyInfo = rootChildren[2].getRaw()
@@ -118,6 +142,12 @@ class CertificateSubjectDescription:
     def __init__(self, oidStr, value):
         self._oidStr = oidStr
         self._value = value
+
+    def getOid(self):
+        return self._oidStr
+
+    def getValue(self):
+        return self._value
 
     def toDer(self):
         root = DerSequence()

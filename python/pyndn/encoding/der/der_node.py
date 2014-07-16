@@ -15,8 +15,9 @@ class DerNode (object):
         return len(self._header) + len(self._payload)
 
     def getRaw(self):
-        temp = self._header[:]
-        return Blob(temp.extend(self._payload))
+        temp = self._header+self._payload
+        
+        return Blob(temp)
 
     def encodeHeader(self, size):
         self._header.append(self._nodeType)
@@ -163,8 +164,9 @@ class DerStructure(DerNode):
         temp = self._header[:]
 
         for n in self._nodeList:
+            print self.__class__, n.__class__
             childBlob = n.getRaw()
-            temp.extend(childBlob)
+            temp.extend(childBlob.toRawStr())
 
         return Blob(temp)
             
@@ -251,14 +253,15 @@ class DerInteger(DerNode):
         self.encodeHeader(len(self._payload))
 
 class DerBitString(DerNode):
-    def __init__(self, inputBuf, padding):
+    def __init__(self, inputBuf=None, padding=None):
         super(DerBitString, self).__init__(Der.BitString)
-        if type(inputBuf) is Blob:
-            inputBuf = inputBuf.buf()
-        self._payload.append(chr(padding))
-        self._payload.extend(inputBuf)
+        if inputBuf is not None:
+            if type(inputBuf) is Blob:
+                inputBuf = inputBuf.buf()
+            self._payload.append(chr(padding))
+            self._payload.extend(inputBuf)
 
-        self.encodeHeader(len(self._payload))
+            self.encodeHeader(len(self._payload))
 
 
 class DerOctetString(DerByteString):
@@ -334,7 +337,7 @@ class DerOid(DerNode):
         oldOffset = offset
 
         while self._payload[offset] & flagMask:
-            result = 128 * result + chr(self._payload[offset]-128)
+            result = 128 * result + (self._payload[offset]-128) & 0xff
             offset += 1
 
         result = result * 128 + self._payload[offset]
@@ -374,18 +377,19 @@ class DerGeneralizedTime(DerNode):
             self._payload.extend(bytearray(derTime))
             self.encodeHeader(len(self._payload))
 
-    def toDerTimeString(self, msSince1970):
+    @classmethod
+    def toDerTimeString(cls, msSince1970):
         secondsSince1970 = msSince1970/1000.0
         utcTime = datetime.utcfromtimestamp(secondsSince1970)
 
-        derTime = utcTime.strftime("%Y%m%d%H%M%S.%fZ")
+        derTime = utcTime.strftime("%Y%m%d%H%M%SZ")
         return derTime
 
     def toVal(self):
         # return the milliseconds since 1970
         timeStr = str(self._payload)
-        dt = datetime.strptime(timeStr, "%Y%m%d%H%M%S.%fZ")
+        dt = datetime.strptime(timeStr, "%Y%m%d%H%M%SZ")
         epochStart = datetime(1970, 1,1)
-        msSince1970 = (dt-epochStart).total_seconds()
+        msSince1970 = (dt-epochStart).total_seconds()*1000
 
         return msSince1970
