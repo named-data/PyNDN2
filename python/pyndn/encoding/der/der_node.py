@@ -1,3 +1,22 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A copy of the GNU General Public License is in the file COPYING.
+
 from der import Der
 from pyndn.util import Blob
 from der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
@@ -314,12 +333,10 @@ class DerOid(DerNode):
         if value < 128:
             outBytes.append(chr(value & mask))
         else:
-            n = 1
             outBytes.insert(0, value & mask)
             value >>= 7
             while value != 0:
                 outBytes.insert(0, (value & mask) | (1 << 7))
-                n += 1
                 value >>= 7
 
         return outBytes
@@ -333,7 +350,7 @@ class DerOid(DerNode):
         oldOffset = offset
 
         while self._payload[offset] & flagMask:
-            result = 128 * result + (self._payload[offset]-128) & 0xff
+            result = 128 * result + self._payload[offset]-128 
             offset += 1
 
         result = result * 128 + self._payload[offset]

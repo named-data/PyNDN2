@@ -1,19 +1,43 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A copy of the GNU General Public License is in the file COPYING.
+
 from pyndn.encoding.der import DerNode, DerSequence, DerGeneralizedTime, DerOid, DerPrintableString
 from pyndn.security.certificate import PublicKey
 from pyndn.security.security_types import KeyType
 from pyndn.util import Blob
+from pyndn import Data, ContentType
 from datetime import datetime
 
 import base64
 
-class DerCertificate():
+class Certificate(Data):
     epochStart = datetime(1970,1,1)
-    def __init__(self):
+    def __init__(self, other=None):
+        super(Certificate,self).__init__(other)
         self._subjectDescriptionList = []
-        self._notBefore = 1e37
-        self._notAfter = -1e37
-        self._publicKey = None
         self._extensionList = []
+        if isinstance(other, Data):
+            self.decode()
+        else:
+            self._notBefore = 1e37
+            self._notAfter = -1e37
+            self._publicKey = None
 
     def isTooEarly(self):
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
@@ -100,17 +124,18 @@ class DerCertificate():
 
     def encode(self):
         """
-            Returns a Blob
+            Sets the content of this Data packet to the DER encoded certificate data
         """
         root = self.toDer()
         outVal = root.encode()
-        return outVal
+        self.setContent(Blob(outVal))
+        self.getMetaInfo().setType(ContentType.KEY)
 
-    def decode(self, inputBuf):
+    def decode(self):
         """
             Populates the fields by decoding DER data from inputBuf
         """
-        root = DerNode.parse(inputBuf)
+        root = DerNode.parse(self.getContent())
         
         # we need to ensure that there are:
         #   validity (notBefore, notAfter)
@@ -147,6 +172,21 @@ class DerCertificate():
                 value = children[2].getRaw()
                 extension = CertificateExtension(oidStr, isCritical, value)
                 self.addExtension(extension)
+
+    def getNotBefore(self):
+        return self._notBefore
+
+    def getNotAfter(self):
+        return self._notAfter
+
+    def getPublicKey(self):
+        return self._publicKey
+
+    def getSubjectDescriptions(self):
+        return self._subjectDescriptionList
+
+    def getExtensions(self):
+        return self._extensionList
 
 class CertificateSubjectDescription:
     def __init__(self, oidStr, value):

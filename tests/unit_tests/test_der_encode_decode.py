@@ -1,3 +1,22 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A copy of the GNU General Public License is in the file COPYING.
+
 """ 
     This is more or less a copy of one of the NDN-cxx unit tests:
           ndn-cxx / tests / unit-tests / security / test-encode-decode-certificate.cpp
@@ -5,8 +24,10 @@
 
 from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger
 from pyndn.util import Blob
-from pyndn.security.certificate import PublicKey, DerCertificate, CertificateSubjectDescription, CertificateExtension
+from pyndn.security.certificate import PublicKey, Certificate, CertificateSubjectDescription, CertificateExtension
 from pyndn.security.security_types import KeyType
+
+import unittest as ut
 
 
 PUBLIC_KEY = bytearray([
@@ -45,8 +66,6 @@ CERT_DUMP = bytearray([
 
 TEST_OID = "2.5.4.41"
 
-#CERT_STRING = "Certificate name:\n"\
-# + "  /\n"\
 CERT_STRING = "Validity:\n"\
  + "  NotBefore: 20131226T232254\n"\
  + "  NotAfter: 20131226T232254\n"\
@@ -57,49 +76,6 @@ CERT_STRING = "Validity:\n"\
  + "OiQe64kBu+mbssMirGjj8GwCzmimxNCnBpCcqhsIHYtDmjNnRG0hoxuImpdeWcQV\n"\
  + "C9ksvVEHYYKtwbjXv5vPfSTCY/OXF+v+YiW6W02Kwnq9Q4qPuPLxxWow01CMyJrf\n"\
  + "7+0153pi6nZ8uwgmxwIB\n"
-
-cert = DerCertificate()
-
-cert._notBefore = 1388100174000L
-cert._notAfter = 1388100174000L
-
-cert.addSubjectDescription(CertificateSubjectDescription(TEST_OID, "TEST NAME"))
-key = PublicKey(KeyType.RSA, Blob(PUBLIC_KEY))
-
-cert._publicKey = key
-
-print "====== Expected Output ======="
-print CERT_STRING
-
-print "======  Actual  Output ======="
-print cert
-
-cert_data = cert.encode()
-decoded_cert = DerCertificate()
-decoded_cert.decode(cert_data)
-
-print "====== After Decoding  ======="
-print decoded_cert
-
-#now add an extension
-extValueRoot = DerSequence()
-extValueName = DerOctetString("/hello/kitty")
-extValueTrustClass = DerInteger(0)
-extValueTrustLevel = DerInteger(10)
-
-extValueRoot.addChild(extValueName)
-extValueRoot.addChild(extValueTrustClass)
-extValueRoot.addChild(extValueTrustLevel)
-
-extValueData = extValueRoot.encode()
-
-certExtension = CertificateExtension("1.3.6.1.5.32.1", True, extValueData)
-
-cert.addExtension(certExtension)
-
-print "====== With Extensions ======="
-print cert
-
 
 REAL_CERT = bytearray([
 0x30, 0x82, 0x01, 0x63, 0x30, 0x22, 0x18, 0x0f, 0x32, 0x30, 0x31, 0x33, 0x31, 0x31, 0x30,
@@ -143,12 +119,62 @@ REAL_CERT_STRING = "Validity:\n"\
 +"QdiNH9zs/EiVzAkeMG4iniSXLuYM3z0gMqqcyUUUr6r1F9IBmDO+Kp97nZh8VCL+\n"\
 +"cnIEwyzAFAupQH5GoXUWGiee8oKWwH2vGHX7u6sWZsCp15NMSG3OC4jUIZOEiVUF\n"\
 +"1QIB\n"
+#CERT_STRING = "Certificate name:\n"\
+# + "  /\n"\
 
-realCert = DerCertificate()
-realCert.decode(REAL_CERT)
 
-print "====== Expected Output ======="
-print REAL_CERT_STRING
+class TestCertificate(ut.TestCase):
+    def setUp(self):
+        cert = Certificate()
 
-print "======  Actual  Output ======="
-print realCert
+        cert._notBefore = 1388100174000L
+        cert._notAfter = 1388100174000L
+
+        cert.addSubjectDescription(CertificateSubjectDescription(TEST_OID, "TEST NAME"))
+        key = PublicKey(KeyType.RSA, Blob(PUBLIC_KEY))
+
+        cert._publicKey = key
+        self.toyCert = cert
+
+    def test_representation(self):
+        self.assertEqual(CERT_STRING, str(self.toyCert), 'Certificate dump does not have expected format')
+
+    def test_encode_decode(self):
+        self.toyCert.encode()
+        cert_data = self.toyCert.getContent()
+        decoded_cert = Certificate()
+        decoded_cert.setContent(cert_data)
+        decoded_cert.decode()
+
+        self.assertEqual(str(self.toyCert), str(decoded_cert), 'Certificate representation changed after encoding')
+
+    def test_extension(self):
+        # TODO: incomplete
+        #now add an extension
+        
+        self.toyCert.encode()
+        extValueRoot = DerSequence()
+        extValueName = DerOctetString("/hello/kitty")
+        extValueTrustClass = DerInteger(0)
+        extValueTrustLevel = DerInteger(10)
+
+        extValueRoot.addChild(extValueName)
+        extValueRoot.addChild(extValueTrustClass)
+        extValueRoot.addChild(extValueTrustLevel)
+
+        extValueData = extValueRoot.encode()
+
+        certExtension = CertificateExtension("1.3.6.1.5.32.1", True, extValueData)
+        cert = Certificate(self.toyCert)
+        cert.addExtension(certExtension)
+
+
+
+    def test_decode(self):
+        realCert = Certificate()
+        realCert.setContent(REAL_CERT)
+        realCert.decode()
+        self.assertEqual(REAL_CERT_STRING, str(realCert))
+
+if __name__ == '__main__':
+   ut.main(verbosity=2) 
