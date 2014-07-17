@@ -29,6 +29,12 @@ import base64
 class Certificate(Data):
     epochStart = datetime(1970,1,1)
     def __init__(self, other=None):
+        """
+        Create a new certificate, optionally copying the 
+        contents of another Data object.
+        :param other: (optional) A Data packet to copy the content from
+        :type other: Data
+        """
         super(Certificate,self).__init__(other)
         self._subjectDescriptionList = []
         self._extensionList = []
@@ -40,6 +46,11 @@ class Certificate(Data):
             self._publicKey = None
 
     def isTooEarly(self):
+        """
+        Check if the certificate start date is in the future
+        :return: True if the certificate cannot be used yet
+        :rtype: boolean
+        """
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
         if secondsSince1970 < self._notBefore:
             return true
@@ -47,6 +58,11 @@ class Certificate(Data):
 
 
     def isTooLate(self):
+        """
+        Check if the certificate end date is in the past
+        :return: True if the certificate has expired
+        :rtype: boolean
+        """
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
         if secondsSince1970 > self._notAfter:
             return true
@@ -86,12 +102,25 @@ class Certificate(Data):
 
 
     def addSubjectDescription(self, descr):
+        """
+        Add a subject description field to the certificate.
+        :param descr: The CertificateSubjectDescription object to add
+        """
         self._subjectDescriptionList.append(descr)
 
     def addExtension(self, ext):
+        """
+        Add an extension field to the certificate.
+        :param ext: Th CertificateExtension object to add
+        """
         self._extensionList.append(ext)
 
     def toDer(self):
+        """
+        Encode the certificate fields in DER format.
+        :return: The DER encoded contents of the certificate.
+        :rtype: DerNode
+        """
         root = DerSequence()
         validity = DerSequence()
         notBefore = DerGeneralizedTime(self._notBefore)
@@ -121,7 +150,8 @@ class Certificate(Data):
 
     def encode(self):
         """
-            Sets the content of this Data packet to the DER encoded certificate data
+            Encode the contents of the certificate in DER format and set the
+            Content and MetaInfo fields. 
         """
         root = self.toDer()
         outVal = root.encode()
@@ -130,7 +160,7 @@ class Certificate(Data):
 
     def decode(self):
         """
-            Populates the fields by decoding DER data from inputBuf
+            Populates the fields by decoding DER data from the Content.
         """
         root = DerNode.parse(self.getContent())
         
@@ -171,32 +201,74 @@ class Certificate(Data):
                 self.addExtension(extension)
 
     def getNotBefore(self):
+        """
+        Returns the earliest date the certificate is valid at.
+        :return: Timestamp as milliseconds since 1970.
+        :rtype: float
+        """
         return self._notBefore
 
     def getNotAfter(self):
+        """
+        Returns the latest date the certificate is valid at.
+        :return: Timestamp as milliseconds since 1970.
+        :rtype: float
+        """
         return self._notAfter
 
     def getPublicKey(self):
+        """
+        :return: The PublicKey object stored in the certificate.
+        :rtype: PublicKey
+        """
         return self._publicKey
 
     def getSubjectDescriptions(self):
+        """
+        :return: The subject description fields of the certificate.
+        :rtype: list of CertificateSubjectDescription
+        """
         return self._subjectDescriptionList
 
     def getExtensions(self):
+        """
+        :return: The extension fields of the certificate.
+        :rtype: list of CertificateExtension
+        """
         return self._extensionList
 
 class CertificateSubjectDescription:
     def __init__(self, oidStr, value):
+        """
+        Create a subject description field for a certificate.
+        :param oidStr: The object identifier
+        :type oidStr: strig
+        :param value: The value of the description field
+        :type value: Blob or bytearray
+        """
         self._oidStr = oidStr
-        self._value = value
+        self._value = Blob(value)
 
     def getOid(self):
+        """
+        :return: The object identifier of the subject description field.
+        :rtype: string
+        """
         return self._oidStr
 
     def getValue(self):
+        """
+        :return: The value of the subject description field.
+        :rtype: Blob
+        """
         return self._value
 
     def toDer(self):
+        """
+        Encode this field as a DerNode.
+        :return: Encoded subject description
+        :rtype: DerSequence
+        """
         root = DerSequence()
 
         oid = DerOid(self._oidStr)
@@ -208,11 +280,25 @@ class CertificateSubjectDescription:
 
 class CertificateExtension:
     def __init__(self, oidStr, isCritical, value):
+        """
+        Create a certificate extension field.
+        :param oidStr: The object identifier for the extension
+        :type oidStr: string
+        :param isCritical: Whether this extension is critical to the certificate
+        :type isCritical: boolean
+        :param value: The value of the extension field
+        :type value: bytearray or Blob
+        """
         self._oidStr = oidStr
         self._isCritical = isCritical
         self._value = Blob(value)
 
     def toDer(self):
+        """
+        Encode this field as a DerNode.
+        :return: Encoded certificate extension
+        :rtype: DerSequence
+        """
         root = DerSequence()
 
         extensionId = DerOid(self._oidStr)
@@ -226,10 +312,22 @@ class CertificateExtension:
         return root
 
     def getOid(self):
+        """
+        :return: The object identifier of the subject description field.
+        :rtype: string
+        """
         return self._oidStr
 
     def isCritical(self):
+        """
+        :return: Whether the extension is critical to the certificate
+        :rtype: boolean
+        """
         return self._isCritical
 
     def getValue(self):
+        """
+        :return: The value of the extension field
+        :rtype: Blob
+        """
         return self._value

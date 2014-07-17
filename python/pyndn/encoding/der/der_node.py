@@ -23,22 +23,37 @@ from der_exceptions import NegativeLengthException, DerEncodingException, DerDec
 
 from datetime import datetime
 
+""" 
+This module defines the implemented DER node types used in encoding/decoding DER formatted data.
+"""
+
 class DerNode (object):
     def __init__(self, nodeType):
+        """
+        Create an untyped DER node. This class should never be instantiated directly: instead, use one of the node classesdefined below.
+
+        :param nodeType: The DER node type
+        :type nodeType: An int defined in the Der class
+        """
         self._parent = None
         self._nodeType = chr(nodeType)
         self._header = bytearray()
         self._payload = bytearray()
 
     def getSize(self):
+        """
+        Get the total length of the encoding.
+        :return: The total (header + payload) length
+        :rtype: int
+        """
         return len(self._header) + len(self._payload)
 
-    def getRaw(self):
-        temp = self._header+self._payload
-        
-        return Blob(temp)
-
-    def encodeHeader(self, size):
+    def _encodeHeader(self, size):
+        """
+        Encode the given size and update the header.
+        :param size: The payload size to encode
+        :type size: int
+        """
         self._header = bytearray()
         self._header.append(self._nodeType)
         if size < 0:
@@ -56,9 +71,13 @@ class DerNode (object):
             tempBuf.insert(0,chr(((1<<7)|n) & 0xff))
             self._header.extend(tempBuf)
 
-    def decodeHeader(self, inputBuf, startIdx=0):
+    def _decodeHeader(self, inputBuf, startIdx=0):
         """
-            Extracts the header from an input buffer
+            Extracts the header from an input buffer.
+            :param inputBuf: The input buffer to read from.
+            :type inputBuf: bytearray or Blob
+            :param startIdx: (optional) An offset into the buffer.
+            :type startIdx: int
         """
 
         if type(inputBuf) is Blob:
@@ -92,17 +111,25 @@ class DerNode (object):
 
     def encode(self):
         """ 
-            Returns a Blob 
+        :return: The raw data encoding for this node
+        :rtype: Blob
         """
         val = self._header+self._payload
         return Blob(val)
 
     def decode(self, inputBuf, startIdx=0):
+        """
+        Decode and store the data from an input buffer.
+        :param inputBuf: The input buffer to read from.
+        :type inputBuf: bytearray or Blob
+        :param startIdx: (optional) An offset into the buffer.
+        :type startIdx: int
+        """
         if type(inputBuf) is Blob:
             inputBuf = inputBuf.buf()
 
         idx = startIdx
-        payloadSize = self.decodeHeader(inputBuf, idx)
+        payloadSize = self._decodeHeader(inputBuf, idx)
         skipBytes = len(self._header)
         if payloadSize > 0:
             idx += skipBytes
@@ -111,7 +138,11 @@ class DerNode (object):
     @staticmethod
     def parse(inputBuf, startIdx=0):
         """
-            Returns a DerNode according to the type at the head of the buffer
+        Parse the data from the input buffer recursively and return the root as a subclass of DerNode.
+        :param inputBuf: The input buffer to read from.
+        :type inputBuf: bytearray or Blob
+        :param startIdx: (optional) An offset into the buffer.
+        :type startIdx: int
         """
         if type(inputBuf) is Blob:
             inputBuf = inputBuf.buf()
@@ -147,25 +178,44 @@ class DerNode (object):
         return newNode
 
     def toVal(self):
-        return self.getRaw()
+        """ 
+        Convert the encoded data to a standard representation. Overridden by some subclasses (e.g. DerBoolean)
+        :return: The encoded data
+        :rtype: Blob
+        """
+        return self.encode()
 
 class DerStructure(DerNode):
     def __init__(self, nodeType):
+        """
+        Create a DerNode that can hold other DerNodes. Do not instantiate this directly: instead use a DerSequence.
+        :param nodeType: The DER node type
+        :type nodeType: An int defined in the Der class
+        """
        super(DerStructure, self).__init__(nodeType)
        self._childChanged = False
        self._nodeList = []
        self._size = 0
        
     def getSize(self):
+        """
+        Get the total length of the encoding, including children
+        :return: The total (header + payload) length
+        :rtype: int
+        """
         if self._childChanged:
             self.updateSize()
             self._childChanged = False
 
         self._header = bytearray()
-        self.encodeHeader(self._size)
+        self._encodeHeader(self._size)
         return self._size + len(self._header)
 
     def getChildren(self):
+        """
+        :return: The children of this node
+        :rtype: array of DerNode
+        """
         return self._nodeList
 
     def updateSize(self):
@@ -180,16 +230,14 @@ class DerStructure(DerNode):
         self._size = newSize
         self._childChanged = False
 
-    def getRaw(self):
-        temp = self._header[:]
-
-        for n in self._nodeList:
-            childBlob = n.getRaw()
-            temp.extend(childBlob.toRawStr())
-
-        return Blob(temp)
-            
     def addChild(self, node, notifyParent=False):
+        """
+        Add a child to this node.
+        :param node: The child node to add.
+        :type node: DerNode
+        :param notifyParent: (optional) Set to true to cause any containing nodes to update their size
+        :type notifyParent: boolean
+        """
         node._parent = self
         self._nodeList.append(node)
         if notifyParent:
@@ -198,18 +246,22 @@ class DerStructure(DerNode):
         self._childChanged = True
 
     def setChildChanged(self):
+        """
+        Mark the child list as dirty, so that we update size when necessary.
+        """
         if self._parent is not None:
             self._parent.setChildChanged()
         self._childChanged = True
 
     def encode(self):
         """ 
-            Returns the encoded DER object in a Blob
+        :return: The raw data encoding for this node and its children
+        :rtype: Blob
         """
         temp = bytearray()
         self.updateSize()
         self._header = bytearray()
-        self.encodeHeader(self._size)
+        self._encodeHeader(self._size)
         temp.extend(self._header)
         for n in self._nodeList:
             encodedChild = n.encode()
@@ -218,15 +270,23 @@ class DerStructure(DerNode):
         return Blob(temp)
 
     def decode(self, inputBuf, startIdx = 0):
-       idx = startIdx 
-       self._size = self.decodeHeader(inputBuf, idx)
-       idx += len(self._header)
-       accSize = 0
-       while accSize < self._size:
-           node = self.parse(inputBuf, idx)
-           idx += node.getSize()
-           accSize += node.getSize()
-           self.addChild(node, False)
+        """
+        Decode and store the data from an input buffer. Recursively populates child nodes.
+        :param inputBuf: The input buffer to read from.
+        :type inputBuf: bytearray or Blob
+        :param startIdx: (optional) An offset into the buffer.
+        :type startIdx: int
+        """
+
+        idx = startIdx 
+        self._size = self._decodeHeader(inputBuf, idx)
+        idx += len(self._header)
+        accSize = 0
+        while accSize < self._size:
+            node = self.parse(inputBuf, idx)
+            idx += node.getSize()
+            accSize += node.getSize()
+            self.addChild(node, False)
 
 ########
 # Now for all the node types...
@@ -234,6 +294,13 @@ class DerStructure(DerNode):
 
 class DerByteString(DerNode):
     def __init__(self, inputData, nodeType):
+        """
+        Create a node that handles byte strings. Do not instantiate this type directly: instead use a subclass such as DerOctetString or DerPrintableString.
+        :param inputData: An input buffer containing the string to encode.
+        :type inputData: Blob or bytearray
+        :param nodeType: The specific DER node type.
+        :type nodeType: An int defined in the Der class.
+        """
         super(DerByteString, self).__init__(nodeType)
         if inputData is not None:
             if type(inputData) is Blob:
@@ -242,18 +309,28 @@ class DerByteString(DerNode):
                 inputData = bytearray(inputData)
             
             self._payload.extend(inputData)
-            self.encodeHeader(len(self._payload))
+            self._encodeHeader(len(self._payload))
 
     def toVal(self):
+        """
+         For byte string types, the payload encodes the string directly, so it is used as a representation.
+        :return: The encoded string
+        :rtype: bytearray
+        """
         return self._payload # already a byte string
 
 class DerBoolean(DerNode):
     def __init__(self, val=None):
+        """
+        Create a DerNode that encodes a boolean value.
+        :param val: (optional) The value to encode
+        :type val: boolean
+        """
         super(DerBoolean, self).__init__(Der.Boolean)
         if val is not None:
             val = 0xff if val else 0x00
             self._payload.append(val)
-            self.encodeHeader(len(self._payload))
+            self._encodeHeader(len(self._payload))
 
     def toVal(self):
         val = self._payload[0]
@@ -261,18 +338,30 @@ class DerBoolean(DerNode):
 
 class DerInteger(DerNode):
     def __init__(self, integer):
+        """
+        Create a DerNode that encodes a integer value.
+        :param integer: (optional) The value to encode
+        :type integer: int
+        """
         super(DerInteger, self).__init__(Der.Integer)
-        # convert the integer to bytes the esay/slow way
+        # convert the integer to bytes the easy/slow way
         temp = bytearray()
         while integer > 0:
             temp.insert(0, integer & 0xff)
             integer >>= 8
 
         self._payload.extend(temp)
-        self.encodeHeader(len(self._payload))
+        self._encodeHeader(len(self._payload))
 
 class DerBitString(DerNode):
     def __init__(self, inputBuf=None, padding=None):
+        """
+        Create a DerNode that encodes a bit string value.
+        :param inputBuf: (optional) A buffer containing the bits to encode
+        :type inputBuf: Blob or bytearray
+        :param padding: (optional) The number of bits of padding at the end of the bit string
+        :type padding: int < 8
+        """
         super(DerBitString, self).__init__(Der.BitString)
         if inputBuf is not None:
             if type(inputBuf) is Blob:
@@ -280,19 +369,33 @@ class DerBitString(DerNode):
             self._payload.append(chr(padding))
             self._payload.extend(inputBuf)
 
-            self.encodeHeader(len(self._payload))
+            self._encodeHeader(len(self._payload))
 
 class DerOctetString(DerByteString):
     def __init__(self, inputData = None):
+        """
+        Create a DerNode to encode a string of bytes
+        :param inputData: An input buffer containing the string to encode.
+        :type inputData: Blob or bytearray
+        """
         super(DerOctetString, self).__init__(inputData, Der.OctetString)
 
 class DerNull(DerNode):
     def __init__(self):
+        """
+        Create a DerNode to encode a null value
+        """
         super(DerNull, self).__init__(Der.Null)
-        self.encodeHeader(0)
+        self._encodeHeader(0)
 
 class DerOid(DerNode):
     def __init__(self, oidStr=None):
+        """
+        Create a DerNode to encode an object identifier.
+        The object identifier string must begin with 0,1, or 2 and must contain at least 2 digits.
+        :param oidStr: The OID to encode
+        :type oidStr: string
+        """
         super(DerOid, self).__init__(Der.ObjectIdentifier)
         if oidStr is not None:
             parts = [int(p) for p in oidStr.split('.')]
@@ -300,6 +403,9 @@ class DerOid(DerNode):
             self.prepareEncoding(parts)
 
     def prepareEncoding(self, value):
+        """
+        Encode a sequence of integers into an OID object.
+        """
         firstNumber = 0
         if len(value) == 0:
             raise DerEncodingException("No integer in OID")
@@ -315,18 +421,20 @@ class DerOid(DerNode):
             else:
                 raise DerEncodingException("Second integer in OID is out of range")
 
-        encodedStr = self.encode128(firstNumber)
+        encodedStr = self._encode128(firstNumber)
 
         if len(value) > 2:
             for i in range(2,len(value)):
-                encodedStr.extend(self.encode128(value[i]))
+                encodedStr.extend(self._encode128(value[i]))
 
-        self.encodeHeader(len(encodedStr))
+        self._encodeHeader(len(encodedStr))
         self._payload.extend(encodedStr)
 
-    def encode128(self, value):
+    def _encode128(self, value):
         """
-            Returns a bytearray with the encoded value
+        Compute the encoding for one part of an OID, where values greater than 128 must be encoded as multiple bytes.
+        :param value: A component of an OID
+        :type value: int
         """
         mask = (1 << 7) - 1
         outBytes = bytearray()
@@ -341,9 +449,11 @@ class DerOid(DerNode):
 
         return outBytes
 
-    def decode128(self, offset):
+    def _decode128(self, offset):
         """
-            For internal use only
+        Convert an encoded component of the OID to the original integer.
+        :param offset: The offset into this node's payload
+        :type offset: int
         """
         flagMask = 0x80
         result = 0
@@ -358,12 +468,13 @@ class DerOid(DerNode):
 
     def toVal(self):
         """
-            Returns the OID as a string
+        :return: The string representation of the OID
+        :rtype: string
         """
         offset = 0
         components = []
         while offset < len(self._payload):
-            nextVal,skip = self.decode128(offset)
+            nextVal,skip = self._decode128(offset)
             offset += skip
             components.append(nextVal)
         # for some odd reason, the first digits are represented in one byte
@@ -377,26 +488,49 @@ class DerOid(DerNode):
 
 class DerSequence(DerStructure):
     def __init__(self):
+        """
+        Create a DerNode that contains an ordered sequence of other nodes.
+        """
         super(DerSequence, self).__init__(Der.Sequence)
 
 
 class DerPrintableString(DerByteString):
+        """
+        Create a DerNode to encode a printable string
+        No escaping or other modification is done to the string
+        :param inputData: An input buffer containing the string to encode.
+        :type inputData: Blob or bytearray
+        """
     def __init__(self, inputData = None):
         super(DerPrintableString, self).__init__(inputData, Der.PrintableString)
 
     def toVal(self):
+        """
+        :return: The string encoded in the node
+        :rtype: string
+        """
         return str(self._payload)
 
 class DerGeneralizedTime(DerNode):
-    def __init__(self, timeSince1970 = None):
+    def __init__(self, msSince1970 = None):
         super(DerGeneralizedTime, self).__init__(Der.GeneralizedTime)
-        if timeSince1970 is not None:
-            derTime = self.toDerTimeString(timeSince1970)
+        """
+        Create a DerNode representing a date and time, with millisecond accuracy.
+        :param msSince1970: (optional) Timestamp as milliseconds since Jan 1, 1970
+        :type msSince1970: float
+        """
+        if msSince1970 is not None:
+            derTime = self.toDerTimeString(msSince1970)
             self._payload.extend(bytearray(derTime))
-            self.encodeHeader(len(self._payload))
+            self._encodeHeader(len(self._payload))
 
-    @classmethod
-    def toDerTimeString(cls, msSince1970):
+    @staticmethod
+    def toDerTimeString(msSince1970):
+        """
+        Convert a UNIX timestamp to the internal string representation
+        :param msSince1970: Timestamp as milliseconds since Jan 1, 1970
+        :type msSince1970: float
+        """
         secondsSince1970 = msSince1970/1000.0
         utcTime = datetime.utcfromtimestamp(secondsSince1970)
 
@@ -405,6 +539,10 @@ class DerGeneralizedTime(DerNode):
 
     def toVal(self):
         # return the milliseconds since 1970
+        """
+        :return: The timestamp encoded in this node as milliseconds since 1970
+        :rtype: float
+        """
         timeStr = str(self._payload)
         dt = datetime.strptime(timeStr, "%Y%m%d%H%M%SZ")
         epochStart = datetime(1970, 1,1)
