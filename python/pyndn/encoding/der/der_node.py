@@ -187,11 +187,11 @@ class DerNode (object):
 
 class DerStructure(DerNode):
     def __init__(self, nodeType):
-        """
-        Create a DerNode that can hold other DerNodes. Do not instantiate this directly: instead use a DerSequence.
-        :param nodeType: The DER node type
-        :type nodeType: An int defined in the Der class
-        """
+       """
+       Create a DerNode that can hold other DerNodes. Do not instantiate this directly: instead use a DerSequence.
+       :param nodeType: The DER node type
+       :type nodeType: An int defined in the Der class
+       """
        super(DerStructure, self).__init__(nodeType)
        self._childChanged = False
        self._nodeList = []
@@ -304,10 +304,9 @@ class DerByteString(DerNode):
         super(DerByteString, self).__init__(nodeType)
         if inputData is not None:
             if type(inputData) is Blob:
-                inputData = inputData.buf
+                inputData = inputData.buf()
             else:
                 inputData = bytearray(inputData)
-            
             self._payload.extend(inputData)
             self._encodeHeader(len(self._payload))
 
@@ -495,13 +494,13 @@ class DerSequence(DerStructure):
 
 
 class DerPrintableString(DerByteString):
+    def __init__(self, inputData = None):
         """
         Create a DerNode to encode a printable string
         No escaping or other modification is done to the string
         :param inputData: An input buffer containing the string to encode.
         :type inputData: Blob or bytearray
         """
-    def __init__(self, inputData = None):
         super(DerPrintableString, self).__init__(inputData, Der.PrintableString)
 
     def toVal(self):

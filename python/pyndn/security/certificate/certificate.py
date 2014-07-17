@@ -187,7 +187,7 @@ class Certificate(Data):
             self.addSubjectDescription(subjectDesc)
 
         # 3rd: public key
-        publicKeyInfo = rootChildren[2].getRaw()
+        publicKeyInfo = rootChildren[2].encode()
         self._publicKey = PublicKey(KeyType.RSA, publicKeyInfo)
 
         if len(rootChildren) > 3:
@@ -196,7 +196,7 @@ class Certificate(Data):
                 children = extInfo.getChildren()
                 oidStr = children[0].toVal()
                 isCritical = children[1].toVal()
-                value = children[2].getRaw()
+                value = children[2].encode()
                 extension = CertificateExtension(oidStr, isCritical, value)
                 self.addExtension(extension)
 
