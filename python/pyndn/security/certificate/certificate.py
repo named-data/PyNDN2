@@ -200,6 +200,13 @@ class Certificate(Data):
                 extension = CertificateExtension(oidStr, isCritical, value)
                 self.addExtension(extension)
 
+    def wireDecode(self, buf, wireFormat = None):
+        """
+        Make sure the fields are populated after decoding
+        """
+        Data.wireDecode(self, buf, wireFormat)
+        self.decode()
+
     def getNotBefore(self):
         """
         Returns the earliest date the certificate is valid at.
@@ -338,3 +345,4 @@ class CertificateExtension:
         :rtype: Blob
         """
         return self._value
+

@@ -37,7 +37,7 @@
 
 from pyndn.security.certificate import Certificate
 from pyndn.security.security_exception import SecurityException
-from pyndn import Name
+from pyndn import Name,Data
 
 """
 IdentityCertificate is a subclass of Certificate that provides convenience methods
@@ -45,7 +45,7 @@ for getting the public key name from the certificate name.
 """
 
 class IdentityCertificate(Certificate):
-    def __init__(self, data=None):
+    def __init__(self, value=None):
         """
         Create a new identity certificate.
         :param data: (optional) A Data object to copy the contents of
@@ -53,9 +53,11 @@ class IdentityCertificate(Certificate):
         :throws: SecurityException if the name of this Data object is 
         not a valid identity certificate name.
         """
-        super(IdentityCertificate,self).__init__(data)
-        if not self._isCorrectName(self.getName()):
-            raise SecurityException("Bad format for identity certificate name!")
+        super(IdentityCertificate,self).__init__(value)
+
+        if isinstance(value, Name):
+            if not self._isCorrectName(self.getName()):
+                raise SecurityException("Bad format for identity certificate name: " + self.getName().toUri())
         self._setPublicKeyName()
 
     @classmethod
@@ -80,6 +82,13 @@ class IdentityCertificate(Certificate):
                 break
         return loc
 
+    def wireDecode(self, buf, wireFormat = None):
+        """
+        Data.wireDecode does not call setName, so we must make sure to update our public key name
+        """
+        Certificate.wireDecode(self, buf, wireFormat)
+        self._setPublicKeyName()
+
     def getPublicKeyName(self):
         """
         :return: The name of the public key associated with this certificate
@@ -97,7 +106,7 @@ class IdentityCertificate(Certificate):
         if (not self._isCorrectName(name)):
             raise SecurityException("Bad format for identity certificate name!")
 
-        Data.setName(name)
+        Data.setName(self, name)
         self._setPublicKeyName()
 
     def _setPublicKeyName(self):
@@ -113,6 +122,8 @@ class IdentityCertificate(Certificate):
         :param certName: The certificate name
         :type certName: Name
         """
+        if certName.size() == 0:
+            return Name()
 
         certComponentIdx = cls._idxOfNameComponent(certName, "ID-CERT")
 
