@@ -216,12 +216,19 @@ class Certificate(Data):
         """
         return self._notAfter
 
-    def getPublicKey(self):
+    def getPublicKeyInfo(self):
         """
         :return: The PublicKey object stored in the certificate.
         :rtype: PublicKey
         """
         return self._publicKey
+
+    def setPublicKeyInfo(self, publicKey):
+        """
+        Assign a new public key to the certificate.
+        :param publicKey: The new public key
+        :type publicKey: PublicKey
+        """
 
     def getSubjectDescriptions(self):
         """
