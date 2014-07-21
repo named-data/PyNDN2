@@ -91,30 +91,11 @@ class SelfVerifyPolicyManager(PolicyManager):
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
-        signature = data.getSignature()
-        if not isinstance(signature, Sha256WithRsaSignature):
-            raise SecurityException(
-           "SelfVerifyPolicyManager: Signature is not Sha256WithRsaSignature.")
-
-        if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME and 
-            self._identityStorage != None):
-            # Assume the key name is a certificate name.
-            publicKeyDer = self._identityStorage.getKey(
-              IdentityCertificate.certificateNameToPublicKeyName(
-                signature.getKeyLocator().getKeyName()))
-            if publicKeyDer.isNull():
-                # Can't find the public key with the name.
-                onVerifyFailed(data)
-
-            # wireEncode returns the cached encoding if available.
-            if self._verifySha256WithRsaSignature(
-              signature, data.wireEncode(), publicKeyDer):
-                onVerified(data)
-            else:
-                onVerifyFailed(data) 
+        # wireEncode returns the cached encoding if available.
+        if self._verify(data.getSignature(), data.wireEncode()):
+            onVerified(data)
         else:
-            # Can't find a key to verify.
-            onVerifyFailed(data)
+            onVerifyFailed(data) 
 
         # No more steps, so return a None.
         return None
@@ -141,6 +122,46 @@ class SelfVerifyPolicyManager(PolicyManager):
         :rtype: Name
         """
         return Name()
+
+    def _verify(self, signatureInfo, signedBlob):
+        """
+        Check the type of signatureInfo to get the KeyLocator. Look in the
+        IdentityStorage for the public key with the name in the KeyLocator and
+        use it to verify the signedBlob. If the public key can't be found,
+        return false. (This is a generalized method which can verify both a Data
+        packet and an interest.)
+
+        :param Signature signatureInfo: An object of a subclass of Signature,
+          e.g. Sha256WithRsaSignature.
+        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
+          verify.
+        :return: True if the signature verifies, False if not.
+        :rtype: boolean
+        """
+        signature = signatureInfo
+        if not isinstance(signature, Sha256WithRsaSignature):
+            raise SecurityException(
+           "SelfVerifyPolicyManager: Signature is not Sha256WithRsaSignature.")
+
+        if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME and
+            self._identityStorage != None):
+            # Assume the key name is a certificate name.
+            publicKeyDer = self._identityStorage.getKey(
+              IdentityCertificate.certificateNameToPublicKeyName(
+                signature.getKeyLocator().getKeyName()))
+            if publicKeyDer.isNull():
+                # Can't find the public key with the name.
+                return False
+
+            # wireEncode returns the cached encoding if available.
+            if self._verifySha256WithRsaSignature(
+              signature, signedBlob, publicKeyDer):
+                return True
+            else:
+                return False
+        else:
+            # Can't find a key to verify.
+            return False
 
     @staticmethod
     def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
