@@ -44,6 +44,8 @@ class Interest(object):
             self._nonce = value.getNonce()
             self._scope = value._scope
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
+            self._defaultWireEncoding = value.getDefaultWireEncoding()
+            self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
             self._name = ChangeCounter(Name(value) if type(value) is Name 
                                                    else Name())
@@ -57,8 +59,11 @@ class Interest(object):
             self._nonce = Blob()
             self._scope = None
             self._interestLifetimeMilliseconds = None            
+            self._defaultWireEncoding = SignedBlob()
+            self._defaultWireEncodingFormat = None
         
         self._getNonceChangeCount = 0
+        self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
 
     def getName(self):
@@ -224,7 +229,9 @@ class Interest(object):
     
     def wireEncode(self, wireFormat = None):
         """
-        Encode this Interest for a particular wire format.
+        Encode this Interest for a particular wire format. If wireFormat is the
+        default wire format, also set the defaultWireEncoding field to the
+        encoded result.
         
         :param wireFormat: (optional) A WireFormat object used to encode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
@@ -236,17 +243,32 @@ class Interest(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
+        if (not self.getDefaultWireEncoding().isNull() and
+            self.getDefaultWireEncodingFormat() == wireFormat):
+            # We already have an encoding in the desired format.
+            return self.getDefaultWireEncoding()
+
         (encoding, signedPortionBeginOffset, signedPortionEndOffset) = \
           wireFormat.encodeInterest(self)
-        return SignedBlob(
+        wireEncoding = SignedBlob(
           encoding, signedPortionBeginOffset, signedPortionEndOffset)
+
+        if wireFormat == WireFormat.getDefaultWireFormat():
+            # This is the default wire encoding.
+            self._setDefaultWireEncoding(
+              wireEncoding, WireFormat.getDefaultWireFormat())
+        return wireEncoding
     
     def wireDecode(self, input, wireFormat = None):
         """
         Decode the input using a particular wire format and update this Interest.
+        If wireFormat is the default wire format, also set the
+        defaultWireEncoding to another pointer to the input.
         
-        :param input: The array with the bytes to decode.
-        :type input: An array type with int elements
+        :param input: The array with the bytes to decode. If input is not a
+          Blob, then copy the bytes to save the defaultWireEncoding (otherwise
+          take another pointer to the same Blob).
+        :type input: A Blob or an array type with int elements
         :param wireFormat: (optional) A WireFormat object used to decode this 
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
@@ -255,9 +277,20 @@ class Interest(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a blob, get its buf().
+        # If input is a Blob, get its buf().
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        wireFormat.decodeInterest(self, decodeBuffer)
+        (signedPortionBeginOffset, signedPortionEndOffset) = \
+          wireFormat.decodeInterest(self, decodeBuffer)
+
+        if wireFormat == WireFormat.getDefaultWireFormat():
+            # This is the default wire encoding.  In the Blob constructor, set
+            #   copy true, but if input is already a Blob, it won't copy.
+            self._setDefaultWireEncoding(SignedBlob(
+                Blob(input, True),
+                signedPortionBeginOffset, signedPortionEndOffset),
+            WireFormat.getDefaultWireFormat())
+        else:
+            self._setDefaultWireEncoding(SignedBlob(), None)
         
     def toUri(self):
         """
@@ -327,6 +360,34 @@ class Interest(object):
             return False
 
         return True
+
+    def getDefaultWireEncoding(self):
+        """
+        Return the default wire encoding, which was encoded with
+        getDefaultWireEncodingFormat().
+
+        :return: The default wire encoding, whose isNull() may be true if there
+          is no default wire encoding.
+        :rtype: SignedBlob
+        """
+        if self._getDefaultWireEncodingChangeCount != self.getChangeCount():
+            # The values have changed, so the default wire encoding is
+            # invalidated.
+            self._defaultWireEncoding = SignedBlob()
+            self._defaultWireEncodingFormat = None
+            self._getDefaultWireEncodingChangeCount = self.getChangeCount()
+
+        return self._defaultWireEncoding
+
+    def getDefaultWireEncodingFormat(self):
+        """
+        Get the WireFormat which is used by getDefaultWireEncoding().
+
+        :return: The WireFormat, which is only meaningful if the
+          getDefaultWireEncoding() is not isNull().
+        :rtype: WireFormat
+        """
+        return self._defaultWireEncodingFormat
         
     def getChangeCount(self):
         """
@@ -345,4 +406,12 @@ class Interest(object):
             self._changeCount += 1
 
         return self._changeCount
+
+    def _setDefaultWireEncoding(
+          self, defaultWireEncoding, defaultWireEncodingFormat):
+        self._defaultWireEncoding = defaultWireEncoding
+        self._defaultWireEncodingFormat = defaultWireEncodingFormat
+        # Set _getDefaultWireEncodingChangeCount so that the next call to
+        # getDefaultWireEncoding() won't clear _defaultWireEncoding.
+        self._getDefaultWireEncodingChangeCount = self.getChangeCount()
         
