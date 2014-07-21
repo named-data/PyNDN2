@@ -128,7 +128,7 @@ class Tlv0_1WireFormat(WireFormat):
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
-        self._decodeName(interest.getName(), decoder)
+        offsets = self._decodeName(interest.getName(), decoder)
         if decoder.peekType(Tlv.Selectors, endOffset):
             self._decodeSelectors(interest, decoder)
         # Require a Nonce, but don't force it to be 4 bytes.
@@ -143,6 +143,7 @@ class Tlv0_1WireFormat(WireFormat):
         interest.setNonce(nonce)
 
         decoder.finishNestedTlvs(endOffset)
+        return offsets
         
     def encodeData(self, data):
         """
@@ -436,15 +437,12 @@ class Tlv0_1WireFormat(WireFormat):
         
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
         signedPortionBeginOffset = decoder.getOffset()
+        # In case there are no components, set signedPortionEndOffset arbitrarily.
         signedPortionEndOffset = signedPortionBeginOffset
 
         while decoder.getOffset() < endOffset:
-            saveOffset = decoder.getOffset()
+            signedPortionEndOffset = decoder.getOffset()
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
-            
-            if decoder.getOffset() >= endOffset:
-                # This was the last component.
-                signedPortionEndOffset = saveOffset
    
         decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
