@@ -106,7 +106,9 @@ class SelfVerifyPolicyManager(PolicyManager):
                 # Can't find the public key with the name.
                 onVerifyFailed(data)
 
-            if self._verifySha256WithRsaSignature(data, publicKeyDer):
+            # wireEncode returns the cached encoding if available.
+            if self._verifySha256WithRsaSignature(
+              signature, data.wireEncode(), publicKeyDer):
                 onVerified(data)
             else:
                 onVerifyFailed(data) 
@@ -141,27 +143,19 @@ class SelfVerifyPolicyManager(PolicyManager):
         return Name()
 
     @staticmethod
-    def _verifySha256WithRsaSignature(data, publicKeyDer):
+    def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
         """
-        Verify the signature on the data packet using the given public key. If 
-        there is no data.getDefaultWireEncoding(), this calls data.wireEncode() 
-        to set it.
+        Verify the signature on the SignedBlob using the given public key.
         TODO: Move this general verification code to a more central location.
  
-        :param Data data: The data packet with the signed portion and the 
-          signature to verify. The data packet must have a 
-          Sha256WithRsaSignature.
+        :param Sha256WithRsaSignature signature: The Sha256WithRsaSignature.
+        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
+        verify.
         :param Blob publicKeyDer: The DER-encoded public key used to verify the 
           signature.
         :return: True if the signature verifies, False if not.
         :rtype: boolean
-        :raises SecurityException: if data does not have a 
-          Sha256WithRsaSignature.
         """
-        signature = data.getSignature()
-        if not type(signature) is Sha256WithRsaSignature:
-          raise RuntimeError("signature is not Sha256WithRsaSignature.")
-
         # Get the public key.
         if _PyCryptoUsesStr:
             # PyCrypto in Python 2 requires a str.
@@ -172,7 +166,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         
         # Get the bytes to verify.
         # wireEncode returns the cached encoding if available.
-        signedPortion = data.wireEncode().toSignedBuffer()
+        signedPortion = signedBlob.toSignedBuffer()
         # Sign the hash of the data.
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
