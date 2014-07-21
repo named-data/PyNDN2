@@ -146,7 +146,7 @@ class WireFormat(object):
     
     def decodeControlParameters(self, controlParameters, input):
         """
-        Decode input as an controlParameters and set the fields of the 
+        Decode input as a controlParameters and set the fields of the 
         controlParameters object. Your derived class should override.
         
         :param ControlParameters controlParameters: The ControlParameters object 
@@ -171,6 +171,23 @@ class WireFormat(object):
           override.
         """
         raise RuntimeError("encodeSignatureInfo is not implemented")
+
+    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue):
+        """
+        Decode signatureInfo as a signature info and signatureValue as the
+        related SignatureValue, and return a new object which is a subclass of
+        Signature. Your derived class should override.
+
+        :param signatureInfo: The array with the signature info input buffer to
+          decode.
+        :type signatureInfo: An array type with int elements
+        :param signatureValue: The array with the signature value input buffer
+          to decode.
+        :type signatureValue: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeSignatureInfoAndValue is not implemented")
     
     def encodeSignatureValue(self, signature):
         """

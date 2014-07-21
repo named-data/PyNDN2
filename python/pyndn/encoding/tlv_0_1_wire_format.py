@@ -347,7 +347,40 @@ class Tlv0_1WireFormat(WireFormat):
         self._encodeSignatureSha256WithRsa(signature, encoder)
     
         return Blob(encoder.getOutput(), False)
-    
+
+    # SignatureHolder is used by decodeSignatureInfoAndValue.
+    class SignatureHolder(object):
+        def setSignature(self, signature):
+            self._signature = signature
+        def getSignature(self):
+            return self._signature
+
+    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue):
+        """
+        Decode signatureInfo as a signature info and signatureValue as the
+        related SignatureValue, and return a new object which is a subclass of
+        Signature.
+
+        :param signatureInfo: The array with the signature info input buffer to
+          decode.
+        :type signatureInfo: An array type with int elements
+        :param signatureValue: The array with the signature value input buffer
+          to decode.
+        :type signatureValue: An array type with int elements
+        """
+        # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
+        signatureHolder = self.SignatureHolder()
+        decoder = TlvDecoder(signatureInfo)
+        self._decodeSignatureInfo(signatureHolder, decoder)
+
+        decoder = TlvDecoder(signatureValue)
+        # TODO: The library needs to handle other signature types than
+        #   SignatureSha256WithRsa.
+        signatureHolder.getSignature().setSignature(
+          Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
+
+        return signatureHolder.getSignature()
+
     def encodeSignatureValue(self, signature):
         """
         Encode the signatureValue in the Signature object as an NDN-TLV 
