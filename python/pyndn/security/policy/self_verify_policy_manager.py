@@ -20,9 +20,9 @@
 """
 This module defines the SelfVerifyPolicyManager class which implements a 
 PolicyManager to look in the IdentityStorage for the public key with the name in 
-the KeyLocator (if available) and use it to verify the data packet, without 
-searching a certificate chain. If the public key can't be found, the 
-verification fails.
+the KeyLocator (if available) and use it to verify the data packet or signed
+interest, without searching a certificate chain. If the public key can't be
+found, the verification fails.
 """
 
 import sys
@@ -30,7 +30,10 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from pyndn.name import Name
+from pyndn.interest import Interest
+from pyndn.data import Data
 from pyndn.util import Blob
+from pyndn.encoding import WireFormat
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
@@ -51,51 +54,76 @@ class SelfVerifyPolicyManager(PolicyManager):
     def __init__(self, identityStorage = None):
         self._identityStorage = identityStorage
         
-    def skipVerifyAndTrust(self, data):
+    def skipVerifyAndTrust(self, dataOrInterest):
         """
         Never skip verification.
 
-        :param Data data: The received data packet.
+        :param dataOrInterest: The received data packet or interest.
+        :type dataOrInterest: Data or Interest
         :return: False.
         :rtype: boolean
         """
         return False
 
-    def requireVerify(self, data):
+    def requireVerify(self, dataOrInterest):
         """
         Always return true to use the self-verification rule for the received 
-        data.
+        data packet or signed interest.
 
-        :param Data data: The received data packet.
+        :param dataOrInterest: The received data packet or interest.
+        :type dataOrInterest: Data or Interest
         :return: True.
         :rtype: boolean
         """
         return True
 
-    def checkVerificationPolicy(self, data, stepCount, onVerified, 
-                                onVerifyFailed):
+    def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
+                                onVerifyFailed, wireFormat = None):
         """
         Look in the IdentityStorage for the public key with the name in the 
         KeyLocator (if available) and use it to verify the data packet. If the 
         public key can't be found, call onVerifyFailed.
 
-        :param Data data: The Data object with the signature to check.
-        :param int stepCount: The number of verification steps that have been 
-          done, used to track the verification progress. (stepCount is ignored.)
-        :param onVerified: If the signature is verified, this calls 
-          onVerified(data).
+        :param dataOrInterest: The Data object or interest with the signature to
+          check.
+        :type dataOrInterest: Data or Interest
+        :param int stepCount: The number of verification steps that have been
+          done, used to track the verification progress.
+        :param onVerified: If the signature is verified, this calls
+          onVerified(dataOrInterest).
         :type onVerified: function object
-        :param onVerifyFailed: If the signature check fails or can't find the 
-          public key, this calls onVerifyFailed(data).
+        :param onVerifyFailed: If the signature check fails, this calls
+          onVerifyFailed(dataOrInterest).
         :type onVerifyFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
-        # wireEncode returns the cached encoding if available.
-        if self._verify(data.getSignature(), data.wireEncode()):
-            onVerified(data)
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        if isinstance(dataOrInterest, Data):
+            data = dataOrInterest
+            # wireEncode returns the cached encoding if available.
+            if self._verify(data.getSignature(), data.wireEncode()):
+                onVerified(data)
+            else:
+                onVerifyFailed(data)
+        elif isinstance(dataOrInterest, Interest):
+            interest = dataOrInterest
+            # Decode the last two name components of the signed interest
+            signature = wireFormat.decodeSignatureInfoAndValue(
+               interest.getName().get(-2).getValue().buf(),
+               interest.getName().get(-1).getValue().buf())
+
+            # wireEncode returns the cached encoding if available.
+            if self._verify(signature, interest.wireEncode()):
+                onVerified(interest)
+            else:
+                onVerifyFailed(interest)
         else:
-            onVerifyFailed(data) 
+            raise RuntimeError(
+              "checkVerificationPolicy: unrecognized type for dataOrInterest")
 
         # No more steps, so return a None.
         return None
