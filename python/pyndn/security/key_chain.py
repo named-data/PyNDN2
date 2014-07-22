@@ -381,9 +381,7 @@ class KeyChain(object):
         onVerifyFailed. We use callback functions because verify may fetch 
         information to check the signature.
         
-        :param Data data: The Data object with the signature to check. It is an 
-          error if data does not have a wireEncoding. To set the wireEncoding, 
-          you can call data.wireDecode.
+        :param Data data: The Data object with the signature to check.
         :param onVerified: If the signature is verified, this calls 
           onVerified(data).
         :type onVerified: function object
@@ -405,6 +403,41 @@ class KeyChain(object):
             onVerified(data)
         else:
             onVerifyFailed(data)
+
+    def verifyInterest(
+      self, interest, onVerified, onVerifyFailed, stepCount = 0,
+      wireFormat = None):
+        """
+        Check the signature on the signed interest and call either onVerify or
+        onVerifyFailed. We use callback functions because verify may fetch
+        information to check the signature.
+
+        :param Interest interest: The interest with the signature to check.
+        :param onVerified: If the signature is verified, this calls
+          onVerified(interest).
+        :type onVerified: function object
+        :param onVerifyFailed: If the signature check fails or can't find the
+          public key, this calls onVerifyFailed(interest).
+        :type onVerifyFailed: function object
+        :param int stepCount: (optional) The number of verification steps that
+          have been done. If omitted, use 0.
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        if self._policyManager.requireVerify(interest):
+            nextStep = self._policyManager.checkVerificationPolicy(
+              interest, stepCount, onVerified, onVerifyFailed, wireFormat)
+            if nextStep != None:
+                self._face.expressInterest(
+                  nextStep.interest, self._makeOnCertificateData(nextStep),
+                  self._makeOnCertificateInterestTimeout(
+                    nextStep.retry, onVerifyFailed, interest, nextStep))
+        elif self._policyManager.skipVerifyAndTrust(interest):
+            onVerified(interest)
+        else:
+            onVerifyFailed(interest)
             
     #
     # Encrypt/Decrypt

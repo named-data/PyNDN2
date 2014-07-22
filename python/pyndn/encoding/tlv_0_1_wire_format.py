@@ -128,7 +128,7 @@ class Tlv0_1WireFormat(WireFormat):
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
-        self._decodeName(interest.getName(), decoder)
+        offsets = self._decodeName(interest.getName(), decoder)
         if decoder.peekType(Tlv.Selectors, endOffset):
             self._decodeSelectors(interest, decoder)
         # Require a Nonce, but don't force it to be 4 bytes.
@@ -143,6 +143,7 @@ class Tlv0_1WireFormat(WireFormat):
         interest.setNonce(nonce)
 
         decoder.finishNestedTlvs(endOffset)
+        return offsets
         
     def encodeData(self, data):
         """
@@ -346,7 +347,40 @@ class Tlv0_1WireFormat(WireFormat):
         self._encodeSignatureSha256WithRsa(signature, encoder)
     
         return Blob(encoder.getOutput(), False)
-    
+
+    # SignatureHolder is used by decodeSignatureInfoAndValue.
+    class SignatureHolder(object):
+        def setSignature(self, signature):
+            self._signature = signature
+        def getSignature(self):
+            return self._signature
+
+    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue):
+        """
+        Decode signatureInfo as a signature info and signatureValue as the
+        related SignatureValue, and return a new object which is a subclass of
+        Signature.
+
+        :param signatureInfo: The array with the signature info input buffer to
+          decode.
+        :type signatureInfo: An array type with int elements
+        :param signatureValue: The array with the signature value input buffer
+          to decode.
+        :type signatureValue: An array type with int elements
+        """
+        # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
+        signatureHolder = self.SignatureHolder()
+        decoder = TlvDecoder(signatureInfo)
+        self._decodeSignatureInfo(signatureHolder, decoder)
+
+        decoder = TlvDecoder(signatureValue)
+        # TODO: The library needs to handle other signature types than
+        #   SignatureSha256WithRsa.
+        signatureHolder.getSignature().setSignature(
+          Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
+
+        return signatureHolder.getSignature()
+
     def encodeSignatureValue(self, signature):
         """
         Encode the signatureValue in the Signature object as an NDN-TLV 
@@ -436,15 +470,12 @@ class Tlv0_1WireFormat(WireFormat):
         
         endOffset = decoder.readNestedTlvsStart(Tlv.Name)        
         signedPortionBeginOffset = decoder.getOffset()
+        # In case there are no components, set signedPortionEndOffset arbitrarily.
         signedPortionEndOffset = signedPortionBeginOffset
 
         while decoder.getOffset() < endOffset:
-            saveOffset = decoder.getOffset()
+            signedPortionEndOffset = decoder.getOffset()
             name.append(decoder.readBlobTlv(Tlv.NameComponent))
-            
-            if decoder.getOffset() >= endOffset:
-                # This was the last component.
-                signedPortionEndOffset = saveOffset
    
         decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)

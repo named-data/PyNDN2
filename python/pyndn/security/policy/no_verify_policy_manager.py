@@ -21,43 +21,48 @@ from pyndn.security.policy.policy_manager import PolicyManager
 
 class NoVerifyPolicyManager(PolicyManager):
 
-    def skipVerifyAndTrust(self, data):
+    def skipVerifyAndTrust(self, dataOrInterest):
         """
         Override to always skip verification and trust as valid.
 
-        :param Data data: The received data packet.
+        :param dataOrInterest: The received data packet or interest.
+        :type dataOrInterest: Data or Interest
         :return: True.
         :rtype: boolean
         """
         return True
 
-    def requireVerify(self, data):
+    def requireVerify(self, dataOrInterest):
         """
-        Override to return false for no verification rule for the received data.
+        Override to return false for no verification rule for the received data
+        or signed interest.
 
-        :param Data data: The received data packet.
+        :param dataOrInterest: The received data packet or interest.
+        :type dataOrInterest: Data or Interest
         :return: False.
         :rtype: boolean
         """
         return False
 
-    def checkVerificationPolicy(self, data, stepCount, onVerified, 
-                                onVerifyFailed):
+    def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
+                                onVerifyFailed, wireFormat = None):
         """
         Override to call onVerified(data) and to indicate no further 
         verification step.
 
-        :param Data data: The Data object with the signature to check.
+        :param dataOrInterest: The Data object or interest with the signature
+          (to ignore).
+        :type dataOrInterest: Data or Interest
         :param int stepCount: The number of verification steps that have been 
           done, used to track the verification progress. (stepCount is ignored.)
-        :param onVerified: This does override to call onVerified(data).
+        :param onVerified: This does override to call onVerified(dataOrInterest).
         :type onVerified: function object
         :param onVerifyFailed: Override to ignore this.
         :type onVerifyFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
-        onVerified(data)
+        onVerified(dataOrInterest)
         return None
           
     def checkSigningPolicy(self, dataName, certificateName):

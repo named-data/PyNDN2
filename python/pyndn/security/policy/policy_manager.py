@@ -24,50 +24,54 @@ subclass.
 """
 
 class PolicyManager(object):
-    def skipVerifyAndTrust(self, data):
+    def skipVerifyAndTrust(self, dataOrInterest):
         """
-        Check if the received data packet can escape from verification and be 
-        trusted as valid.
+        Check if the received data packet or signed interest can escape from
+        verification and be trusted as valid.
         Your derived class should override.
 
-        :param Data data: The received data packet.
-        :return: True if the data does not need to be verified to be trusted as 
-          valid, otherwise False.
+        :param dataOrInterest: The received data packet or interest.
+        :type dataOrInterest: Data or Interest
+        :return: True if the data or interest does not need to be verified to be
+          trusted as valid, otherwise False.
         :rtype: boolean
         :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("skipVerifyAndTrust is not implemented")
 
-    def requireVerify(self, data):
+    def requireVerify(self, dataOrInterest):
         """
         Check if this PolicyManager has a verification rule for the received 
-        data.
+        data packet or signed interest.
         Your derived class should override.
 
-        :param Data data: The received data packet.
-        :return: True if the data must be verified, otherwise False.
+        :param dataOrInterest: The received data packet or interest.
+        :type dataOrInterest: Data or Interest
+        :return: True if the data or interest must be verified, otherwise False.
         :rtype: boolean
         :raises RuntimeError: for unimplemented if the derived class does not 
           override.
         """
         raise RuntimeError("requireVerify is not implemented")
 
-    def checkVerificationPolicy(self, data, stepCount, onVerified, 
-                                onVerifyFailed):
+    def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
+                                onVerifyFailed, wireFormat = None):
         """
         Check whether the received data packet complies with the verification 
         policy, and get the indication of the next verification step.
         Your derived class should override.
 
-        :param Data data: The Data object with the signature to check.
+        :param dataOrInterest: The Data object or interest with the signature to
+          check.
+        :type dataOrInterest: Data or Interest
         :param int stepCount: The number of verification steps that have been 
           done, used to track the verification progress.
         :param onVerified: If the signature is verified, this calls 
-          onVerified(data).
+          onVerified(dataOrInterest).
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails, this calls 
-          onVerifyFailed(data).
+          onVerifyFailed(dataOrInterest).
         :type onVerifyFailed: function object
         :return: The indication of next verification step, or None if there is 
           no further step.
