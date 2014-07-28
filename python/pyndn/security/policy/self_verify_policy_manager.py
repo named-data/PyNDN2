@@ -181,7 +181,6 @@ class SelfVerifyPolicyManager(PolicyManager):
                 # Can't find the public key with the name.
                 return False
 
-            # wireEncode returns the cached encoding if available.
             if self._verifySha256WithRsaSignature(
               signature, signedBlob, publicKeyDer):
                 return True
