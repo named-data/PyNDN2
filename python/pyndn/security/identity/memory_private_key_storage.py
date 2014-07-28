@@ -37,7 +37,7 @@ from pyndn.security.identity.private_key_storage import PrivateKeyStorage
 class MemoryPrivateKeyStorage(PrivateKeyStorage):
     def __init__(self):
         super(MemoryPrivateKeyStorage, self).__init__()
-        # The key is the keyName.toUri(). The value is ecurity.certificate.PublicKey.
+        # The key is the keyName.toUri(). The value is security.certificate.PublicKey.
         self._publicKeyStore = {}
         # The key is the keyName.toUri(). The value is self.PrivateKey.
         self._privateKeyStore = {}
