@@ -181,11 +181,8 @@ class SelfVerifyPolicyManager(PolicyManager):
                 # Can't find the public key with the name.
                 return False
 
-            if self._verifySha256WithRsaSignature(
-              signature, signedBlob, publicKeyDer):
-                return True
-            else:
-                return False
+            return self._verifySha256WithRsaSignature(
+              signature, signedBlob, publicKeyDer)
         else:
             # Can't find a key to verify.
             return False
