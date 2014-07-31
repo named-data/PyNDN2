@@ -51,8 +51,9 @@ class Certificate(Data):
         :return: True if the certificate cannot be used yet
         :rtype: boolean
         """
+
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
-        if secondsSince1970 < self._notBefore:
+        if secondsSince1970 < self._notBefore/1000:
             return true
         return false
 
@@ -64,7 +65,7 @@ class Certificate(Data):
         :rtype: boolean
         """
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
-        if secondsSince1970 > self._notAfter:
+        if secondsSince1970 > self._notAfter/1000:
             return true
         return false
 
@@ -174,7 +175,7 @@ class Certificate(Data):
         # 1st: validity info
         validityChildren = rootChildren[0].getChildren()
         self._notBefore = validityChildren[0].toVal()
-        self._notAfter = validityChildren[0].toVal()
+        self._notAfter = validityChildren[1].toVal()
 
         # 2nd: subjectList
         subjectChildren = rootChildren[1].getChildren()
@@ -230,12 +231,19 @@ class Certificate(Data):
         """
         return self._publicKey
 
+    def setNotBefore(self, notBefore):
+        self._notBefore = notBefore
+
+    def setNotAfter(self, notAfter):
+        self._notAfter = notAfter
+
     def setPublicKeyInfo(self, publicKey):
         """
         Assign a new public key to the certificate.
         :param publicKey: The new public key
         :type publicKey: PublicKey
         """
+        self._publicKey = publicKey
 
     def getSubjectDescriptions(self):
         """
