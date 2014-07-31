@@ -182,7 +182,7 @@ class MemoryIdentityStorage(IdentityStorage):
               "No corresponding Key record for certificate! " + 
               keyName.toUri() + " " + certificateName.toUri())
 
-        # Check if the certificate has already exists.
+        # Check if the certificate already exists.
         if self.doesCertificateExist(certificateName):
             raise SecurityException("Certificate has already been installed!")
 

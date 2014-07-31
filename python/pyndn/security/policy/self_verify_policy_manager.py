@@ -81,8 +81,8 @@ class SelfVerifyPolicyManager(PolicyManager):
                                 onVerifyFailed, wireFormat = None):
         """
         Look in the IdentityStorage for the public key with the name in the 
-        KeyLocator (if available) and use it to verify the data packet. If the 
-        public key can't be found, call onVerifyFailed.
+        KeyLocator (if available) and use it to verify the data packet or
+        signed interest. If the public key can't be found, call onVerifyFailed.
 
         :param dataOrInterest: The Data object or interest with the signature to
           check.
@@ -181,12 +181,8 @@ class SelfVerifyPolicyManager(PolicyManager):
                 # Can't find the public key with the name.
                 return False
 
-            # wireEncode returns the cached encoding if available.
-            if self._verifySha256WithRsaSignature(
-              signature, signedBlob, publicKeyDer):
-                return True
-            else:
-                return False
+            return self._verifySha256WithRsaSignature(
+              signature, signedBlob, publicKeyDer)
         else:
             # Can't find a key to verify.
             return False

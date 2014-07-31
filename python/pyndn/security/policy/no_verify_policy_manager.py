@@ -47,7 +47,7 @@ class NoVerifyPolicyManager(PolicyManager):
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
                                 onVerifyFailed, wireFormat = None):
         """
-        Override to call onVerified(data) and to indicate no further 
+        Override to call onVerified(dataOrInterest) and to indicate no further
         verification step.
 
         :param dataOrInterest: The Data object or interest with the signature
