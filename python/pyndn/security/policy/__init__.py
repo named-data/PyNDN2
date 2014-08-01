@@ -18,7 +18,8 @@
 # A copy of the GNU General Public License is in the file COPYING.
 
 __all__ = ['no_verify_policy_manager', 'policy_manager', 
-           'self_verify_policy_manager', 'validation_request']
+           'self_verify_policy_manager', 'validation_request',
+           'config_policy_manager']
 
 import sys as _sys
 
@@ -26,6 +27,7 @@ try:
     from pyndn.security.policy.no_verify_policy_manager import *
     from pyndn.security.policy.policy_manager import *
     from pyndn.security.policy.self_verify_policy_manager import *
+    from pyndn.security.policy.config_policy_manager import *
     from pyndn.security.policy.validation_request import *
 except ImportError:
     del _sys.modules[__name__]

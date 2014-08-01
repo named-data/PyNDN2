@@ -1,0 +1,413 @@
+
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A copy of the GNU General Public License is in the file COPYING.
+
+import sys
+import os
+
+from pyndn.security.policy.self_verify_policy_manager import SelfVerifyPolicyManager
+from pyndn.security.policy.validation_request import ValidationRequest
+from pyndn.security.certificate.identity_certificate import IdentityCertificate
+from pyndn.security.certificate.public_key import PublicKey
+from pyndn import Name, Data, Interest
+
+from pyndn.util import Blob
+from pyndn.encoding import WireFormat
+from pyndn.key_locator import KeyLocatorType
+from pyndn.security.security_exception import SecurityException
+
+from base64 import b64decode
+
+from pyndn.util.boost_info_parser import BoostInfoParser
+from pyndn.util.ndn_regex import NdnRegexMatcher
+
+
+"""
+This module manages trust according to a configuration file in the 
+Validator Configuration File Format  
+(http://redmine.named-data.net/projects/ndn-cxx/wiki/CommandValidatorConf)
+
+Once a rule is matched, the ConfigPolicyManager looks in the 
+IdentityStorage for the IdentityCertificate matching the name in the KeyLocator 
+and uses its public key to verify the data packet or signed interest. If the 
+certificate can't be found, it is downloaded, verified and installed. A chain
+of certificates will be followed to a maximum depth.
+If the new certificate is accepted, it is used to complete the verification.
+
+The KeyLocators of data packets and signed interests MUST contain a name for 
+verification to succeed.
+"""
+class ConfigPolicyManager(SelfVerifyPolicyManager):
+    """
+    Create a new ConfigPolicyManager which acts on the rules specified 
+    in the configuration file and downloads unknown certificates when necessary. 
+    
+    :param IdentityStorage identityStorage: The IdentityStorage for 
+      looking up the public key. This object must remain valid during the life 
+      of this SelfVerifyPolicyManager. 
+    :param string configFileName: The path to the configuration file containing
+      verification rules.
+    :param int searchDepth: (optional) The maximum number of links to follow 
+      when verifying a certificate chain.
+    """
+    def __init__(self, identityStorage, configFileName, searchDepth=5):
+        super(ConfigPolicyManager, self).__init__()
+        self._identityStorage = identityStorage
+        self._maxDepth = searchDepth
+
+        # stores the fixed-signer certificate name associated with validation rules
+        # so we don't keep loading from files
+        self.certificateCache = {}
+
+        self.config = BoostInfoParser()
+        self.config.read(configFileName)
+
+        self.requiresVerification = True
+
+        self._loadTrustAnchorCertificates()
+
+    def requireVerify(self, dataOrInterest):
+        """
+        If the configuration file contains the trust anchor 'any', 
+        nothing is verified.
+        """
+        return self.requiresVerification
+    
+    def skipVerifyAndTrust(self, dataOrInterest):
+        """
+        If the configuration file contains the trust anchor 'any', 
+        nothing is verified.
+        """
+        return not self.requiresVerification
+
+    def _loadTrustAnchorCertificates(self):
+        """
+        The configuration file allows 'trust anchor' certificates to be preloaded.
+        The certificates may also be loaded from a directory, and if the 'refresh'
+        option is set to an interval, the certificates are reloaded at the 
+        specified interval
+        """
+
+        try:
+            anchors = self.config["validator/trust-anchor"]
+        except KeyError:
+            return 
+
+        for anchor in anchors:
+            typeName = anchor["type"][0].getValue()
+            if typeName == 'file':
+                certID = anchor["file-name"][0].getValue()
+                isPath = True
+            elif typeName == 'base64':
+                certID = anchor["base64-string"][0].getValue()
+                isPath = False
+            elif typeName == "dir":
+                pass
+            elif typeName == "any":
+                # this disables all security!
+                self.requiresVerification = False
+                break
+
+            self._lookupCertificate(certID, isPath)
+
+    def _checkSignatureMatch(self, signatureName, objectName, rule):
+        """
+        Once a rule is found to match data or a signed interest, the name in the 
+        KeyLocator must satisfy the condition in the 'checker' section of the rule,
+        else the data or interest is rejected.
+
+        :param Name signatureName: The certificate name from the KeyLocator .
+        :param Name objectName: The name of the data packet or interest. In the 
+          case of signed interests, this excludes the timestamp, nonce and signature 
+          components.
+        :param BoostInfoTree rule: The rule from the configuration file that matches
+          the data or interest.
+
+        """
+        checker = rule['checker'][0]
+        checkerType = checker['type'][0].getValue()
+        if checkerType == 'fixed-signer':
+            signerInfo = checker['signer'][0]
+            signerType = signerInfo['type'][0].getValue()
+            if signerType == 'file':
+                cert = self._lookupCertificate(signerInfo['file-name'][0].getValue(), True)
+            elif signerType == 'base64':
+                cert = self._lookupCertificate(signerInfo['base64-string'][0].getValue(), False)
+            else:
+                return False
+            if cert is None:
+                return False
+            else:
+                return cert.getName().equals(signatureName)
+        elif checkerType == 'hierarchical':
+            # this just means the data/interest name has the signing identity as a prefix
+            # that means everything before 'ksk-?' in the key name
+            identityRegex = '^([^<KEY>]*)<KEY>(<>*)<ksk-.+><ID-CERT>'
+            identityMatch = NdnRegexMatcher.match(identityRegex, signatureName)
+            if identityMatch is not None:
+                identityPrefix = Name(identityMatch.group(1)).append(Name(identityMatch.group(2)))
+                return self._matchesRelation(objectName, identityPrefix, 'is-prefix-of')
+            else:
+                return False
+        elif checkerType == 'customized':
+            keyLocatorInfo = checker['key-locator'][0]
+            # not checking type - only name is supported
+
+            # is this a simple relation?
+            try:
+                relationType = keyLocatorInfo['relation'][0].getValue()
+            except KeyError:
+                pass
+            else:
+                matchName = Name(keyLocatorInfo['name'][0].getValue())
+                return self._matchesRelation(objectName, matchName, relationType)
+
+            # is this a simple regex?
+            try:
+                keyRegex = keyLocatorInfo['regex'][0].getValue()
+            except KeyError:
+                pass
+            else:
+                return NdnRegexMatcher.match(regex, name) is not None
+
+            # is this a hyper-relation?
+            try:
+                hyperRelation = keyLocatorInfo['hyper-relation'][0]
+            except KeyError:
+                pass
+            else:
+                try:
+                    keyRegex = hyperRelation['k-regex'][0].getValue()
+                    keyMatch = NdnRegexMatcher.match(keyRegex, signatureName)
+                    keyExpansion = hyperRelation['k-expand'][0].getValue()
+                    keyMatchPrefix = keyMatch.expand(keyExpansion)
+
+                    nameRegex = hyperRelation['p-regex'][0].getValue()
+                    nameMatch = NdnRegexMatcher.match(nameRegex, objectName)
+                    nameExpansion = hyperRelation['p-expand'][0].getValue()
+                    nameMatchStr = nameMatch.expand(nameExpansion)
+
+                    relationType = hyperRelation['h-relation'][0].getValue()
+
+                    return self._matchesRelation(Name(nameMatchStr), Name(keyMatchPrefix), relationType)
+                except:
+                    pass 
+
+        # unknown type
+        return False
+
+    def _lookupCertificate(self, certID, isPath):
+        """
+        This looks up certificates specified as base64-encoded data or file names. 
+        These are cached by filename or encoding to avoid repeated reading of files
+        or decoding.
+        """
+        try:
+            try:
+                certUri = self.certificateCache[certID]
+            except KeyError:
+                if isPath:
+                    cert = self._identityStorage.loadIdentityCertificateFromFile(certID)
+                else:
+                    certData = b64decode(certID)
+                    cert = IdentityCertificate()
+                    cert.wireDecode(certData)
+
+                self.certificateCache[certID] = cert.getName().toUri()
+                try:
+                    self._identityStorage.addCertificate(cert)
+                except SecurityException:
+                    #already exists? it's okay
+                    pass
+            else:
+                cert = self._identityStorage.getCertificate(Name(certUri))
+
+            return cert
+        except: 
+            return None
+        
+    def _findMatchingRule(self, objName, matchType):
+        """
+        Search the configuration file for the first rule that matches the data 
+        or signed interest name. In the case of interests, the name to match 
+        should exclude the timestamp, nonce, and signature components.
+        :param Name objName: The name to be matched.
+        :param string matchType: The rule type to match, "data" or "interest".
+        """
+        rules = self.config["validator/rule"]
+        for r in rules:
+            if r['for'][0].getValue() == matchType:
+                passed = True
+                try:
+                    filters = r['filter']
+                except KeyError:
+                    # no filters means we pass!
+                    return r
+                else:
+                    for f in filters:
+                        # don't check the type - it can only be name for now
+                        # we need to see if this is a regex or a relation
+                        try:
+                            regex = f['regex'][0].getValue()
+                        except KeyError:
+                            matchRelation = f['relation'][0].getValue()
+                            matchUri = f['name'][0].getValue()
+                            matchName = Name(matchUri)
+                            passed = self._matchesRelation(objName, matchName, matchRelation)
+                        else:
+                            passed =  NdnRegexMatcher.match(regex, objName) is not None
+                        if not passed:
+                            break
+                    if passed:
+                        return r
+
+        return None
+
+    def _matchesRelation(self, name, matchName, matchRelation):
+        """
+        Determines if a name satisfies the relation to another name, which can 
+        be one of:
+            'is-prefix-of' - passes if the name is equal to or has the other 
+               name as a prefix
+            'is-strict-prefix-of' - passes if the name has the other name as a
+               prefix, and is not equal
+            'equal' - passes if the two names are equal
+        """
+        passed = False
+        if matchRelation == 'is-strict-prefix-of':
+            if matchName.size() == name.size():
+                passed = False
+            elif matchName.match(name):
+                passed = True
+        elif matchRelation == 'is-prefix-of':
+            if matchName.match(name):
+                passed = True
+        elif matchRelation == 'equal':
+            if matchName.equals(name):
+                passed = True
+        return passed
+            
+    def _extractSignature(self, dataOrInterest, wireFormat=None):
+        """
+        Extract the signature information from the interest name or from the
+        data packet.
+        :param dataOrInterest: The object whose signature is needed.
+        :type dataOrInterest: Data or Interest
+        :param WireFormat wireFormat: (optional) The wire format used to decode 
+          signature information from the interest name. 
+        """
+        if isinstance(dataOrInterest, Data):
+            return dataOrInterest.getSignature()
+        elif isinstance(dataOrInterest, Interest):
+            if wireFormat is None:
+                # Don't use a default argument since getDefaultWireFormat can change.
+                wireFormat = WireFormat.getDefaultWireFormat()
+            try:
+                signature = wireFormat.decodeSignatureInfoAndValue(
+                   dataOrInterest.getName().get(-2).getValue().buf(),
+                   dataOrInterest.getName().get(-1).getValue().buf())
+            except (IndexError, ValueError):
+                return None
+            return signature
+        return None
+
+    
+    def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
+                                onVerifyFailed, wireFormat = None):
+        """
+        If there is a rule matching the data or interest, and the matching 
+        certificate is missing, download it. If there is no matching rule, 
+        verification fails. Otherwise, verify the signature using the public key
+        in the IdentityStorage.
+
+        :param dataOrInterest: The Data object or interest with the signature to
+          check.
+        :type dataOrInterest: Data or Interest
+        :param int stepCount: The number of verification steps that have been
+          done, used to track the verification progress.
+        :param onVerified: If the signature is verified, this calls
+          onVerified(dataOrInterest).
+        :type onVerified: function object
+        :param onVerifyFailed: If the signature check fails, this calls
+          onVerifyFailed(dataOrInterest).
+        :type onVerifyFailed: function object
+        :return: None for no further step for looking up a certificate chain.
+        :rtype: ValidationRequest
+        """
+
+        if stepCount > self._maxDepth:
+            onVerifyFailed(dataOrInterest)
+            return None
+
+        signature = self._extractSignature(dataOrInterest, wireFormat)
+        # no signature -> fail
+        if signature is None:
+            onVerifyFailed(dataOrInterest)
+            return None
+
+        signatureName = signature.getKeyLocator().getKeyName()
+        # no key name in KeyLocator -> fail
+        if signatureName is None:
+            onVerifyFailed(dataOrInterest)
+            return None
+
+        objectName = dataOrInterest.getName()
+        matchType = "data"
+
+        #for command interests, we need to ignore the last 4 components when matching the name
+        if isinstance(dataOrInterest, Interest):
+            objectName = objectName.getPrefix(-4)
+            matchType = "interest"
+
+        # first see if we can find a rule to match this packet
+        try:
+            matchedRule = self._findMatchingRule(objectName, matchType)
+        except:
+            matchedRule = None
+
+        # no matching rule -> fail
+        if matchedRule is None:
+            onVerifyFailed(dataOrInterest)
+            return None
+
+        signatureMatches = self._checkSignatureMatch(signatureName, objectName, matchedRule)
+        if not signatureMatches:
+            onVerifyFailed(dataOrInterest)
+            return None
+
+        # now finally check that the data or interest was signed correctly
+        # if we don't actually have the certificate yet, create a 
+        # ValidationRequest for it
+        if not self._identityStorage.doesCertificateExist(signatureName):
+            certificateInterest = Interest(signatureName)
+            def onCertificateDownloadComplete(certificate):
+                certificate = IdentityCertificate(certificate)
+                self._identityStorage.addCertificate(certificate)
+                self.checkVerificationPolicy(dataOrInterest, stepCount+1, onVerified, onVerifyFailed)
+
+            nextStep = ValidationRequest(certificateInterest, onCertificateDownloadComplete,
+                    onVerifyFailed, 2, stepCount+1)
+            return nextStep
+        else:
+            # certificate is known, verify the signature
+            if self._verify(signature, dataOrInterest.wireEncode()):
+                onVerified(dataOrInterest)
+            else:
+                onVerifyFailed(dataOrInterest)
+
