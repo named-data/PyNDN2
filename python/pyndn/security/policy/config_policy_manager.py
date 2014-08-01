@@ -69,12 +69,15 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
     :param int searchDepth: (optional) The maximum number of links to follow 
       when verifying a certificate chain.
     """
-    def __init__(self, identityStorage, configFileName, searchDepth=5, graceInterval=3000, keyTimestampTtl=3600000):
+    def __init__(self, identityStorage, configFileName, 
+            searchDepth=5, graceInterval=3000, keyTimestampTtl=3600000,
+            maxTrackedKeys=1000):
         super(ConfigPolicyManager, self).__init__()
         self._identityStorage = identityStorage
         self._maxDepth = searchDepth
         self._keyGraceInterval = graceInterval
         self._keyTimestampTtl = keyTimestampTtl
+        self._maxTrackedKeys = 1000
 
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
@@ -356,6 +359,57 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
             return signature
         return None
 
+    def _interestTimestampIsFresh(self, keyName, timestamp):
+        """
+        Determine whether the timestamp from the interest is newer than the last use
+        of this key, or within the grace interval on first use.
+
+        :param Name keyName: The name of the public key used to sign the interest.
+        :paramt int timestamp: The timestamp extracted from the interest name.
+        """
+        try:
+            lastTimestamp = self._keyTimestamps[keyName.toUri]
+        except KeyError:
+            now = time.time()
+            notBefore = now - self._keyGraceInterval
+            notAfter = now + self._keyGraceInterval
+            return timestamp > notBefore and timestamp < notAfter
+        else:
+            return timestamp > lastTimestamp
+
+    def _updateTimestampForKey(self, keyName, timestamp):
+        """
+        Trim the table size down if necessary, and insert/update the latest 
+        interest signing timestamp for the key.
+
+        Any key which has not been used within the TTL period is purged. If the
+        table is still too large, the oldest key is purged.
+
+        :param Name keyName: The name of the public key used to sign the interest.
+        :paramt int timestamp: The timestamp extracted from the interest name.
+
+        """
+        self._keyTimestamps[keyName.toUri()] = timestamp
+
+        if len(self._keyTimestamps) >= self._maxTrackedKeys:
+            now = time.time()
+            oldestTimestamp = now
+            oldestKey = None
+            trackedKeys = self._keyTimestamps.keys()
+            for keyUri in trackedKeys:
+                ts = self._keyTimestamps[keyUri]
+                if now - ts > self._keyTimestampTtl:
+                    del self._keyTimestamps[keyUri]
+                elif ts < oldestTimestamp:
+                    oldestTimestamp = ts
+                    oldestKey = keyUri
+
+            if len(self._keyTimestamps) > self._maxTrackedKeys:
+                # have not removed enough
+                del self._keyTimestamps[oldestKey]
+
+
+
     
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
                                 onVerifyFailed, wireFormat = None):
@@ -415,6 +469,8 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
             onVerifyFailed(dataOrInterest)
             return None
 
+
+
         signatureMatches = self._checkSignatureMatch(signatureName, objectName, matchedRule)
         if not signatureMatches:
             onVerifyFailed(dataOrInterest)
@@ -437,9 +493,21 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
                     onVerifyFailed, 2, stepCount+1)
             return nextStep
         else:
+            # for interests, we must check that the timestamp is fresh enough
+            # I do this after (possibly) downloading the certificate to avoid filling
+            # the cache with bad keys
+            if isinstance(dataOrInterest, Interest):
+                keyName = IdentityCertificate.certificateNameToPublicKeyName(signatureName)
+                timestamp = dataOrInterest.getName().get(-4).toNumber()/1000
+
+                if not self._interestTimestampIsFresh(keyName, timestamp):
+                    onVerifyFailed(dataOrInterest)
+                    return None
+
             # certificate is known, verify the signature
             if self._verify(signature, dataOrInterest.wireEncode()):
                 onVerified(dataOrInterest)
+                self._updateTimestampForKey(keyName, timestamp)
             else:
                 onVerifyFailed(dataOrInterest)
 
