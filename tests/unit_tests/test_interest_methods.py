@@ -149,10 +149,11 @@ class TestInterestMethods(ut.TestCase):
         self.assertTrue(freshInterest.getNonce().isNull(), 'Freshly created interest should not have a nonce')
 
     def test_set_removes_nonce(self):
-        # ensure that setting a value on an interest clears the nonce
+        # Ensure that changing a value on an interest clears the nonce.
         self.assertFalse(self.referenceInterest.getNonce().isNull())
         interest = Interest(self.referenceInterest)
-        interest.setChildSelector(0)
+        # Change a child object.
+        interest.getExclude().clear();
         self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
 
 
