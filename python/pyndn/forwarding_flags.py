@@ -148,7 +148,7 @@ class ForwardingFlags(object):
         :param int nfdForwardingFlags: An integer with the bits set.
         """
         self._childInherit = True if (nfdForwardingFlags & 
-                                      ForwardingFlagsNfdForwardingFlags_CHILD_INHERIT) else False
+                                      ForwardingFlags.NfdForwardingFlags_CHILD_INHERIT) else False
         self._capture = True if (nfdForwardingFlags & 
                                  ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
 
