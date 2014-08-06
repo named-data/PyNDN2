@@ -33,11 +33,7 @@ from pyndn import KeyLocatorType
 from pyndn.security.security_types import EncryptMode
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
-from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
-from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
-from pyndn.encoding.tlv.tlv import Tlv
-from pyndn.encoding.tlv_0_1_wire_format import Tlv0_1WireFormat
 
 class KeyChain(object):
     """
@@ -314,9 +310,6 @@ class KeyChain(object):
         signedSignature = self.sign(encoding.toSignedBuffer(), certificateName)
 
         # Remove the empty signature and append the real one.
-        encoder = TlvEncoder(256)
-        encoder.writeBlobTlv(
-          Tlv.SignatureValue, signedSignature.getSignature().buf())
         interest.setName(interest.getName().getPrefix(-1).append(
           wireFormat.encodeSignatureValue(signedSignature)))
           
