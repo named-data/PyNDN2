@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.0alpha2 (2014-07-21)
----------------------------------------------------
+PyNDN v2.0alpha3 (2014-08-08)
+-----------------------------
 
 Changes
 * Implemented SelfVerifyPolicyManager for use with KeyChain.verifyData, and use
@@ -23,6 +23,7 @@ Changes
 * Added MemoryContentCache. See http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 * KeyChain: added verifyInterest.
 * Added instructions for building the Sphinx documentation.
+* Added setup.py to support easy_install.
 
 Deprecated
 * MemoryPrivateKeyStorage: Deprecated setKeyPairForKeyName without an explicit keyType. Use
