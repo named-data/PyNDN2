@@ -10,3 +10,8 @@
 
 # Sphinx output
 doc/_build
+
+# setuptools files
+/dist
+/python/PyNDN.egg-info
+/build
