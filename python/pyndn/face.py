@@ -207,7 +207,7 @@ class Face(object):
           name with keyChain.getDefaultCertificateName() .        
         """
         self._commandKeyChain = keyChain
-        self._commandCertificateName = certificateName
+        self._commandCertificateName = Name(certificateName)
         
     def setCommandCertificateName(self, certificateName):
         """
@@ -218,7 +218,7 @@ class Face(object):
         :param Name certificateName: The certificate name for signing interest.
           This makes a copy of the Name.
         """
-        self._commandCertificateName = certificateName
+        self._commandCertificateName = Name(certificateName)
         
     def makeCommandInterest(self, interest, wireFormat = None):
         """
