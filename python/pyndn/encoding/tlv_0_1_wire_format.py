@@ -344,6 +344,7 @@ class Tlv0_1WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
+        # TODO: This assumes it is a Sha256WithRsaSignature.
         self._encodeSignatureSha256WithRsa(signature, encoder)
     
         return Blob(encoder.getOutput(), False)
@@ -367,6 +368,8 @@ class Tlv0_1WireFormat(WireFormat):
         :param signatureValue: The array with the signature value input buffer
           to decode.
         :type signatureValue: An array type with int elements
+        :return: A new object which is a subclass of Signature.
+        :rtype: a subclass of Signature
         """
         # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
         signatureHolder = self.SignatureHolder()

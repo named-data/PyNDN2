@@ -184,6 +184,8 @@ class WireFormat(object):
         :param signatureValue: The array with the signature value input buffer
           to decode.
         :type signatureValue: An array type with int elements
+        :return: A new object which is a subclass of Signature.
+        :rtype: a subclass of Signature
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
