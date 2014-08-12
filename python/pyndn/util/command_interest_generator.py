@@ -55,8 +55,9 @@ class CommandInterestGenerator(object):
         :param KeyChain keyChain: The KeyChain for calling sign.
         :param Name certificateName: The certificate name of the key to use for 
           signing.
-        :param wireFormat: (optional) A WireFormat object used to encode this 
-           ControlParameters. If omitted, use WireFormat.getDefaultWireFormat().
+        :param wireFormat: (optional) A WireFormat object used to encode the 
+          SignatureInfo and to encode interest name for signing. If omitted, use
+          WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:

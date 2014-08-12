@@ -120,8 +120,8 @@ class Node(object):
         :param KeyChain keyChain: The KeyChain for calling sign.
         :param Name certificateName: The certificate name of the key to use for 
           signing.
-        :param wireFormat: (optional) A WireFormat object used to encode this 
-           ControlParameters.
+        :param wireFormat: A WireFormat object used to encode the 
+          SignatureInfo and to encode the interest name for signing.
         :type wireFormat: A subclass of WireFormat
         """
         self._commandInterestGenerator.generate( 
