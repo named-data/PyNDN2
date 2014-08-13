@@ -113,7 +113,7 @@ class BoostInfoParser(object):
                 val = strings[1]
             else:
                 val = None
-            newTree = context.createSubtree(key, val)
+            context.createSubtree(key, val)
 
             return context
         # ok, who is the joker who put a { on the same line as the key name?!
@@ -144,7 +144,6 @@ class BoostInfoParser(object):
     def __getitem__(self, key):
         ctxList = [self._root]
         path = key.split('/')
-        foundVals = []
         for k in path:
             newList = []
             for ctx in ctxList:
