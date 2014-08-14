@@ -3,9 +3,32 @@
 # This uses the template https://github.com/pypa/sampleproject/blob/master/setup.py
 # and from Alex Afanasyev's file at https://github.com/cawka/PyNDN2/blob/master/setup.py
 
+# To build/upload the package, do the following as described in
+# https://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html
+# python setup.py sdist
+# python setup.py bdist_wheel --universal
+# python setup.py sdist bdist_wheel upload
+
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
 from codecs import open  # To use a consistent encoding
 from os import path
+import sys
+
+requirements = ['pycrypto']
+if sys.version_info[0] == 2:
+    requirements.append('trollius')
+elif sys.version_info[0] == 3:
+    if sys.version_info[1] < 3:
+        requirements.append('trollius')
+    elif sys.version_info[1] < 4:
+        requirements.append('asyncio')
+
+if sys.version_info[0] == 3:
+    protobuf_name = 'protobuf-py3'
+elif sys.version_info[0] == 2:
+    protobuf_name = 'protobuf'
+
+extras = {'protobuf': [protobuf_name]}
 
 setup(
     name='PyNDN',
@@ -44,5 +67,6 @@ setup(
     packages=find_packages('python'),
     package_dir = {'':'python'},
 
-    install_requires=['pycrypto', 'trollius', 'protobuf']
+    install_requires=requirements,
+    extras_require=extras
 )
