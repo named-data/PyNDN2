@@ -1,4 +1,4 @@
-PyNDN v2.0alpha3 (2014-08-08)
+PyNDN v2.0alpha3 (2014-08-14)
 -----------------------------
 
 Changes
@@ -23,7 +23,7 @@ Changes
 * Added MemoryContentCache. See http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 * KeyChain: added verifyInterest.
 * Added instructions for building the Sphinx documentation.
-* Added setup.py to support easy_install.
+* Added setup.py to support easy_install.  Added instructions in the README file.
 
 Deprecated
 * MemoryPrivateKeyStorage: Deprecated setKeyPairForKeyName without an explicit keyType. Use
