@@ -1,6 +1,10 @@
 PyNDN: A Named Data Networking client library with TLV wire format support in native Python
 ===========================================================================================
 
+These are instructions to install and run from the full PyNDN distribution.
+If you only need to install the pyndn Python module, you can use the easy_install instructions
+from the [README.md](https://github.com/named-data/PyNDN2/blob/master/README.md) file.
+
 Prerequisites
 =============
 * Required: Python 2.7 or later
