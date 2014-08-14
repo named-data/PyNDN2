@@ -9,7 +9,10 @@ It is wire format compatible with the new NDN-TLV encoding, with ndnd-tlv and NF
 See the file [INSTALL.md](https://github.com/named-data/PyNDN2/blob/master/INSTALL.md)
 for instructions to build and run from the full distribution.
 
-If you only need to install the pyndn Python module, you can enter the following in a terminal:
+If you only need to install the pyndn Python module, you can use easy_install.
+(If you don't have easy_install, see the instructions at
+https://pypi.python.org/pypi/setuptools#installation-instructions .)
+In a terminal, enter:
 
     sudo easy_install pyndn
 
