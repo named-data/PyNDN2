@@ -140,11 +140,7 @@ class BoostInfoTree(object):
 
 class BoostInfoParser(object):
     def __init__(self):
-        self._reset()
-
-    def _reset(self):
         self._root = BoostInfoTree()
-        self._root.lastChild = self
 
     def read(self, filename):
         with open(filename, 'r') as stream:
@@ -202,6 +198,7 @@ class BoostInfoParser(object):
             context = context.parent
             return context
 
+        raise RuntimeError("BoostInfoParser: input line is malformed")
 
     def getRoot(self):
         return self._root
