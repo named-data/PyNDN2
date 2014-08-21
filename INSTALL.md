@@ -27,9 +27,13 @@ Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
     sudo pip install trollius
 
-Optional: To install Protobuf, in a terminal enter:
+Optional: To install Protobuf in Python 2, in a terminal enter:
 
     sudo pip install protobuf
+
+Optional: To install Protobuf in Python 3, in a terminal enter:
+
+    sudo pip install protobuf-py3
 
 Optional: To install Sphinx, in a terminal enter:
 
@@ -46,9 +50,13 @@ Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
     sudo pip install trollius
 
-Optional: To install Protobuf, in a terminal enter:
+Optional: To install Protobuf in Python 2, in a terminal enter:
 
     sudo pip install protobuf
+
+Optional: To install Protobuf in Python 3, in a terminal enter:
+
+    sudo pip install protobuf-py3
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
@@ -72,7 +80,7 @@ Optional: To install Sphinx, in a terminal enter:
 
 (Protobuf is already installed.)
 
-## Ubuntu 13.10 (64 bit)
+## Ubuntu 14.04 (64 bit and 32 bit)
 (PyCrypto is already installed.)
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
@@ -85,7 +93,15 @@ Optional: To install Sphinx, in a terminal enter:
     sudo apt-get install python-pip
     sudo pip install sphinx
 
-(Protobuf is already installed.)
+Optional: To install Protobuf in Python 2, in a terminal enter:
+
+    sudo apt-get install python-pip
+    sudo pip install protobuf
+
+Optional: To install Protobuf in Python 3, in a terminal enter:
+
+    sudo apt-get install python-pip
+    sudo pip install protobuf-py3
 
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
