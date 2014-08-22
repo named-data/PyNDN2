@@ -14,7 +14,7 @@ If you only need to install the pyndn Python module, you can use easy_install.
 https://pypi.python.org/pypi/setuptools#installation-instructions .)
 In a terminal, enter:
 
-    sudo easy_install pyndn
+    sudo CFLAGS=-Qunused-arguments easy_install pyndn
 
 This installs the pyndn module on the Python search path so that applications
 which depend on it can use it, but does not install the sample tests or documentation
