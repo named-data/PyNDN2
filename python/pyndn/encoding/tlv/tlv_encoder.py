@@ -111,7 +111,7 @@ class TlvEncoder(object):
         if value < 0:
             raise ValueError("TLV integer value may not be negative")
         
-        if value < 253:
+        if value <= 0xff:
             self._length += 1
             self._output.ensureLengthFromBack(self._length)
             self._output._array[-self._length] = value & 0xff
