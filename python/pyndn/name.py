@@ -130,9 +130,9 @@ class Name(object):
         
         def toSegment(self):
             """
-            Interpret this name component as a segment number according to NDN 
-            name conventions (a network-ordered number where the first byte is 
-            the marker 0x00).
+            Interpret this name component as a segment number according to NDN
+            naming conventions for "Segment number" (marker 0x00).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
             
             :return: The integer segment number.
             :rtype: int
@@ -143,10 +143,10 @@ class Name(object):
         
         def toVersion(self):
             """
-            Interpret this name component as a version number according to NDN 
-            name conventions (a network-ordered number where the first byte is 
-            the marker 0xFD).  Note that this returns the exact number from the 
-            component without converting it to a time representation.
+            Interpret this name component as a version number  according to NDN
+            naming conventions for "Versioning" (marker 0xFD). Note that this
+            returns the exact number from the component without converting it to
+            a time representation.
             
             :return: The integer version number.
             :rtype: int
@@ -385,10 +385,11 @@ class Name(object):
   
         return Common.getBytesIOString(result)
         
-        
     def appendSegment(self, segment):
         """
-        Append a component with the encoded segment number.
+        Append a component with the encoded segment number according to NDN
+        naming conventions for "Segment number" (marker 0x00).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
         
         :param int segment: The segment number.
         :return: This name so that you can chain calls to append.
@@ -398,7 +399,11 @@ class Name(object):
     
     def appendVersion(self, version):
         """
-        Append a component with the encoded version number.
+        Append a component with the encoded version number according to NDN
+        naming conventions for "Versioning" (marker 0xFD).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+        Note that this encodes the exact value of version without converting
+        from a time representation.
         
         :param int version: The version number.
         :return: This name so that you can chain calls to append.
