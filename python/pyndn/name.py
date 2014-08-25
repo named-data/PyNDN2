@@ -187,31 +187,22 @@ class Name(object):
         @staticmethod
         def fromNumber(number):
             """
-            Create a component whose value is the network-ordered encoding of 
-            the number. Note: if the number is zero, the result is empty.
+            Create a component whose value is the nonNegativeInteger encoding of
+            the number.
             
             :param int number: The number to be encoded.
             :return: The component value.
             :rtype: Name.Component
             """
-            value = []
-
-            # First encode in little endian.
-            while number != 0:
-                value.append(number & 0xff)
-                number >>= 8
-                
-            # Make it big endian.
-            value.reverse()
-            return Name.Component(Blob(value, False))
+            encoder = TlvEncoder(8)
+            encoder.writeNonNegativeInteger(number)
+            return Name.Component(Blob(encoder.getOutput(), False))
         
         @staticmethod
         def fromNumberWithMarker(number, marker):
             """
             Create a component whose value is the marker appended with the 
-            network-ordered encoding of the number. Note: if the number is zero, 
-            no bytes are used for the number - the result will have only the 
-            marker.
+            nonNegativeInteger encoding of the number.
 
             :param int number: The number to be encoded.
             :param int marker: The marker to use as the first byte of the 
@@ -219,20 +210,11 @@ class Name(object):
             :return: The component value.
             :rtype: Name.Component
             """
-            value = []
-
-            # First encode in little endian.
-            while number != 0:
-                value.append(number & 0xff)
-                number >>= 8
-                
-            # Make it big endian.
-            value.reverse()
-            
-            # Prepend the leading marker.
-            value.insert(0, marker)
-            
-            return Name.Component(Blob(value, False))
+            encoder = TlvEncoder(9)
+            # Encode backwards.
+            encoder.writeNonNegativeInteger(number)
+            encoder.writeNonNegativeInteger(marker)
+            return Name.Component(Blob(encoder.getOutput(), False))
 
         # Python operators
         
@@ -664,3 +646,6 @@ class Name(object):
             i += 1
 
         return bytearray(result.getvalue())          
+
+# Import this at the end of the file to avoid circular references.
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
