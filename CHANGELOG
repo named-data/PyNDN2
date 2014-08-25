@@ -1,3 +1,9 @@
+Interim changes after PyNDN v2.0alpha3 (2014-08-25)
+---------------------------------------------------
+
+Bug fixes
+* http://redmine.named-data.net/issues/1925 Should encode non-negative integers 253 through 255 as one byte.
+
 PyNDN v2.0alpha3 (2014-08-14)
 -----------------------------
 
