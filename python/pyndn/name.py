@@ -140,6 +140,19 @@ class Name(object):
               expected marker.
             """
             return self.toNumberWithMarker(0x00)
+
+        def toSegmentOffset(self):
+            """
+            Interpret this name component as a segment byte offset according to
+            NDN naming conventions for segment "Byte offset" (marker 0xFB).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: The integer segment byte offset.
+            :rtype: int
+            :raises RuntimeError: If the first byte of the component is not the
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFB)
         
         def toVersion(self):
             """
@@ -147,6 +160,7 @@ class Name(object):
             naming conventions for "Versioning" (marker 0xFD). Note that this
             returns the exact number from the component without converting it to
             a time representation.
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
             
             :return: The integer version number.
             :rtype: int
@@ -154,6 +168,33 @@ class Name(object):
               expected marker.
             """
             return self.toNumberWithMarker(0xFD)
+
+        def toTimestamp(self):
+            """
+            Interpret this name component as a timestamp  according to NDN naming
+            conventions for "Timestamp" (marker 0xFC).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: The number of microseconds since the UNIX epoch (Thursday,
+              1 January 1970) not counting leap seconds.
+            :rtype: int
+            :raises RuntimeError: If the first byte of the component is not the
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFC)
+
+        def toSequenceNumber(self):
+            """
+            Interpret this name component as a sequence number according to NDN
+            naming conventions for "Sequencing" (marker 0xFE).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: The integer sequence number.
+            :rtype: int
+            :raises RuntimeError: If the first byte of the component is not the
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFE)
         
         def equals(self, other):
             """
@@ -396,6 +437,18 @@ class Name(object):
         :rtype: Name
         """
         return self.append(Name.Component.fromNumberWithMarker(segment, 0x00))
+
+    def appendSegmentOffset(self, segmentOffset):
+        """
+        Append a component with the encoded segment byte offset according to NDN
+        naming conventions for segment "Byte offset" (marker 0xFB).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+        :param int segmentOffset: The segment byte offset.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(segmentOffset, 0xFB))
     
     def appendVersion(self, version):
         """
@@ -410,6 +463,31 @@ class Name(object):
         :rtype: Name        
         """
         return self.append(Name.Component.fromNumberWithMarker(version, 0xFD))
+
+    def appendTimestamp(self, timestamp):
+        """
+        Append a component with the encoded timestamp according to NDN naming
+        conventions for "Timestamp" (marker 0xFC).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+        :param int timestamp: The number of microseconds since the UNIX epoch
+          (Thursday, 1 January 1970) not counting leap seconds.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(timestamp, 0xFC))
+
+    def appendSequenceNumber(self, sequenceNumber):
+        """
+        Append a component with the encoded sequence number according to NDN naming
+        conventions for "Sequencing" (marker 0xFE).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+        :param int sequenceNumber: The sequence number.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE))
         
     def equals(self, name):
         """
