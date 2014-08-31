@@ -1,5 +1,11 @@
-PyNDN v2.0 (2014-08-27)
----------------------------------------------------
+Interim changes after PyNDN v2.0beta1 (2014-08-31)
+--------------------------------------------------
+
+Bug fixes
+* http://redmine.named-data.net/issues/1955 Return the registeredPrefixId from registerPrefix.
+
+PyNDN v2.0beta1 (2014-08-27)
+----------------------------
 
 Changes
 * In Name.appendSegment and appendVersion, encode the number as nonNegativeInteger which is always 1, 2, 4 or 8 bytes.
