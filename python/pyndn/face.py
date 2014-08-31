@@ -283,7 +283,7 @@ class Face(object):
             wireFormat = WireFormat.getDefaultWireFormat()
 
         # Node.expressInterest requires a copy of the prefix.
-        self._node.registerPrefix(
+        return self._node.registerPrefix(
           prefix, onInterest, onRegisterFailed, flags, wireFormat, 
           self._commandKeyChain, self._commandCertificateName)
         
