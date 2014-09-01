@@ -23,6 +23,7 @@ operations related to identity, keys, and certificates.
 """
 
 import sys
+from pyndn.Name import Name
 from pyndn.data import Data
 from pyndn.encoding import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
@@ -30,6 +31,9 @@ from pyndn import KeyLocatorType
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStorage
 from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
+from pyndn.security.security_exception import SecurityException
+from pyndn.security.certificate.identity_certificate import  IdentityCertificate
+from pyndn.security.certificate.public_key import PublicKey
 
 class IdentityManager(object):
     """
