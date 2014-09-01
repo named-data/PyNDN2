@@ -23,7 +23,7 @@ operations related to identity, keys, and certificates.
 """
 
 import sys
-from pyndn.Name import Name
+from pyndn.name import Name
 from pyndn.data import Data
 from pyndn.encoding import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
