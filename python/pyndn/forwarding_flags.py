@@ -175,3 +175,28 @@ class ForwardingFlags(object):
 
     def getCaptureOk(self):
         return self._captureOk
+    
+    
+    def setActive(self, value):
+        self._active = value
+
+    def setChildInherit(self, value):
+        self._childInherit = value
+
+    def setAdvertise(self, value):
+        self._advertise = value
+
+    def setLast(self, value):
+        self._last = value
+
+    def setCapture(self, value):
+        self._capture = value
+
+    def setLocal(self, value):
+        self._local = value
+
+    def setTap(self, value):
+        self._tap = value
+
+    def setCaptureOk(self, value):
+        self._captureOk = value
