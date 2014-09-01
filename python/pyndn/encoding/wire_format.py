@@ -26,6 +26,7 @@ You should use a derived class such as TlvWireFormat.
 class WireFormat(object):
     _defaultWireFormat = None
     
+    
     def encodeInterest(self, interest):
         """
         Encode interest and return the encoding.  Your derived class should 
@@ -228,3 +229,10 @@ class WireFormat(object):
         :rtype: A subclass of WireFormat.
         """
         return self._defaultWireFormat
+
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    defaultWireFormat = property(_defaultWireFormat, getDefaultWireFormat, setDefaultWireFormat)
+    
+    
+    
+    

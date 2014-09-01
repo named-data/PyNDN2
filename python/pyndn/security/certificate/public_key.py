@@ -38,7 +38,9 @@ class PublicKey(object):
     def __init__(self, keyType, keyDer):
         self._keyType = keyType
         self._keyDer = keyDer
-        
+          
+        # TODO: Implementation of managed properties? 
+                
     def toDer(self):
         """
         Encode the public key into DER.

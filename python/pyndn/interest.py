@@ -66,6 +66,7 @@ class Interest(object):
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
 
+            
     def getName(self):
         """
         Get the interest Name.
@@ -186,8 +187,8 @@ class Interest(object):
         :param KeyLocator keyLocator: The KeyLocator that is copied.
         """
         self._keyLocator.set(
-          keyLocator if type(keyLocator) is KeyLocator(keyLocator) 
-                     else KeyLocator())
+          keyLocator if type(keyLocator) is KeyLocator() 
+                     else KeyLocator())                         
         self._changeCount += 1
     
     def setExclude(self, exclude):
@@ -415,3 +416,18 @@ class Interest(object):
         # getDefaultWireEncoding() won't clear _defaultWireEncoding.
         self._getDefaultWireEncodingChangeCount = self.getChangeCount()
         
+        
+    # Create managed properties for read/write properties of the class for more pythonic syntax. 
+    name = property(getName, setName)
+    minSuffixComponents = property(getMinSuffixComponents, setMinSuffixComponents)
+    maxSuffixComponents = property(getMaxSuffixComponents, setMaxSuffixComponents)
+    keyLocator = property(getKeyLocator, setKeyLocator)
+    exclude = property(getExclude, setExclude)
+    childSelector = property(getChildSelector, setChildSelector)
+    mustBeFresh = property(getMustBeFresh, setMustBeFresh)
+    nonce = property(getNonce, setNonce)
+    scope = property(getScope, setScope)
+    interestLifetimeMilliseconds = property(getInterestLifetimeMilliseconds, setInterestLifetimeMilliseconds)
+
+
+    

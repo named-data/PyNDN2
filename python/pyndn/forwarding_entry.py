@@ -161,3 +161,13 @@ class ForwardingEntry(object):
         # If input is a blob, get its buf().
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
         wireFormat.decodeForwardingEntry(self, decodeBuffer)
+        
+        
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    action = property(getAction, setAction)
+    prefix = property(getPrefix, setPrefix)
+    faceId = property(getFaceId, setFaceId)
+    forwardingFlags = property(getForwardingFlags, setForwardingFlags)
+    freshnessPeriod = property(getFreshnessPeriod, setFreshnessPeriod)        
+                       
+        

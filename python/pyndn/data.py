@@ -256,4 +256,13 @@ class Data(object):
         # Set _getDefaultWireEncodingChangeCount so that the next call to 
         # getDefaultWireEncoding() won't clear _defaultWireEncoding.
         self._getDefaultWireEncodingChangeCount = self.getChangeCount()
+    
+    # Create managed properties for read/write properties of the class for more pythonic syntax. 
+    name = property(getName, setName)
+    metaInfo = property(getMetaInfo, setMetaInfo)
+    signature = property(getSignature, setSignature)
+    content = property(getContent, setContent)
+
+    
+    
         

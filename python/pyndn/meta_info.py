@@ -48,7 +48,7 @@ class MetaInfo(object):
               repr(type(value)))
                     
         self._changeCount = 0
-        
+
     def getType(self):
         """
         Get the content type.
@@ -120,6 +120,24 @@ class MetaInfo(object):
         :rtype: int
         """
         return self._changeCount
+        
+    # Support property-based equivalence check 
+    # TODO: Desired syntax?
+    def equals(self, other):
+        if  (self._type == other._type 
+        and self._freshnessPeriod == other._freshnessPeriod
+        and self._finalBlockID == other._finalBlockID):
+            return True
+        else:
+            return False
+        
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    # TODO:Capitalization of ID does not follow the rest of the CCL
+    type = property(getType, setType)
+    freshnessPeriod = property(getFreshnessPeriod, setFreshnessPeriod)
+    finalBlockID = property(getFinalBlockID, setFinalBlockID)
+        
+        
 
 class ContentType(object):
     """

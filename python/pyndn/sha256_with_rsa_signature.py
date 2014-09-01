@@ -122,3 +122,7 @@ class Sha256WithRsaSignature(Signature):
             self._changeCount += 1
 
         return self._changeCount
+    
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    keyLocator = property(getKeyLocator, setKeyLocator)
+    signature = property(getSignature, setSignature)    
