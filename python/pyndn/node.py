@@ -170,7 +170,7 @@ class Node(object):
                   self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout, 
                   wireFormat)
             else:
-                _registerPrefixHelper(
+                self._registerPrefixHelper(
                   registeredPrefixId, Name(prefix), onInterest, onRegisterFailed, 
                   flags, wireFormat)
         else:
