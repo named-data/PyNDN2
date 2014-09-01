@@ -277,6 +277,9 @@ class Name(object):
         def __gt__(self, other):
             return self.compare(other) > 0
 
+        def __len__(self):
+            return self._value.size()
+            
     def set(self, uri):
         """
         Parse the uri according to the NDN URI Scheme and set the name with 
