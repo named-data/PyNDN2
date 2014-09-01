@@ -404,14 +404,14 @@ class Tlv0_1WireFormat(WireFormat):
     @classmethod
     def get(self):
         """
-        Get a singleton instance of a Tlv1_0a2WireFormat.  To always use the 
+        Get a singleton instance of a Tlv0_1WireFormat.  To always use the 
         preferred version NDN-TLV, you should use TlvWireFormat.get().
         
         :return: The singleton instance.
-        :rtype: Tlv1_0a2WireFormat
+        :rtype: Tlv0_1WireFormat
         """
         if self._instance == None:
-            self._instance = Tlv1_0a2WireFormat()
+            self._instance = Tlv0_1WireFormat()
         return self._instance
         
     @staticmethod
