@@ -1,10 +1,4 @@
-Interim changes after PyNDN v2.0beta1 (2014-08-31)
---------------------------------------------------
-
-Bug fixes
-* http://redmine.named-data.net/issues/1955 Return the registeredPrefixId from registerPrefix.
-
-PyNDN v2.0beta1 (2014-08-27)
+PyNDN v2.0beta1 (2014-08-31)
 ----------------------------
 
 Changes
@@ -15,6 +9,7 @@ Changes
 
 Bug fixes
 * http://redmine.named-data.net/issues/1925 Should encode non-negative integers 253 through 255 as one byte.
+* http://redmine.named-data.net/issues/1955 Return the registeredPrefixId from registerPrefix.
 
 PyNDN v2.0alpha3 (2014-08-14)
 -----------------------------
