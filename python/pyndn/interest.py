@@ -187,7 +187,7 @@ class Interest(object):
         :param KeyLocator keyLocator: The KeyLocator that is copied.
         """
         self._keyLocator.set(
-          keyLocator if type(keyLocator) is KeyLocator() 
+          keyLocator if type(keyLocator) is KeyLocator
                      else KeyLocator())                         
         self._changeCount += 1
     
