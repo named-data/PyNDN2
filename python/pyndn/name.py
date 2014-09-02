@@ -673,7 +673,25 @@ class Name(object):
         
     def __getitem__(self, key):
         if type(key) is int:
+            # Get the component.
             return self._components[key]
+        elif type(key is slice):
+            # Call self.getSubName
+            if key.step != None and key.step != 1:
+                raise ValueError("Name slice only supports a step of 1. Got %d." % key.step)
+            if key.start == None:
+                start = 0
+            else:
+                start = (min(key.start, len(self._components)) if key.start >= 0 else
+                         max(len(self._components) + key.start, 0))
+
+            if key.stop == None:
+                stop = len(self._components)
+            else:
+                stop =  (min(key.stop, len(self._components)) if key.stop >= 0 else
+                         max(len(self._components) + key.stop, 0))
+
+            return self.getSubName(start, stop - start)
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
 

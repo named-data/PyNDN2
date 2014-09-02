@@ -1,3 +1,12 @@
+Iterim changes after PyNDN v2.0beta1 (2014-09-02)
+-------------------------------------------------
+
+Changes
+* Support getter and setter properties in the classes Interest, Data, MetaInfo,
+  KeyLocator and ForwardingFlags, plus the internal ForwardingEntry and
+  ControlParameters.
+* In Name, support slice notation to call getSubName, e.g. name[2:4].
+
 PyNDN v2.0beta1 (2014-08-31)
 ----------------------------
 
