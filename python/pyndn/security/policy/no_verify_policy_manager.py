@@ -18,6 +18,7 @@
 # A copy of the GNU General Public License is in the file COPYING.
 
 from pyndn.security.policy.policy_manager import PolicyManager
+from pyndn.name import Name
 
 class NoVerifyPolicyManager(PolicyManager):
 
