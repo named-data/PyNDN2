@@ -103,7 +103,9 @@ class MetaInfo(object):
         
         :param finalBlockID: The final block ID.  If it is another 
           Name.Component, use its value. Otherwise pass value to the 
-          Name.Component constructor.
+          Name.Component constructor.  If finalBlockID is None, set to a
+          Name.Component of size 0 so that the finalBlockID is not specified
+          and not encoded.
         :type finalBlockID: Name.Component or value for the Name.Component 
           constructor
         """
