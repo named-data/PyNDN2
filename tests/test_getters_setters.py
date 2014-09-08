@@ -48,13 +48,6 @@ def testPropertyRW( obj, p, vals, onlyCheckPresence=False ):
     return (True, type(obj).__name__, vals)
     
 ## To Do: Add value checks   
-    
-# WireFormat
-#
-from pyndn.encoding.wire_format import WireFormat
-from pyndn.encoding.tlv_0_1_wire_format import Tlv0_1WireFormat
-from pyndn.encoding.tlv_wire_format import TlvWireFormat
-testPropertyRW( WireFormat(), "defaultWireFormat", [TlvWireFormat(), Tlv0_1WireFormat()])
 
 # ControlParameters
 #
