@@ -77,7 +77,7 @@ class MetaInfo(object):
         """
         return self._finalBlockID
 
-    def getFinalBlockID(self):
+    def getFinalBlockId(self):
         """
         :deprecated: Use getFinalBlockId.
         """
@@ -119,7 +119,7 @@ class MetaInfo(object):
                               else Name.Component(finalBlockID))
         self._changeCount += 1
 
-    def setFinalBlockID(self, finalBlockID):
+    def setFinalBlockId(self, finalBlockID):
         """
         :deprecated: Use setFinalBlockId.
         """
@@ -150,7 +150,7 @@ class MetaInfo(object):
     type = property(getType, setType)
     freshnessPeriod = property(getFreshnessPeriod, setFreshnessPeriod)
     finalBlockId = property(getFinalBlockId, setFinalBlockId)
-    finalBlockID = property(getFinalBlockID, setFinalBlockID)
+    finalBlockID = property(getFinalBlockId, setFinalBlockId)
         
 class ContentType(object):
     """

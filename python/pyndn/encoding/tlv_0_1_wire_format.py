@@ -582,7 +582,7 @@ class Tlv0_1WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        finalBlockIdBuf = metaInfo.getFinalBlockID().getValue().buf()
+        finalBlockIdBuf = metaInfo.getFinalBlockId().getValue().buf()
         if finalBlockIdBuf != None and len(finalBlockIdBuf) > 0:
             # FinalBlockId has an inner NameComponent.
             finalBlockIdSaveLength = len(encoder)
@@ -619,10 +619,10 @@ class Tlv0_1WireFormat(WireFormat):
             Tlv.FreshnessPeriod, endOffset))
         if decoder.peekType(Tlv.FinalBlockId, endOffset):
             finalBlockIdEndOffset = decoder.readNestedTlvsStart(Tlv.FinalBlockId)
-            metaInfo.setFinalBlockID(decoder.readBlobTlv(Tlv.NameComponent))
+            metaInfo.setFinalBlockId(decoder.readBlobTlv(Tlv.NameComponent))
             decoder.finishNestedTlvs(finalBlockIdEndOffset)
         else:
-            metaInfo.setFinalBlockID(None)
+            metaInfo.setFinalBlockId(None)
         
         decoder.finishNestedTlvs(endOffset)
 

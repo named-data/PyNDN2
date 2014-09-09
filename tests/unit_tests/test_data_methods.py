@@ -59,8 +59,8 @@ def dumpData(data):
          data.getMetaInfo().getFreshnessPeriod()
          if data.getMetaInfo().getFreshnessPeriod() >= 0 else "<none>"))
     result.append(dump("metaInfo.finalBlockID:",
-         data.getMetaInfo().getFinalBlockID().toEscapedString()
-         if data.getMetaInfo().getFinalBlockID().getValue().size() > 0
+         data.getMetaInfo().getFinalBlockId().toEscapedString()
+         if data.getMetaInfo().getFinalBlockId().getValue().size() > 0
          else "<none>"))
     signature = data.getSignature()
     if type(signature) is Sha256WithRsaSignature:
@@ -109,7 +109,7 @@ class TestDataDump(ut.TestCase):
         freshData = Data(Name("/ndn/abc"))
         freshData.setContent("SUCCESS!")
         freshData.getMetaInfo().setFreshnessPeriod(5000.0)
-        freshData.getMetaInfo().setFinalBlockID(Name("/%00%09")[0])
+        freshData.getMetaInfo().setFinalBlockId(Name("/%00%09")[0])
     
         # Initialize the storage.
         return freshData
