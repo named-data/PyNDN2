@@ -146,7 +146,6 @@ class MetaInfo(object):
             return False
         
     # Create managed properties for read/write properties of the class for more pythonic syntax.   
-    # TODO:Capitalization of ID does not follow the rest of the CCL
     type = property(getType, setType)
     freshnessPeriod = property(getFreshnessPeriod, setFreshnessPeriod)
     finalBlockId = property(getFinalBlockId, setFinalBlockId)
