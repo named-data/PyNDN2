@@ -67,7 +67,7 @@ class MetaInfo(object):
         """
         return self._freshnessPeriod
     
-    def getFinalBlockID(self):
+    def getFinalBlockId(self):
         """
         Get the final block ID.
         
@@ -76,6 +76,12 @@ class MetaInfo(object):
         :rtype: Name.Component
         """
         return self._finalBlockID
+
+    def getFinalBlockID(self):
+        """
+        :deprecated: Use getFinalBlockId.
+        """
+        return self.getFinalBlockId()
     
     def setType(self, type):
         """
@@ -97,7 +103,7 @@ class MetaInfo(object):
         self._freshnessPeriod = freshnessPeriod
         self._changeCount += 1
 
-    def setFinalBlockID(self, finalBlockID):
+    def setFinalBlockId(self, finalBlockID):
         """
         Set the final block ID.
         
@@ -112,6 +118,12 @@ class MetaInfo(object):
         self._finalBlockID = (finalBlockID if type(finalBlockID) is Name.Component 
                               else Name.Component(finalBlockID))
         self._changeCount += 1
+
+    def setFinalBlockID(self, finalBlockID):
+        """
+        :deprecated: Use setFinalBlockId.
+        """
+        self.setFinalBlockId(finalBlockID)
 
     def getChangeCount(self):
         """
@@ -137,10 +149,9 @@ class MetaInfo(object):
     # TODO:Capitalization of ID does not follow the rest of the CCL
     type = property(getType, setType)
     freshnessPeriod = property(getFreshnessPeriod, setFreshnessPeriod)
+    finalBlockId = property(getFinalBlockId, setFinalBlockId)
     finalBlockID = property(getFinalBlockID, setFinalBlockID)
         
-        
-
 class ContentType(object):
     """
     A ContentType specifies the content type in a MetaInfo object.
