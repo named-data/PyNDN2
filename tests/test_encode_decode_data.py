@@ -180,7 +180,7 @@ def dumpData(data):
     dump("metaInfo.freshnessPeriod (milliseconds):",
          data.getMetaInfo().getFreshnessPeriod()
          if data.getMetaInfo().getFreshnessPeriod() >= 0 else "<none>")
-    dump("metaInfo.finalBlockID:",
+    dump("metaInfo.finalBlockId:",
          data.getMetaInfo().getFinalBlockId().toEscapedString()
          if data.getMetaInfo().getFinalBlockId().getValue().size() > 0
          else "<none>")
