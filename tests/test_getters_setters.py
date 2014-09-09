@@ -110,11 +110,11 @@ for p in [("type", KeyLocatorType.KEYNAME, KeyLocatorType.KEY_LOCATOR_DIGEST), (
     if not res[0]: print(res)
 
 # MetaInfo
-# TODO:  Support FinalBlockID of None. 
+# TODO:  Support FinalBlockId of None. 
 #
 from pyndn.name import Name
 from pyndn.meta_info import MetaInfo, ContentType
-for p in [("type", ContentType.BLOB, ContentType.LINK), ("freshnessPeriod", 47, None), ("finalBlockID", Name.Component("12"), Name.Component())]:
+for p in [("type", ContentType.BLOB, ContentType.LINK), ("freshnessPeriod", 47, None), ("finalBlockId", Name.Component("12"), Name.Component())]:
     res = testPropertyRW( MetaInfo(), p[0], [p[1],p[2]])
     if not res[0]: print(res)
 
