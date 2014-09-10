@@ -20,7 +20,6 @@
 
 from collections import OrderedDict
 
-#TODO: process includes
 
 def shlex_split(s):
     """
@@ -89,29 +88,56 @@ def shlex_split(s):
             return result
 
         iStart = iEnd
-
+"""
+This class is provided for compatibility with the Boost INFO property list
+format used in ndn-cxx.
+"""
 class BoostInfoTree(object):
     def __init__(self, value = None, parent = None):
         super(BoostInfoTree, self).__init__()
-        self.subTrees = OrderedDict()
+        self.subtrees = OrderedDict()
         self.value = value
         self.parent = parent
 
         self.lastChild = None
 
+    def clone(self):
+
+        copy = BoostInfoTree(self.value)
+        for subtreeName, subtrees in self.subtrees.items():
+            for t in subtrees:
+                newTree = t.clone()
+                copy.addSubtree(subtreeName, newTree)
+        return copy
+
+    def addSubtree(self, treeName, newTree):
+        if treeName in self.subtrees:
+            self.subtrees[treeName].append(newTree)
+        else:
+            self.subtrees[treeName] = [newTree]
+        newTree.parent = self
+        self.lastChild = newTree
+
     def createSubtree(self, treeName, value=None ):
         newTree = BoostInfoTree(value, self)
-        if treeName in self.subTrees:
-            self.subTrees[treeName].append(newTree)
-        else:
-            self.subTrees[treeName] = [newTree]
-        self.lastChild = newTree
+        self.addSubtree(treeName, newTree)
         return newTree
 
     def __getitem__(self, key):
-        # since there can be repeated keys, we may have to get creative
-        found = self.subTrees[key]
-        return list(found)
+        key = key.lstrip('/')
+        path = key.split('/')
+        if len(key) == 0:
+            return [self]
+
+        subtrees = self.subtrees[path[0]]
+        if len(path) == 1:
+            return subtrees
+
+        newPath = '/'.join(path[1:])
+        foundVals = []
+        for t in subtrees:
+            foundVals.extend(t.__getitem__(newPath))
+        return foundVals
 
     def getValue(self):
         return self.value
@@ -123,13 +149,13 @@ class BoostInfoTree(object):
             if self.value is not None and len(self.value) > 0:
                 s += "\"" + str(self.value) + "\""
             s+= "\n" 
-        if len(self.subTrees) > 0:
+        if len(self.subtrees) > 0:
             if self.parent is not None:
                 s += prefix+ "{\n"
             nextLevel = " "*(indentLevel+2)
-            for t in self.subTrees:
-                for subTree in self.subTrees[t]:
-                    s += nextLevel + str(t) + " " + subTree._prettyprint(indentLevel+2)
+            for t in self.subtrees:
+                for subtree in self.subtrees[t]:
+                    s += nextLevel + str(t) + " " + subtree._prettyprint(indentLevel+2)
             if self.parent is not None:
                 s +=  prefix + "}\n"
         return s
@@ -143,10 +169,44 @@ class BoostInfoParser(object):
         self._root = BoostInfoTree()
 
     def read(self, filename):
+        self._read(filename, self._root)
+        return self._root
+
+    def readPropertyList(self, fromDict):
+        if not isinstance(fromDict, dict):
+            raise TypeError('BoostInfoTree must be initialized from dictionary')
+        self._readDict(fromDict, self._root)
+        return self._root
+
+    def _read(self, filename, ctx):
         with open(filename, 'r') as stream:
-            ctx = self._root
             for line in stream:
                 ctx = self._parseLine(line.strip(), ctx)
+        return ctx
+
+    def _readList(self, fromList, intoNode, keyName):
+        # we can have lists of strings or dicts, ONLY
+        for v in fromList:
+            if hasattr(v, 'keys'):
+                newNode = intoNode.createSubtree(k)
+                self._readDict(v, newNode)
+            else:
+                intoNode.createSubtree(keyName, v)
+
+    def _readDict(self, fromDict, currentNode):
+        for k,v in fromDict.items():
+            # HACK
+            if k == '__name__':
+                continue
+            if hasattr(v, 'keys'):
+                newNode = currentNode.createSubtree(k)
+                self._readDict(v, newNode)
+            elif hasattr(v, '__iter__'):
+                self._readList(v, currentNode, k)
+            else:
+                # should be a string, should I check?
+                currentNode.createSubtree(k,v)
+
 
     def write(self, filename):
         with open(filename, 'w') as stream:
@@ -174,7 +234,11 @@ class BoostInfoParser(object):
                 val = strings[1]
             else:
                 val = None
-            context.createSubtree(key, val)
+            #if it is an "#include", load the new file instead of inserting keys
+            if key == "#include":
+                context = self._read(val, context)
+            else:
+                newTree = context.createSubtree(key, val)
 
             return context
         # ok, who is the joker who put a { on the same line as the key name?!
@@ -204,33 +268,4 @@ class BoostInfoParser(object):
         return self._root
 
     def __getitem__(self, key):
-        ctxList = [self._root]
-        path = key.split('/')
-        for k in path:
-            newList = []
-            for ctx in ctxList:
-                try:
-                    newList.extend(ctx[k])
-                except KeyError:
-                    pass
-            ctxList = newList
-        
-        return ctxList
-
-def main():
-    import sys
-    try:
-        filename = sys.argv[1]
-        parser = BoostInfoParser()
-        parser.read(filename)
-        parser.write('test.conf')
-        parser2 = BoostInfoParser()
-        parser2.read('test.conf')
-        print str(parser2.getRoot()) == str(parser.getRoot())
-        print parser2.getRoot()
-    except IndexError:
-        print 'Usage: {} filename'.format(sys.argv[0])
-
-if __name__ == '__main__':
-    main()
-
+        return self._root.__getitem__(key)
