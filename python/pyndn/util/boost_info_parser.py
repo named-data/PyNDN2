@@ -18,12 +18,77 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-
-import shlex
 from collections import OrderedDict
 
 #TODO: process includes
 
+def shlex_split(s):
+    """
+    Similar to shlex.split, split s into an array of strings which are 
+    separated by whitespace, treating a string within quotes as a single entity
+    regardless of whitespace between the quotes. Also allow a backslash to
+    escape the next character.
+    
+    :param str s: The input string to split.
+    :return: An array of strings.
+    :rtype: list of str
+    """
+    result = []
+    if s == "":
+        return result
+    whiteSpace = " \t\n\r"
+    iStart = 0
+
+    while True:
+        # Move iStart past whitespace.
+        while s[iStart] in whiteSpace:
+            iStart += 1
+            if iStart >= len(s):
+                # Done.
+                return result
+
+        # Move iEnd to the end of the token.
+        iEnd = iStart
+        inQuotation = False
+        token = ""
+        while True:
+            if s[iEnd] == '\\':
+                # Append characters up to the backslash, skip the backslash and
+                #   move iEnd past the escaped character.
+                token += s[iStart:iEnd]
+                iStart = iEnd + 1
+                iEnd = iStart
+                if iEnd >= len(s):
+                    # An unusual case: A backslash at the end of the string.
+                    break
+            else:
+                if inQuotation:
+                    if s[iEnd] == '\"':
+                        # Append characters up to the end quote and skip.
+                        token += s[iStart:iEnd]
+                        iStart = iEnd + 1
+                        inQuotation = False
+                else:
+                    if s[iEnd] == '\"':
+                        # Append characters up to the start quote and skip.
+                        token += s[iStart:iEnd]
+                        iStart = iEnd + 1
+                        inQuotation = True
+                    else:
+                        if s[iEnd] in whiteSpace:
+                            break
+
+            iEnd += 1
+            if iEnd >= len(s):
+                break
+
+        token += s[iStart:iEnd]
+        result.append(token)
+        if iEnd >= len(s):
+            # Done.
+            return result
+
+        iStart = iEnd
 
 class BoostInfoTree(object):
     def __init__(self, value = None, parent = None):
@@ -75,11 +140,7 @@ class BoostInfoTree(object):
 
 class BoostInfoParser(object):
     def __init__(self):
-        self._reset()
-
-    def _reset(self):
         self._root = BoostInfoTree()
-        self._root.lastChild = self
 
     def read(self, filename):
         with open(filename, 'r') as stream:
@@ -100,7 +161,7 @@ class BoostInfoParser(object):
            return context
 
         # usually we are expecting key and optional value
-        strings = shlex.split(string)
+        strings = shlex_split(string)
         isSectionStart = False
         isSectionEnd=False
         for s in strings:
@@ -113,7 +174,7 @@ class BoostInfoParser(object):
                 val = strings[1]
             else:
                 val = None
-            newTree = context.createSubtree(key, val)
+            context.createSubtree(key, val)
 
             return context
         # ok, who is the joker who put a { on the same line as the key name?!
@@ -137,6 +198,7 @@ class BoostInfoParser(object):
             context = context.parent
             return context
 
+        raise RuntimeError("BoostInfoParser: input line is malformed")
 
     def getRoot(self):
         return self._root
@@ -144,7 +206,6 @@ class BoostInfoParser(object):
     def __getitem__(self, key):
         ctxList = [self._root]
         path = key.split('/')
-        foundVals = []
         for k in path:
             newList = []
             for ctx in ctxList:
