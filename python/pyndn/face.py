@@ -207,7 +207,7 @@ class Face(object):
           name with keyChain.getDefaultCertificateName() .        
         """
         self._commandKeyChain = keyChain
-        self._commandCertificateName = certificateName
+        self._commandCertificateName = Name(certificateName)
         
     def setCommandCertificateName(self, certificateName):
         """
@@ -218,7 +218,7 @@ class Face(object):
         :param Name certificateName: The certificate name for signing interest.
           This makes a copy of the Name.
         """
-        self._commandCertificateName = certificateName
+        self._commandCertificateName = Name(certificateName)
         
     def makeCommandInterest(self, interest, wireFormat = None):
         """
@@ -283,7 +283,7 @@ class Face(object):
             wireFormat = WireFormat.getDefaultWireFormat()
 
         # Node.expressInterest requires a copy of the prefix.
-        self._node.registerPrefix(
+        return self._node.registerPrefix(
           prefix, onInterest, onRegisterFailed, flags, wireFormat, 
           self._commandKeyChain, self._commandCertificateName)
         

@@ -1,3 +1,22 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A copy of the GNU General Public License is in the file COPYING.
+
 #####
 # dump method taken from test_encode_decode_interest
 #####
@@ -149,10 +168,11 @@ class TestInterestMethods(ut.TestCase):
         self.assertTrue(freshInterest.getNonce().isNull(), 'Freshly created interest should not have a nonce')
 
     def test_set_removes_nonce(self):
-        # ensure that setting a value on an interest clears the nonce
+        # Ensure that changing a value on an interest clears the nonce.
         self.assertFalse(self.referenceInterest.getNonce().isNull())
         interest = Interest(self.referenceInterest)
-        interest.setChildSelector(0)
+        # Change a child object.
+        interest.getExclude().clear();
         self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
 
 

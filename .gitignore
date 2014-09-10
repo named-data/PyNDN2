@@ -8,5 +8,14 @@
 # Emacs temp files
 *~
 
+# Eclipse 
+.project
+.pydevproject
+
 # Sphinx output
 doc/_build
+
+# setuptools files
+/dist
+/python/PyNDN.egg-info
+/build

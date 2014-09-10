@@ -1,3 +1,22 @@
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+#
+# Copyright (C) 2014 Regents of the University of California.
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A copy of the GNU General Public License is in the file COPYING.
+
 from pyndn import Name
 from pyndn import Data
 from pyndn import ContentType
@@ -58,9 +77,9 @@ def dumpData(data):
     result.append(dump("metaInfo.freshnessPeriod (milliseconds):",
          data.getMetaInfo().getFreshnessPeriod()
          if data.getMetaInfo().getFreshnessPeriod() >= 0 else "<none>"))
-    result.append(dump("metaInfo.finalBlockID:",
-         data.getMetaInfo().getFinalBlockID().toEscapedString()
-         if data.getMetaInfo().getFinalBlockID().getValue().size() > 0
+    result.append(dump("metaInfo.finalBlockId:",
+         data.getMetaInfo().getFinalBlockId().toEscapedString()
+         if data.getMetaInfo().getFinalBlockId().getValue().size() > 0
          else "<none>"))
     signature = data.getSignature()
     if type(signature) is Sha256WithRsaSignature:
@@ -87,7 +106,7 @@ initialDump = ['name: /ndn/abc',
         'content (raw): SUCCESS!', 
         'content (hex): 5355434345535321',
         'metaInfo.freshnessPeriod (milliseconds): 5000.0',
-        'metaInfo.finalBlockID: %00%09',
+        'metaInfo.finalBlockId: %00%09',
         'signature.signature: 1a03c39c4fc55c36a2e79cee52fe45a7e10cfb95acb49bccb6a0c34aaa45bfbfdf0b51d5a48bf2ab45971c24d8e2c28a4d4012d77701eb7435f14dddd0f3a69ab7a4f17fa78434d7082552808b6c4293041e071f4f764318f2f8511a56afe6a931cb6c1c0aa40110fcc866ce2e9c0b2d7fb464a0ee2282c834f79af551122a84', 
         'signature.keyLocator: KeyName: /testname/KEY/DSK-123/ID-CERT']
 
@@ -109,7 +128,7 @@ class TestDataDump(ut.TestCase):
         freshData = Data(Name("/ndn/abc"))
         freshData.setContent("SUCCESS!")
         freshData.getMetaInfo().setFreshnessPeriod(5000.0)
-        freshData.getMetaInfo().setFinalBlockID(Name("/%00%09")[0])
+        freshData.getMetaInfo().setFinalBlockId(Name("/%00%09")[0])
     
         # Initialize the storage.
         return freshData

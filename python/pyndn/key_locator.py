@@ -50,7 +50,7 @@ class KeyLocator(object):
               repr(type(value)))
             
         self._changeCount = 0
-
+    
     def getType(self):
         """
         Get the key locator type. If KeyLocatorType.KEYNAME, you may also
@@ -141,6 +141,22 @@ class KeyLocator(object):
             self._changeCount += 1
 
         return self._changeCount
+
+    # Create managed properties for read/write properties of the class for more pythonic syntax.         
+    type = property(getType, setType)
+    keyName = property(getKeyName, setKeyName)
+    keyData = property(getKeyData, setKeyData)    
+
+    # Support property-based equivalence check 
+    # TODO: Desired syntax?
+    def equals(self, other):
+        if self is None and other is None: return True
+        if other is None: return False
+        if self._type != other._type: return False
+        if self._keyName.get() != None and not self._keyName.get().equals(other._keyName.get()): return False
+        if self._keyData != None and not self._keyData.equals(other._keyData): return False
+        return True
+    
 
 class KeyLocatorType(object):
     """

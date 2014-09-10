@@ -148,7 +148,7 @@ class ForwardingFlags(object):
         :param int nfdForwardingFlags: An integer with the bits set.
         """
         self._childInherit = True if (nfdForwardingFlags & 
-                                      ForwardingFlagsNfdForwardingFlags_CHILD_INHERIT) else False
+                                      ForwardingFlags.NfdForwardingFlags_CHILD_INHERIT) else False
         self._capture = True if (nfdForwardingFlags & 
                                  ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
 
@@ -175,3 +175,54 @@ class ForwardingFlags(object):
 
     def getCaptureOk(self):
         return self._captureOk
+    
+    
+    def setActive(self, value):
+        self._active = value
+
+    def setChildInherit(self, value):
+        self._childInherit = value
+
+    def setAdvertise(self, value):
+        self._advertise = value
+
+    def setLast(self, value):
+        self._last = value
+
+    def setCapture(self, value):
+        self._capture = value
+
+    def setLocal(self, value):
+        self._local = value
+
+    def setTap(self, value):
+        self._tap = value
+
+    def setCaptureOk(self, value):
+        self._captureOk = value
+        
+    # Support property-based equivalence check 
+    # TODO: Desired syntax?
+    def equals(self, other):
+        if  (self._active == other._active 
+        and self._childInherit == other._childInherit
+        and self._advertise == other._advertise
+        and self._last == other._last
+        and self._capture == other._capture
+        and self._local == other._local
+        and self._tap == other._tap
+        and self._captureOk == other._captureOk):
+            return True
+        else:
+            return False
+        
+        
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    active = property(getActive, setActive)
+    childInherit = property(getChildInherit, setChildInherit)
+    advertise = property(getAdvertise, setAdvertise)
+    last = property(getLast, setLast)
+    capture = property(getCapture, setCapture)
+    local = property(getLocal, setLocal)
+    tap = property(getTap, setTap)
+    captureOk = property(getCaptureOk, setCaptureOk)

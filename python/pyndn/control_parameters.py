@@ -40,6 +40,7 @@ class ControlParameters(object):
         # TODO: Add "Strategy" name.
         self._expirationPeriod = None
     
+    
     def wireEncode(self, wireFormat = None):
         """
         Encode this ControlParameters for a particular wire format.
@@ -199,3 +200,30 @@ class ControlParameters(object):
           None for not specified.
         """
         self._expirationPeriod = expirationPeriod
+
+    # Support property-based equivalence check 
+    # TODO: Desired syntax?
+    def equals(self, other):
+        if  (self._name == other._name 
+        and self._faceId == other._faceId
+        and self._localControlFeature == other._localControlFeature
+        and self._origin == other._origin
+        and self._cost == other._cost
+        and self._forwardingFlags == other._forwardingFlags
+        and self._expirationPeriod == other._expirationPerion):
+            return True
+        else:
+            return False
+    
+        # TODO: Add "Uri" string.
+        # TODO: Add "Strategy" name.
+    
+
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    name = property(getName, setName)
+    faceId = property(getFaceId, setFaceId)
+    localControlFeature = property(getLocalControlFeature, setLocalControlFeature)
+    origin = property(getOrigin, setOrigin)
+    cost = property(getCost, setCost)
+    forwardingFlags = property(getForwardingFlags, setForwardingFlags)
+    expirationPeriod = property(getExpirationPeriod, setExpirationPeriod)

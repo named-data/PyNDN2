@@ -344,6 +344,7 @@ class Tlv0_1WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
+        # TODO: This assumes it is a Sha256WithRsaSignature.
         self._encodeSignatureSha256WithRsa(signature, encoder)
     
         return Blob(encoder.getOutput(), False)
@@ -367,6 +368,8 @@ class Tlv0_1WireFormat(WireFormat):
         :param signatureValue: The array with the signature value input buffer
           to decode.
         :type signatureValue: An array type with int elements
+        :return: A new object which is a subclass of Signature.
+        :rtype: a subclass of Signature
         """
         # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
         signatureHolder = self.SignatureHolder()
@@ -401,14 +404,14 @@ class Tlv0_1WireFormat(WireFormat):
     @classmethod
     def get(self):
         """
-        Get a singleton instance of a Tlv1_0a2WireFormat.  To always use the 
+        Get a singleton instance of a Tlv0_1WireFormat.  To always use the 
         preferred version NDN-TLV, you should use TlvWireFormat.get().
         
         :return: The singleton instance.
-        :rtype: Tlv1_0a2WireFormat
+        :rtype: Tlv0_1WireFormat
         """
         if self._instance == None:
-            self._instance = Tlv1_0a2WireFormat()
+            self._instance = Tlv0_1WireFormat()
         return self._instance
         
     @staticmethod
@@ -579,7 +582,7 @@ class Tlv0_1WireFormat(WireFormat):
         saveLength = len(encoder)
         
         # Encode backwards.
-        finalBlockIdBuf = metaInfo.getFinalBlockID().getValue().buf()
+        finalBlockIdBuf = metaInfo.getFinalBlockId().getValue().buf()
         if finalBlockIdBuf != None and len(finalBlockIdBuf) > 0:
             # FinalBlockId has an inner NameComponent.
             finalBlockIdSaveLength = len(encoder)
@@ -616,10 +619,10 @@ class Tlv0_1WireFormat(WireFormat):
             Tlv.FreshnessPeriod, endOffset))
         if decoder.peekType(Tlv.FinalBlockId, endOffset):
             finalBlockIdEndOffset = decoder.readNestedTlvsStart(Tlv.FinalBlockId)
-            metaInfo.setFinalBlockID(decoder.readBlobTlv(Tlv.NameComponent))
+            metaInfo.setFinalBlockId(decoder.readBlobTlv(Tlv.NameComponent))
             decoder.finishNestedTlvs(finalBlockIdEndOffset)
         else:
-            metaInfo.setFinalBlockID(None)
+            metaInfo.setFinalBlockId(None)
         
         decoder.finishNestedTlvs(endOffset)
 

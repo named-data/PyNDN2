@@ -120,8 +120,8 @@ class Node(object):
         :param KeyChain keyChain: The KeyChain for calling sign.
         :param Name certificateName: The certificate name of the key to use for 
           signing.
-        :param wireFormat: (optional) A WireFormat object used to encode this 
-           ControlParameters.
+        :param wireFormat: A WireFormat object used to encode the 
+          SignatureInfo and to encode the interest name for signing.
         :type wireFormat: A subclass of WireFormat
         """
         self._commandInterestGenerator.generate( 
@@ -170,7 +170,7 @@ class Node(object):
                   self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout, 
                   wireFormat)
             else:
-                _registerPrefixHelper(
+                self._registerPrefixHelper(
                   registeredPrefixId, Name(prefix), onInterest, onRegisterFailed, 
                   flags, wireFormat)
         else:
@@ -355,7 +355,7 @@ class Node(object):
         :param int registeredPrefixId: The 
           _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
           so it could return it to the caller. If this is 0, then don't add to 
-          registeredPrefixTable_ (assuming it has already been done).  
+          _registeredPrefixTable (assuming it has already been done).
         """
         # Create a ForwardingEntry.
         # Note: ndnd ignores any freshness that is larger than 3600 seconds and 
@@ -411,7 +411,7 @@ class Node(object):
         :param int registeredPrefixId: The 
           _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
           so it could return it to the caller. If this is 0, then don't add to 
-          registeredPrefixTable_ (assuming it has already been done).  
+          _registeredPrefixTable (assuming it has already been done).
         """
         if commandKeyChain == None:
             raise RuntimeError(
@@ -700,7 +700,7 @@ class Node(object):
                 if self._node._ndndId == None:
                     # First fetch the ndndId of the connected hub.
                     # Pass 0 for registeredPrefixId since the entry was already added to
-                    #   registeredPrefixTable_ on the first try.
+                    #   _registeredPrefixTable on the first try.
                     fetcher = Node._NdndIdFetcher(
                       self._node, 0, self._prefix, self._onInterest,
                       self._onRegisterFailed, self._flags, self._wireFormat)
@@ -711,8 +711,8 @@ class Node(object):
                       fetcher.onTimeout, self._wireFormat)
                 else:
                     # Pass 0 for registeredPrefixId since the entry was already 
-                    #   added to registeredPrefixTable_ on the first try.
-                    self._node.registerPrefixHelper(
+                    #   added to _registeredPrefixTable on the first try.
+                    self._node._registerPrefixHelper(
                       0, self._prefix, self._onInterest, self._onRegisterFailed, 
                       self._flags, self._wireFormat)
             else:

@@ -130,9 +130,9 @@ class Name(object):
         
         def toSegment(self):
             """
-            Interpret this name component as a segment number according to NDN 
-            name conventions (a network-ordered number where the first byte is 
-            the marker 0x00).
+            Interpret this name component as a segment number according to NDN
+            naming conventions for "Segment number" (marker 0x00).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
             
             :return: The integer segment number.
             :rtype: int
@@ -140,13 +140,27 @@ class Name(object):
               expected marker.
             """
             return self.toNumberWithMarker(0x00)
+
+        def toSegmentOffset(self):
+            """
+            Interpret this name component as a segment byte offset according to
+            NDN naming conventions for segment "Byte offset" (marker 0xFB).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: The integer segment byte offset.
+            :rtype: int
+            :raises RuntimeError: If the first byte of the component is not the
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFB)
         
         def toVersion(self):
             """
-            Interpret this name component as a version number according to NDN 
-            name conventions (a network-ordered number where the first byte is 
-            the marker 0xFD).  Note that this returns the exact number from the 
-            component without converting it to a time representation.
+            Interpret this name component as a version number  according to NDN
+            naming conventions for "Versioning" (marker 0xFD). Note that this
+            returns the exact number from the component without converting it to
+            a time representation.
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
             
             :return: The integer version number.
             :rtype: int
@@ -154,6 +168,33 @@ class Name(object):
               expected marker.
             """
             return self.toNumberWithMarker(0xFD)
+
+        def toTimestamp(self):
+            """
+            Interpret this name component as a timestamp  according to NDN naming
+            conventions for "Timestamp" (marker 0xFC).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: The number of microseconds since the UNIX epoch (Thursday,
+              1 January 1970) not counting leap seconds.
+            :rtype: int
+            :raises RuntimeError: If the first byte of the component is not the
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFC)
+
+        def toSequenceNumber(self):
+            """
+            Interpret this name component as a sequence number according to NDN
+            naming conventions for "Sequencing" (marker 0xFE).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: The integer sequence number.
+            :rtype: int
+            :raises RuntimeError: If the first byte of the component is not the
+              expected marker.
+            """
+            return self.toNumberWithMarker(0xFE)
         
         def equals(self, other):
             """
@@ -187,31 +228,22 @@ class Name(object):
         @staticmethod
         def fromNumber(number):
             """
-            Create a component whose value is the network-ordered encoding of 
-            the number. Note: if the number is zero, the result is empty.
+            Create a component whose value is the nonNegativeInteger encoding of
+            the number.
             
             :param int number: The number to be encoded.
             :return: The component value.
             :rtype: Name.Component
             """
-            value = []
-
-            # First encode in little endian.
-            while number != 0:
-                value.append(number & 0xff)
-                number >>= 8
-                
-            # Make it big endian.
-            value.reverse()
-            return Name.Component(Blob(value, False))
+            encoder = TlvEncoder(8)
+            encoder.writeNonNegativeInteger(number)
+            return Name.Component(Blob(encoder.getOutput(), False))
         
         @staticmethod
         def fromNumberWithMarker(number, marker):
             """
             Create a component whose value is the marker appended with the 
-            network-ordered encoding of the number. Note: if the number is zero, 
-            no bytes are used for the number - the result will have only the 
-            marker.
+            nonNegativeInteger encoding of the number.
 
             :param int number: The number to be encoded.
             :param int marker: The marker to use as the first byte of the 
@@ -219,20 +251,11 @@ class Name(object):
             :return: The component value.
             :rtype: Name.Component
             """
-            value = []
-
-            # First encode in little endian.
-            while number != 0:
-                value.append(number & 0xff)
-                number >>= 8
-                
-            # Make it big endian.
-            value.reverse()
-            
-            # Prepend the leading marker.
-            value.insert(0, marker)
-            
-            return Name.Component(Blob(value, False))
+            encoder = TlvEncoder(9)
+            # Encode backwards.
+            encoder.writeNonNegativeInteger(number)
+            encoder.writeNonNegativeInteger(marker)
+            return Name.Component(Blob(encoder.getOutput(), False))
 
         # Python operators
         
@@ -254,6 +277,9 @@ class Name(object):
         def __gt__(self, other):
             return self.compare(other) > 0
 
+        def __len__(self):
+            return self._value.size()
+            
     def set(self, uri):
         """
         Parse the uri according to the NDN URI Scheme and set the name with 
@@ -403,26 +429,68 @@ class Name(object):
   
         return Common.getBytesIOString(result)
         
-        
     def appendSegment(self, segment):
         """
-        Append a component with the encoded segment number.
+        Append a component with the encoded segment number according to NDN
+        naming conventions for "Segment number" (marker 0x00).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
         
         :param int segment: The segment number.
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
         return self.append(Name.Component.fromNumberWithMarker(segment, 0x00))
+
+    def appendSegmentOffset(self, segmentOffset):
+        """
+        Append a component with the encoded segment byte offset according to NDN
+        naming conventions for segment "Byte offset" (marker 0xFB).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+        :param int segmentOffset: The segment byte offset.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(segmentOffset, 0xFB))
     
     def appendVersion(self, version):
         """
-        Append a component with the encoded version number.
+        Append a component with the encoded version number according to NDN
+        naming conventions for "Versioning" (marker 0xFD).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+        Note that this encodes the exact value of version without converting
+        from a time representation.
         
         :param int version: The version number.
         :return: This name so that you can chain calls to append.
         :rtype: Name        
         """
         return self.append(Name.Component.fromNumberWithMarker(version, 0xFD))
+
+    def appendTimestamp(self, timestamp):
+        """
+        Append a component with the encoded timestamp according to NDN naming
+        conventions for "Timestamp" (marker 0xFC).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+        :param int timestamp: The number of microseconds since the UNIX epoch
+          (Thursday, 1 January 1970) not counting leap seconds.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(timestamp, 0xFC))
+
+    def appendSequenceNumber(self, sequenceNumber):
+        """
+        Append a component with the encoded sequence number according to NDN naming
+        conventions for "Sequencing" (marker 0xFE).
+        http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+        :param int sequenceNumber: The sequence number.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE))
         
     def equals(self, name):
         """
@@ -605,7 +673,25 @@ class Name(object):
         
     def __getitem__(self, key):
         if type(key) is int:
+            # Get the component.
             return self._components[key]
+        elif type(key is slice):
+            # Call self.getSubName
+            if key.step != None and key.step != 1:
+                raise ValueError("Name slice only supports a step of 1. Got %d." % key.step)
+            if key.start == None:
+                start = 0
+            else:
+                start = (min(key.start, len(self._components)) if key.start >= 0 else
+                         max(len(self._components) + key.start, 0))
+
+            if key.stop == None:
+                stop = len(self._components)
+            else:
+                stop =  (min(key.stop, len(self._components)) if key.stop >= 0 else
+                         max(len(self._components) + key.stop, 0))
+
+            return self.getSubName(start, stop - start)
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
 
@@ -664,3 +750,6 @@ class Name(object):
             i += 1
 
         return bytearray(result.getvalue())          
+
+# Import this at the end of the file to avoid circular references.
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder

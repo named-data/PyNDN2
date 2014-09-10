@@ -31,13 +31,11 @@ from pyndn.data import Data
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn import KeyLocatorType
 from pyndn.security.security_types import EncryptMode
+from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
-from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
-from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
-from pyndn.encoding.tlv.tlv import Tlv
-from pyndn.encoding.tlv_0_1_wire_format import Tlv0_1WireFormat
+
 
 class KeyChain(object):
     """
@@ -314,9 +312,6 @@ class KeyChain(object):
         signedSignature = self.sign(encoding.toSignedBuffer(), certificateName)
 
         # Remove the empty signature and append the real one.
-        encoder = TlvEncoder(256)
-        encoder.writeBlobTlv(
-          Tlv.SignatureValue, signedSignature.getSignature().buf())
         interest.setName(interest.getName().getPrefix(-1).append(
           wireFormat.encodeSignatureValue(signedSignature)))
           
@@ -345,7 +340,7 @@ class KeyChain(object):
         if isinstance(target, Data):
             if identityName.size() == 0:
                 inferredIdentity = self._policyManager.inferSigningIdentity(
-                  data.getName())
+                  target.getName())
                 if inferredIdentity.size() == 0:
                     signingCertificateName = self._identityManager.getDefaultCertificateName()
                 else:
@@ -359,12 +354,12 @@ class KeyChain(object):
                 raise SecurityException("No qualified certificate name found!")
 
             if not self._policyManager.checkSigningPolicy(
-                  data.getName(), signingCertificateName):
+                  target.getName(), signingCertificateName):
                 raise SecurityException(
                   "Signing Cert name does not comply with signing policy")
                   
             self._identityManager.signByCertificate(
-              data, signingCertificateName, wireFormat)
+              target, signingCertificateName, wireFormat)
         else:
             signingCertificateName = \
               self._identityManager.getDefaultCertificateNameForIdentity(identityName)
@@ -373,7 +368,7 @@ class KeyChain(object):
                 raise SecurityException("No qualified certificate name found!")
 
             return self._identityManager.signByCertificate(
-              array, signingCertificateName)
+              target, signingCertificateName)
           
     def verifyData(self, data, onVerified, onVerifyFailed, stepCount = 0):
         """
@@ -534,11 +529,5 @@ class KeyChain(object):
         return onTimeout
             
             
-    def setFace(self, face):
-        """
-        Set the Face which will be used to fetch required certificates.
-        
-        :param Face face: The Face object.
-        """
-        self._face = face
+
         

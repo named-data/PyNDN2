@@ -248,7 +248,7 @@ class MemoryContentCache(object):
 
             :param float nowMilliseconds: The current time in milliseconds from
               Common.getNowMilliseconds().
-            :return: true if this interest is stale, otherwise false.
+            :return: True if this content is stale, otherwise False.
             :rtype: bool
             """
             return self._staleTimeMilliseconds <= nowMilliseconds

@@ -29,6 +29,7 @@ from pyndn.name import Name
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding.wire_format import WireFormat
 
 # The Python documentation says "Use SystemRandom if you require a 
 #   cryptographically secure pseudo-random number generator."
@@ -55,8 +56,9 @@ class CommandInterestGenerator(object):
         :param KeyChain keyChain: The KeyChain for calling sign.
         :param Name certificateName: The certificate name of the key to use for 
           signing.
-        :param wireFormat: (optional) A WireFormat object used to encode this 
-           ControlParameters. If omitted, use WireFormat.getDefaultWireFormat().
+        :param wireFormat: (optional) A WireFormat object used to encode the 
+          SignatureInfo and to encode interest name for signing. If omitted, use
+          WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:

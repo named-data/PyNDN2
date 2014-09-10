@@ -36,19 +36,19 @@ class MetaInfo(object):
         if value == None:
             self._type = ContentType.BLOB
             self._freshnessPeriod = None
-            self._finalBlockID = Name.Component()
+            self._finalBlockId = Name.Component()
         elif type(value) is MetaInfo:
             # Copy its values.
             self._type = value._type
             self._freshnessPeriod = value._freshnessPeriod
-            self._finalBlockID = value._finalBlockID
+            self._finalBlockId = value._finalBlockId
         else:
             raise RuntimeError(
               "Unrecognized type for MetaInfo constructor: " +
               repr(type(value)))
                     
         self._changeCount = 0
-        
+
     def getType(self):
         """
         Get the content type.
@@ -67,7 +67,7 @@ class MetaInfo(object):
         """
         return self._freshnessPeriod
     
-    def getFinalBlockID(self):
+    def getFinalBlockId(self):
         """
         Get the final block ID.
         
@@ -75,7 +75,13 @@ class MetaInfo(object):
           getValue().size() is 0, then the final block ID is not specified.
         :rtype: Name.Component
         """
-        return self._finalBlockID
+        return self._finalBlockId
+
+    def getFinalBlockID(self):
+        """
+        :deprecated: Use getFinalBlockId.
+        """
+        return self.getFinalBlockId()
     
     def setType(self, type):
         """
@@ -97,19 +103,27 @@ class MetaInfo(object):
         self._freshnessPeriod = freshnessPeriod
         self._changeCount += 1
 
-    def setFinalBlockID(self, finalBlockID):
+    def setFinalBlockId(self, finalBlockId):
         """
         Set the final block ID.
         
-        :param finalBlockID: The final block ID.  If it is another 
+        :param finalBlockId: The final block ID.  If it is another 
           Name.Component, use its value. Otherwise pass value to the 
-          Name.Component constructor.
-        :type finalBlockID: Name.Component or value for the Name.Component 
+          Name.Component constructor.  If finalBlockId is None, set to a
+          Name.Component of size 0 so that the finalBlockId is not specified
+          and not encoded.
+        :type finalBlockId: Name.Component or value for the Name.Component 
           constructor
         """
-        self._finalBlockID = (finalBlockID if type(finalBlockID) is Name.Component 
-                              else Name.Component(finalBlockID))
+        self._finalBlockId = (finalBlockId if type(finalBlockId) is Name.Component 
+                              else Name.Component(finalBlockId))
         self._changeCount += 1
+
+    def setFinalBlockID(self, finalBlockId):
+        """
+        :deprecated: Use setFinalBlockId.
+        """
+        self.setFinalBlockId(finalBlockId)
 
     def getChangeCount(self):
         """
@@ -120,7 +134,23 @@ class MetaInfo(object):
         :rtype: int
         """
         return self._changeCount
-
+        
+    # Support property-based equivalence check 
+    # TODO: Desired syntax?
+    def equals(self, other):
+        if  (self._type == other._type 
+        and self._freshnessPeriod == other._freshnessPeriod
+        and self._finalBlockId == other._finalBlockId):
+            return True
+        else:
+            return False
+        
+    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+    type = property(getType, setType)
+    freshnessPeriod = property(getFreshnessPeriod, setFreshnessPeriod)
+    finalBlockId = property(getFinalBlockId, setFinalBlockId)
+    finalBlockID = property(getFinalBlockID, setFinalBlockID)
+        
 class ContentType(object):
     """
     A ContentType specifies the content type in a MetaInfo object.

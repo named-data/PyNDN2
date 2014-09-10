@@ -1,5 +1,31 @@
-Interim changes since PyNDN v2.0alpha2 (2014-07-21)
----------------------------------------------------
+Iterim changes after PyNDN v2.0beta1 (2014-09-02)
+-------------------------------------------------
+
+Changes
+* Support getter and setter properties in the classes Interest, Data, MetaInfo,
+  KeyLocator and ForwardingFlags, plus the internal ForwardingEntry and
+  ControlParameters.
+* In Name, support slice notation to call getSubName, e.g. name[2:4].
+* In MetaInfo, added get/setFinalBlockId (replaces the deprecated get/setFinalBlockID).
+
+Deprecated
+* In MetaInfo, deprecated get/setFinalBlockID. Use get/setFinalBlockId.
+
+PyNDN v2.0beta1 (2014-08-31)
+----------------------------
+
+Changes
+* In Name.appendSegment and appendVersion, encode the number as nonNegativeInteger which is always 1, 2, 4 or 8 bytes.
+  This means that appendSegment(0) now encodes as %00%00 instead of just %00.
+* In Name, added appendSegmentOffset, appendTimestamp and appendSequenceNumber.
+* In Name.Component, added toSegmentOffset, toTimestamp and toSequenceNumber.
+
+Bug fixes
+* http://redmine.named-data.net/issues/1925 Should encode non-negative integers 253 through 255 as one byte.
+* http://redmine.named-data.net/issues/1955 Return the registeredPrefixId from registerPrefix.
+
+PyNDN v2.0alpha3 (2014-08-14)
+-----------------------------
 
 Changes
 * Implemented SelfVerifyPolicyManager for use with KeyChain.verifyData, and use
@@ -23,6 +49,7 @@ Changes
 * Added MemoryContentCache. See http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 * KeyChain: added verifyInterest.
 * Added instructions for building the Sphinx documentation.
+* Added setup.py to support easy_install.  Added instructions in the README file.
 
 Deprecated
 * MemoryPrivateKeyStorage: Deprecated setKeyPairForKeyName without an explicit keyType. Use
