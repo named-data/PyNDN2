@@ -91,6 +91,14 @@ def shlex_split(s):
 """
 This class is provided for compatibility with the Boost INFO property list
 format used in ndn-cxx.
+
+Each node in the tree may have a name and a value as well as associated 
+sub-trees. The sub-tree names are not unique, and so sub-trees are stored as 
+dictionaries where the key is a sub-tree name and the values are the sub-trees
+sharing the same name.
+
+Nodes can be accessed with a path syntax, as long as nodes in the path do not 
+contain the path separator '/' in their names.
 """
 class BoostInfoTree(object):
     def __init__(self, value = None, parent = None):
@@ -102,7 +110,9 @@ class BoostInfoTree(object):
         self.lastChild = None
 
     def clone(self):
-
+        """
+        Create a deep copy of this tree.
+        """
         copy = BoostInfoTree(self.value)
         for subtreeName, subtrees in self.subtrees.items():
             for t in subtrees:
@@ -111,6 +121,11 @@ class BoostInfoTree(object):
         return copy
 
     def addSubtree(self, treeName, newTree):
+        """
+        Insert a BoostInfoTree as a sub-tree with the given name.
+        :param str treeName: The name of the new sub-tree.
+        :param BoostInfoTree newTree: The sub-tree to add.
+        """
         if treeName in self.subtrees:
             self.subtrees[treeName].append(newTree)
         else:
@@ -119,6 +134,14 @@ class BoostInfoTree(object):
         self.lastChild = newTree
 
     def createSubtree(self, treeName, value=None ):
+        """
+        Create a new BoostInfo and insert it as a sub-tree with the given name.
+        :param str treeName: The name of the new sub-tree.
+        :param str value: The value associated with the new sub-tree.
+        :return: The created sub-tree. 
+        :rtype: BoostInfoTree
+        """
+
         newTree = BoostInfoTree(value, self)
         self.addSubtree(treeName, newTree)
         return newTree
@@ -140,6 +163,10 @@ class BoostInfoTree(object):
         return foundVals
 
     def getValue(self):
+        """
+        :return: The value associated with this tree.
+        :rtype: str
+        """
         return self.value
 
     def _prettyprint(self, indentLevel=1):
@@ -164,27 +191,47 @@ class BoostInfoTree(object):
         return self._prettyprint()
 
 
+"""
+This class reads files in Boost's INFO format and constructs a BoostInfoTree.
+"""
 class BoostInfoParser(object):
     def __init__(self):
         self._root = BoostInfoTree()
 
     def read(self, filename):
+        """
+        Add the contents of the file to the root BoostInfoTree.
+        :param str filename: The path to the INFO file.
+        """
         self._read(filename, self._root)
         return self._root
 
     def readPropertyList(self, fromDict):
+        """
+        Import a python dict as a BoostInfoTree. Only leaf nodes will have
+        associated values.
+        :param dict fromDict: The dictionary to import.
+        """
         if not isinstance(fromDict, dict):
             raise TypeError('BoostInfoTree must be initialized from dictionary')
         self._readDict(fromDict, self._root)
         return self._root
 
     def _read(self, filename, ctx):
+        """
+        Internal import method.
+        :param str filename: The INFO file.
+        :param BoostInfoTree ctx: The node currently being populated.
+        """
         with open(filename, 'r') as stream:
             for line in stream:
                 ctx = self._parseLine(line.strip(), ctx)
         return ctx
 
     def _readList(self, fromList, intoNode, keyName):
+        """
+        Helper method for reading lists inside imported dictionaries.
+        """
         # we can have lists of strings or dicts, ONLY
         for v in fromList:
             if hasattr(v, 'keys'):
@@ -194,6 +241,9 @@ class BoostInfoParser(object):
                 intoNode.createSubtree(keyName, v)
 
     def _readDict(self, fromDict, currentNode):
+        """
+        Helper method for reading dictionaries inside imported dictionaries.
+        """
         for k,v in fromDict.items():
             # HACK
             if k == '__name__':
@@ -209,10 +259,18 @@ class BoostInfoParser(object):
 
 
     def write(self, filename):
+        """
+        Write the root tree of this BoostInfoParser as file in Boost's INFO 
+        format.
+        :param str filename: The output path.
+        """
         with open(filename, 'w') as stream:
             stream.write(str(self._root))
 
     def _parseLine(self, string, context):
+        """
+        Internal helper method for parsing INFO files line by line.
+        """
         # skip blank lines and comments
         commentStart = string.find(";")
         if commentStart >= 0:
@@ -265,6 +323,10 @@ class BoostInfoParser(object):
         raise RuntimeError("BoostInfoParser: input line is malformed")
 
     def getRoot(self):
+        """
+        :return: The root tree of this parser.
+        :rtype: BoostInfoTree
+        """
         return self._root
 
     def __getitem__(self, key):

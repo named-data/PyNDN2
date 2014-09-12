@@ -336,21 +336,22 @@ class DerBoolean(DerNode):
         return val != 0x00
 
 class DerInteger(DerNode):
-    def __init__(self, integer):
+    def __init__(self, integer=None):
         """
         Create a DerNode that encodes a integer value.
         :param integer: (optional) The value to encode
         :type integer: int
         """
         super(DerInteger, self).__init__(Der.Integer)
-        # convert the integer to bytes the easy/slow way
-        temp = bytearray()
-        while integer > 0:
-            temp.insert(0, integer & 0xff)
-            integer >>= 8
+        if integer is not None:
+            # convert the integer to bytes the easy/slow way
+            temp = bytearray()
+            while integer > 0:
+                temp.insert(0, integer & 0xff)
+                integer >>= 8
 
-        self._payload.extend(temp)
-        self._encodeHeader(len(self._payload))
+            self._payload.extend(temp)
+            self._encodeHeader(len(self._payload))
 
 class DerBitString(DerNode):
     def __init__(self, inputBuf=None, padding=None):

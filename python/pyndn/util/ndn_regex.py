@@ -33,7 +33,7 @@ class NdnRegexMatcher(object):
         newPattern = pattern
 
         #positive sets can be changed to (comp1|comp2)
-        #negative sets must be changed to negative lookbehind assertions
+        #negative sets must be changed to negative lookahead assertions
 
         inSetMatches = re.finditer('\[(\^?)(.*?)\]', pattern)
         for match in inSetMatches:
@@ -45,8 +45,8 @@ class NdnRegexMatcher(object):
             newStr = re.sub('><', '>|<', oldStr)
             newPattern = newPattern[:start] + newStr + newPattern[end:]
             
-        ## replace [] with () or (?<! ) for negative lookbehind
-        ## if we use negative lookbehind, we also have to consume one component
+        ## replace [] with (),  or (?! ) for negative lookahead
+        ## if we use negative lookahead, we also have to consume one component
         isNegative = newPattern.find("[^") >= 0
         if isNegative:
             newPattern = newPattern.replace("[^", "(?:(?!")
@@ -78,6 +78,11 @@ class NdnRegexMatcher(object):
     
     @staticmethod
     def match(pattern, name):
+        """
+        Determine if the provided NDN regex matches the given Name.
+        :param str pattern: The NDN regex.
+        :param Name name: The Name to match against the regex.
+        """
         #nameParts = [name.get(i).getValue().toRawStr() for i in range(name.size())]
         #nameUri = '/'+'/'.join(nameParts)
         nameUri = name.toUri()
@@ -90,45 +95,3 @@ class NdnRegexMatcher(object):
 
         return re.search(pattern, nameUri)
     
-
-if __name__ == '__main__':
-    def testMatch(pattern, name):
-        match = NdnRegexMatcher.match(pattern, name)
-        resultStr =  'Matching {} to {}: '.format(name.toUri(), pattern)
-        resultStr += 'Success'if match else 'Failure'
-        print resultStr
-        print
-            
-    testMatch('^<ndn>', Name("/ndn/KEY/ID-CERT")) 
-
-    testMatch('<&EY>', Name("/ndn/&EY/ID-CERT")) 
-
-    testMatch('<\\?EY>', Name("/ndn/?EY/ID-CERT")) 
-
-    testMatch('^<KEY>', Name("/ndn/KEY/ID-CERT")) 
-
-    testMatch('<KE\\.Y>', Name("/ndn/KE.Y/ID-CERT")) 
-
-    testMatch('<K.+Y>', Name("/ndn/KE.Y/ID-CERT")) 
-
-    testMatch('^<ndn><KEY><ID-CERT>$', Name("/ndn/KEY/ID-CERT")) 
-
-    testMatch('^<ndn><KEY><>*<ID-CERT>$', Name("/ndn/KEY/ID-CERT")) 
-
-    testMatch('^<ndn><KEY><>?<ID-CERT>$', Name("/ndn/KEY/ID-CERT")) 
-
-    testMatch('^<ndn><KEY><>+<ID-CERT>$', Name("/ndn/KEY/ID-CERT")) 
-
-    testMatch('^<ndn><KEY><>+<ID-CERT>$', Name("/ndn/KEY/lookhere/now/ID-CERT")) 
-
-    testMatch('^[<ndn><something>]', Name("/ndn/KEY/lookhere/ID-CERT")) 
-
-    testMatch('^[^<something>]', Name("/ndn/KEY/lookhere/ID-CERT")) 
-
-    testMatch('^[<something>]', Name("/ndn/KEY/lookhere/ID-CERT")) 
-
-    testMatch('<DNS><>*<NS>', Name("/ndn/edu/ucla/DNS/irl/NS/123456")) 
-
-    testMatch('^([^<DNS>]+)<DNS>(<>*)<NS>', Name("/ndn/ucla.edu/DNS/irl/NS/123456")) 
-
-    testMatch('^([^<KEY>]*)<KEY>(<>*)<ksk-.+><ID-CERT>', Name("/ndn/test/abannis/KEY/ksk-17837823/ID-CERT")) 
