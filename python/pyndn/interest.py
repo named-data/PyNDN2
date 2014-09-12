@@ -238,7 +238,7 @@ class Interest(object):
            Interest. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         :return: The encoded buffer.
-        :rtype: Blob
+        :rtype: SignedBlob
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.

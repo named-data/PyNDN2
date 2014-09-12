@@ -113,7 +113,7 @@ class Exclude(object):
         Append a new entry of type Exclude.ANY.
         
         :return: This Exclude so that you can chain calls to append.
-        :rype: Exclude
+        :rtype: Exclude
         """
         self._entries.append(Exclude.Entry())
         self._changeCount += 1
@@ -127,7 +127,7 @@ class Exclude(object):
         :type component: Exclude.Entry, Name.Component or a value for the 
           Name.Component constructor
         :return: This Exclude so that you can chain calls to append.
-        :rype: Exclude
+        :rtype: Exclude
         """
         self._entries.append(component if type(component) is Exclude.Entry
                              else Exclude.Entry(component))
