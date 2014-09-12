@@ -58,6 +58,10 @@ Optional: To install Protobuf in Python 3, in a terminal enter:
 
     sudo pip install protobuf-py3
 
+Optional: To install Sphinx, in a terminal enter:
+
+    sudo pip install sphinx
+
 ## Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
 
