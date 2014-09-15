@@ -350,7 +350,7 @@ class Node(object):
       wireFormat):
         """
         Do the work of registerPrefix to register with NDNx once we have an 
-        ndndId_.
+        _ndndId.
         
         :param int registeredPrefixId: The 
           _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
@@ -672,12 +672,12 @@ class Node(object):
                     statusCode = decoder.readNonNegativeIntegerTlv(Tlv.NfdCommand_StatusCode)
                 except ValueError:
                     # Error decoding the ControlResponse.
-                    self._onRegisterFailed_(self._prefix)
+                    self._onRegisterFailed(self._prefix)
                     return
 
                 # Status code 200 is "OK".
                 if statusCode != 200:
-                  self._onRegisterFailed_(self._prefix)
+                  self._onRegisterFailed(self._prefix)
 
                 # Otherwise, silently succeed.
             else:
