@@ -193,7 +193,7 @@ class KeyChain(object):
         :return: The requested certificate which is valid.
         :rtype: IdentityCertificate
         """
-        return self._identityManager.getIdentityCertificate(certificateName)
+        return self._identityManager.getCertificate(certificateName)
     
     def getAnyIdentityCertificate(self, certificateName):
         """
@@ -203,7 +203,7 @@ class KeyChain(object):
         :return: The requested certificate.
         :rtype: IdentityCertificate
         """
-        return self._identityManager.getAnyIdentityCertificate(certificateName)
+        return self._identityManager.getAnyCertificate(certificateName)
     
     def revokeKey(self, keyName):
         """
