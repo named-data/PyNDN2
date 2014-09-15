@@ -25,6 +25,7 @@ the methods.
 """
 
 import math
+from pyndn.name import Name
 from pyndn.util.common import Common
 from pyndn.security.security_exception import SecurityException
 
