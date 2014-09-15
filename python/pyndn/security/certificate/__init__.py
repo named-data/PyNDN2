@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.security.certificate import public_key
 __all__ = ['public_key']
 
 import sys as _sys

@@ -17,6 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.security.policy import no_verify_policy_manager, policy_manager
+from pyndn.security.policy import self_verify_policy_manager, validation_request
 __all__ = ['no_verify_policy_manager', 'policy_manager', 
            'self_verify_policy_manager', 'validation_request']
 
