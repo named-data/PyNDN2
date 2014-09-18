@@ -61,6 +61,7 @@ class Node(object):
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
         self._ndndId = None
         self._commandInterestGenerator = CommandInterestGenerator()
+        self._timeoutPrefix = Name("/local/timeout")
         
     def expressInterest(self, interest, onData, onTimeout, wireFormat):
         """
@@ -87,8 +88,11 @@ class Node(object):
         self._pendingInterestTable.append(
           Node._PendingInterest(pendingInterestId, interest, onData, 
                           onTimeout))
-        
-        self._transport.send(interest.wireEncode(wireFormat).toBuffer())
+
+        # Special case: For _timeoutPrefix we don't actually send the interest.
+        if not self._timeoutPrefix.match(interest.getName()):
+          self._transport.send(interest.wireEncode(wireFormat).toBuffer())
+          
         return pendingInterestId
     
     def removePendingInterest(self, pendingInterestId):
