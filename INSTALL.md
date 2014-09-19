@@ -14,7 +14,15 @@ Prerequisites
 * Optional: Sphinx (to make documentation)
 * Optional: pytest, mock and gevent (for running unit tests)
 
-Following are the detailed steps for each platform to install the prerequisites.
+### Option to use easy_install
+
+If you use easy_install to install the pyndn module, it automatically installs
+the prerequisites for PyCrypto, trollius/asyncio and Protobuf needed to run PyNDN.
+To use easy_install, change directory to the PyNDN root and enter:
+
+    sudo CFLAGS=-Qunused-arguments python ./setup.py install
+
+Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
 ## Mac OS X 10.7.3, Mac OS X 10.8.5
 Install Xcode.  
