@@ -22,7 +22,7 @@
 import unittest as ut
 from pyndn import Name
 
-class TestNameConventiions(ut.TestCase):
+class TestNameConventions(ut.TestCase):
     def testNumberWithMarker(self):
         expected = Name("/%AA%03%E8")
         number = 1000

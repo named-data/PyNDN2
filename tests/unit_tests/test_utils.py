@@ -139,7 +139,7 @@ class CredentialStorage:
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage), 
                         SelfVerifyPolicyManager(self.identityStorage))
         keyName = Name("/testname/DSK-123")
-        self.defaultCertName = keyName.getSubName(0, keyName.size() - 1).append(
+        self.defaultCertName = keyName[:-1].append(
       "KEY").append(keyName[-1]).append("ID-CERT").append("0")
 
         self.identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
