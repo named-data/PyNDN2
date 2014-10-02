@@ -74,7 +74,7 @@ def dumpInterest(interest):
         if (interest.getKeyLocator().getType() == 
             KeyLocatorType.KEY_LOCATOR_DIGEST):
             result.append(dump("keyLocator: KeyLocatorDigest:",
-                 str(interest.getKeyLocator().getKeyData()).encode('hex')))
+                 interest.getKeyLocator().getKeyData().toHex()))
         elif interest.getKeyLocator().getType() == KeyLocatorType.KEYNAME:
             result.append(dump("keyLocator: KeyName:",
                  interest.getKeyLocator().getKeyName().toUri()))
@@ -90,7 +90,7 @@ def dumpInterest(interest):
          if interest.getChildSelector() is not None else "<none>"))
     result.append(dump("mustBeFresh:", interest.getMustBeFresh()))
     result.append(dump("nonce:", "<none>" if len(interest.getNonce()) == 0
-                            else str(interest.getNonce()).encode('hex')))
+                            else interest.getNonce().toHex()))
     result.append(dump("scope:", "<none>" if interest.getScope() is None
                             else interest.getScope()))
     result.append(dump("lifetimeMilliseconds:",

@@ -188,7 +188,7 @@ class TestFaceRegisterMethods(ut.TestCase):
         # check the message content
         data = onDataArgs[1]
         expectedBlob = Blob(bytearray("SUCCESS"))
-        self.assertTrue(expectedBlob.equals(data.getContent()), 'Data received on face does not match expected format')
+        self.assertTrue(expectedBlob == data.getContent(), 'Data received on face does not match expected format')
 
 
     def face_process_events(self, face, callbacks, name=None):

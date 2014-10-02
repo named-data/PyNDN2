@@ -66,7 +66,7 @@ def dumpData(data):
     result.append(dump("name:", data.getName().toUri()))
     if len(data.getContent()) > 0:
         result.append(dump("content (raw):", str(data.getContent())))
-        result.append(dump("content (hex):", str(data.getContent()).encode('hex')))
+        result.append(dump("content (hex):", data.getContent().toHex()))
     else:
         result.append(dump("content: <empty>"))
     if not data.getMetaInfo().getType() == ContentType.BLOB:
@@ -85,12 +85,12 @@ def dumpData(data):
     if type(signature) is Sha256WithRsaSignature:
         result.append(dump("signature.signature:", 
              "<none>" if len(signature.getSignature()) == 0
-                      else str(signature.getSignature()).encode('hex')))
+                      else signature.getSignature().toHex()))
         if signature.getKeyLocator().getType() is not None:
             if (signature.getKeyLocator().getType() == 
                 KeyLocatorType.KEY_LOCATOR_DIGEST):
                 result.append(dump("signature.keyLocator: KeyLocatorDigest:",
-                     str(signature.getKeyLocator().getKeyData()).encode('hex')))
+                     signature.getKeyLocator().getKeyData().toHex()))
             elif signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME:
                 result.append(dump("signature.keyLocator: KeyName:",
                      signature.getKeyLocator().getKeyName().toUri()))
