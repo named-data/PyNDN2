@@ -361,13 +361,18 @@ class Name(object):
         """
         Get a new name, constructed as a subset of components.
         
-        :param int iStartComponent: The index if the first component to get.
+        :param int iStartComponent: The index if the first component to get. If
+          iStartComponent is -N then return return components starting from
+          name.size() - N.
         :param int nComponents: (optional) nComponents The number of components 
           starting at iStartComponent.  If omitted, return components starting 
           at iStartComponent until the end of the name.
         :return: A new name.
         :rtype: Name
         """
+        if iStartComponent < 0:
+            iStartComponent = len(self._components) - (-iStartComponent)
+            
         if nComponents == None:
             nComponents = len(self._components) - iStartComponent
 
