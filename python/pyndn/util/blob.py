@@ -146,6 +146,14 @@ class Blob(object):
         else:
             return "".join(map(chr, self.buf()))
 
+    # Python operators
+
+    def __eq__(self, other):
+        return type(other) is Blob and self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
+
     def __str__(self):
         """
         For Python 3, decode the buffer as UTF8 and return the Unicode string
