@@ -459,7 +459,7 @@ class Tlv0_1WireFormat(WireFormat):
         the name object.
         
         :param Name name: The name object whose fields are updated.
-        :param TlvDecode decode: The decoder with the input.
+        :param TlvDecoder decode: The decoder with the input.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
           where signedPortionBeginOffset is the offset in the encoding of 
           the beginning of the signed portion, and signedPortionEndOffset is
