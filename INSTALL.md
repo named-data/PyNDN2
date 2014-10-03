@@ -50,7 +50,7 @@ Optional: To install Sphinx, in a terminal enter:
 
 Optional: To install pytest, mock and gevent, in a terminal enter:
 
-    sudo pip install CFLAGS=-Qunused-arguments pytest mock gevent
+    sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
 
 ## Mac OS X 10.9
 Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)  
@@ -77,7 +77,7 @@ Optional: To install Sphinx, in a terminal enter:
 
 Optional: To install pytest, mock and gevent, in a terminal enter:
 
-    sudo pip install CFLAGS=-Qunused-arguments pytest mock gevent
+    sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
