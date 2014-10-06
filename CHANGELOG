@@ -1,4 +1,4 @@
-Interim changes after PyNDN v2.0beta1 (2014-09-18)
+Interim changes after PyNDN v2.0beta1 (2014-10-06)
 --------------------------------------------------
 
 Changes
@@ -7,6 +7,7 @@ Changes
   ControlParameters.
 * In Name, support slice notation to call getSubName, e.g. name[2:4].
 * In MetaInfo, added get/setFinalBlockId (replaces the deprecated get/setFinalBlockID).
+* In MemoryContentCache, added unregisterAll.
 * In unit tests, added test-name-conventions.
 * In each __init__.py, added import statements for each module (required by pylint).
 

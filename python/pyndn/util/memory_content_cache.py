@@ -51,7 +51,9 @@ class MemoryContentCache(object):
 
         # The map key is the prefix.toUri(). The value is an OnInterest function.
         self._onDataNotFoundForPrefix = {}
-        #  elements are MemoryContentCache._Content
+        # elements are int
+        self._registeredPrefixIdList = []
+        # elements are MemoryContentCache._Content
         self._noStaleTimeCache = []
         # elements are MemoryContentCache.StaleTimeContent
         self._staleTimeCache = []
@@ -80,8 +82,23 @@ class MemoryContentCache(object):
         """
         if onDataNotFound != None:
             self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
-        self._face.registerPrefix(
+        registeredPrefixId = self._face.registerPrefix(
           prefix, self._onInterest, onRegisterFailed, flags, wireFormat)
+        self._registeredPrefixIdList.append(registeredPrefixId)
+
+    def unregisterAll(self):
+        """
+        Call Face.removeRegisteredPrefix for all the prefixes given to the
+        registerPrefix method on this MemoryContentCache object so that it will
+        not receive interests any more. You can call this if you want to "shut
+        down" this MemoryContentCache while your application is still running.
+        """
+        for registeredPrefixId in self._registeredPrefixIdList:
+            self._face.removeRegisteredPrefix(registeredPrefixId)
+        self._registeredPrefixIdList = []
+
+        # Also clear each onDataNotFoundForPrefix given to registerPrefix.
+        self._onDataNotFoundForPrefix = {}
 
     def add(self, data):
         """
