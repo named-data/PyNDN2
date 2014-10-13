@@ -163,8 +163,8 @@ class BasicIdentityStorage(IdentityStorage):
         :return: True if the key exists, otherwise False.
         :rtype: bool
         """
-        keyId = keyName.get(keyName.size() - 1).toEscapedString()
-        identityName = keyName.getSubName(0, keyName.size() - 1)
+        keyId = keyName.get(-1).toEscapedString()
+        identityName = keyName.getPrefix(-1)
 
         cursor = self._database.cursor()        
         cursor.execute(
@@ -207,8 +207,8 @@ class BasicIdentityStorage(IdentityStorage):
         :return: The KeyType, for example KeyType.RSA.
         :rtype: an int from KeyType
         """
-        keyId = keyName.get(keyName.size() - 1).toEscapedString()
-        identityName = keyName.getSubName(0, keyName.size() - 1)
+        keyId = keyName.get(-1).toEscapedString()
+        identityName = keyName.getPrefix(-1)
 
         cursor = self._database.cursor()        
         cursor.execute(
@@ -346,8 +346,8 @@ class BasicIdentityStorage(IdentityStorage):
         :raises SecurityException: if the default certificate name for the key 
           name is not set.
         """
-        keyId = keyName.get(keyName.size() - 1).toEscapedString()
-        identityName = keyName.getSubName(0, keyName.size() - 1)
+        keyId = keyName.get(-1).toEscapedString()
+        identityName = keyName.getPrefix(-1)
 
         cursor = self._database.cursor()        
         cursor.execute(
