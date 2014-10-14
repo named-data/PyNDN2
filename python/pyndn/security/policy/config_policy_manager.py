@@ -219,7 +219,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
             except KeyError:
                 pass
             else:
-                return NdnRegexMatcher.match(regex, name) is not None
+                return NdnRegexMatcher.match(keyRegex, signatureName) is not None
 
             # is this a hyper-relation?
             try:
@@ -468,8 +468,6 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         if matchedRule is None:
             onVerifyFailed(dataOrInterest)
             return None
-
-
 
         signatureMatches = self._checkSignatureMatch(signatureName, objectName, matchedRule)
         if not signatureMatches:
