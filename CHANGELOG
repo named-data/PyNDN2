@@ -1,4 +1,4 @@
-Interim changes after PyNDN v2.0beta1 (2014-10-06)
+Interim changes after PyNDN v2.0beta1 (2014-10-14)
 --------------------------------------------------
 
 Changes
@@ -6,6 +6,7 @@ Changes
   KeyLocator and ForwardingFlags, plus the internal ForwardingEntry and
   ControlParameters.
 * In Name, support slice notation to call getSubName, e.g. name[2:4].
+* In Name, added wireEncode and wireDecode.
 * In MetaInfo, added get/setFinalBlockId (replaces the deprecated get/setFinalBlockID).
 * In MemoryContentCache, added unregisterAll.
 * In unit tests, added test-name-conventions.

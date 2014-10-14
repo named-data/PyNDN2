@@ -576,6 +576,40 @@ class Name(object):
                 return False
 
         return True
+
+    def wireEncode(self, wireFormat = None):
+        """
+        Encode this Name for a particular wire format.
+
+        :param wireFormat: (optional) A WireFormat object used to encode this
+           Name. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: The encoded buffer.
+        :rtype: Blob
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        return wireFormat.encodeName(self)
+
+    def wireDecode(self, input, wireFormat = None):
+        """
+        Decode the input using a particular wire format and update this Name.
+
+        :param input: The array with the bytes to decode.
+        :type input: A Blob or an array type with int elements
+        :param wireFormat: (optional) A WireFormat object used to decode this
+           Name. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        # If input is a Blob, get its buf().
+        decodeBuffer = input.buf() if isinstance(input, Blob) else input
+        wireFormat.decodeName(self, decodeBuffer)
         
     def getChangeCount(self):
         """
@@ -756,5 +790,6 @@ class Name(object):
 
         return bytearray(result.getvalue())          
 
-# Import this at the end of the file to avoid circular references.
+# Import these at the end of the file to avoid circular references.
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding import WireFormat
