@@ -752,6 +752,12 @@ class Name(object):
     def __gt__(self, other):
         return self.compare(other) > 0
 
+    def __str__(self):
+        return self.toUri()
+
+    def __repr__(self):
+        return self.toUri()
+
     @staticmethod
     def _unescape(escaped):
         """
