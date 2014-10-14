@@ -279,6 +279,9 @@ class Name(object):
 
         def __len__(self):
             return self._value.size()
+
+        def __str__(self):
+            return self.toEscapedString()
             
     def set(self, uri):
         """
