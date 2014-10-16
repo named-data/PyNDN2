@@ -18,7 +18,7 @@
 # A copy of the GNU General Public License is in the file COPYING.
 
 from pyndn.encoding.der import DerNode, DerSequence, DerGeneralizedTime, DerOid, DerPrintableString
-from pyndn.security.certificate import PublicKey
+from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.security_types import KeyType
 from pyndn.util import Blob
 from pyndn import Data, ContentType
