@@ -111,7 +111,7 @@ REAL_CERT_STRING = "Certificate name:\n"\
 +"  /tmp\n"\
 +"Validity:\n"\
 +"  NotBefore: 20131101T171122\n"\
-+"  NotAfter: 20131101T171122\n"\
++"  NotAfter: 20141101T171122\n"\
 +"Subject Description:\n"\
 +"  2.5.4.41: NDN Testbed Root\n"\
 +"Public key bits:\n"\
