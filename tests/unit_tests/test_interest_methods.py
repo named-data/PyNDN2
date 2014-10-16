@@ -66,11 +66,11 @@ def dumpInterest(interest):
     result.append(dump("name:", interest.getName().toUri()))
     result.append(dump("minSuffixComponents:",
          interest.getMinSuffixComponents()
-         if interest.getMinSuffixComponents() != None else "<none>"))
+         if interest.getMinSuffixComponents() is not None else "<none>"))
     result.append(dump("maxSuffixComponents:",
          interest.getMaxSuffixComponents()
-         if interest.getMaxSuffixComponents() != None else "<none>"))
-    if interest.getKeyLocator().getType() != None:
+         if interest.getMaxSuffixComponents() is not None else "<none>"))
+    if interest.getKeyLocator().getType() is not None:
         if (interest.getKeyLocator().getType() == 
             KeyLocatorType.KEY_LOCATOR_DIGEST):
             result.append(dump("keyLocator: KeyLocatorDigest:",
@@ -84,17 +84,17 @@ def dumpInterest(interest):
         result.append(dump("keyLocator: <none>"))
     result.append(dump("exclude:",
          interest.getExclude().toUri()
-         if interest.getExclude().size() > 0 else "<none>"))
+         if len(interest.getExclude()) > 0 else "<none>"))
     result.append(dump("childSelector:",
          interest.getChildSelector()
-         if interest.getChildSelector() != None else "<none>"))
+         if interest.getChildSelector() is not None else "<none>"))
     result.append(dump("mustBeFresh:", interest.getMustBeFresh()))
-    result.append(dump("nonce:", "<none>" if interest.getNonce().size() == 0
+    result.append(dump("nonce:", "<none>" if len(interest.getNonce()) == 0
                             else interest.getNonce().toHex()))
-    result.append(dump("scope:", "<none>" if interest.getScope() == None
+    result.append(dump("scope:", "<none>" if interest.getScope() is None
                             else interest.getScope()))
     result.append(dump("lifetimeMilliseconds:",
-         "<none>" if interest.getInterestLifetimeMilliseconds() == None
+         "<none>" if interest.getInterestLifetimeMilliseconds() is None
                   else interest.getInterestLifetimeMilliseconds()))
     return result
 

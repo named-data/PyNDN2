@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.util import blob, signed_blob
 __all__ = ['blob', 'signed_blob']
 
 import sys as _sys

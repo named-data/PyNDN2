@@ -37,6 +37,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
     def __init__(self):
         super(OSXPrivateKeyStorage, self).__init__()
 
+#pylint: disable=E1103
         self._kCFBooleanTrue = c_void_p.in_dll(cf, "kCFBooleanTrue")
         
         self._security = cdll.LoadLibrary(
@@ -69,6 +70,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         self._kSecTransformInputAttributeName = c_void_p.in_dll(self._security, "kSecTransformInputAttributeName")
         self._kSecDigestTypeAttribute = c_void_p.in_dll(self._security, "kSecDigestTypeAttribute")
         self._kSecDigestLengthAttribute = c_void_p.in_dll(self._security, "kSecDigestLengthAttribute")
+#pylint: enable=E1103
 
     def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
         """

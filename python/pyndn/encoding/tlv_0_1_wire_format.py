@@ -42,6 +42,30 @@ with the NDN-TLV wire format, version 0.1a2.
 
 class Tlv0_1WireFormat(WireFormat):
     _instance = None
+
+    def encodeName(self, name):
+        """
+        Encode name in NDN-TLV and return the encoding.
+
+        :param Name name: The Name object to encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        self._encodeName(name, encoder)
+        return Blob(encoder.getOutput(), False)
+
+    def decodeName(self, name, input):
+        """
+        Decode input as an NDN-TLV name and set the fields of the Name
+        object.
+
+        :param Name name: The Name object whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        decoder = TlvDecoder(input)
+        self._decodeName(name, decoder)
     
     def encodeInterest(self, interest):
         """
@@ -459,7 +483,7 @@ class Tlv0_1WireFormat(WireFormat):
         the name object.
         
         :param Name name: The name object whose fields are updated.
-        :param TlvDecode decode: The decoder with the input.
+        :param TlvDecoder decode: The decoder with the input.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset) 
           where signedPortionBeginOffset is the offset in the encoding of 
           the beginning of the signed portion, and signedPortionEndOffset is

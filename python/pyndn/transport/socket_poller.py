@@ -38,8 +38,10 @@ class SocketPoller(object):
         
         if hasattr(select, "poll"):
             # Set up _poll.  (Ubuntu, etc.)
+#pylint: disable=E1103
             self._poll = select.poll()
             self._poll.register(sock.fileno(), select.POLLIN)
+#pylint: enable=E1103
         elif hasattr(select, "kqueue"):
             ## Set up _kqueue. (BSD and OS X)
             self._kqueue = select.kqueue()
@@ -63,8 +65,10 @@ class SocketPoller(object):
             isReady = False
             # Set timeout to 0 for an immediate check.
             for (fd, pollResult) in self._poll.poll(0):
+#pylint: disable=E1103
                 if pollResult > 0 and pollResult & select.POLLIN != 0:
                     return True
+#pylint: enable=E1103
 
             # There is no data waiting.
             return False

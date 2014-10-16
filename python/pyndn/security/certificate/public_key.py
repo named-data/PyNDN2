@@ -23,6 +23,7 @@ for use by the security library.
 """
 
 from Crypto.PublicKey import RSA
+from pyndn.util import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException

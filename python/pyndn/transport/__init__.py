@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.transport import tcp_transport, transport, udp_transport, unix_transport
 __all__ = ['tcp_transport', 'transport', 'udp_transport', 'unix_transport']
 
 import sys as _sys

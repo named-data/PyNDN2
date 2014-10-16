@@ -64,8 +64,8 @@ codedData = Blob(bytearray([
 def dumpData(data):
     result = []
     result.append(dump("name:", data.getName().toUri()))
-    if data.getContent().size() > 0:
-        result.append(dump("content (raw):", data.getContent().toRawStr()))
+    if len(data.getContent()) > 0:
+        result.append(dump("content (raw):", str(data.getContent())))
         result.append(dump("content (hex):", data.getContent().toHex()))
     else:
         result.append(dump("content: <empty>"))
@@ -79,14 +79,14 @@ def dumpData(data):
          if data.getMetaInfo().getFreshnessPeriod() >= 0 else "<none>"))
     result.append(dump("metaInfo.finalBlockId:",
          data.getMetaInfo().getFinalBlockId().toEscapedString()
-         if data.getMetaInfo().getFinalBlockId().getValue().size() > 0
+         if len(data.getMetaInfo().getFinalBlockId().getValue()) > 0
          else "<none>"))
     signature = data.getSignature()
     if type(signature) is Sha256WithRsaSignature:
         result.append(dump("signature.signature:", 
-             "<none>" if signature.getSignature().size() == 0
+             "<none>" if len(signature.getSignature()) == 0
                       else signature.getSignature().toHex()))
-        if signature.getKeyLocator().getType() != None:
+        if signature.getKeyLocator().getType() is not None:
             if (signature.getKeyLocator().getType() == 
                 KeyLocatorType.KEY_LOCATOR_DIGEST):
                 result.append(dump("signature.keyLocator: KeyLocatorDigest:",

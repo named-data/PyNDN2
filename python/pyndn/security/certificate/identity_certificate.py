@@ -35,7 +35,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-from pyndn.security.certificate import Certificate
+from pyndn.security.certificate.certificate import Certificate
 from pyndn.security.security_exception import SecurityException
 from pyndn import Name,Data
 

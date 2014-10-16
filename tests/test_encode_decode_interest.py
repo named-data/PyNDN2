@@ -208,6 +208,8 @@ def main():
     dump("Interest:")
     dumpInterest(interest)
     
+    # Set the name again to clear the cached encoding so we encode again.
+    interest.setName(interest.getName())
     encoding = interest.wireEncode()
     dump("")
     dump("Re-encoded interest", encoding.toHex())

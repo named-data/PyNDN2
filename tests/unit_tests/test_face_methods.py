@@ -79,7 +79,7 @@ class TestFaceInterestMethods(ut.TestCase):
 
         #just check that the interest was returned correctly?
         callbackInterest = onDataArgs[0]
-        self.assertTrue(callbackInterest.getName().equals(Name(uri)), 'Interest returned on callback had different name')
+        self.assertTrue(callbackInterest.getName() == (Name(uri)), 'Interest returned on callback had different name')
         
     # TODO: Replace this with a test that connects to a Face on localhost
     #def test_specific_interest(self):
@@ -94,7 +94,7 @@ class TestFaceInterestMethods(ut.TestCase):
 
     #    #just check that the interest was returned correctly?
     #    callbackInterest = onDataArgs[0]
-    #    self.assertTrue(callbackInterest.getName().equals(Name(uri)), 'Interest returned on callback had different name')
+    #    self.assertTrue(callbackInterest.getName() == Name(uri), 'Interest returned on callback had different name')
 
     def test_timeout(self):
         uri = "/test/timeout"
@@ -110,7 +110,7 @@ class TestFaceInterestMethods(ut.TestCase):
 
         #just check that the interest was returned correctly?
         callbackInterest = onTimeoutArgs[0]
-        self.assertTrue(callbackInterest.getName().equals(Name(uri)), 'Interest returned on callback had different name')
+        self.assertTrue(callbackInterest.getName() == (Name(uri)), 'Interest returned on callback had different name')
 
     def test_remove_pending(self):
         name = Name("/ndn/edu/ucla/remap/")
@@ -188,7 +188,7 @@ class TestFaceRegisterMethods(ut.TestCase):
         # check the message content
         data = onDataArgs[1]
         expectedBlob = Blob(bytearray("SUCCESS"))
-        self.assertTrue(expectedBlob.equals(data.getContent()), 'Data received on face does not match expected format')
+        self.assertTrue(expectedBlob == data.getContent(), 'Data received on face does not match expected format')
 
 
     def face_process_events(self, face, callbacks, name=None):

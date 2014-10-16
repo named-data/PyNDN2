@@ -61,6 +61,7 @@ class Node(object):
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
         self._ndndId = None
         self._commandInterestGenerator = CommandInterestGenerator()
+        self._timeoutPrefix = Name("/local/timeout")
         
     def expressInterest(self, interest, onData, onTimeout, wireFormat):
         """
@@ -87,8 +88,11 @@ class Node(object):
         self._pendingInterestTable.append(
           Node._PendingInterest(pendingInterestId, interest, onData, 
                           onTimeout))
-        
-        self._transport.send(interest.wireEncode(wireFormat).toBuffer())
+
+        # Special case: For _timeoutPrefix we don't actually send the interest.
+        if not self._timeoutPrefix.match(interest.getName()):
+          self._transport.send(interest.wireEncode(wireFormat).toBuffer())
+          
         return pendingInterestId
     
     def removePendingInterest(self, pendingInterestId):
@@ -350,7 +354,7 @@ class Node(object):
       wireFormat):
         """
         Do the work of registerPrefix to register with NDNx once we have an 
-        ndndId_.
+        _ndndId.
         
         :param int registeredPrefixId: The 
           _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
@@ -672,12 +676,12 @@ class Node(object):
                     statusCode = decoder.readNonNegativeIntegerTlv(Tlv.NfdCommand_StatusCode)
                 except ValueError:
                     # Error decoding the ControlResponse.
-                    self._onRegisterFailed_(self._prefix)
+                    self._onRegisterFailed(self._prefix)
                     return
 
                 # Status code 200 is "OK".
                 if statusCode != 200:
-                  self._onRegisterFailed_(self._prefix)
+                  self._onRegisterFailed(self._prefix)
 
                 # Otherwise, silently succeed.
             else:

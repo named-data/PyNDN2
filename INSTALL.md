@@ -12,8 +12,17 @@ Prerequisites
 * Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter)
 * Optional: Sphinx (to make documentation)
+* Optional: pytest, mock and gevent (for running unit tests)
 
-Following are the detailed steps for each platform to install the prerequisites.
+### Option to use easy_install
+
+If you use easy_install to install the pyndn module, it automatically installs
+the prerequisites for PyCrypto, trollius/asyncio and Protobuf needed to run PyNDN.
+To use easy_install, change directory to the PyNDN root and enter:
+
+    sudo CFLAGS=-Qunused-arguments python ./setup.py install
+
+Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
 ## Mac OS X 10.7.3, Mac OS X 10.8.5
 Install Xcode.  
@@ -39,6 +48,10 @@ Optional: To install Sphinx, in a terminal enter:
 
     sudo pip install sphinx
 
+Optional: To install pytest, mock and gevent, in a terminal enter:
+
+    sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
+
 ## Mac OS X 10.9
 Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)  
 In a terminal, enter:
@@ -57,6 +70,14 @@ Optional: To install Protobuf in Python 2, in a terminal enter:
 Optional: To install Protobuf in Python 3, in a terminal enter:
 
     sudo pip install protobuf-py3
+
+Optional: To install Sphinx, in a terminal enter:
+
+    sudo pip install sphinx
+
+Optional: To install pytest, mock and gevent, in a terminal enter:
+
+    sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
@@ -77,6 +98,12 @@ Optional: To install Sphinx, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install sphinx
+
+Optional: To install pytest, mock and gevent, in a terminal enter:
+
+    sudo apt-get install python-pip
+    sudo pip install pytest mock
+    sudo apt-get install python-gevent
 
 (Protobuf is already installed.)
 
@@ -102,6 +129,12 @@ Optional: To install Protobuf in Python 3, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install protobuf-py3
+
+Optional: To install pytest, mock and gevent, in a terminal enter:
+
+    sudo apt-get install python-pip
+    sudo pip install pytest mock
+    sudo apt-get install python-gevent
 
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
@@ -160,6 +193,12 @@ You need PyNDN on the Python path.  To temporarily set it, do the following.
 If `<PyNDN root>` is the path to the root of the PyNDN distribution, in a terminal enter:
 
     export PYTHONPATH=$PYTHONPATH:<PyNDN root>/python
+
+To run the unit tests, in a terminal enter:
+
+    python -m pytest <PyNDN root>/tests/unit_tests/*.py
+
+(If TestFaceRegisterMethods fails, make sure the local NFD is running.)
 
 For examples, see the test files in `<PyNDN root>/tests`.  For example in a terminal enter:
 
