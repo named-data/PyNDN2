@@ -43,6 +43,7 @@ class ElementReader(object):
         self._tlvStructureDecoder = TlvStructureDecoder()
         self._usePartialData = False
         self._partialData = DynamicByteArray(1000)
+        self._partialDataLength = 0
         self._useTlv = None
 
     def onReceivedData(self, data):

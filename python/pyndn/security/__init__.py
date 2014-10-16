@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.security import key_chain, security_exception, security_types
 __all__ = ['key_chain', 'security_exception', 'security_types']
 
 import sys as _sys

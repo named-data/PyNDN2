@@ -25,6 +25,8 @@ own means and add the objects to the MemoryIdentityStorage object.
 To use permanent file-based storage, see BasicIdentityStorage.
 """
 
+from pyndn.data import Data
+from pyndn.name import Name
 from pyndn.util import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
@@ -187,7 +189,7 @@ class MemoryIdentityStorage(IdentityStorage):
             raise SecurityException("Certificate has already been installed!")
 
         # Check if the public key of certificate is the same as the key record.
-        keyBlob = getKey(keyName)
+        keyBlob = self.getKey(keyName)
         if (keyBlob.isNull() or 
               # Note: In Python, != should do a byte-by-byte comparison.
               keyBlob.toBuffer() != 

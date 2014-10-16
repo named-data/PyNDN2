@@ -17,6 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.security.identity import basic_identity_storage, file_private_key_storage
+from pyndn.security.identity import identity_manager, identity_storage, memory_identity_storage
+from pyndn.security.identity import memory_private_key_storage, osx_private_key_storage
+from pyndn.security.identity import private_key_storage
 __all__ = ['basic_identity_storage', 'file_private_key_storage', 
            'identity_manager', 'identity_storage', 'memory_identity_storage', 
            'memory_private_key_storage', 'osx_private_key_storage', 

@@ -5,6 +5,7 @@
 # See COPYING for copyright and distribution information.
 
 # Don't include internal modules.
+from pyndn.encoding import tlv_0_1_wire_format, tlv_wire_format, wire_format
 __all__ = ['tlv_0_1_wire_format', 'tlv_wire_format', 'wire_format']
 
 import sys as _sys

@@ -197,6 +197,7 @@ def cfarray_to_list(cfarray):
              for i in range(count) ]
 
 
+#pylint: disable=E1103
 kCFRunLoopDefaultMode = c_void_p.in_dll(cf, 'kCFRunLoopDefaultMode')
 
 cf.CFRunLoopGetCurrent.restype = c_void_p
@@ -355,6 +356,7 @@ CGBitmapInfo = c_uint32          # CGImage.h
 #     ImageIO.framework/Headers/CGImageProperties.h
 kCGImagePropertyGIFDictionary = c_void_p.in_dll(quartz, 'kCGImagePropertyGIFDictionary')
 kCGImagePropertyGIFDelayTime = c_void_p.in_dll(quartz, 'kCGImagePropertyGIFDelayTime')
+#pylint: enable=E1103
 
 # /System/Library/Frameworks/ApplicationServices.framework/Frameworks/...
 #     CoreGraphics.framework/Headers/CGColorSpace.h
@@ -501,11 +503,13 @@ CTFontOrientation = c_uint32      # CTFontDescriptor.h
 CTFontSymbolicTraits = c_uint32   # CTFontTraits.h
 
 # CoreText constants
+#pylint: disable=E1103
 kCTFontAttributeName = c_void_p.in_dll(ct, 'kCTFontAttributeName')
 kCTFontFamilyNameAttribute = c_void_p.in_dll(ct, 'kCTFontFamilyNameAttribute')
 kCTFontSymbolicTrait = c_void_p.in_dll(ct, 'kCTFontSymbolicTrait')
 kCTFontWeightTrait = c_void_p.in_dll(ct, 'kCTFontWeightTrait')
 kCTFontTraitsAttribute = c_void_p.in_dll(ct, 'kCTFontTraitsAttribute')
+#pylint: enable=E1103
 
 # constants from CTFontTraits.h
 kCTFontItalicTrait = (1 << 0)

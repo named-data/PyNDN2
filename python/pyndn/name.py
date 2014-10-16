@@ -279,6 +279,9 @@ class Name(object):
 
         def __len__(self):
             return self._value.size()
+
+        def __str__(self):
+            return self.toEscapedString()
             
     def set(self, uri):
         """
@@ -361,13 +364,18 @@ class Name(object):
         """
         Get a new name, constructed as a subset of components.
         
-        :param int iStartComponent: The index if the first component to get.
+        :param int iStartComponent: The index if the first component to get. If
+          iStartComponent is -N then return return components starting from
+          name.size() - N.
         :param int nComponents: (optional) nComponents The number of components 
           starting at iStartComponent.  If omitted, return components starting 
           at iStartComponent until the end of the name.
         :return: A new name.
         :rtype: Name
         """
+        if iStartComponent < 0:
+            iStartComponent = len(self._components) - (-iStartComponent)
+            
         if nComponents == None:
             nComponents = len(self._components) - iStartComponent
 
@@ -571,6 +579,40 @@ class Name(object):
                 return False
 
         return True
+
+    def wireEncode(self, wireFormat = None):
+        """
+        Encode this Name for a particular wire format.
+
+        :param wireFormat: (optional) A WireFormat object used to encode this
+           Name. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: The encoded buffer.
+        :rtype: Blob
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        return wireFormat.encodeName(self)
+
+    def wireDecode(self, input, wireFormat = None):
+        """
+        Decode the input using a particular wire format and update this Name.
+
+        :param input: The array with the bytes to decode.
+        :type input: A Blob or an array type with int elements
+        :param wireFormat: (optional) A WireFormat object used to decode this
+           Name. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        # If input is a Blob, get its buf().
+        decodeBuffer = input.buf() if isinstance(input, Blob) else input
+        wireFormat.decodeName(self, decodeBuffer)
         
     def getChangeCount(self):
         """
@@ -713,6 +755,12 @@ class Name(object):
     def __gt__(self, other):
         return self.compare(other) > 0
 
+    def __str__(self):
+        return self.toUri()
+
+    def __repr__(self):
+        return self.toUri()
+
     @staticmethod
     def _unescape(escaped):
         """
@@ -751,5 +799,6 @@ class Name(object):
 
         return bytearray(result.getvalue())          
 
-# Import this at the end of the file to avoid circular references.
+# Import these at the end of the file to avoid circular references.
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding import WireFormat

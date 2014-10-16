@@ -25,6 +25,32 @@ You should use a derived class such as TlvWireFormat.
 
 class WireFormat(object):
     _defaultWireFormat = None
+
+    def encodeName(self, name):
+        """
+        Encode name and return the encoding.  Your derived class should
+        override.
+
+        :param Name name: The Name object to encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("encodeName is not implemented")
+
+    def decodeName(self, name, input):
+        """
+        Decode input as a name and set the fields of the Name object.
+        Your derived class should override.
+
+        :param Name name: The Name object whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeName is not implemented")
     
     def encodeInterest(self, interest):
         """
