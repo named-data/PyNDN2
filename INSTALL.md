@@ -194,9 +194,9 @@ If `<PyNDN root>` is the path to the root of the PyNDN distribution, in a termin
 
     export PYTHONPATH=$PYTHONPATH:<PyNDN root>/python
 
-To run the unit tests, in a terminal enter:
+To run the unit tests, in a terminal change to the directory `<PyNDN root>/tests/unit_tests` and enter:
 
-    python -m pytest <PyNDN root>/tests/unit_tests/*.py
+    python -m pytest test_*.py
 
 (If TestFaceRegisterMethods fails, make sure the local NFD is running.)
 
