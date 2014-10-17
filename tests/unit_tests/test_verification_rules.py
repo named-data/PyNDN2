@@ -67,7 +67,7 @@ class TestRegexMatching(ut.TestCase):
             
         """
         policyManager = ConfigPolicyManager(self.identityStorage, 
-            "validator1.conf")
+            "policy_config/validator1.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 
@@ -97,7 +97,7 @@ class TestRegexMatching(ut.TestCase):
 
     def test_hyper_relation(self):
         policyManager = ConfigPolicyManager(self.identityStorage, 
-            "validator2.conf")
+            "policy_config/validator2.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 
