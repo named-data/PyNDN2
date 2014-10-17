@@ -30,6 +30,10 @@ import unittest as ut
 
 class TestRegexMatching(ut.TestCase):
 
+    def _certNameFromKeyName(self, keyName):
+        return keyName.getSubName(0, keyName.size() - 1).append(
+      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
+
     def setUp(self):
         # set up the keychain so we can sign data
         self.identityStorage = MemoryIdentityStorage()
@@ -42,27 +46,53 @@ class TestRegexMatching(ut.TestCase):
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
         self.identityName = Name('/SecurityTestSecRule/Basic/Rsa')
         keyName = Name(self.identityName).append('ksk-2439872')
-        self.defaultCertName = keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
-
+        self.defaultCertName = self._certNameFromKeyName(keyName)
         self.identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
         self.privateKeyStorage.setKeyPairForKeyName(
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
-        self.identityStorage.setDefaultIdentity(self.identityName)
+
+        keyName = Name('/SecurityTestSecRule/Basic')
+        self.identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
+        self.privateKeyStorage.setKeyPairForKeyName(
+      keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
+        self.shortCertName = self._certNameFromKeyName(keyName)
     
      
     def test_simple_regex(self):
+        """
+        The rule in validator1.conf requires that the data name is
+            /SecurityTestSecRule/Basic
+        and the signer name has exactly 1 more component before the key parts
+            i.e. /SecurityTestSecRule/Basic/?/KEY/?/?
+            
+        """
         policyManager = ConfigPolicyManager(self.identityStorage, 
             "validator1.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 
         matchingRule = policyManager._findMatchingRule(rsaData.getName(), 'data')
-        self.assertTrue(matchingRule is not None)
+        self.assertIsNotNone(matchingRule, "Validator did not match data name to rule")
 
         signatureName = rsaData.getSignature().getKeyLocator().getKeyName()
         self.assertTrue(policyManager._checkSignatureMatch(signatureName,
             rsaData.getName(), matchingRule))
+
+        wrongNameData = Data(Name('/SecurityTestSecRule/Other'))
+        self.keyChain.sign(wrongNameData, self.defaultCertName)
+        matchingRule = policyManager._findMatchingRule(wrongNameData.getName(), 'data')
+        self.assertIsNone(matchingRule, "Validator matched bad name to rule")
+
+        
+        wrongSignerData = Data(rsaData)
+        self.keyChain.sign(wrongSignerData, self.shortCertName)
+        matchingRule = policyManager._findMatchingRule(wrongSignerData.getName(), 'data')
+        self.assertIsNotNone(matchingRule, "Validator did not match data name to rule")
+
+        signatureName = wrongSignerData.getSignature().getKeyLocator().getKeyName()
+        self.assertFalse(policyManager._checkSignatureMatch(signatureName, 
+            wrongSignerData.getName(), matchingRule), "Validator allows wrong signer")
+
 
 
     def test_hyper_relation(self):

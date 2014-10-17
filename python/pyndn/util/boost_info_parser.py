@@ -235,7 +235,7 @@ class BoostInfoParser(object):
         # we can have lists of strings or dicts, ONLY
         for v in fromList:
             if hasattr(v, 'keys'):
-                newNode = intoNode.createSubtree(k)
+                newNode = intoNode.createSubtree(keyName)
                 self._readDict(v, newNode)
             else:
                 intoNode.createSubtree(keyName, v)

@@ -17,7 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-from pyndn.encoding.der import DerNode, DerSequence, DerGeneralizedTime, DerOid, DerPrintableString
+from pyndn.encoding.der.der_node import *
+from pyndn.encoding.der.der import *
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.security_types import KeyType
 from pyndn.util import Blob
@@ -54,8 +55,8 @@ class Certificate(Data):
 
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
         if secondsSince1970 < self._notBefore/1000:
-            return true
-        return false
+            return True
+        return False
 
 
     def isTooLate(self):
@@ -66,8 +67,8 @@ class Certificate(Data):
         """
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
         if secondsSince1970 > self._notAfter/1000:
-            return true
-        return false
+            return True
+        return False
 
     def __str__(self):
         s = "Certificate name:\n"
@@ -325,7 +326,7 @@ class CertificateExtension:
 
         extensionId = DerOid(self._oidStr)
         isCritical = DerBoolean(self._isCritical)
-        value = DerOctetString(self._value)
+        extensionValue = DerOctetString(self._value)
 
         root.addChild(extensionId)
         root.addChild(isCritical)

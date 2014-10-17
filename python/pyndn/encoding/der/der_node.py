@@ -17,9 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-from der import Der
+from pyndn.encoding.der.der import Der
 from pyndn.util import Blob
-from der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
+from pyndn.encoding.der.der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
 
 from datetime import datetime
 
@@ -88,7 +88,7 @@ class DerNode (object):
         nodeType = inputBuf[idx]
         idx += 1
 
-        self.nodeType = nodeType
+        self._nodeType = nodeType
 
         sizeLen = inputBuf[idx]
         idx += 1

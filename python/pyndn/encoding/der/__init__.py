@@ -17,12 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
+from pyndn.encoding.der import der, der_exceptions, der_node
 __all__ = ['der', 'der_exceptions', 'der_node']
 
 import sys as _sys
 
 try:
-    from pyndn.encoding.der.der import *
+    from pyndn.encoding.der.der import Der
     from pyndn.encoding.der.der_exceptions import *
     from pyndn.encoding.der.der_node import *
 
