@@ -30,8 +30,10 @@ from security_classes.test_identity_storage import TestIdentityStorage
 from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
 from pyndn.security import KeyChain
+from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn import Name, Data
+from pyndn.util import Blob
 from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager
 import unittest as ut
 
@@ -77,17 +79,49 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         with self.assertRaises(SecurityException):
             self.identityManager.getDefaultCertificateNameForIdentity(identityName)
-
     def test_key_create_delete(self):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
         keyName1 = self.keyChain.generateRSAKeyPair(identityName, True)
         
-        self.assertIsNotNone(keyName1, "Key was not created")
+        keyName2 = self.keyChain.generateRSAKeyPair(identityName, False)
+        self.assertEqual(self.identityManager.getDefaultKeyNameForIdentity(identityName),
+            keyName1, "Default key name was changed without explicit request")
+        self.assertNotEqual(self.identityManager.getDefaultKeyNameForIdentity(identityName),
+            keyName2, "Newly created key replaced default key without explicit request")
+
+        self.identityStorage.revokeKey(keyName2)
+
+        self.assertFalse(self.identityStorage.doesKeyExist(keyName2))
+        self.identityManager.deleteIdentity(identityName)
+
+    def test_key_autocreate_identity(self):
+        keyName1 = Name('/TestSqlIdentityStorage/KeyType/RSA/ksk-12345')
+        identityName = keyName1[:-1]
+        self.addCleanup(self.identityManager.deleteIdentity, identityName)
+        self.identityStorage.addKey(keyName1, KeyType.RSA, Blob(RSA_DER))
+        
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName1),
+            "Key was not added")
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName),
             "Identity for key was not automatically created")
 
+        self.assertEqual(self.identityManager.getDefaultKeyNameForIdentity(identityName),
+            keyName1, "Default key was not set on identity creation")
+
+        with self.assertRaises(SecurityException):
+            self.identityStorage.getDefaultCertificateNameForKey(keyName1)
+        with self.assertRaises(SecurityException):
+            self.identityManager.getDefaultCertificateNameForIdentity(identityName)
         self.identityManager.deleteIdentity(identityName)
+        self.assertFalse(self.identityStorage.doesKeyExist(keyName1))
+
+    def test_certificate_add_delete(self):
+        pass
+
+    def test_stress(self):
+        # the contents of https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/security/test-sec-public-info-sqlite3.cpp, more or less 
+        pass
         
         
 
