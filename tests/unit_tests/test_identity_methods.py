@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-RSA_DER = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFoDcNtffwbfFix64fw0\
+RSA_DER = b"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFoDcNtffwbfFix64fw0\
 hI2tKMkFrc6Ex7yw0YLMK9vGE8lXOyBl/qXabow6RCz+GldmFN6E2Qhm1+AX3Zm5\
 sj3H53/HPtzMefvMQ9X7U+lK8eNMWawpRzvBh4/36VrK/awlkNIVIQ9aXj6q6BVe\
 zL+zWT/WYemLq/8A1/hHWiwCtfOH1xQhGqWHJzeSgwIgOOrzxTbRaCjhAb1u2TeV\
@@ -35,7 +35,10 @@ from pyndn.security.security_exception import SecurityException
 from pyndn import Name, Data
 from pyndn.util import Blob
 from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager
+from pyndn.security.certificate import IdentityCertificate
 import unittest as ut
+
+import base64
 
 try:
     from unittest.mock import Mock 
@@ -57,6 +60,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
         
+        self.addCleanup(self.identityManager.deleteIdentity, identityName)
         keyName = self.keyChain.createIdentity(identityName)
         
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName),
@@ -79,9 +83,12 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         with self.assertRaises(SecurityException):
             self.identityManager.getDefaultCertificateNameForIdentity(identityName)
+
     def test_key_create_delete(self):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
+        self.addCleanup(self.identityManager.deleteIdentity, identityName)
+
         keyName1 = self.keyChain.generateRSAKeyPair(identityName, True)
         
         keyName2 = self.keyChain.generateRSAKeyPair(identityName, False)
@@ -99,7 +106,9 @@ class TestSqlIdentityStorage(ut.TestCase):
         keyName1 = Name('/TestSqlIdentityStorage/KeyType/RSA/ksk-12345')
         identityName = keyName1[:-1]
         self.addCleanup(self.identityManager.deleteIdentity, identityName)
-        self.identityStorage.addKey(keyName1, KeyType.RSA, Blob(RSA_DER))
+
+        decodedKey = base64.b64decode(RSA_DER)
+        self.identityStorage.addKey(keyName1, KeyType.RSA, Blob(decodedKey))
         
         self.assertTrue(self.identityStorage.doesKeyExist(keyName1),
             "Key was not added")
@@ -111,18 +120,110 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         with self.assertRaises(SecurityException):
             self.identityStorage.getDefaultCertificateNameForKey(keyName1)
+        
+        with self.assertRaises(SecurityException):
+            # we have no private key for signing
+            self.identityManager.selfSign(keyName1)
+        
+        with self.assertRaises(SecurityException):
+            self.identityStorage.getDefaultCertificateNameForKey(keyName1)
+
         with self.assertRaises(SecurityException):
             self.identityManager.getDefaultCertificateNameForIdentity(identityName)
+
+        keyName2 = self.identityManager.generateRSAKeyPairAsDefault(identityName)
+        cert = self.identityManager.selfSign(keyName2)
+        self.identityManager.addCertificateAsIdentityDefault(cert)
+
+        certName1 = self.identityManager.getDefaultCertificateNameForIdentity(identityName)
+        certName2 = self.identityStorage.getDefaultCertificateNameForKey(keyName2)
+
+        self.assertEqual(certName1, certName2, 
+            "Key-certificate mapping and identity-certificate mapping are not consistent")
+
         self.identityManager.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesKeyExist(keyName1))
 
     def test_certificate_add_delete(self):
-        pass
+        identityName = Name('/TestIdentityStorage/Identity').appendVersion(
+            int(time.time()))
+        self.addCleanup(self.identityManager.deleteIdentity, identityName)
+    
+        self.identityManager.createIdentity(identityName)
+        keyName1 = self.identityManager.getDefaultKeyNameForIdentity(identityName)
+        cert2 = self.identityManager.selfSign(keyName1)
+        self.identityStorage.addCertificate(cert2)
+        certName2 = cert2.getName()
+    
+        certName1 = self.identityManager.getDefaultCertificateNameForIdentity(identityName)
+        self.assertNotEqual(certName1, certName2, 
+            "New certificate was set as default without explicit request")
 
+        self.identityStorage.revokeCertificate(certName1)
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName2))
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName1))  
+
+        self.identityManager.deleteIdentity(identityName)
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName2))
     def test_stress(self):
-        # the contents of https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/security/test-sec-public-info-sqlite3.cpp, more or less 
-        pass
+        # ndn-cxx/tests/unit-tests/security/test-sec-public-info-sqlite3.cpp
+        identityName = Name("/TestSecPublicInfoSqlite3/Delete").appendVersion(
+            int(time.time()))
         
+        self.addCleanup(self.identityManager.deleteIdentity, identityName)
+        # ndn-cxx returns the cert name, but the IndentityManager docstring
+        # specifies a key
+        keyName1 = self.keyChain.createIdentity(identityName)
+        certName1 = self.identityStorage.getDefaultCertificateNameForKey(keyName1)
+        keyName2 = self.keyChain.generateRSAKeyPairAsDefault(identityName)
+    
+        cert2 = self.identityManager.selfSign(keyName2)
+        certName2 = cert2.getName()
+        self.identityManager.addCertificateAsDefault(cert2)
+
+        keyName3 = self.keyChain.generateRSAKeyPairAsDefault(identityName)
+        cert3 = self.identityManager.selfSign(keyName3)
+        certName3 = cert3.getName()
+        self.identityManager.addCertificateAsDefault(cert3)
+
+        cert4 = self.identityManager.selfSign(keyName3)
+        self.identityManager.addCertificateAsDefault(cert4)
+        certName4 = cert4.getName()
+
+        cert5 = self.identityManager.selfSign(keyName3)
+        self.identityManager.addCertificateAsDefault(cert5)
+        certName5 = cert5.getName()
+
+        self.assertTrue(self.identityStorage.doesIdentityExist(identityName))
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName1))
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName2))
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName3))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName1))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName2))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName3))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName4))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName5))
+
+        self.identityStorage.revokeCertificate(certName5)
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName5))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName4))
+        self.assertTrue(self.identityStorage.doesCertificateExist(certName3))
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName2))
+
+        self.identityStorage.revokeKey(keyName3)
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName4))
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName3))
+        self.assertFalse(self.identityStorage.doesKeyExist(keyName3))
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName2))
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName1))
+        self.assertTrue(self.identityStorage.doesIdentityExist(identityName))
+
+        self.identityManager.deleteIdentity(identityName)
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName2))
+        self.assertFalse(self.identityStorage.doesKeyExist(keyName2))
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName1))
+        self.assertFalse(self.identityStorage.doesKeyExist(keyName1))
+        self.assertFalse(self.identityStorage.doesIdentityExist(identityName))
         
 
 if __name__ == '__main__':
