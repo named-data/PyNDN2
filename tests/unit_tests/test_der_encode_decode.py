@@ -22,7 +22,7 @@
           ndn-cxx / tests / unit-tests / security / test-encode-decode-certificate.cpp
 """
 
-from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger
+from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger, DerOid
 from pyndn.util import Blob
 from pyndn.security.certificate import PublicKey, Certificate, CertificateSubjectDescription, CertificateExtension
 from pyndn.security.security_types import KeyType
@@ -177,6 +177,15 @@ class TestCertificate(ut.TestCase):
         realCert.decode()
 
         self.assertEqual(REAL_CERT_STRING, str(realCert))
+
+    def test_oid(self):
+        oidString = "1.2.840.113549.1.1.11"
+        derOid = DerOid(oidString)
+        expectedEncoding = "06092a864886f70d01010b"
+
+        self.assertEqual(expectedEncoding, derOid.encode().toHex(),
+                         "Incorrect OID encoding")
+        self.assertEqual(oidString, derOid.toVal(), "Incorrect decoded OID")
 
 if __name__ == '__main__':
    ut.main(verbosity=2) 
