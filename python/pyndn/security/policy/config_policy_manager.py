@@ -88,10 +88,6 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         # key is public key name, value is last timestamp
         self._keyTimestamps = {}
 
-        # if a trust-anchor is specified as a directory, it may also specify a refresh period
-        # key is directory, value is refresh period
-        self._refreshDirectories = {}
-
         self.config = BoostInfoParser()
         self.config.read(configFileName)
 
