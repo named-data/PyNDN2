@@ -253,7 +253,12 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
             certUri = self._certificateCache[certID]
         except KeyError:
             if isPath:
-                cert = self._identityStorage.loadIdentityCertificateFromFile(certID)
+                # load the certificate data (base64 encoded IdentityCertificate)
+                with open(certID, 'r') as certFile:
+                    encodedData = certFile.read()
+                    decodedData = b64decode(encodedData)
+                    cert = IdentityCertificate()
+                    cert.wireDecode(decodedData)
             else:
                 certData = b64decode(certID)
                 cert = IdentityCertificate()
@@ -364,7 +369,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         :paramt int timestamp: The timestamp extracted from the interest name.
         """
         try:
-            lastTimestamp = self._keyTimestamps[keyName.toUri]
+            lastTimestamp = self._keyTimestamps[keyName.toUri()]
         except KeyError:
             now = time.time()
             notBefore = now - self._keyGraceInterval
@@ -501,7 +506,8 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
             # certificate is known, verify the signature
             if self._verify(signature, dataOrInterest.wireEncode()):
                 onVerified(dataOrInterest)
-                self._updateTimestampForKey(keyName, timestamp)
+                if isinstance(dataOrInterest, Interest):
+                    self._updateTimestampForKey(keyName, timestamp)
             else:
                 onVerifyFailed(dataOrInterest)
 
