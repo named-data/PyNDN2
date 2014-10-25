@@ -63,7 +63,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
     
     :param IdentityStorage identityStorage: The IdentityStorage for 
       looking up the public key. This object must remain valid during the life 
-      of this SelfVerifyPolicyManager. 
+      of this ConfigPolicyManager.
     :param string configFileName: The path to the configuration file containing
       verification rules.
     :param int searchDepth: (optional) The maximum number of links to follow 
