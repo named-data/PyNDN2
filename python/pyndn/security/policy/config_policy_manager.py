@@ -193,7 +193,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
             identityMatch = NdnRegexMatcher.match(identityRegex, signatureName)
             if identityMatch is not None:
                 identityPrefix = Name(identityMatch.group(1)).append(Name(identityMatch.group(2)))
-                return self._matchesRelation(objectName, identityPrefix, 'is-prefix-of')
+                return self._matchesRelation(signatureName, identityPrefix, 'is-prefix-of')
             else:
                 return False
         elif checkerType == 'customized':
@@ -207,7 +207,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
                 pass
             else:
                 matchName = Name(keyLocatorInfo['name'][0].getValue())
-                return self._matchesRelation(objectName, matchName, relationType)
+                return self._matchesRelation(signatureName, matchName, relationType)
 
             # is this a simple regex?
             try:
@@ -254,11 +254,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         except KeyError:
             if isPath:
                 # load the certificate data (base64 encoded IdentityCertificate)
-                with open(certID, 'r') as certFile:
-                    encodedData = certFile.read()
-                    decodedData = b64decode(encodedData)
-                    cert = IdentityCertificate()
-                    cert.wireDecode(decodedData)
+                cert = self._loadIdentityCertificateFromFile(certID)
             else:
                 certData = b64decode(certID)
                 cert = IdentityCertificate()
@@ -559,13 +555,23 @@ class TrustAnchorRefreshManager(object):
         # revoked when necessary, and the next refresh time
         self._refreshDirectories = {}
 
+    def _loadIdentityCertificateFromFile(self, filename):
+        with open(filename, 'r') as certFile:
+            encodedData = certFile.read()
+            decodedData = b64decode(encodedData)
+            cert = IdentityCertificate()
+            cert.wireDecode(Blob(decodedData, False))
+            self._identityStorage.addCertificate(cert)
+            return cert
+
     def addDirectory(self, directoryName, refreshPeriod):
         allFiles = [f for f in os.listdir(directoryName) 
                 if os.path.isfile(os.path.join(directoryName, f))]
         certificateNames = []
         for f in allFiles:
             try:
-                cert = self._identityStorage.loadIdentityCertificateFromFile(f)
+                fullPath = os.path.join(directoryName, f)
+                cert = self._loadIdentityCertificateFromFile(fullPath)
             except SecurityException:
                 pass # allow files that are not certificates
             else:
@@ -579,7 +585,7 @@ class TrustAnchorRefreshManager(object):
         refreshTime =  time.time()
         for directory, info in self._refreshDirectories.items():
             nextRefreshTime = info['nextRefresh']
-            if nextRefreshTime < refreshTime:
+            if nextRefreshTime <= refreshTime:
                 certificateList = info['certificates'][:]
                 # revoke the certificates associated with this directory if possible
                 # then re-import
