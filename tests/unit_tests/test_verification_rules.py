@@ -57,17 +57,19 @@ class TestRegexMatching(ut.TestCase):
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
         self.shortCertName = self._certNameFromKeyName(keyName)
     
-     
+    def test_name_relation(self):
+
+
     def test_simple_regex(self):
         """
-        The rule in ruleset1.conf requires that the data name is
+        The rule in regex_ruleset.conf requires that the data name is
             /SecurityTestSecRule/Basic
         and the signer name has exactly 1 more component before the key parts
             i.e. /SecurityTestSecRule/Basic/?/KEY/?/?
             
         """
         policyManager = ConfigPolicyManager(self.identityStorage, 
-            "policy_config/ruleset1.conf")
+            "policy_config/regex_ruleset.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 
@@ -94,10 +96,9 @@ class TestRegexMatching(ut.TestCase):
             wrongSignerData.getName(), matchingRule), "Validator allows wrong signer")
 
 
-
     def test_hyper_relation(self):
         policyManager = ConfigPolicyManager(self.identityStorage, 
-            "policy_config/ruleset2.conf")
+            "policy_config/hyperrelation_ruleset.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 
