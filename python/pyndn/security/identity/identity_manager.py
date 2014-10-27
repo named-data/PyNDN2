@@ -204,8 +204,7 @@ class IdentityManager(object):
         :return: The requested certificate which is valid.        
         :rtype: IdentityCertificate
         """
-        return IdentityCertificate(
-         self._identityStorage.getCertificate(certificateName, False))
+        return self._identityStorage.getCertificate(certificateName, False)
 
     def getAnyCertificate(self, certificateName):
         """
@@ -215,8 +214,7 @@ class IdentityManager(object):
         :return: The requested certificate.        
         :rtype: IdentityCertificate
         """
-        return IdentityCertificate(
-         self._identityStorage.getCertificate(certificateName, True))
+        return self._identityStorage.getCertificate(certificateName, True)
 
     def getDefaultCertificateNameForIdentity(self, identityName):
         """

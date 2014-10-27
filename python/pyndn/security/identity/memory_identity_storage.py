@@ -211,16 +211,16 @@ class MemoryIdentityStorage(IdentityStorage):
           be returned, otherwise validity is disregarded.  If omitted, 
           allowAny is False.
         :return: The requested certificate. If not found, return None.
-        :rtype: Data
+        :rtype: IdentityCertificate
         """
         certificateNameUri = certificateName.toUri()
         if not (certificateNameUri in self._certificateStore):
             # Not found.  Silently return None.
             return None
   
-        data = Data()
-        data.wireDecode(self._certificateStore[certificateNameUri])
-        return data
+        certificate = IdentityCertificate()
+        certificate.wireDecode(self._certificateStore[certificateNameUri])
+        return certificate
 
     #
     # Get/Set Default

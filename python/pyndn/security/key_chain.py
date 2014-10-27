@@ -171,7 +171,7 @@ class KeyChain(object):
         
         :param Name certificateName: The name of the requested certificate.
         :return: The requested certificate which is valid.        
-        :rtype: Certificate
+        :rtype: IdentityCertificate
         """
         return self._identityManager.getCertificate(certificateName)
     
@@ -181,7 +181,7 @@ class KeyChain(object):
         
         :param Name certificateName: The name of the requested certificate.
         :return: The requested certificate.        
-        :rtype: Certificate
+        :rtype: IdentityCertificate
         """
         return self._identityManager.getAnyCertificate(certificateName)
     

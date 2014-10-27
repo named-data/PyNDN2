@@ -217,7 +217,7 @@ class TestIdentityStorage(BasicIdentityStorage):
           be returned, otherwise validity is disregarded.  If omitted, 
           allowAny is False.
         :return: The requested certificate. If not found, return None.
-        :rtype: Data
+        :rtype: IdentityCertificate
         """
         chosenCert = None
         certificateUri = certificateName.toUri()
