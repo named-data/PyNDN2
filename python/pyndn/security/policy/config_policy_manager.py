@@ -254,7 +254,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         except KeyError:
             if isPath:
                 # load the certificate data (base64 encoded IdentityCertificate)
-                cert = self._loadIdentityCertificateFromFile(certID)
+                cert = self._refreshManager._loadIdentityCertificateFromFile(certID)
             else:
                 certData = b64decode(certID)
                 cert = IdentityCertificate()
