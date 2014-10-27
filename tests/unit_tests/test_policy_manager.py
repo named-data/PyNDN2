@@ -22,6 +22,7 @@ from security_classes.test_identity_storage import TestIdentityStorage
 from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
 from pyndn.security import KeyChain
+from pyndn.security.certificate import IdentityCertificate
 from pyndn.util import Blob
 from pyndn import Name, Data, Interest, Face
 from pyndn import Sha256WithRsaSignature
@@ -29,7 +30,8 @@ from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager
 import unittest as ut
 import time
 import os
-from base64 import b64decode
+from base64 import b64decode, b64encode
+from collections import namedtuple
 
 CERT_DUMP="Bv0C4AcxCAR0ZW1wCANLRVkIEWtzay0xNDE0MTk1Nzc5NjY1CAdJRC1DRVJUCAgA\
            AAFJRKMe3BQDGAECFf0BcDCCAWwwIhgPMjAxNDEwMjUwMDA5NDFaGA8yMDM0MTAy\
@@ -53,11 +55,16 @@ try:
 except ImportError:
     from mock import Mock
 
-def doVerify(method, toVerify):
+VerificationResult = namedtuple('VerificationResult', 
+        'successCount failureCount hasFurtherSteps')
+def doVerify(policyMan, toVerify):
     success = Mock()
     failure = Mock()
-    method(toVerify, success, failure)
-    return (success.call_count, failure.call_count)
+    result = policyMan.checkVerificationPolicy(toVerify, 0, success, failure)
+
+    # a result of None means no more steps
+    return VerificationResult(success.call_count, 
+            failure.call_count, result is not None)
 
 class TestSimplePolicyManager(ut.TestCase):
     def test_no_verify(self):
@@ -74,13 +81,16 @@ class TestSimplePolicyManager(ut.TestCase):
         data = Data(Name(identityName).append('data'))
         keyChain.signByIdentity(data, identityName)
 
-        (success_count, fail_count) = doVerify(keyChain.verifyData, data)
+        vr = doVerify(policyManager, data)
 
-        self.assertEqual(fail_count, 0, 
+        self.assertFalse(vr.hasFurtherSteps, 
+                "NoVerifyPolicyManager returned a ValidationRequest")
+
+        self.assertEqual(vr.failureCount, 0, 
             "Verification failed with NoVerifyPolicyManager")
-        self.assertEqual(success_count, 1, 
+        self.assertEqual(vr.successCount, 1, 
             "Verification callback called {} times instead of 1".format( 
-            success_count))
+            vr.successCount))
 
     def test_self_verification(self):
         identityStorage = TestIdentityStorage()
@@ -95,24 +105,28 @@ class TestSimplePolicyManager(ut.TestCase):
         data = Data(Name('/TestData/1'))
         keyChain.signByIdentity(data, identityName)
 
-        (success_count, fail_count) = doVerify(keyChain.verifyData, data)
+        vr = doVerify(policyManager, data)
         
-        self.assertEqual(fail_count, 0, 
+        self.assertFalse(vr.hasFurtherSteps, 
+                "SelfVerifyPolicyManager returned a ValidationRequest")
+        self.assertEqual(vr.failureCount, 0, 
             "Verification of identity-signed data failed")
-        self.assertEqual(success_count, 1,
+        self.assertEqual(vr.successCount, 1,
             "Verification callback called {} times instead of 1".format(
-            success_count))
+            vr.successCount))
 
         data2 = Data(Name('/TestData/2'))
 
-        (success_count, fail_count) = doVerify(keyChain.verifyData, 
+        vr = doVerify(policyManager, 
                 data2)
         
-        self.assertEqual(success_count, 0,
+        self.assertFalse(vr.hasFurtherSteps, 
+                "SelfVerifyPolicyManager returned a ValidationRequest")
+        self.assertEqual(vr.successCount, 0,
             "Verification of unsigned data succeeded")
-        self.assertEqual(fail_count, 1, 
+        self.assertEqual(vr.failureCount, 1, 
             "Verification failure callback called {} times instead of 1".format(
-            fail_count))
+            vr.failureCount))
 
 class TestConfigPolicyManager(ut.TestCase):
     def setUp(self):
@@ -128,47 +142,52 @@ class TestConfigPolicyManager(ut.TestCase):
         self.keyChain = KeyChain(self.identityManager, self.policyManager)
         self.keyChain.createIdentity(self.identityName)
 
+        self.face = Face()
+
     def tearDown(self):
         self.identityStorage.revokeIdentity(self.identityName)
+        self.face.shutdown()
 
     def test_interest_timestamp(self):
         interestName = Name('/ndn/ucla/edu/something')
-        f = Face()
         certName = self.identityManager.getDefaultCertificateNameForIdentity(
                 self.identityName)
-        f.setCommandSigningInfo(self.keyChain, certName)
-        self.addCleanup(f.shutdown)
+        self.face.setCommandSigningInfo(self.keyChain, certName)
         
         oldInterest = Interest(interestName)
-        f.makeCommandInterest(oldInterest)
+        self.face.makeCommandInterest(oldInterest)
 
         time.sleep(0.1) # make sure timestamps are different
         newInterest = Interest(interestName)
-        f.makeCommandInterest(newInterest)
+        self.face.makeCommandInterest(newInterest)
 
-        (success_count, fail_count) = doVerify(self.keyChain.verifyInterest,
+        vr  = doVerify(self.policyManager,
                 newInterest)
 
-        self.assertEqual(fail_count, 0,
+        self.assertFalse(vr.hasFurtherSteps,
+                "ConfigPolicyManager returned ValidationRequest but certificate is known")
+        self.assertEqual(vr.failureCount, 0,
                 "Verification of valid interest failed")
-        self.assertEqual(success_count, 1,
+        self.assertEqual(vr.successCount, 1,
                 "Verification callback called {} times instead of 1".format(
-                      success_count))
+                      vr.successCount))
 
-        (success_count, fail_count) = doVerify(self.keyChain.verifyInterest,
+        vr  = doVerify(self.policyManager,
                 oldInterest)
 
-        self.assertEqual(success_count, 0,
+        self.assertFalse(vr.hasFurtherSteps,
+                "ConfigPolicyManager returned ValidationRequest but certificate is known")
+        self.assertEqual(vr.successCount, 0,
                 "Verification of stale interest succeeded")
-        self.assertEqual(fail_count, 1,
+        self.assertEqual(vr.failureCount, 1,
                 "Failure callback called {} times instead of 1".format(
-                      fail_count))
+                      vr.failureCount))
 
     def _removeFile(self, filename):
-        import pdb; pdb.set_trace()
         try:
             os.remove(filename)
         except OSError:
+            # no such file
             pass
 
     def test_refresh_10s(self):
@@ -178,39 +197,52 @@ class TestConfigPolicyManager(ut.TestCase):
             dataBlob = Blob(b64decode(encodedData))
             data.wireDecode(dataBlob)
 
-        (success_count, fail_count) = doVerify(self.keyChain.verifyData, data)
+        # needed, since the KeyChain will express interests in unknown 
+        # certificates
+        vr = doVerify(self.policyManager, data)
 
-        self.assertEqual(success_count, 0,
-                "Verification with unknown identity succeeded")
-        self.assertEqual(fail_count, 1,
-                "Failure callback called {} times instead of 1".format(
-                      fail_count))
+        self.assertTrue(vr.hasFurtherSteps, 
+                "ConfigPolicyManager did not create ValidationRequest for unknown certificate")
+        self.assertEqual(vr.successCount, 0,
+                "ConfigPolicyManager called success callback with pending ValidationRequest")
+        self.assertEqual(vr.failureCount, 0,
+                "ConfigPolicyManager called failure callback with pending ValidationRequest")
 
         # now save the cert data to our anchor directory, and wait
+        # we have to sign it with the current identity or the 
+        # policy manager will create an interest for the signing certificate
         testCertFile = 'policy_config/certs/test.cert'
         self.addCleanup(self._removeFile, testCertFile)
+        self.addCleanup(self.identityStorage.revokeIdentity, Name('/temp'))
         with open(testCertFile, 'w') as certFile:
-            certFile.write(CERT_DUMP)
+            cert = IdentityCertificate()
+            certData = b64decode(CERT_DUMP)
+            cert.wireDecode(Blob(certData, False))
+            self.keyChain.signByIdentity(cert, self.identityName)
+            encodedCert = b64encode(str(cert.wireEncode()))
+            certFile.write(encodedCert)
 
         # still too early for refresh to pick it up
-        (success_count, fail_count) = doVerify(self.keyChain.verifyData, data)
+        vr = doVerify(self.policyManager, data)
 
-        self.assertEqual(success_count, 0,
-                "Certificate store refreshed too soon")
-        self.assertEqual(fail_count, 1,
-                "Failure callback called {} times instead of 1".format(
-                      fail_count))
+        self.assertTrue(vr.hasFurtherSteps, 
+                "ConfigPolicyManager refresh occured sooner than specified")
+        self.assertEqual(vr.successCount, 0,
+                "ConfigPolicyManager called success callback with pending ValidationRequest")
+        self.assertEqual(vr.failureCount, 0,
+                "ConfigPolicyManager called failure callback with pending ValidationRequest")
         time.sleep(6)
 
         # now we should find it
-        (success_count, fail_count) = doVerify(self.keyChain.verifyData, data)
+        vr  = doVerify(self.policyManager, data)
 
-        self.assertEqual(fail_count, 0,
-                "Certificate store was not refreshed")
-        self.assertEqual(success_count, 1,
-                "Verification callback called {} times instead of 1".format(
-                      success_count))
+        self.assertFalse(vr.hasFurtherSteps,
+                "ConfigPolicyManager did not refresh certificate store")
+        self.assertEqual(vr.successCount, 1,
+                "Failure callback called {} times instead of 1".format(
+                    vr.successCount))
+        self.assertEqual(vr.failureCount, 0,
+                "ConfigPolicyManager did not verify valid signed data")
 
-        
 if __name__ == '__main__':
     ut.main(verbosity=2)

@@ -60,14 +60,14 @@ class TestRegexMatching(ut.TestCase):
      
     def test_simple_regex(self):
         """
-        The rule in validator1.conf requires that the data name is
+        The rule in ruleset1.conf requires that the data name is
             /SecurityTestSecRule/Basic
         and the signer name has exactly 1 more component before the key parts
             i.e. /SecurityTestSecRule/Basic/?/KEY/?/?
             
         """
         policyManager = ConfigPolicyManager(self.identityStorage, 
-            "policy_config/validator1.conf")
+            "policy_config/ruleset1.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 
@@ -97,7 +97,7 @@ class TestRegexMatching(ut.TestCase):
 
     def test_hyper_relation(self):
         policyManager = ConfigPolicyManager(self.identityStorage, 
-            "policy_config/validator2.conf")
+            "policy_config/ruleset2.conf")
         rsaData = Data(Name('/SecurityTestSecRule/Basic'))
         self.keyChain.sign(rsaData, self.defaultCertName)
 

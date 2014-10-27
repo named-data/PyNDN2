@@ -561,7 +561,6 @@ class TrustAnchorRefreshManager(object):
             decodedData = b64decode(encodedData)
             cert = IdentityCertificate()
             cert.wireDecode(Blob(decodedData, False))
-            self._identityStorage.addCertificate(cert)
             return cert
 
     def addDirectory(self, directoryName, refreshPeriod):
