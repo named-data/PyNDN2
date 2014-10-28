@@ -52,7 +52,7 @@ class TestIdentityManager(IdentityManager):
         if (Name(self._identityStorage.getDefaultIdentity()) ==
                 identityName):
             return # don't delete the default identity!
-        self._identityStorage.revokeIdentity(identityName)
+        self._identityStorage.deleteIdentityInfo(identityName)
         keysToDelete = self._identityStorage.getAllKeysForIdentity(identityName)
         for keyName in keysToDelete:
             self._privateKeyStorage.deleteKeyPair(keyName) 

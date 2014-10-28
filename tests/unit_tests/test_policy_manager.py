@@ -74,7 +74,7 @@ class TestSimplePolicyManager(ut.TestCase):
         policyManager = NoVerifyPolicyManager()
         identityName = Name('TestValidator/Null').appendVersion(int(time.time()))
         
-        self.addCleanup(identityStorage.revokeIdentity ,identityName)
+        self.addCleanup(identityStorage.deleteIdentityInfo ,identityName)
 
         keyChain = KeyChain(identityManager, policyManager)
         keyChain.createIdentity(identityName)
@@ -99,7 +99,7 @@ class TestSimplePolicyManager(ut.TestCase):
         keyChain = KeyChain(identityManager, policyManager)
         
         identityName  = Name('TestValidator/RsaSignatureVerification')
-        self.addCleanup(identityStorage.revokeIdentity, identityName)
+        self.addCleanup(identityStorage.deleteIdentityInfo, identityName)
         keyChain.createIdentity(identityName)
 
         data = Data(Name('/TestData/1'))
@@ -145,7 +145,7 @@ class TestConfigPolicyManager(ut.TestCase):
         self.face = Face()
 
     def tearDown(self):
-        self.identityStorage.revokeIdentity(self.identityName)
+        self.identityStorage.deleteIdentityInfo(self.identityName)
         self.face.shutdown()
 
     def test_interest_timestamp(self):
@@ -213,7 +213,7 @@ class TestConfigPolicyManager(ut.TestCase):
         # policy manager will create an interest for the signing certificate
         testCertFile = 'policy_config/certs/test.cert'
         self.addCleanup(self._removeFile, testCertFile)
-        self.addCleanup(self.identityStorage.revokeIdentity, Name('/temp'))
+        self.addCleanup(self.identityStorage.deleteIdentityInfo, Name('/temp'))
         with open(testCertFile, 'w') as certFile:
             cert = IdentityCertificate()
             certData = b64decode(CERT_DUMP)

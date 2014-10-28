@@ -77,9 +77,9 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertFalse(self.identityStorage.doesIdentityExist(identityName),
             "Identity still in IdentityStorage after revoking")
         self.assertFalse(self.identityStorage.doesKeyExist(keyName),
-            "Key still in IdentityStorage after identity was revoked")
+            "Key still in IdentityStorage after identity was deletedInfo")
         self.assertFalse(self.identityStorage.doesCertificateExist(certificateName),
-            "Certificate still in IdentityStorage after identity was revoked")
+            "Certificate still in IdentityStorage after identity was deletedInfo")
 
         with self.assertRaises(SecurityException):
             self.identityManager.getDefaultCertificateNameForIdentity(identityName)
@@ -97,7 +97,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertNotEqual(self.identityManager.getDefaultKeyNameForIdentity(identityName),
             keyName2, "Newly created key replaced default key without explicit request")
 
-        self.identityStorage.revokeKey(keyName2)
+        self.identityStorage.deletePublicKeyInfo(keyName2)
 
         self.assertFalse(self.identityStorage.doesKeyExist(keyName2))
         self.identityManager.deleteIdentity(identityName)
@@ -159,7 +159,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertNotEqual(certName1, certName2, 
             "New certificate was set as default without explicit request")
 
-        self.identityStorage.revokeCertificate(certName1)
+        self.identityStorage.deleteCertificateInfo(certName1)
         self.assertTrue(self.identityStorage.doesCertificateExist(certName2))
         self.assertFalse(self.identityStorage.doesCertificateExist(certName1))  
 
@@ -204,13 +204,13 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertTrue(self.identityStorage.doesCertificateExist(certName4))
         self.assertTrue(self.identityStorage.doesCertificateExist(certName5))
 
-        self.identityStorage.revokeCertificate(certName5)
+        self.identityStorage.deleteCertificateInfo(certName5)
         self.assertFalse(self.identityStorage.doesCertificateExist(certName5))
         self.assertTrue(self.identityStorage.doesCertificateExist(certName4))
         self.assertTrue(self.identityStorage.doesCertificateExist(certName3))
         self.assertTrue(self.identityStorage.doesKeyExist(keyName2))
 
-        self.identityStorage.revokeKey(keyName3)
+        self.identityStorage.deletePublicKeyInfo(keyName3)
         self.assertFalse(self.identityStorage.doesCertificateExist(certName4))
         self.assertFalse(self.identityStorage.doesCertificateExist(certName3))
         self.assertFalse(self.identityStorage.doesKeyExist(keyName3))

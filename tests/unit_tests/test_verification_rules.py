@@ -30,9 +30,9 @@ import unittest as ut
 
 class TestRegexMatching(ut.TestCase):
 
-    def _certNameFromKeyName(self, keyName):
-        return keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
+    def _certNameFromKeyName(self, keyName, keyIdx=-1):
+        return keyName[:keyIdx].append("KEY").append(keyName[keyIdx:]).\
+                append("ID-CERT").append("0")
 
     def setUp(self):
         # set up the keychain so we can sign data
@@ -44,18 +44,18 @@ class TestRegexMatching(ut.TestCase):
         # not using keychain for verification so we don't neet to set the
         # policy manager
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
-        self.identityName = Name('/SecurityTestSecRule/Basic/Rsa')
+        self.identityName = Name('/SecurityTestSecRule/Basic/Longer')
         keyName = Name(self.identityName).append('ksk-2439872')
         self.defaultCertName = self._certNameFromKeyName(keyName)
         self.identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
         self.privateKeyStorage.setKeyPairForKeyName(
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
 
-        keyName = Name('/SecurityTestSecRule/Basic')
+        keyName = Name('/SecurityTestSecRule/Basic/ksk-0923489')
         self.identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
         self.privateKeyStorage.setKeyPairForKeyName(
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
-        self.shortCertName = self._certNameFromKeyName(keyName)
+        self.shortCertName = self._certNameFromKeyName(keyName, -2)
     
     def test_name_relation(self):
         policyManagerPrefix = ConfigPolicyManager(self.identityStorage, 
@@ -100,52 +100,112 @@ class TestRegexMatching(ut.TestCase):
                 "Strict-prefix relation should  not match inner components")
 
     def test_simple_regex(self):
-        """
-        The rule in regex_ruleset.conf requires that the data name is
-            /SecurityTestSecRule/Basic
-        and the signer name has exactly 1 more component before the key parts
-            i.e. /SecurityTestSecRule/Basic/?/KEY/?/?
-            
-        """
         policyManager = ConfigPolicyManager(self.identityStorage, 
             "policy_config/regex_ruleset.conf")
-        data = Data(Name('/SecurityTestSecRule/Basic'))
-        self.keyChain.sign(data, self.defaultCertName)
+        dataName1 = Name('/SecurityTestSecRule/Basic')
+        dataName2 = Name('/SecurityTestSecRule/Basic/More')
+        dataName3 = Name('/SecurityTestSecRule/')
+        dataName4 = Name('/SecurityTestSecRule/Other/TestData')
+        dataName5 = Name('/Basic/Data')
 
-        matchingRule = policyManager._findMatchingRule(data.getName(), 'data')
-        self.assertIsNotNone(matchingRule, "Validator did not match data name to rule")
+        matchedRule1 = policyManager._findMatchingRule(dataName1, 'data')
+        matchedRule2 = policyManager._findMatchingRule(dataName2, 'data')
+        matchedRule3 = policyManager._findMatchingRule(dataName3, 'data')
+        matchedRule4 = policyManager._findMatchingRule(dataName4, 'data')
+        matchedRule5 = policyManager._findMatchingRule(dataName5, 'data')
 
-        signatureName = data.getSignature().getKeyLocator().getKeyName()
-        self.assertTrue(policyManager._checkSignatureMatch(signatureName,
-            data.getName(), matchingRule))
+        self.assertIsNotNone(matchedRule1)
+        self.assertIsNone(matchedRule2)
+        self.assertIsNotNone(matchedRule3)
+        self.assertNotEqual(matchedRule3, matchedRule1,
+                "Rule regex matched extra components")
+        self.assertIsNotNone(matchedRule4)
+        self.assertNotEqual(matchedRule4, matchedRule1,
+                "Rule regex matched with missing component")
 
-        wrongNameData = Data(Name('/SecurityTestSecRule/Other'))
-        self.keyChain.sign(wrongNameData, self.defaultCertName)
-        matchingRule = policyManager._findMatchingRule(wrongNameData.getName(), 'data')
-        self.assertIsNone(matchingRule, "Validator matched bad name to rule")
+        self.assertIsNone(matchedRule5)
 
-        wrongSignerData = Data(data)
-        self.keyChain.sign(wrongSignerData, self.shortCertName)
-        matchingRule = policyManager._findMatchingRule(wrongSignerData.getName(), 'data')
-        self.assertIsNotNone(matchingRule, "Validator did not match data name to rule")
+    def test_checker_hierarchical(self):
+        policyManager = ConfigPolicyManager(self.identityStorage, 
+            "policy_config/hierarchical_ruleset.conf")
 
-        signatureName = wrongSignerData.getSignature().getKeyLocator().getKeyName()
-        self.assertFalse(policyManager._checkSignatureMatch(signatureName, 
-            wrongSignerData.getName(), matchingRule), "Validator allows wrong signer")
+        dataName1 = Name('/SecurityTestSecRule/Basic/Data1')
+        dataName2 = Name('/SecurityTestSecRule/Basic/Longer/Data2')
+
+        data1 = Data(dataName1)
+        data2 = Data(dataName2)
+
+        matchedRule = policyManager._findMatchingRule(dataName1, 'data')
+        self.assertEqual(matchedRule, 
+                policyManager._findMatchingRule(dataName2, 'data'))
+
+        self.keyChain.sign(data1, self.defaultCertName)
+        self.keyChain.sign(data2, self.defaultCertName)
+
+        signatureName1 = data1.getSignature().getKeyLocator().getKeyName()
+        signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
+
+        self.assertFalse(policyManager._checkSignatureMatch(signatureName1,
+            dataName1, matchedRule),
+            "Hierarchical matcher matched short data name to long key name")
+
+        self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
+            dataName2, matchedRule))
+        
+        self.keyChain.sign(data1, self.shortCertName)
+        self.keyChain.sign(data2, self.shortCertName)
+
+        signatureName1 = data1.getSignature().getKeyLocator().getKeyName()
+        signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
+
+        self.assertTrue(policyManager._checkSignatureMatch(signatureName1,
+            dataName1, matchedRule))
+        self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
+            dataName2, matchedRule))
 
 
-    def test_hyper_relation(self):
+    def test_hyperrelation(self):
         policyManager = ConfigPolicyManager(self.identityStorage, 
             "policy_config/hyperrelation_ruleset.conf")
-        data = Data(Name('/SecurityTestSecRule/Basic'))
-        self.keyChain.sign(data, self.defaultCertName)
 
-        matchingRule = policyManager._findMatchingRule(data.getName(), 'data')
-        self.assertTrue(matchingRule is not None)
+        dataName = Name('/SecurityTestSecRule/Basic/Longer/Data2')
+        data1 = Data(dataName)
+        data2 = Data(dataName)
 
-        signatureName = data.getSignature().getKeyLocator().getKeyName()
-        self.assertTrue(policyManager._checkSignatureMatch(signatureName,
-            data.getName(), matchingRule))
+        matchedRule = policyManager._findMatchingRule(dataName, 'data')
+        self.keyChain.sign(data1, self.defaultCertName)
+        self.keyChain.sign(data2, self.shortCertName)
+
+        signatureName1 = data1.getSignature().getKeyLocator().getKeyName()
+        signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
+
+        self.assertTrue(policyManager._checkSignatureMatch(signatureName1,
+            dataName, matchedRule))
+        self.assertFalse(policyManager._checkSignatureMatch(signatureName2,
+            dataName, matchedRule))
+
+        dataName = Name('/SecurityTestSecRule/Basic/Other/Data1')
+        data1 = Data(dataName)
+        data2 = Data(dataName)
+
+        matchedRule = policyManager._findMatchingRule(dataName, 'data')
+        self.keyChain.sign(data1, self.defaultCertName)
+        self.keyChain.sign(data2, self.shortCertName)
+
+        signatureName1 = data1.getSignature().getKeyLocator().getKeyName()
+        signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
+
+        self.assertFalse(policyManager._checkSignatureMatch(signatureName1,
+            dataName, matchedRule))
+        self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
+            dataName, matchedRule))
+
+    def test_interest_matching(self):
+        # make sure we chop off timestamp, nonce, and signature info from
+        # signed interests
+        pass
+
+
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

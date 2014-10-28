@@ -46,7 +46,7 @@ class TestIdentityStorage(BasicIdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def revokeIdentity(self, identityName):
+    def deleteIdentityInfo(self, identityName):
         """
         Delete an identity, and all keys and certificates associated with it.
         :param Name identityName: The identity name
@@ -92,7 +92,7 @@ class TestIdentityStorage(BasicIdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def revokeKey(self, keyName):
+    def deletePublicKeyInfo(self, keyName):
         """
         Delete the public key from the store and delete all associated 
         certificates
@@ -344,7 +344,7 @@ class TestIdentityStorage(BasicIdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def revokeCertificate(self, certificateName):
+    def deleteCertificateInfo(self, certificateName):
         """
         Delete a certificate and dissociate it from all keys.
         :param Name certificateName: The full name of the certificate
