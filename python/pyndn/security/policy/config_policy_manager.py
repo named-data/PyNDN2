@@ -209,7 +209,7 @@ class ConfigPolicyManager(PolicyManager):
             identityMatch = NdnRegexMatcher.match(identityRegex, signatureName)
             if identityMatch is not None:
                 identityPrefix = Name(identityMatch.group(1)).append(Name(identityMatch.group(2)))
-                return self._matchesRelation(signatureName, identityPrefix, 'is-prefix-of')
+                return self._matchesRelation(objectName, identityPrefix, 'is-prefix-of')
             else:
                 return False
         elif checkerType == 'customized':
