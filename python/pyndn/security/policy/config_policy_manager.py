@@ -27,7 +27,7 @@ from base64 import b64decode
 from warnings import warn
 
 from pyndn import Name, Data, Interest
-from pyndn.security.policy.self_verify_policy_manager import SelfVerifyPolicyManager
+from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.security.certificate.public_key import PublicKey
@@ -40,6 +40,9 @@ from pyndn.security.security_exception import SecurityException
 from pyndn.util.boost_info_parser import BoostInfoParser
 from pyndn.util.ndn_regex import NdnRegexMatcher
 
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
 """
 This module manages trust according to a configuration file in the 
 Validator Configuration File Format  
@@ -56,7 +59,7 @@ The KeyLocators of data packets and signed interests MUST contain a name for
 verification to succeed.
 """
 
-class ConfigPolicyManager(SelfVerifyPolicyManager):
+class ConfigPolicyManager(PolicyManager):
     """
     Create a new ConfigPolicyManager which acts on the rules specified 
     in the configuration file and downloads unknown certificates when necessary. 
@@ -102,6 +105,19 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         nothing is verified.
         """
         return self.requiresVerification
+
+    def checkSigningPolicy(self, dataName, certificateName):
+        """
+        Override to always indicate that the signing certificate name and data 
+        name satisfy the signing policy.
+
+        :param Name dataName: The name of data to be signed.
+        :param Name certificateName: The name of signing certificate.
+        :return: True to indicate that the signing certificate can be used to 
+          sign the data.
+        :rtype: boolean
+        """
+        return True
     
     def skipVerifyAndTrust(self, dataOrInterest):
         """
@@ -525,7 +541,7 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         signature = signatureInfo
         if not isinstance(signature, Sha256WithRsaSignature):
             raise SecurityException(
-           "SelfVerifyPolicyManager: Signature is not Sha256WithRsaSignature.")
+           "ConfigPolicyManager: Signature is not Sha256WithRsaSignature.")
 
         if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME and
             self._identityStorage != None):
@@ -542,6 +558,49 @@ class ConfigPolicyManager(SelfVerifyPolicyManager):
         else:
             # Can't find a key to verify.
             return False
+
+    @staticmethod
+    def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
+        """
+        Verify the signature on the SignedBlob using the given public key.
+        TODO: Move this general verification code to a more central location.
+ 
+        :param Sha256WithRsaSignature signature: The Sha256WithRsaSignature.
+        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
+        verify.
+        :param Blob publicKeyDer: The DER-encoded public key used to verify the 
+          signature.
+        :return: True if the signature verifies, False if not.
+        :rtype: boolean
+        """
+        # Get the public key.
+        if _PyCryptoUsesStr:
+            # PyCrypto in Python 2 requires a str.
+            publicKeyDerBytes = publicKeyDer.toRawStr()
+        else:
+            publicKeyDerBytes = publicKeyDer.toBuffer()
+        publicKey = RSA.importKey(publicKeyDerBytes)
+        
+        # Get the bytes to verify.
+        # wireEncode returns the cached encoding if available.
+        signedPortion = signedBlob.toSignedBuffer()
+        # Sign the hash of the data.
+        if sys.version_info[0] == 2:
+            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
+            signedPortion = Blob(signedPortion, False).toRawStr()
+
+        # Convert the signature bits to a raw string or bytes as required.
+        if _PyCryptoUsesStr:
+            signatureBits = signature.getSignature().toRawStr()
+        else:
+            signatureBits = bytes(signature.getSignature().buf())
+
+        # Hash and verify.
+        return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion), 
+                                                signatureBits)
+
+# Depending on the Python version, PyCrypto uses str or bytes.
+_PyCryptoUsesStr = type(SHA256.new().digest()) is str
 
 class TrustAnchorRefreshManager(object):
     """
@@ -561,7 +620,6 @@ class TrustAnchorRefreshManager(object):
             decodedData = b64decode(encodedData)
             cert = IdentityCertificate()
             cert.wireDecode(Blob(decodedData, False))
-            self._identityStorage.addCertificate(cert)
             return cert
 
     def addDirectory(self, directoryName, refreshPeriod):
