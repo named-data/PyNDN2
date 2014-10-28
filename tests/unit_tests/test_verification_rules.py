@@ -58,7 +58,46 @@ class TestRegexMatching(ut.TestCase):
         self.shortCertName = self._certNameFromKeyName(keyName)
     
     def test_name_relation(self):
+        policyManagerPrefix = ConfigPolicyManager(self.identityStorage, 
+            "policy_config/relation_ruleset_prefix.conf")
+        policyManagerStrict = ConfigPolicyManager(self.identityStorage, 
+            "policy_config/relation_ruleset_strict.conf")
+        policyManagerEqual = ConfigPolicyManager(self.identityStorage, 
+            "policy_config/relation_ruleset_equal.conf")
 
+        dataName = Name('/TestRule1')
+
+        self.assertIsNotNone(
+                policyManagerPrefix._findMatchingRule(dataName, 'data'),
+                "Prefix relation should match prefix name")
+        self.assertIsNotNone(
+                policyManagerEqual._findMatchingRule(dataName, 'data'),
+                "Equal relation should match prefix name")
+        self.assertIsNone(
+                policyManagerStrict._findMatchingRule(dataName, 'data'),
+                "Strict-prefix relation should not match prefix name")
+
+        dataName = Name('/TestRule1/hi')
+        self.assertIsNotNone(
+                policyManagerPrefix._findMatchingRule(dataName, 'data'),
+                "Prefix relation should match longer name")
+        self.assertIsNone(
+                policyManagerEqual._findMatchingRule(dataName, 'data'),
+                "Equal relation should not match longer name")
+        self.assertIsNotNone(
+                policyManagerStrict._findMatchingRule(dataName, 'data'),
+                "Strict-prefix relation should match longer name")
+
+        dataName = Name('/Bad/TestRule1/')
+        self.assertIsNone(
+                policyManagerPrefix._findMatchingRule(dataName, 'data'),
+                "Prefix relation should not match inner components")
+        self.assertIsNone(
+                policyManagerEqual._findMatchingRule(dataName, 'data'),
+                "Equal relation should not match inner components")
+        self.assertIsNone(
+                policyManagerStrict._findMatchingRule(dataName, 'data'),
+                "Strict-prefix relation should  not match inner components")
 
     def test_simple_regex(self):
         """
@@ -70,23 +109,22 @@ class TestRegexMatching(ut.TestCase):
         """
         policyManager = ConfigPolicyManager(self.identityStorage, 
             "policy_config/regex_ruleset.conf")
-        rsaData = Data(Name('/SecurityTestSecRule/Basic'))
-        self.keyChain.sign(rsaData, self.defaultCertName)
+        data = Data(Name('/SecurityTestSecRule/Basic'))
+        self.keyChain.sign(data, self.defaultCertName)
 
-        matchingRule = policyManager._findMatchingRule(rsaData.getName(), 'data')
+        matchingRule = policyManager._findMatchingRule(data.getName(), 'data')
         self.assertIsNotNone(matchingRule, "Validator did not match data name to rule")
 
-        signatureName = rsaData.getSignature().getKeyLocator().getKeyName()
+        signatureName = data.getSignature().getKeyLocator().getKeyName()
         self.assertTrue(policyManager._checkSignatureMatch(signatureName,
-            rsaData.getName(), matchingRule))
+            data.getName(), matchingRule))
 
         wrongNameData = Data(Name('/SecurityTestSecRule/Other'))
         self.keyChain.sign(wrongNameData, self.defaultCertName)
         matchingRule = policyManager._findMatchingRule(wrongNameData.getName(), 'data')
         self.assertIsNone(matchingRule, "Validator matched bad name to rule")
 
-        
-        wrongSignerData = Data(rsaData)
+        wrongSignerData = Data(data)
         self.keyChain.sign(wrongSignerData, self.shortCertName)
         matchingRule = policyManager._findMatchingRule(wrongSignerData.getName(), 'data')
         self.assertIsNotNone(matchingRule, "Validator did not match data name to rule")
@@ -99,15 +137,15 @@ class TestRegexMatching(ut.TestCase):
     def test_hyper_relation(self):
         policyManager = ConfigPolicyManager(self.identityStorage, 
             "policy_config/hyperrelation_ruleset.conf")
-        rsaData = Data(Name('/SecurityTestSecRule/Basic'))
-        self.keyChain.sign(rsaData, self.defaultCertName)
+        data = Data(Name('/SecurityTestSecRule/Basic'))
+        self.keyChain.sign(data, self.defaultCertName)
 
-        matchingRule = policyManager._findMatchingRule(rsaData.getName(), 'data')
+        matchingRule = policyManager._findMatchingRule(data.getName(), 'data')
         self.assertTrue(matchingRule is not None)
 
-        signatureName = rsaData.getSignature().getKeyLocator().getKeyName()
+        signatureName = data.getSignature().getKeyLocator().getKeyName()
         self.assertTrue(policyManager._checkSignatureMatch(signatureName,
-            rsaData.getName(), matchingRule))
+            data.getName(), matchingRule))
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
