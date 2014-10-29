@@ -1,7 +1,7 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2014 Regents of the University of California.
-# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,15 +17,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-from pyndn.security.certificate import public_key, certificate, identity_certificate
-__all__ = ['public_key', 'certificate', 'identity_certificate']
+"""
+    Exceptions that may occur during DER encoding/decoding
+    Correspond to exceptions in ndn-cpp
+"""
 
-import sys as _sys
+class DerException(Exception):
+    pass
 
-try:
-    from pyndn.security.certificate.public_key import *
-    from pyndn.security.certificate.certificate import *
-    from pyndn.security.certificate.identity_certificate import *
-except ImportError:
-    del _sys.modules[__name__]
-    raise
+class NegativeLengthException(DerException):
+    def __init__(self, message):
+        super(NegativeLengthException, self).__init__(self, message)
+
+class DerEncodingException(DerException):
+    def __init__(self, message):
+        super(DerEncodingException, self).__init__(self, message)
+
+class DerDecodingException(DerException):
+    def __init__(self, message):
+        super(DerDecodingException, self).__init__(self, message)
+

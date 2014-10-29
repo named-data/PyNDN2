@@ -1,7 +1,7 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2014 Regents of the University of California.
-# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,15 +17,37 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-from pyndn.security.certificate import public_key, certificate, identity_certificate
-__all__ = ['public_key', 'certificate', 'identity_certificate']
+"""
+This module defines the Der object with known DER node types.
+"""
+class Der(object):
+    Eoc = 0
+    Boolean = 1
+    Integer = 2
+    BitString = 3
+    OctetString = 4
+    Null = 5
+    ObjectIdentifier = 6
+    ObjectDescriptor = 7
+    External = 40
+    Real = 9
+    Enumerated = 10
+    EmbeddedPdv = 43
+    Utf8String = 12
+    RelativeOid = 13
+    Sequence = 48
+    Set = 49
+    NumericString = 18
+    PrintableString = 19
+    T61String = 20
+    VideoTexString = 21
+    Ia5String = 22
+    UtcTime = 23
+    GeneralizedTime = 24
+    GraphicString = 25
+    VisibleString = 26
+    GeneralString = 27
+    UniversalString = 28
+    CharacterString = 29
+    BmpString = 30
 
-import sys as _sys
-
-try:
-    from pyndn.security.certificate.public_key import *
-    from pyndn.security.certificate.certificate import *
-    from pyndn.security.certificate.identity_certificate import *
-except ImportError:
-    del _sys.modules[__name__]
-    raise

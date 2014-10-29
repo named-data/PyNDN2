@@ -1,7 +1,7 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2014 Regents of the University of California.
-# Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,15 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU General Public License is in the file COPYING.
 
-from pyndn.security.certificate import public_key, certificate, identity_certificate
-__all__ = ['public_key', 'certificate', 'identity_certificate']
+from pyndn.encoding.der import der, der_exceptions, der_node
+__all__ = ['der', 'der_exceptions', 'der_node']
 
 import sys as _sys
 
 try:
-    from pyndn.security.certificate.public_key import *
-    from pyndn.security.certificate.certificate import *
-    from pyndn.security.certificate.identity_certificate import *
+    from pyndn.encoding.der.der import Der
+    from pyndn.encoding.der.der_exceptions import *
+    from pyndn.encoding.der.der_node import *
+
 except ImportError:
     del _sys.modules[__name__]
     raise

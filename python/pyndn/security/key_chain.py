@@ -144,7 +144,7 @@ class KeyChain(object):
         Create a public key signing request.
         
         :param Name keyName: The name of the key.
-        :returns: The signing request data.
+        :return: The signing request data.
         :rtype: Blob
         """
         return self._identityManager.getPublicKey(keyName).getKeyDer()
@@ -171,7 +171,7 @@ class KeyChain(object):
         
         :param Name certificateName: The name of the requested certificate.
         :return: The requested certificate which is valid.        
-        :rtype: Certificate
+        :rtype: IdentityCertificate
         """
         return self._identityManager.getCertificate(certificateName)
     
@@ -181,7 +181,7 @@ class KeyChain(object):
         
         :param Name certificateName: The name of the requested certificate.
         :return: The requested certificate.        
-        :rtype: Certificate
+        :rtype: IdentityCertificate
         """
         return self._identityManager.getAnyCertificate(certificateName)
     

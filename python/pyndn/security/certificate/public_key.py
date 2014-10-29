@@ -23,9 +23,14 @@ for use by the security library.
 """
 
 from Crypto.PublicKey import RSA
+from pyndn.util import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
+
+from pyndn.encoding.der import DerNode
+
+from Crypto.Hash import SHA256
 
 class PublicKey(object):
     """
@@ -48,7 +53,7 @@ class PublicKey(object):
         :return: The encoded DER syntax tree.
         :rtype: DerNode
         """
-        raise RuntimeError("PublicKey.toDer is not implemented")
+        return DerNode.parse(self._keyDer)
     
     @staticmethod
     def fromDer(keyType, keyDer):
@@ -78,7 +83,14 @@ class PublicKey(object):
         :return: The digest value
         :rtype: Blob
         """
-        raise RuntimeError("PublicKey.getDigest is not implemented")
+        if digestAlgorithm == DigestAlgorithm.SHA256:
+            hashFunc  = SHA256.new()
+            hashFunc.update(self._keyDer.buf())
+
+            return Blob(hashFunc.digest())
+        else:
+            raise RuntimeError("Unimplemented digest algorithm")
+
     
     def getKeyType(self):
         """

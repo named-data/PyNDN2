@@ -56,7 +56,7 @@ class IdentityStorage(object):
         :return: True if the identity was revoked, False if not.
         :rtype: bool
         """
-        raise RuntimeError("doesIdentityExist is not implemented")
+        raise RuntimeError("revokeIdentityExist is not implemented")
 
     def getNewKeyName(self, identityName, useKsk):  
         """
@@ -140,6 +140,14 @@ class IdentityStorage(object):
         """
         raise RuntimeError("deactivateKey is not implemented")
 
+    def deletePublicKeyInfo(self, keyName):
+        """
+        Remove the key and all certificates associated with it.
+        
+        :param Name keyName: The name of the key.
+        """
+        raise RuntimeError("deletePublicKeyInfo is not implemented")
+
     def doesCertificateExist(self, certificateName):    
         """
         Check if the specified certificate already exists.
@@ -168,9 +176,17 @@ class IdentityStorage(object):
           be returned, otherwise validity is disregarded.  If omitted, 
           allowAny is False.
         :return: The requested certificate. If not found, return None.
-        :rtype: Data
+        :rtype: IdentityCertificate
         """
         raise RuntimeError("getCertificate is not implemented")
+
+    def deleteCertificateInfo(self, certificateName):
+        """
+        Remove a certificate from associated keys.
+
+        :param Name keyName: The name of the key.
+        """
+        raise RuntimeError("deleteCertificateInfo is not implemented")
 
     #
     # Get/Set Default
