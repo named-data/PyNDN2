@@ -611,7 +611,7 @@ class TrustAnchorRefreshManager(object):
         
         self._identityStorage = identityStorage
         # maps the directory name to certificate names so they can be
-        # revoked when necessary, and the next refresh time
+        # deleted when necessary
         self._refreshDirectories = {}
 
     def _loadIdentityCertificateFromFile(self, filename):
@@ -645,14 +645,14 @@ class TrustAnchorRefreshManager(object):
             nextRefreshTime = info['nextRefresh']
             if nextRefreshTime <= refreshTime:
                 certificateList = info['certificates'][:]
-                # revoke the certificates associated with this directory if possible
+                # delete the certificates associated with this directory if possible
                 # then re-import
-                # IdentityStorage subclasses may not support revocation
+                # IdentityStorage subclasses may not support deletion
                 for c in certificateList:
                     try:
-                        self._identityStorage.revokeCertificate(Name(c))
+                        self._identityStorage.deleteCertificateInfo(Name(c))
                     except SecurityException:
-                        # was already removed?
+                        # was already removed? not supported?
                         pass
                     except RuntimeError:
                         #not implemented
