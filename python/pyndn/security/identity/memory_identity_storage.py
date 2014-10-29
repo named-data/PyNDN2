@@ -25,11 +25,11 @@ own means and add the objects to the MemoryIdentityStorage object.
 To use permanent file-based storage, see BasicIdentityStorage.
 """
 
-from pyndn.data import Data
 from pyndn.name import Name
 from pyndn.util import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
+from pyndn.security.certificate import IdentityCertificate
 
 class MemoryIdentityStorage(IdentityStorage):
     def __init__(self):
