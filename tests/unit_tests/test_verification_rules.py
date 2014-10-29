@@ -38,8 +38,6 @@ class TestRegexMatching(ut.TestCase):
         # set up the keychain so we can sign data
         self.identityStorage = MemoryIdentityStorage()
         self.privateKeyStorage = MemoryPrivateKeyStorage()
-        self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
-        self.privateKeyStorage = MemoryPrivateKeyStorage()
         
         # not using keychain for verification so we don't neet to set the
         # policy manager
