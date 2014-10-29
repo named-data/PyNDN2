@@ -130,6 +130,14 @@ class TestSimplePolicyManager(ut.TestCase):
 
 class TestConfigPolicyManager(ut.TestCase):
     def setUp(self):
+        testCertDirectory = 'policy_config/certs'
+        self.testCertFile = os.path.join(testCertDirectory, 'test.cert')
+        try:
+            os.mkdir(testCertDirectory)
+        except OSError:
+            # already exists
+            pass
+
         self.identityStorage = TestIdentityStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
                 TestPrivateKeyStorage())
@@ -211,10 +219,10 @@ class TestConfigPolicyManager(ut.TestCase):
         # now save the cert data to our anchor directory, and wait
         # we have to sign it with the current identity or the 
         # policy manager will create an interest for the signing certificate
-        testCertFile = 'policy_config/certs/test.cert'
-        self.addCleanup(self._removeFile, testCertFile)
+
+        self.addCleanup(self._removeFile, self.testCertFile)
         self.addCleanup(self.identityStorage.deleteIdentityInfo, Name('/temp'))
-        with open(testCertFile, 'w') as certFile:
+        with open(self.testCertFile, 'w') as certFile:
             cert = IdentityCertificate()
             certData = b64decode(CERT_DUMP)
             cert.wireDecode(Blob(certData, False))
