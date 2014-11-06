@@ -58,7 +58,7 @@ class DerNode (object):
         self._header.append(self._nodeType)
         if size < 0:
             raise NegativeLengthException("DER object has negative length")
-        elif size < 127:
+        elif size <= 127:
             self._header.append(size & 0xff)
         else:
             tempBuf = bytearray()
