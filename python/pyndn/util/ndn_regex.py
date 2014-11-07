@@ -21,7 +21,7 @@ import re
 from pyndn import Name
 
 """
-Convert an NDN regex (http://redmine.named-data.net/projects/ndn-css/wiki/Regex)
+Convert an NDN regex (http://redmine.named-data.net/projects/ndn-cxx/wiki/Regex)
 to a python regex that can match against URIs
 """
 
