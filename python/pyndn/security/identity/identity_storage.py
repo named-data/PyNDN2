@@ -188,6 +188,14 @@ class IdentityStorage(object):
         """
         raise RuntimeError("deleteCertificateInfo is not implemented")
 
+    def deleteIdentityInfo(self, identity):
+        """
+        Delete an identity and related public keys and certificates.
+
+        :param Name identity: The identity name.
+        """
+        raise RuntimeError("deleteIdentityInfo is not implemented")
+
     #
     # Get/Set Default
     #
