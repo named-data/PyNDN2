@@ -174,8 +174,8 @@ class BasicIdentityStorage(IdentityStorage):
         :return: True if the key exists, otherwise False.
         :rtype: bool
         """
-        keyId = keyName.get(-1).toEscapedString()
-        identityName = keyName.getPrefix(-1)
+        keyId = keyName[-1].toEscapedString()
+        identityName = keyName[:-1]
 
         cursor = self._database.cursor()        
         cursor.execute(
@@ -204,14 +204,14 @@ class BasicIdentityStorage(IdentityStorage):
         if self.doesKeyExist(keyName):
             raise SecurityException("A key with the same name already exists!")
 
-        identityName = keyName.getPrefix(-1)
+        identityName = keyName[:-1]
         identityUri = identityName.toUri()
         makeDefault = 0
         if not self.doesIdentityExist(identityName):
             self.addIdentity(identityName)
             makeDefault = 1
 
-        keyId = keyName.get(-1).toEscapedString()
+        keyId = keyName[-1].toEscapedString()
         keyBuffer = buffer(bytearray (publicKeyDer.buf()))
 
         cursor = self._database.cursor()
@@ -231,8 +231,8 @@ class BasicIdentityStorage(IdentityStorage):
         if not self.doesKeyExist(keyName):
             return Blob()
 
-        identityUri = keyName.getPrefix(-1).toUri()
-        keyId = keyName.get(-1).toEscapedString()
+        identityUri = keyName[:-1].toUri()
+        keyId = keyName[-1].toEscapedString()
 
         cursor = self._database.cursor()
         cursor.execute("SELECT public_key FROM Key WHERE identity_name=? AND key_identifier=?",
@@ -249,8 +249,8 @@ class BasicIdentityStorage(IdentityStorage):
         :return: The KeyType, for example KeyType.RSA.
         :rtype: an int from KeyType
         """
-        keyId = keyName.get(-1).toEscapedString()
-        identityName = keyName.getPrefix(-1)
+        keyId = keyName[-1].toEscapedString()
+        identityName = keyName[:-1]
 
         cursor = self._database.cursor()        
         cursor.execute(
@@ -294,7 +294,7 @@ class BasicIdentityStorage(IdentityStorage):
         if keyName.size() == 0:
             return
 
-        keyId = keyName.get(-1).toEscapedString()
+        keyId = keyName[-1].toEscapedString()
         identityName = keyName[:-1]
         cursor = self._database.cursor()
         cursor.execute("DELETE FROM Certificate WHERE identity_name=? AND key_identifier=?",
@@ -445,8 +445,8 @@ class BasicIdentityStorage(IdentityStorage):
         :raises SecurityException: if the default certificate name for the key 
           name is not set.
         """
-        keyId = keyName.get(-1).toEscapedString()
-        identityName = keyName.getPrefix(-1)
+        keyId = keyName[-1].toEscapedString()
+        identityName = keyName[:-1]
 
         cursor = self._database.cursor()        
         cursor.execute(
@@ -470,7 +470,17 @@ class BasicIdentityStorage(IdentityStorage):
         
         :param Name identityName: The default identity name.
         """
-        raise RuntimeError("setDefaultIdentity is not implemented")
+        # Reset previous default identity.
+        cursor = self._database.cursor()
+        cursor.execute(
+          "UPDATE Identity SET default_identity=0 WHERE default_identity=1")
+
+        # Set current default identity.
+        cursor.execute(
+          "UPDATE Identity SET default_identity=1 WHERE identity_name=?",
+          (identityName.toUri(), ))
+        self._database.commit()
+        cursor.close()
 
     def setDefaultKeyNameForIdentity(self, keyName, identityNameCheck = None):    
         """
@@ -481,7 +491,29 @@ class BasicIdentityStorage(IdentityStorage):
         :param Name identityNameCheck: (optional) The identity name to check the 
           keyName.
         """
-        raise RuntimeError("setDefaultKeyNameForIdentity is not implemented")
+        keyId = keyName[-1].toEscapedString()
+        identityName = keyName[:-1]
+
+        if (not (identityNameCheck is None) and
+             identityNameCheck.size() != 0 and
+             not identityNameCheck.equals(identityName)):
+            raise SecurityException(
+              "Specified identity name does not match the key name")
+
+        # Reset previous default key.
+        identityUri = identityName.toUri()
+        cursor = self._database.cursor()
+        cursor.execute(
+          "UPDATE Key SET default_key=0 WHERE default_key=1 and identity_name=?",
+          (identityUri, ))
+
+        # Set current default Key.
+        cursor.execute(
+          "UPDATE Key SET default_key=1 WHERE identity_name=? AND key_identifier=?",
+          (identityUri, keyId))
+
+        self._database.commit()
+        cursor.close()
 
     def setDefaultCertificateNameForKey(self, keyName, certificateName):        
         """
@@ -490,4 +522,20 @@ class BasicIdentityStorage(IdentityStorage):
         :param Name keyName: The key name.
         :param Name certificateName: The certificate name.
         """
-        raise RuntimeError("setDefaultCertificateNameForKey is not implemented")
+        keyId = keyName[-1].toEscapedString()
+        identityName = keyName[:-1]
+
+        # Reset previous default certificate.
+        identityUri = identityName.toUri()
+        cursor = self._database.cursor()
+        cursor.execute(
+          "UPDATE Certificate SET default_cert=0 WHERE default_cert=1 AND identity_name=? AND key_identifier=?",
+          (identityUri, keyId))
+
+        # Set the current default Certificate.
+        cursor.execute(
+          "UPDATE Certificate SET default_cert=1 WHERE identity_name=? AND key_identifier=? AND cert_name=?",
+            (identityUri, keyId, certificateName.toUri()))
+
+        self._database.commit()
+        cursor.close()
