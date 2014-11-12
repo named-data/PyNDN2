@@ -2,7 +2,8 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -25,6 +26,7 @@ identity, public keys and certificates using SQLite.
 import os
 import sqlite3
 from pyndn.name import Name
+from pyndn.util import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
 
@@ -144,7 +146,16 @@ class BasicIdentityStorage(IdentityStorage):
 
         :param Name identityName: The identity name.
         """
-        raise RuntimeError("doesIdentityExist is not implemented")
+        identityUri = identityName.toUri()
+        if self.doesIdentityExist(identityName):
+            raise SecurityException("The identity {} already exists".format(
+                identityUri))
+
+        cursor = self._database.cursor()
+        cursor.execute("INSERT INTO Identity(identity_name) VALUES(?)",
+            (identityUri,))
+        self._database.commit()
+        cursor.close()
 
     def revokeIdentity(self):    
         """
@@ -153,7 +164,7 @@ class BasicIdentityStorage(IdentityStorage):
         :return: True if the identity was revoked, False if not.
         :rtype: bool
         """
-        raise RuntimeError("doesIdentityExist is not implemented")
+        return False
 
     def doesKeyExist(self, keyName):    
         """
@@ -187,7 +198,27 @@ class BasicIdentityStorage(IdentityStorage):
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
         """
-        raise RuntimeError("addKey is not implemented")
+        if keyName.size() == 0:
+            return
+        
+        if self.doesKeyExist(keyName):
+            raise SecurityException("A key with the same name already exists!")
+
+        identityName = keyName.getPrefix(-1)
+        identityUri = identityName.toUri()
+        makeDefault = 0
+        if not self.doesIdentityExist(identityName):
+            self.addIdentity(identityName)
+            makeDefault = 1
+
+        keyId = keyName.get(-1).toEscapedString()
+        keyBuffer = buffer(bytearray (publicKeyDer.buf()))
+
+        cursor = self._database.cursor()
+        cursor.execute("INSERT INTO Key VALUES(?,?,?,?,?, ?)",
+            (identityUri, keyId, keyType, keyBuffer, makeDefault, 1))
+        self._database.commit()
+        cursor.close()
 
     def getKey(self, keyName):    
         """
@@ -197,7 +228,18 @@ class BasicIdentityStorage(IdentityStorage):
         :return: The DER Blob. If not found, return a isNull() Blob.
         :rtype: Blob
         """
-        raise RuntimeError("getKey is not implemented")
+        if not self.doesKeyExist(keyName):
+            return Blob()
+
+        identityUri = keyName.getPrefix(-1).toUri()
+        keyId = keyName.get(-1).toEscapedString()
+
+        cursor = self._database.cursor()
+        cursor.execute("SELECT public_key FROM Key WHERE identity_name=? AND key_identifier=?",
+            (identityUri, keyId))
+        (keyData, ) = cursor.fetchone()
+        cursor.close()
+        return Blob(bytearray(keyData))
 
     def getKeyType(self, keyName):    
         """
@@ -243,6 +285,27 @@ class BasicIdentityStorage(IdentityStorage):
         """
         raise RuntimeError("deactivateKey is not implemented")
 
+    def deletePublicKeyInfo(self, keyName):
+        """
+        Remove the key and all certificates associated with it.
+
+        :param Name keyName: The name of the key.
+        """
+        if keyName.size() == 0:
+            return
+
+        keyId = keyName.get(-1).toEscapedString()
+        identityName = keyName[:-1]
+        cursor = self._database.cursor()
+        cursor.execute("DELETE FROM Certificate WHERE identity_name=? AND key_identifier=?",
+            (identityName.toUri(), keyId))
+
+        cursor.execute("DELETE FROM Key WHERE identity_name=? and key_identifier=?",
+            (identityName.toUri(), keyId))
+
+        self._database.commit()
+        cursor.close()
+
     def doesCertificateExist(self, certificateName):    
         """
         Check if the specified certificate already exists.
@@ -284,6 +347,42 @@ class BasicIdentityStorage(IdentityStorage):
         :rtype: IdentityCertificate
         """
         raise RuntimeError("getCertificate is not implemented")
+
+    def deleteCertificateInfo(self, certificateName):
+        """
+        Remove a certificate from associated keys.
+
+        :param Name keyName: The name of the key.
+        """
+        if certificateName.size() == 0:
+            return
+
+        cursor = self._database.cursor()
+        cursor.execute("DELETE FROM Certificate WHERE cert_name=?",
+            (certificateName.toUri(),))
+        self._database.commit()
+        cursor.close()
+
+    def deleteIdentityInfo(self, identityName):
+        """
+        Delete an identity and related public keys and certificates.
+
+        :param Name identity: The identity name.
+        """
+        identity = identityName.toUri()
+
+        cursor = self._database.cursor()
+        cursor.execute("DELETE FROM Certificate WHERE identity_name=?",
+            (identity,))
+
+        cursor.execute("DELETE FROM Key WHERE identity_name=?",
+            (identity,))
+
+        cursor.execute("DELETE FROM Identity WHERE identity_name=?",
+            (identity,))
+
+        self._database.commit()
+        cursor.close()
 
     #
     # Get/Set Default
