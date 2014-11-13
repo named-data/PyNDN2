@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -27,7 +27,7 @@ import select
 class SocketPoller(object):
     """
     Create a new SocketPoller and register with the given sock
-    
+
     :param socket sock: The socket to register with.
     """
     def __init__(self, sock):
@@ -35,7 +35,7 @@ class SocketPoller(object):
         self._poll = None
         self._kqueue = None
         self._kevents = None
-        
+
         if hasattr(select, "poll"):
             # Set up _poll.  (Ubuntu, etc.)
 #pylint: disable=E1103
@@ -47,7 +47,7 @@ class SocketPoller(object):
             self._kqueue = select.kqueue()
             self._kevents = [select.kevent(
               sock.fileno(), filter = select.KQ_FILTER_READ,
-              flags = select.KQ_EV_ADD | select.KQ_EV_ENABLE | 
+              flags = select.KQ_EV_ADD | select.KQ_EV_ENABLE |
                       select.KQ_EV_CLEAR)]
         elif not hasattr(select, "select"):
             # Most Python implementations have this fallback, so we
@@ -57,7 +57,7 @@ class SocketPoller(object):
     def isReady(self):
         """
         Check if the socket given to the constructor has data to receive.
-        
+
         :return: True if there is data ready to receive, otherwise False.
         :rtype: bool
         """

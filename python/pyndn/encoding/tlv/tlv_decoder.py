@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -20,14 +20,14 @@
 from pyndn.util import Blob
 
 """
-This module defines the TlvDecoder class for decoding in the NDN-TLV wire 
+This module defines the TlvDecoder class for decoding in the NDN-TLV wire
 format.
 """
 
 class TlvDecoder(object):
     """
     Create a new TlvDecoder to decode the input using NDN-TLV.
-    
+
     :param input: The array with the bytes to decode.
     :type input: An array type with int elements
     """
@@ -37,11 +37,11 @@ class TlvDecoder(object):
         #   which is more efficient for slicing.
         self._inputView = Blob(input, False).buf()
         self._offset = 0
-        
+
     def readVarNumber(self):
         """
         Decode VAR-NUMBER in NDN-TLV and return it. Update offset.
-        
+
         :return: The decoded VAR-NUMBER.
         :rtype: int
         """
@@ -52,13 +52,13 @@ class TlvDecoder(object):
             return firstOctet
         else:
             return self.readExtendedVarNumber(firstOctet)
-        
+
     def readExtendedVarNumber(self, firstOctet):
         """
         A private function to do the work of readVarNumber, given the firstOctet
         which is >= 253.
-        
-        :param int firstOctet: The first octet which is >= 253, used to decode 
+
+        :param int firstOctet: The first octet which is >= 253, used to decode
           the remaining bytes.
         :return: The decoded VAR-NUMBER.
         :rtype: int
@@ -84,16 +84,16 @@ class TlvDecoder(object):
                       (self._input[self._offset + 6] << 8) +
                        self._input[self._offset + 7])
             self._offset += 8
-        
+
         return result
-        
+
     def readTypeAndLength(self, expectedType):
         """
-        Decode the type and length from self's input starting at offset, 
-        expecting the type to be expectedType and return the length. 
-        Update offset.  Also make sure the decoded length does not exceed the 
+        Decode the type and length from self's input starting at offset,
+        expecting the type to be expectedType and return the length.
+        Update offset.  Also make sure the decoded length does not exceed the
         number of bytes remaining in the input.
-        
+
         :param int expectedType: The expected type.
         :return: The length of the TLV.
         :rtype: int
@@ -103,22 +103,22 @@ class TlvDecoder(object):
         type = self.readVarNumber()
         if type != expectedType:
             raise ValueError("Did not get the expected TLV type")
-        
+
         length = self.readVarNumber()
         if self._offset + length > len(self._input):
             raise ValueError("TLV length exceeds the buffer length")
-        
+
         return length
-    
+
     def readNestedTlvsStart(self, expectedType):
         """
-        Decode the type and length from self's input starting at offset, 
-        expecting the type to be expectedType.  Update offset.  Also make sure 
-        the decoded length does not exceed the number of bytes remaining in the 
+        Decode the type and length from self's input starting at offset,
+        expecting the type to be expectedType.  Update offset.  Also make sure
+        the decoded length does not exceed the number of bytes remaining in the
         input. Return the offset of the end of this parent TLV, which is used in
-        decoding optional nested TLVs. After reading all nested TLVs, call 
+        decoding optional nested TLVs. After reading all nested TLVs, call
         finishNestedTlvs.
-        
+
         :param int expectedType: The expected type.
         :return: The offset of the end of the parent TLV.
         :rtype: int
@@ -126,14 +126,14 @@ class TlvDecoder(object):
           the TLV length exceeds the buffer length.
         """
         return self.readTypeAndLength(expectedType) + self._offset
-    
+
     def finishNestedTlvs(self, endOffset):
         """
-        Call this after reading all nested TLVs to skip any remaining 
+        Call this after reading all nested TLVs to skip any remaining
         unrecognized TLVs and to check if the offset after the final nested TLV
         matches the endOffset returned by readNestedTlvsStart.
-        
-        :param int endOffset: The offset of the end of the parent TLV, returned 
+
+        :param int endOffset: The offset of the end of the parent TLV, returned
           by readNestedTlvsStart.
         :raises ValueError: if the TLV length does not equal the total length of
           the nested TLVs.
@@ -141,7 +141,7 @@ class TlvDecoder(object):
         # We expect _offset to be endOffset, so check this first.
         if self._offset == endOffset:
             return
-        
+
         # Skip remaining TLVs.
         while self._offset < endOffset:
             # Skip the type VAR-NUMBER.
@@ -156,18 +156,18 @@ class TlvDecoder(object):
         if self._offset != endOffset:
             raise ValueError(
                "TLV length does not equal the total length of the nested TLVs")
-               
+
     def peekType(self, expectedType, endOffset):
         """
-        Decode the type from self's input starting at offset, and if it is the 
-        expectedType, then return True, else False.  However, if self's offset 
-        is greater than or equal to endOffset, then return False and don't try 
+        Decode the type from self's input starting at offset, and if it is the
+        expectedType, then return True, else False.  However, if self's offset
+        is greater than or equal to endOffset, then return False and don't try
         to read the type. Do not update offset.
-        
+
         :param int expectedType: The expected type.
-        :param int endOffset: The offset of the end of the parent TLV, returned 
-          by readNestedTlvsStart.        
-        :return: True if the type of the next TLV is the expectedType, 
+        :param int endOffset: The offset of the end of the parent TLV, returned
+          by readNestedTlvsStart.
+        :return: True if the type of the next TLV is the expectedType,
           otherwise False.
         :rtype: bool
         """
@@ -179,18 +179,18 @@ class TlvDecoder(object):
             type = self.readVarNumber()
             # Restore offset.
             self._offset = saveOffset
-    
+
             return type == expectedType
-    
+
     def readNonNegativeInteger(self, length):
         """
-        Decode a non-negative integer in NDN-TLV and return it. Update offset 
+        Decode a non-negative integer in NDN-TLV and return it. Update offset
         by length.
 
         :param int length: The number of bytes in the encoded integer.
         :return: The integer.
         :rtype: int (or long if a large integer on a 32-bit system)
-        :raises ValueError: if length is an invalid length for a TLV 
+        :raises ValueError: if length is an invalid length for a TLV
           non-negative integer.
         """
         if length == 1:
@@ -214,14 +214,14 @@ class TlvDecoder(object):
                        self._input[self._offset + 7])
         else:
             raise ValueError("Invalid length for a TLV nonNegativeInteger")
-        
+
         self._offset += length
         return result
-        
+
     def readNonNegativeIntegerTlv(self, expectedType):
         """
-        Decode the type and length from self's input starting at offset, 
-        expecting the type to be expectedType. Then decode a non-negative 
+        Decode the type and length from self's input starting at offset,
+        expecting the type to be expectedType. Then decode a non-negative
         integer in NDN-TLV and return it.  Update offset.
 
         :param int expectedType: The expected type.
@@ -232,18 +232,18 @@ class TlvDecoder(object):
         """
         length = self.readTypeAndLength(expectedType)
         return self.readNonNegativeInteger(length)
-    
+
     def readOptionalNonNegativeIntegerTlv(self, expectedType, endOffset):
         """
-        Peek at the next TLV, and if it has the expectedType then call 
+        Peek at the next TLV, and if it has the expectedType then call
         readNonNegativeIntegerTlv and return the integer.  Otherwise, return
         None.  However, if self's offset is greater than or equal to endOffset,
         then return None and don't try to read the type.
 
         :param int expectedType: The expected type.
-        :param int endOffset: The offset of the end of the parent TLV, returned 
+        :param int endOffset: The offset of the end of the parent TLV, returned
           by readNestedTlvsStart.
-        :return: The integer or None if the next TLV doesn't have the expected 
+        :return: The integer or None if the next TLV doesn't have the expected
           type.
         :rtype: int
         """
@@ -251,19 +251,19 @@ class TlvDecoder(object):
             return self.readNonNegativeIntegerTlv(expectedType)
         else:
             return None
-        
+
     def readOptionalNonNegativeIntegerTlvAsFloat(self, expectedType, endOffset):
         """
-        Peek at the next TLV, and if it has the expectedType then call 
-        readNonNegativeIntegerTlv and return the integer converted to a float.  
-        Otherwise, return None.  
+        Peek at the next TLV, and if it has the expectedType then call
+        readNonNegativeIntegerTlv and return the integer converted to a float.
+        Otherwise, return None.
         However, if self's offset is greater than or equal to endOffset,
         then return None and don't try to read the type.
 
         :param int expectedType: The expected type.
-        :param int endOffset: The offset of the end of the parent TLV, returned 
+        :param int endOffset: The offset of the end of the parent TLV, returned
           by readNestedTlvsStart.
-        :return: The integer or None if the next TLV doesn't have the expected 
+        :return: The integer or None if the next TLV doesn't have the expected
           type.
         :rtype: float
         """
@@ -273,10 +273,10 @@ class TlvDecoder(object):
             return float(self.readNonNegativeIntegerTlv(expectedType))
         else:
             return None
-        
+
     def readBlobTlv(self, expectedType):
         """
-        Decode the type and length from self's input starting at offset, 
+        Decode the type and length from self's input starting at offset,
         expecting the type to be expectedType. Then return an array of the bytes
         in the value.  Update offset.
 
@@ -290,23 +290,23 @@ class TlvDecoder(object):
         length = self.readTypeAndLength(expectedType)
         # Use _inputView to get the slice.
         result = self._inputView[self._offset:self._offset + length]
-        
+
         # readTypeAndLength already checked if length exceeds the input buffer.
         self._offset += length
         return result
-    
+
     def readOptionalBlobTlv(self, expectedType, endOffset):
         """
-        Peek at the next TLV, and if it has the expectedType then call 
-        readBlobTlv and return the value.  Otherwise, return None.  
+        Peek at the next TLV, and if it has the expectedType then call
+        readBlobTlv and return the value.  Otherwise, return None.
         However, if self's offset is greater than or equal to endOffset,
         then return None and don't try to read the type.
-        
+
         :param int expectedType: The expected type.
-        :param int endOffset: The offset of the end of the parent TLV, returned 
+        :param int endOffset: The offset of the end of the parent TLV, returned
           by readNestedTlvsStart.
-        :return: The bytes in the value as a slice on the byte array or None if 
-          the next TLV doesn't have the expected type.  This is not necessarily 
+        :return: The bytes in the value as a slice on the byte array or None if
+          the next TLV doesn't have the expected type.  This is not necessarily
           a copy of the bytes in the input buffer.  If you need a copy, then you
           must make a copy of the return value.
         :rtype: memoryview or equivalent
@@ -315,18 +315,18 @@ class TlvDecoder(object):
             return self.readBlobTlv(expectedType)
         else:
             return None
-        
+
     def readBooleanTlv(self, expectedType, endOffset):
         """
-        Peek at the next TLV, and if it has the expectedType then read a type 
+        Peek at the next TLV, and if it has the expectedType then read a type
         and value, ignoring the value, and return True. Otherwise, return False.
         However, if self's offset is greater than or equal to endOffset,
         then return False and don't try to read the type.
 
         :param int expectedType: The expected type.
-        :param int endOffset: The offset of the end of the parent TLV, returned 
+        :param int endOffset: The offset of the end of the parent TLV, returned
           by readNestedTlvsStart.
-        :return: Return True, or else False if the next TLV doesn't have the 
+        :return: Return True, or else False if the next TLV doesn't have the
           expected type.
         :rtype: bool
         """
@@ -337,20 +337,20 @@ class TlvDecoder(object):
             return True
         else:
             return False
-    
+
     def getOffset(self):
         """
         Get the offset into the input buffer, used for the next read.
-        
+
         :return: The offset.
         :rtype: int
         """
         return self._offset
-    
+
     def seek(self, offset):
         """
         Set the offset into the input, used for the next read.
-        
+
         :param int offset: The new offset.
         """
         self._offset = offset

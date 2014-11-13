@@ -3,7 +3,7 @@
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # This uses cocoapy in pyglet http://www.pyglet.org/. See contrib/cocoapy/LICENSE
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -39,34 +39,34 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
 
 #pylint: disable=E1103
         self._kCFBooleanTrue = c_void_p.in_dll(cf, "kCFBooleanTrue")
-        
+
         self._security = cdll.LoadLibrary(
           "/System/Library/Frameworks/Security.framework/Versions/Current/Security")
         self._security.SecItemCopyMatching.restype = c_void_p
         self._security.SecItemCopyMatching.argtypes = [c_void_p, POINTER(c_void_p)]
-        
+
         self._security.SecSignTransformCreate.restype = c_void_p
         self._security.SecSignTransformCreate.argtypes = [c_void_p, POINTER(c_void_p)]
-        
+
         self._security.SecTransformSetAttribute.restype = c_void_p
         self._security.SecTransformSetAttribute.argtypes = [c_void_p, c_void_p, c_void_p, POINTER(c_void_p)]
-        
+
         self._security.SecTransformExecute.restype = c_void_p
         self._security.SecTransformExecute.argtypes = [c_void_p, POINTER(c_void_p)]
-          
+
         self._kSecClass = c_void_p.in_dll(self._security, "kSecClass")
         self._kSecClassKey = c_void_p.in_dll(self._security, "kSecClassKey")
         self._kSecAttrLabel = c_void_p.in_dll(self._security, "kSecAttrLabel")
         self._kSecAttrKeyClass = c_void_p.in_dll(self._security, "kSecAttrKeyClass")
         self._kSecReturnRef = c_void_p.in_dll(self._security, "kSecReturnRef")
-        
+
         self._kSecAttrKeyTypeAES = c_void_p.in_dll(self._security, "kSecAttrKeyTypeAES")
         self._kSecAttrKeyTypeRSA = c_void_p.in_dll(self._security, "kSecAttrKeyTypeRSA")
         self._kSecAttrKeyClassPrivate = c_void_p.in_dll(self._security, "kSecAttrKeyClassPrivate")
         self._kSecAttrKeyClassPublic = c_void_p.in_dll(self._security, "kSecAttrKeyClassPublic")
         self._kSecAttrKeyClassSymmetric = c_void_p.in_dll(self._security, "kSecAttrKeyClassSymmetric")
         self._kSecDigestSHA2 = c_void_p.in_dll(self._security, "kSecDigestSHA2")
-        
+
         self._kSecTransformInputAttributeName = c_void_p.in_dll(self._security, "kSecTransformInputAttributeName")
         self._kSecDigestTypeAttribute = c_void_p.in_dll(self._security, "kSecDigestTypeAttribute")
         self._kSecDigestLengthAttribute = c_void_p.in_dll(self._security, "kSecDigestLengthAttribute")
@@ -114,12 +114,12 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         privateKey = self._getKey(keyName, KeyClass.PRIVATE)
         if privateKey == None:
             raise SecurityException("private key not found")
-        
+
         signer = None
         dataRef = None
         digestSizeRef = None
 
-        try:    
+        try:
             error = c_void_p()
             signer = self._security.SecSignTransformCreate(
               privateKey, pointer(error))
@@ -131,23 +131,23 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             dataRef = c_void_p(cf.CFDataCreate(None, dataStr, len(data)))
 
             self._security.SecTransformSetAttribute(
-              signer, self._kSecTransformInputAttributeName, dataRef, 
+              signer, self._kSecTransformInputAttributeName, dataRef,
               pointer(error))
             if error.value != None:
                 raise SecurityException("Failed to configure the input of the signer")
 
             self._security.SecTransformSetAttribute(
-              signer, self._kSecDigestTypeAttribute, 
+              signer, self._kSecDigestTypeAttribute,
               self._getDigestAlgorithm(digestAlgorithm), pointer(error))
             if error.value != None:
                 raise SecurityException("Fail to configure the digest algorithm of the signer")
 
             digestSizeRef = c_void_p(cf.CFNumberCreate(
-              None, kCFNumberLongType, 
+              None, kCFNumberLongType,
               byref(c_long(self._getDigestSize(digestAlgorithm)))))
 
             self._security.SecTransformSetAttribute(
-              signer, self._kSecDigestLengthAttribute, digestSizeRef, 
+              signer, self._kSecDigestLengthAttribute, digestSizeRef,
               pointer(error))
             if error.value != None:
                 raise SecurityException("Failed to configure the digest size of the signer")
@@ -156,10 +156,10 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
               signer, pointer(error))
             if error.value != None:
                 raise SecurityException("Failed to sign the data")
-            
+
             if signature == None:
                 raise SecurityException("Signature is NULL!")
-            
+
             signatureLength = cf.CFDataGetLength(signature)
             signatureBytes = (c_byte * signatureLength)()
             cf.CFDataGetBytes(
@@ -260,13 +260,13 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         :param Name keyName: The name of the key.
         :param keyClass: The class of the key, e.g. KeyClass.PUBLIC,
            KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
-        :return: None if not found, otherwise a Keychain ref to the key. You 
+        :return: None if not found, otherwise a Keychain ref to the key. You
           must use cf.CFRelease to free it.
         :rtype: c_void_p
         """
         keyLabel = None
         attrDict = None
-        
+
         try:
             keyNameUri = self._toInternalKeyName(keyName, keyClass)
 

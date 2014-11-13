@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -41,11 +41,11 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         self._publicKeyStore = {}
         # The key is the keyName.toUri(). The value is self.PrivateKey.
         self._privateKeyStore = {}
-        
+
     def setPublicKeyForKeyName(self, keyName, keyType, publicKeyDer):
         """
         Set the public key for the keyName.
-        
+
         :param Name keyName: The key name.
         :param keyType: The KeyType, such as KeyType.RSA.
         :type keyType: an int from KeyType
@@ -55,11 +55,11 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         """
         self._publicKeyStore[keyName.toUri()] = PublicKey.fromDer(
           keyType, Blob(publicKeyDer, True))
-        
+
     def setPrivateKeyForKeyName(self, keyName, keyType, privateKeyDer):
         """
         Set the private key for the keyName.
-        
+
         :param Name keyName: The key name.
         :param keyType: The KeyType, such as KeyType.RSA.
         :type keyType: an int from KeyType
@@ -69,12 +69,12 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         """
         self._privateKeyStore[keyName.toUri()] = self.PrivateKey(
           keyType, privateKeyDer)
-        
+
     def setKeyPairForKeyName(
           self, keyName, keyType, publicKeyDer, privateKeyDer = None):
         """
         Set the public and private key for the keyName.
-        
+
         :param Name keyName: The key name.
         :param keyType: The KeyType, such as KeyType.RSA.
         :type keyType: an int from KeyType
@@ -91,14 +91,14 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
             privateKeyDer = publicKeyDer
             publicKeyDer = keyType
             keyType = KeyType.RSA
-            
+
         self.setPublicKeyForKeyName(keyName, keyType, publicKeyDer)
         self.setPrivateKeyForKeyName(keyName, keyType, privateKeyDer)
-        
+
     def getPublicKey(self, keyName):
         """
         Get the public key with the keyName.
-        
+
         :param Name keyName: The name of public key.
         :return: The public key.
         :rtype: PublicKey
@@ -106,14 +106,14 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         keyNameUri = keyName.toUri()
         if not (keyNameUri in self._publicKeyStore):
             raise SecurityException(
-              "MemoryPrivateKeyStorage: Cannot find public key " + 
+              "MemoryPrivateKeyStorage: Cannot find public key " +
               keyName.toUri())
-              
+
         return self._publicKeyStore[keyNameUri]
 
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
-        Fetch the private key for keyName and sign the data, returning a 
+        Fetch the private key for keyName and sign the data, returning a
         signature Blob.
 
         :param data: The input byte buffer to sign.
@@ -135,7 +135,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
           raise SecurityException(
             "MemoryPrivateKeyStorage: Cannot find private key " + keyUri)
         privateKey = self._privateKeyStore[keyUri]
-        
+
         # Sign the hash of the data.
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert data.
@@ -143,13 +143,13 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         signature = PKCS1_v1_5.new(privateKey.getPrivateKey()).sign(SHA256.new(data))
         # Convert the string to a Blob.
         return Blob(bytearray(signature), False)
-        
+
     def doesKeyExist(self, keyName, keyClass):
         """
         Check if a particular key exists.
-        
+
         :param Name keyName: The name of the key.
-        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC, 
+        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC,
            KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
         :type keyClass: int from KeyClass
         :return: True if the key exists, otherwise false.
@@ -162,28 +162,27 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
           return keyUri in self._privateKeyStore
         else:
           # KeyClass.SYMMETRIC not implemented yet.
-          return False 
+          return False
 
     class PrivateKey:
         """
-        PrivateKey is a simple class to hold a PyCrypto key object along 
+        PrivateKey is a simple class to hold a PyCrypto key object along
         with a KeyType.
         """
         def __init__(self, keyType, keyDer):
             self._keyType = keyType
-            
+
             if not type(keyDer) is str:
                 keyDer = "".join(map(chr, keyDer))
-                
+
             if keyType == KeyType.RSA:
                 self._privateKey = RSA.importKey(keyDer)
             else:
                 raise SecurityException(
                   "PrivateKey constructor: Unrecognized keyType")
-                  
+
         def getKeyType(self):
             return self._keyType
-        
+
         def getPrivateKey(self):
             return self._privateKey
-        

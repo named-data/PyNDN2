@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the Tlv class with type codes for the NDN-TLV wire format.  
+This module defines the Tlv class with type codes for the NDN-TLV wire format.
 """
 
 class Tlv(object):

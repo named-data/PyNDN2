@@ -33,7 +33,7 @@ class TestNameComponentMethods(ut.TestCase):
         comp1 = Name.Component(u"entr\u00E9e")
         expected = "entr%C3%A9e"
         self.assertEqual(comp1.toEscapedString(), expected)
-    
+
     def test_bytearray(self):
         pass
 
@@ -80,7 +80,7 @@ class TestNameMethods(ut.TestCase):
         self.assertTrue(name2 == name, 'Name constructed with append is not equal to URI constructed name')
         self.assertEqual(name2.toUri(), name.toUri(), 'Name constructed with append has wrong URI')
 
-    def test_slice(self):        
+    def test_slice(self):
         name = Name("/edu/cmu/andrew/user/3498478")
         subName1 = name[0:]
         self.assertEqual(subName1, name, 'Slice from first component does not match original name')
@@ -95,13 +95,13 @@ class TestNameMethods(ut.TestCase):
 
         subName5 = name[7:9]
         self.assertEqual(Name(), subName5, 'Slice beginning after end of name should be empty')
-        
+
         subName6 = name[-3:-1]
         self.assertEqual(subName6, Name("/andrew/user"))
-        
+
         subName7 = name[-5:]
         self.assertEqual(subName7, name, 'Slice with negative indices does not match name')
-        
+
         prefix1 = name[:2]
         self.assertEqual(len(prefix1), 2, 'Name prefix has ' + str(len(prefix1)) + ' components instead of 2')
         for i in range(2):
@@ -110,14 +110,14 @@ class TestNameMethods(ut.TestCase):
     def test_prefix(self):
         name = Name("/edu/cmu/andrew/user/3498478")
         prefix1 = name.getPrefix(2)
-        
+
         self.assertEqual(len(prefix1), 2, 'Name prefix has ' + str(len(prefix1)) + ' components instead of 2')
         for i in range(2):
             self.assertTrue(name[i].getValue() == prefix1[i].getValue())
-            
+
         prefix2 = name.getPrefix(100)
         self.assertEqual(prefix2, name, 'Prefix with more components than original should stop at end of original name')
-        
+
     def test_subname(self):
         name = Name("/edu/cmu/andrew/user/3498478")
         subName1 = name.getSubName(0)
@@ -128,15 +128,15 @@ class TestNameMethods(ut.TestCase):
         subName3 = name.getSubName(1,3)
         self.assertEqual(subName3, Name("/cmu/andrew/user"))
 
-        subName4 = name.getSubName(0,100) 
+        subName4 = name.getSubName(0,100)
         self.assertEqual(name, subName4, 'Subname with more components than original should stop at end of original name')
 
         subName5 = name.getSubName(7,2)
         self.assertEqual(Name(), subName5, 'Subname beginning after end of name should be empty')
-        
+
         subName6 = name.getSubName(-1,7)
         self.assertEqual(subName6, Name("/3498478"), 'Negative subname with more components than original should stop at end of original name')
-        
+
         subName7 = name.getSubName(-5,5)
         self.assertEqual(subName7, name, 'Subname from (-length) should match original name')
 

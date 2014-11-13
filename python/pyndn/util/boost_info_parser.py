@@ -1,8 +1,8 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2014 Regents of the University of California.
-# Author: Adeola Bannis 
-# 
+# Author: Adeola Bannis
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -22,11 +22,11 @@ from collections import OrderedDict
 
 def shlex_split(s):
     """
-    Similar to shlex.split, split s into an array of strings which are 
+    Similar to shlex.split, split s into an array of strings which are
     separated by whitespace, treating a string within quotes as a single entity
     regardless of whitespace between the quotes. Also allow a backslash to
     escape the next character.
-    
+
     :param str s: The input string to split.
     :return: An array of strings.
     :rtype: list of str
@@ -91,12 +91,12 @@ def shlex_split(s):
 This class is provided for compatibility with the Boost INFO property list
 format used in ndn-cxx.
 
-Each node in the tree may have a name and a value as well as associated 
-sub-trees. The sub-tree names are not unique, and so sub-trees are stored as 
+Each node in the tree may have a name and a value as well as associated
+sub-trees. The sub-tree names are not unique, and so sub-trees are stored as
 dictionaries where the key is a sub-tree name and the values are the sub-trees
 sharing the same name.
 
-Nodes can be accessed with a path syntax, as long as nodes in the path do not 
+Nodes can be accessed with a path syntax, as long as nodes in the path do not
 contain the path separator '/' in their names.
 """
 class BoostInfoTree(object):
@@ -137,7 +137,7 @@ class BoostInfoTree(object):
         Create a new BoostInfo and insert it as a sub-tree with the given name.
         :param str treeName: The name of the new sub-tree.
         :param str value: The value associated with the new sub-tree.
-        :return: The created sub-tree. 
+        :return: The created sub-tree.
         :rtype: BoostInfoTree
         """
 
@@ -174,7 +174,7 @@ class BoostInfoTree(object):
         if self.parent is not None:
             if self.value is not None and len(self.value) > 0:
                 s += "\"" + str(self.value) + "\""
-            s+= "\n" 
+            s+= "\n"
         if len(self.subtrees) > 0:
             if self.parent is not None:
                 s += prefix+ "{\n"
@@ -259,7 +259,7 @@ class BoostInfoParser(object):
 
     def write(self, filename):
         """
-        Write the root tree of this BoostInfoParser as file in Boost's INFO 
+        Write the root tree of this BoostInfoParser as file in Boost's INFO
         format.
         :param str filename: The output path.
         """
@@ -311,7 +311,7 @@ class BoostInfoParser(object):
         #if we encounter a {, we are beginning a new context
         # TODO: error if there was already a subcontext here
         if string[0] == '{':
-            context = context.lastChild 
+            context = context.lastChild
             return context
 
         # if we encounter a }, we are ending a list context

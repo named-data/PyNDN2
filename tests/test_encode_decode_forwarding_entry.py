@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -27,12 +27,12 @@ def dump(*list):
     print(result)
 
 def dumpForwardingEntry(forwardingEntry):
-    dump("action:", forwardingEntry.getAction() 
+    dump("action:", forwardingEntry.getAction()
                     if forwardingEntry.getAction() != None else "<none>")
     dump("prefix:", forwardingEntry.getPrefix().toUri())
-    dump("faceID:", forwardingEntry.getFaceId() 
+    dump("faceID:", forwardingEntry.getFaceId()
                     if forwardingEntry.getFaceId() != None else "<none>")
-                    
+
     flags = ""
     if forwardingEntry.getForwardingFlags().getActive():
         flags += " active"
@@ -55,7 +55,7 @@ def dumpForwardingEntry(forwardingEntry):
     dump("freshnessPeriod (milliseconds):",
          forwardingEntry.getFreshnessPeriod()
          if forwardingEntry.getFreshnessPeriod() >= 0 else "<none>")
-    
+
 
 def main():
     forwardingEntry = ForwardingEntry()
@@ -64,7 +64,7 @@ def main():
     forwardingEntry.setFaceId(1)
     forwardingEntry.getForwardingFlags().setForwardingEntryFlags(255)
     forwardingEntry.setFreshnessPeriod(1000000)
-    
+
     reDecodedForwardingEntry = ForwardingEntry()
     reDecodedForwardingEntry.wireDecode(forwardingEntry.wireEncode())
     dump("Re-decoded forwarding entry:")

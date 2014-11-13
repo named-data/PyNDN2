@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,19 +18,19 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the ForwardingFlags class which holds the flags which 
-specify how the forwarding daemon should forward an interest for a registered 
+This module defines the ForwardingFlags class which holds the flags which
+specify how the forwarding daemon should forward an interest for a registered
 prefix.  We use a separate ForwardingFlags object to retain future compatibility
 if the daemon forwarding bits are changed, amended or deprecated.
 """
 
 class ForwardingFlags(object):
     """
-    Create a new ForwardingFlags object, possibly copying values from another 
+    Create a new ForwardingFlags object, possibly copying values from another
     object.
-    
-    :param ForwardingFlags value: (optional) If value is a ForwardingFlags, copy 
-      its values.  If value is omitted, the type is the default with "active" 
+
+    :param ForwardingFlags value: (optional) If value is a ForwardingFlags, copy
+      its values.  If value is omitted, the type is the default with "active"
       and "childInherit" True and other flags False.
     """
     def __init__(self, value = None):
@@ -72,9 +72,9 @@ class ForwardingFlags(object):
 
     def getForwardingEntryFlags(self):
         """
-        Get an integer with the bits set according to the flags as used by the 
+        Get an integer with the bits set according to the flags as used by the
         ForwardingEntry message.
-        
+
         :return: An integer with the bits set.
         :rtype: int
         """
@@ -98,36 +98,36 @@ class ForwardingFlags(object):
             result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK
 
         return result
-    
+
     def setForwardingEntryFlags(self, forwardingEntryFlags):
         """
-        Set the flags according to the bits in forwardingEntryFlags as used by 
+        Set the flags according to the bits in forwardingEntryFlags as used by
         the ForwardingEntry message.
-        
+
         :param int forwardingEntryFlags: An integer with the bits set.
         """
-        self._active = True if (forwardingEntryFlags & 
+        self._active = True if (forwardingEntryFlags &
                                 ForwardingFlags.ForwardingEntryFlags_ACTIVE) else False
-        self._childInherit = True if (forwardingEntryFlags & 
+        self._childInherit = True if (forwardingEntryFlags &
                                       ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT) else False
-        self._advertise = True if (forwardingEntryFlags & 
+        self._advertise = True if (forwardingEntryFlags &
                                    ForwardingFlags.ForwardingEntryFlags_ADVERTISE) else False
-        self._last = True if (forwardingEntryFlags & 
+        self._last = True if (forwardingEntryFlags &
                               ForwardingFlags.ForwardingEntryFlags_LAST) else False
-        self._capture = True if (forwardingEntryFlags & 
+        self._capture = True if (forwardingEntryFlags &
                                  ForwardingFlags.ForwardingEntryFlags_CAPTURE) else False
-        self._local = True if (forwardingEntryFlags & 
+        self._local = True if (forwardingEntryFlags &
                                ForwardingFlags.ForwardingEntryFlags_LOCAL) else False
-        self._tap = True if (forwardingEntryFlags & 
+        self._tap = True if (forwardingEntryFlags &
                              ForwardingFlags.ForwardingEntryFlags_TAP) else False
-        self._captureOk = True if (forwardingEntryFlags & 
+        self._captureOk = True if (forwardingEntryFlags &
                                    ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK) else False
 
     def getNfdForwardingFlags(self):
         """
-        Get an integer with the bits set according to the NFD forwarding flags 
+        Get an integer with the bits set according to the NFD forwarding flags
         as used in the ControlParameters of the command interest.
-        
+
         :return: An integer with the bits set.
         :rtype: int
         """
@@ -139,17 +139,17 @@ class ForwardingFlags(object):
             result |= ForwardingFlags.NfdForwardingFlags_CAPTURE
 
         return result
-    
+
     def setNfdForwardingFlags(self, nfdForwardingFlags):
         """
-        Set the flags according to the NFD forwarding flags as used in the 
+        Set the flags according to the NFD forwarding flags as used in the
         ControlParameters of the command interest.
-        
+
         :param int nfdForwardingFlags: An integer with the bits set.
         """
-        self._childInherit = True if (nfdForwardingFlags & 
+        self._childInherit = True if (nfdForwardingFlags &
                                       ForwardingFlags.NfdForwardingFlags_CHILD_INHERIT) else False
-        self._capture = True if (nfdForwardingFlags & 
+        self._capture = True if (nfdForwardingFlags &
                                  ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
 
     def getActive(self):
@@ -175,8 +175,8 @@ class ForwardingFlags(object):
 
     def getCaptureOk(self):
         return self._captureOk
-    
-    
+
+
     def setActive(self, value):
         self._active = value
 
@@ -200,11 +200,11 @@ class ForwardingFlags(object):
 
     def setCaptureOk(self, value):
         self._captureOk = value
-        
-    # Support property-based equivalence check 
+
+    # Support property-based equivalence check
     # TODO: Desired syntax?
     def equals(self, other):
-        if  (self._active == other._active 
+        if  (self._active == other._active
         and self._childInherit == other._childInherit
         and self._advertise == other._advertise
         and self._last == other._last
@@ -215,9 +215,9 @@ class ForwardingFlags(object):
             return True
         else:
             return False
-        
-        
-    # Create managed properties for read/write properties of the class for more pythonic syntax.   
+
+
+    # Create managed properties for read/write properties of the class for more pythonic syntax.
     active = property(getActive, setActive)
     childInherit = property(getChildInherit, setChildInherit)
     advertise = property(getAdvertise, setAdvertise)

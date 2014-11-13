@@ -136,7 +136,7 @@ class CredentialStorage:
     def __init__(self):
         self.identityStorage = MemoryIdentityStorage()
         self.privateKeyStorage = MemoryPrivateKeyStorage()
-        self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage), 
+        self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage),
                         SelfVerifyPolicyManager(self.identityStorage))
         keyName = Name("/testname/DSK-123")
         self.defaultCertName = keyName[:-1].append(
@@ -149,7 +149,7 @@ class CredentialStorage:
 
     def signData(self, data, certificateName = None):
         if certificateName is None:
-            certificateName = self.defaultCertName   
+            certificateName = self.defaultCertName
         self.keyChain.sign(data, certificateName)
 
     def verifyData(self, data, verifiedCallback, failedCallback):

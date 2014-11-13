@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <abannis@ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the TestPrivateKeyStorage class which extends 
+This module defines the TestPrivateKeyStorage class which extends
 FilePrivateKeyStorage to implement private key storage using files.
 """
 
@@ -39,7 +39,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
 
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
-        Fetch the private key for keyName and sign the data, returning a 
+        Fetch the private key for keyName and sign the data, returning a
         signature Blob.
 
         :param data: Pointer the input byte buffer to sign.
@@ -57,7 +57,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
 
         der = self.getPrivateKey(keyName)
         privateKey = RSA.importKey(der.toRawStr())
-        
+
         # Sign the hash of the data.
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert data.
@@ -69,9 +69,9 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
     def doesKeyExist(self, keyName, keyClass):
         """
         Check if a particular key exists.
-        
+
         :param Name keyName: The name of the key.
-        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC, 
+        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC,
            KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
         :type keyClass: int from KeyClass
         :return: True if the key exists, otherwise false.
@@ -110,17 +110,17 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         publicDer = key.publickey().exportKey(format='DER')
         privateDer = key.exportKey(format='DER', pkcs=8)
         return (Blob(publicDer, False), Blob(privateDer, False))
-        
+
     def generateKeyPair(self, keyName, keyType=KeyType.RSA, keySize=2048):
         """
         Generate a pair of asymmetric keys.
         Your derived class should override.
-        
+
         :param Name keyName: The name of the key pair.
         :param keyType: (optional) The type of the key pair.  If omitted, use
           KeyType.RSA
         :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key pair.  If omitted, 
+        :param int keySize: (optional) The size of the key pair.  If omitted,
           use 2048.
         """
         # TODO: different generator for DSA
@@ -143,7 +143,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         Add a private key to the store.
         :param Name keyName: The name of the key
         :param Blob keyDer: The private key DER
-        """ 
+        """
         self._saveKey(keyName, keyDer, KeyClass.PUBLIC)
 
     def addPrivateKey(self, keyName, keyDer):
@@ -151,7 +151,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         Add a private key to the store.
         :param Name keyName: The name of the key
         :param Blob keyDer: The private key DER
-        """ 
+        """
         self._saveKey(keyName, keyDer, KeyClass.PRIVATE)
 
     def getPrivateKey(self, keyName):
@@ -191,7 +191,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         :param Name keyName: The name of the key
         :param Blob keyBits: The key bits, e.g. private key DER
         :param int keyClass: A value from KeyClass
-        """ 
+        """
         if self.doesKeyExist(keyName, keyClass):
             raise SecurityException("The key already exists!")
         keyUri = keyName.toUri()
@@ -206,7 +206,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         Remove key data from the store.
         :param Name keyName: The name of the key
         :param int keyClass: A value from KeyClass
-        """ 
+        """
         if not self.doesKeyExist(keyName, keyClass):
             raise SecurityException("Key doesn't exist")
 

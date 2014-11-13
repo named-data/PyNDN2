@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -21,9 +21,9 @@ from pyndn.security.identity import basic_identity_storage, file_private_key_sto
 from pyndn.security.identity import identity_manager, identity_storage, memory_identity_storage
 from pyndn.security.identity import memory_private_key_storage, osx_private_key_storage
 from pyndn.security.identity import private_key_storage
-__all__ = ['basic_identity_storage', 'file_private_key_storage', 
-           'identity_manager', 'identity_storage', 'memory_identity_storage', 
-           'memory_private_key_storage', 'osx_private_key_storage', 
+__all__ = ['basic_identity_storage', 'file_private_key_storage',
+           'identity_manager', 'identity_storage', 'memory_identity_storage',
+           'memory_private_key_storage', 'osx_private_key_storage',
            'private_key_storage']
 
 import sys as _sys

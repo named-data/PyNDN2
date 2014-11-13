@@ -136,7 +136,7 @@ class MemoryContentCache(object):
 
     def _onInterest(self, prefix, interest, transport, registeredPrefixId):
         """
-        This is the OnInterest callback which is called when the library 
+        This is the OnInterest callback which is called when the library
         receives an interest whose name has the prefix given to registerPrefix.
         First check if cleanupIntervalMilliseconds milliseconds have passed and
         remove stale content from the cache. Then search the cache for the Data
@@ -216,7 +216,7 @@ class MemoryContentCache(object):
             self._nextCleanupTime = now + self._cleanupIntervalMilliseconds
 
     """
-    _Content is a private class to hold the name and encoding for each entry in 
+    _Content is a private class to hold the name and encoding for each entry in
     the cache. This base class is for a Data packet without a FreshnessPeriod.
     """
     class _Content(object):

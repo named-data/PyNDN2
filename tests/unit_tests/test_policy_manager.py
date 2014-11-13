@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from security_classes.test_identity_manager import TestIdentityManager 
+from security_classes.test_identity_manager import TestIdentityManager
 from security_classes.test_identity_storage import TestIdentityStorage
 from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
@@ -51,11 +51,11 @@ CERT_DUMP="Bv0C4AcxCAR0ZW1wCANLRVkIEWtzay0xNDE0MTk1Nzc5NjY1CAdJRC1DRVJUCAgA\
            BmWVlUfyAg8noGdPRS8MGQs24vw="
 
 try:
-    from unittest.mock import Mock 
+    from unittest.mock import Mock
 except ImportError:
     from mock import Mock
 
-VerificationResult = namedtuple('VerificationResult', 
+VerificationResult = namedtuple('VerificationResult',
         'successCount failureCount hasFurtherSteps')
 def doVerify(policyMan, toVerify):
     success = Mock()
@@ -63,7 +63,7 @@ def doVerify(policyMan, toVerify):
     result = policyMan.checkVerificationPolicy(toVerify, 0, success, failure)
 
     # a result of None means no more steps
-    return VerificationResult(success.call_count, 
+    return VerificationResult(success.call_count,
             failure.call_count, result is not None)
 
 class TestSimplePolicyManager(ut.TestCase):
@@ -73,7 +73,7 @@ class TestSimplePolicyManager(ut.TestCase):
 
         policyManager = NoVerifyPolicyManager()
         identityName = Name('TestValidator/Null').appendVersion(int(time.time()))
-        
+
         self.addCleanup(identityStorage.deleteIdentityInfo ,identityName)
 
         keyChain = KeyChain(identityManager, policyManager)
@@ -83,13 +83,13 @@ class TestSimplePolicyManager(ut.TestCase):
 
         vr = doVerify(policyManager, data)
 
-        self.assertFalse(vr.hasFurtherSteps, 
+        self.assertFalse(vr.hasFurtherSteps,
                 "NoVerifyPolicyManager returned a ValidationRequest")
 
-        self.assertEqual(vr.failureCount, 0, 
+        self.assertEqual(vr.failureCount, 0,
             "Verification failed with NoVerifyPolicyManager")
-        self.assertEqual(vr.successCount, 1, 
-            "Verification callback called {} times instead of 1".format( 
+        self.assertEqual(vr.successCount, 1,
+            "Verification callback called {} times instead of 1".format(
             vr.successCount))
 
     def test_self_verification(self):
@@ -97,7 +97,7 @@ class TestSimplePolicyManager(ut.TestCase):
         identityManager = TestIdentityManager(identityStorage, TestPrivateKeyStorage())
         policyManager = SelfVerifyPolicyManager(identityStorage)
         keyChain = KeyChain(identityManager, policyManager)
-        
+
         identityName  = Name('TestValidator/RsaSignatureVerification')
         self.addCleanup(identityStorage.deleteIdentityInfo, identityName)
         keyChain.createIdentity(identityName)
@@ -106,10 +106,10 @@ class TestSimplePolicyManager(ut.TestCase):
         keyChain.signByIdentity(data, identityName)
 
         vr = doVerify(policyManager, data)
-        
-        self.assertFalse(vr.hasFurtherSteps, 
+
+        self.assertFalse(vr.hasFurtherSteps,
                 "SelfVerifyPolicyManager returned a ValidationRequest")
-        self.assertEqual(vr.failureCount, 0, 
+        self.assertEqual(vr.failureCount, 0,
             "Verification of identity-signed data failed")
         self.assertEqual(vr.successCount, 1,
             "Verification callback called {} times instead of 1".format(
@@ -117,14 +117,14 @@ class TestSimplePolicyManager(ut.TestCase):
 
         data2 = Data(Name('/TestData/2'))
 
-        vr = doVerify(policyManager, 
+        vr = doVerify(policyManager,
                 data2)
-        
-        self.assertFalse(vr.hasFurtherSteps, 
+
+        self.assertFalse(vr.hasFurtherSteps,
                 "SelfVerifyPolicyManager returned a ValidationRequest")
         self.assertEqual(vr.successCount, 0,
             "Verification of unsigned data succeeded")
-        self.assertEqual(vr.failureCount, 1, 
+        self.assertEqual(vr.failureCount, 1,
             "Verification failure callback called {} times instead of 1".format(
             vr.failureCount))
 
@@ -141,7 +141,7 @@ class TestConfigPolicyManager(ut.TestCase):
         self.identityStorage = TestIdentityStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
                 TestPrivateKeyStorage())
-        self.policyManager = ConfigPolicyManager(self.identityStorage, 
+        self.policyManager = ConfigPolicyManager(self.identityStorage,
                 'policy_config/simple_rules.conf')
 
         self.identityName = Name('/TestConfigPolicyManager').appendVersion(
@@ -161,7 +161,7 @@ class TestConfigPolicyManager(ut.TestCase):
         certName = self.identityManager.getDefaultCertificateNameForIdentity(
                 self.identityName)
         self.face.setCommandSigningInfo(self.keyChain, certName)
-        
+
         oldInterest = Interest(interestName)
         self.face.makeCommandInterest(oldInterest)
 
@@ -205,11 +205,11 @@ class TestConfigPolicyManager(ut.TestCase):
             dataBlob = Blob(b64decode(encodedData))
             data.wireDecode(dataBlob)
 
-        # needed, since the KeyChain will express interests in unknown 
+        # needed, since the KeyChain will express interests in unknown
         # certificates
         vr = doVerify(self.policyManager, data)
 
-        self.assertTrue(vr.hasFurtherSteps, 
+        self.assertTrue(vr.hasFurtherSteps,
                 "ConfigPolicyManager did not create ValidationRequest for unknown certificate")
         self.assertEqual(vr.successCount, 0,
                 "ConfigPolicyManager called success callback with pending ValidationRequest")
@@ -217,7 +217,7 @@ class TestConfigPolicyManager(ut.TestCase):
                 "ConfigPolicyManager called failure callback with pending ValidationRequest")
 
         # now save the cert data to our anchor directory, and wait
-        # we have to sign it with the current identity or the 
+        # we have to sign it with the current identity or the
         # policy manager will create an interest for the signing certificate
 
         self.addCleanup(self._removeFile, self.testCertFile)
@@ -233,7 +233,7 @@ class TestConfigPolicyManager(ut.TestCase):
         # still too early for refresh to pick it up
         vr = doVerify(self.policyManager, data)
 
-        self.assertTrue(vr.hasFurtherSteps, 
+        self.assertTrue(vr.hasFurtherSteps,
                 "ConfigPolicyManager refresh occured sooner than specified")
         self.assertEqual(vr.successCount, 0,
                 "ConfigPolicyManager called success callback with pending ValidationRequest")

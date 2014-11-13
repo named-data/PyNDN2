@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -29,7 +29,7 @@ def dump(*list):
     print(result)
 
 def main():
-    # Construct a sample FibEntry message using the structure in fib_entry_pb2 
+    # Construct a sample FibEntry message using the structure in fib_entry_pb2
     # which was produced by protoc.
     message = fib_entry_pb2.FibEntryMessage()
     message.fib_entry.name.component.append("ndn")
@@ -37,13 +37,13 @@ def main():
     nextHopRecord = message.fib_entry.next_hop_records.add()
     nextHopRecord.face_id = 16
     nextHopRecord.cost = 1
-    
+
     # Encode the Protobuf message object as TLV.
     encoding = ProtobufTlv.encode(message)
-    
+
     decodedMessage = fib_entry_pb2.FibEntryMessage()
     ProtobufTlv.decode(decodedMessage, encoding)
-    
+
     dump("Re-decoded FibEntry:")
     # This should print the same values that we put in message above.
     value = ""

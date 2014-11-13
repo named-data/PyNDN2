@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -42,7 +42,7 @@ class NdnRegexMatcher(object):
             oldStr = match.group(2)
             newStr = re.sub('><', '>|<', oldStr)
             newPattern = newPattern[:start] + newStr + newPattern[end:]
-            
+
         ## replace [] with (),  or (?! ) for negative lookahead
         ## if we use negative lookahead, we also have to consume one component
         isNegative = newPattern.find("[^") >= 0
@@ -73,7 +73,7 @@ class NdnRegexMatcher(object):
             modifiedStr = modifiedStr[:start] + newStr + modifiedStr[end:]
 
         return modifiedStr
-    
+
     @staticmethod
     def match(pattern, name):
         """
@@ -84,12 +84,12 @@ class NdnRegexMatcher(object):
         #nameParts = [name.get(i).getValue().toRawStr() for i in range(name.size())]
         #nameUri = '/'+'/'.join(nameParts)
         nameUri = name.toUri()
-        
+
         pattern = NdnRegexMatcher._sanitizeSets(pattern)
-        
+
         pattern = re.sub('<>', '(?:<.+?>)', pattern)
         pattern = pattern.replace('>', '')
         pattern = re.sub('<(?!!)', '/', pattern)
 
         return re.search(pattern, nameUri)
-    
+

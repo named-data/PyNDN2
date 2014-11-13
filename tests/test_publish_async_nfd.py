@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -34,7 +34,7 @@ class Echo(object):
         self._keyChain = keyChain
         self._certificateName = certificateName
         self._responseCount = 0
-        
+
     def onInterest(self, prefix, interest, transport, registeredPrefixId):
         self._responseCount += 1
 
@@ -59,7 +59,7 @@ def main():
     # Use the system default key chain and certificate name to sign commands.
     keyChain = KeyChain()
     face.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName())
-    
+
     # Also use the default certificate name to sign data packets.
     echo = Echo(keyChain, keyChain.getDefaultCertificateName())
     prefix = Name("/testecho")
@@ -69,7 +69,7 @@ def main():
     while echo._responseCount < 1:
         face.processEvents()
         # We need to sleep for a few milliseconds so we don't use 100% of the CPU.
-        time.sleep(0.01)    
+        time.sleep(0.01)
 
     face.shutdown()
 

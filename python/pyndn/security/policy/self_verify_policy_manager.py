@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,8 +18,8 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the SelfVerifyPolicyManager class which implements a 
-PolicyManager to look in the IdentityStorage for the public key with the name in 
+This module defines the SelfVerifyPolicyManager class which implements a
+PolicyManager to look in the IdentityStorage for the public key with the name in
 the KeyLocator (if available) and use it to verify the data packet or signed
 interest, without searching a certificate chain. If the public key can't be
 found, the verification fails.
@@ -37,18 +37,18 @@ from pyndn.security.certificate.identity_certificate import IdentityCertificate
 
 class SelfVerifyPolicyManager(PolicyManager):
     """
-    Create a new SelfVerifyPolicyManager which will look up the public key in 
+    Create a new SelfVerifyPolicyManager which will look up the public key in
     the given identityStorage.
-    
-    :param IdentityStorage identityStorage: (optional) The IdentityStorage for 
-      looking up the public key. This object must remain valid during the life 
-      of this SelfVerifyPolicyManager. If omitted, then don't look for a public 
-      key with the name in the KeyLocator and rely on the KeyLocator having the 
+
+    :param IdentityStorage identityStorage: (optional) The IdentityStorage for
+      looking up the public key. This object must remain valid during the life
+      of this SelfVerifyPolicyManager. If omitted, then don't look for a public
+      key with the name in the KeyLocator and rely on the KeyLocator having the
       full public key DER.
     """
     def __init__(self, identityStorage = None):
         self._identityStorage = identityStorage
-        
+
     def skipVerifyAndTrust(self, dataOrInterest):
         """
         Never skip verification.
@@ -62,7 +62,7 @@ class SelfVerifyPolicyManager(PolicyManager):
 
     def requireVerify(self, dataOrInterest):
         """
-        Always return true to use the self-verification rule for the received 
+        Always return true to use the self-verification rule for the received
         data packet or signed interest.
 
         :param dataOrInterest: The received data packet or interest.
@@ -75,7 +75,7 @@ class SelfVerifyPolicyManager(PolicyManager):
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
                                 onVerifyFailed, wireFormat = None):
         """
-        Look in the IdentityStorage for the public key with the name in the 
+        Look in the IdentityStorage for the public key with the name in the
         KeyLocator (if available) and use it to verify the data packet or
         signed interest. If the public key can't be found, call onVerifyFailed.
 
@@ -122,26 +122,26 @@ class SelfVerifyPolicyManager(PolicyManager):
 
         # No more steps, so return a None.
         return None
-          
+
     def checkSigningPolicy(self, dataName, certificateName):
         """
-        Override to always indicate that the signing certificate name and data 
+        Override to always indicate that the signing certificate name and data
         name satisfy the signing policy.
 
         :param Name dataName: The name of data to be signed.
         :param Name certificateName: The name of signing certificate.
-        :return: True to indicate that the signing certificate can be used to 
+        :return: True to indicate that the signing certificate can be used to
           sign the data.
         :rtype: boolean
         """
         return True
-        
+
     def inferSigningIdentity(self, dataName):
         """
         Override to indicate that the signing identity cannot be inferred.
 
         :param Name dataName: The name of data to be signed.
-        :return: An empty name because cannot infer. 
+        :return: An empty name because cannot infer.
         :rtype: Name
         """
         return Name()
