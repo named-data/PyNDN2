@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -45,15 +45,15 @@ class TestIdentityStorage(BasicIdentityStorage):
 
         return keyNames
 
-    def doesCertificateExist(self, certificateName):    
+    def doesCertificateExist(self, certificateName):
         """
         Check if the specified certificate already exists.
-        
+
         :param Name certificateName: The name of the certificate.
         :return: True if the certificate exists, otherwise False.
         :rtype: bool
         """
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         # need to use LIKE because key locators cut off timestamps
         escapedUri = certificateName.toUri().replace('%', '\\%')
         cursor.execute(
@@ -63,20 +63,20 @@ class TestIdentityStorage(BasicIdentityStorage):
         (count,) = cursor.fetchone()
         if count > 0:
             certExists = True
-            
+
         cursor.close()
         return certExists
 
-    def addCertificate(self, certificate):    
+    def addCertificate(self, certificate):
         """
         Add a certificate to the identity storage.
-        
-        :param IdentityCertificate certificate: The certificate to be added. 
+
+        :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
         """
         #TODO: actually check validity of certificate timestamp
         certificateName = certificate.getName()
-        
+
         if self.doesCertificateExist(certificateName):
             raise SecurityException("Certificate has already been installed!")
 
@@ -90,7 +90,7 @@ class TestIdentityStorage(BasicIdentityStorage):
         else:
             # see if the key we already have matches this certificate
             keyBlob = self.getKey(keyName)
-            if (keyBlob.isNull() or keyBlob.toBuffer() != 
+            if (keyBlob.isNull() or keyBlob.toBuffer() !=
                     keyInfo.getKeyDer().toBuffer()):
                 raise SecurityException("Certificate does not match public key")
 
@@ -106,15 +106,15 @@ class TestIdentityStorage(BasicIdentityStorage):
                 notBefore, notAfter, encodedCert, 1, makeDefault))
         self._database.commit()
         cursor.close()
-            
 
-    def getCertificate(self, certificateName, allowAny = False):    
+
+    def getCertificate(self, certificateName, allowAny = False):
         """
         Get a certificate from the identity storage.
-        
+
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will 
-          be returned, otherwise validity is disregarded.  If omitted, 
+        :param bool allowAny: (optional) If False, only a valid certificate will
+          be returned, otherwise validity is disregarded.  If omitted,
           allowAny is False.
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
@@ -142,4 +142,4 @@ class TestIdentityStorage(BasicIdentityStorage):
         else:
             chosenCert = IdentityCertificate()
             chosenCert.wireDecode(bytearray(certData))
-        return chosenCert 
+        return chosenCert

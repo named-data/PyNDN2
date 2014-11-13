@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -54,7 +54,7 @@ class NoVerifyPolicyManager(PolicyManager):
         :param dataOrInterest: The Data object or interest with the signature
           (to ignore).
         :type dataOrInterest: Data or Interest
-        :param int stepCount: The number of verification steps that have been 
+        :param int stepCount: The number of verification steps that have been
           done, used to track the verification progress. (stepCount is ignored.)
         :param onVerified: This does override to call onVerified(dataOrInterest).
         :type onVerified: function object
@@ -65,26 +65,26 @@ class NoVerifyPolicyManager(PolicyManager):
         """
         onVerified(dataOrInterest)
         return None
-          
+
     def checkSigningPolicy(self, dataName, certificateName):
         """
-        Override to always indicate that the signing certificate name and data 
+        Override to always indicate that the signing certificate name and data
         name satisfy the signing policy.
 
         :param Name dataName: The name of data to be signed.
         :param Name certificateName: The name of signing certificate.
-        :return: True to indicate that the signing certificate can be used to 
+        :return: True to indicate that the signing certificate can be used to
           sign the data.
         :rtype: boolean
         """
         return True
-        
+
     def inferSigningIdentity(self, dataName):
         """
         Override to indicate that the signing identity cannot be inferred.
 
         :param Name dataName: The name of data to be signed.
-        :return: An empty name because cannot infer. 
+        :return: An empty name because cannot infer.
         :rtype: Name
         """
         return Name()

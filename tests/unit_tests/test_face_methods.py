@@ -52,14 +52,14 @@ class TestFaceInterestMethods(ut.TestCase):
         dataCallback = Mock()
         timeoutCallback = Mock()
         self.face.expressInterest(name, dataCallback, timeoutCallback)
-        
+
         def waitForCallbacks():
             while 1:
                 self.face.processEvents()
                 gevent.sleep()
                 if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
                     break
-        
+
         task = gevent.spawn(waitForCallbacks)
         task.join(timeout=10)
 
@@ -71,7 +71,7 @@ class TestFaceInterestMethods(ut.TestCase):
         uri = "/"
         (dataCallback, timeoutCallback) = self.run_express_name_test(uri)
         self.assertTrue(timeoutCallback.call_count == 0 , 'Timeout on expressed interest')
-        
+
         # check that the callback was correct
         self.assertEqual(dataCallback.call_count, 1, 'Expected 1 onData callback, got '+str(dataCallback.call_count))
 
@@ -80,13 +80,13 @@ class TestFaceInterestMethods(ut.TestCase):
         #just check that the interest was returned correctly?
         callbackInterest = onDataArgs[0]
         self.assertTrue(callbackInterest.getName() == (Name(uri)), 'Interest returned on callback had different name')
-        
+
     # TODO: Replace this with a test that connects to a Face on localhost
     #def test_specific_interest(self):
     #    uri = "/ndn/edu/ucla/remap/ndn-js-test/howdy.txt/%FD%052%A1%DF%5E%A4"
     #    (dataCallback, timeoutCallback) = self.run_express_name_test(uri)
     #    self.assertTrue(timeoutCallback.call_count == 0, 'Unexpected timeout on expressed interest')
-    #    
+    #
     #    # check that the callback was correct
     #    self.assertEqual(dataCallback.call_count, 1, 'Expected 1 onData callback, got '+str(dataCallback.call_count))
 
@@ -133,7 +133,7 @@ class TestFaceInterestMethods(ut.TestCase):
 
         self.assertEqual(dataCallback.call_count, 0, 'Should not have called data callback after interest was removed')
         self.assertEqual(timeoutCallback.call_count, 0, 'Should not have called timeout callback after interest was removed')
-        
+
 class TestFaceRegisterMethods(ut.TestCase):
     def setUp(self):
         self.face_in = Face()
@@ -151,11 +151,11 @@ class TestFaceRegisterMethods(ut.TestCase):
         encodedData = data.wireEncode()
         transport.send(encodedData.toBuffer())
 
-    
+
     def test_register_prefix_response(self):
         # gotta sign it (WAT)
         prefixName = Name("/test")
-        self.face_in.setCommandSigningInfo(self.keyChain, 
+        self.face_in.setCommandSigningInfo(self.keyChain,
                 self.keyChain.getDefaultCertificateName())
 
         failedCallback = Mock()
@@ -163,7 +163,7 @@ class TestFaceRegisterMethods(ut.TestCase):
 
         self.face_in.registerPrefix(prefixName, interestCallback, failedCallback)
         server = gevent.spawn(self.face_process_events, self.face_in, [interestCallback, failedCallback], 'h')
-        
+
         gevent.sleep(1) # give the 'server' time to register the interest
 
         # express an interest on another face
@@ -175,10 +175,10 @@ class TestFaceRegisterMethods(ut.TestCase):
         self.face_out.expressInterest(interestName, dataCallback, timeoutCallback)
 
         client = gevent.spawn(self.face_process_events, self.face_out, [dataCallback, timeoutCallback], 'c')
-        
-        gevent.joinall([server, client], timeout=10) 
 
-        self.assertEqual(failedCallback.call_count, 0, 'Failed to register prefix at all') 
+        gevent.joinall([server, client], timeout=10)
+
+        self.assertEqual(failedCallback.call_count, 0, 'Failed to register prefix at all')
 
         self.assertEqual(interestCallback.call_count, 1, 'Expected 1 onInterest callback, got '+str(interestCallback.call_count))
 
@@ -199,7 +199,7 @@ class TestFaceRegisterMethods(ut.TestCase):
             face.processEvents()
             gevent.sleep()
             for c in callbacks:
-                
+
                 if (c.call_count > 0):
                     done = True
 

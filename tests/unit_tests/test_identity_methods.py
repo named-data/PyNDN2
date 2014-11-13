@@ -25,7 +25,7 @@ yx/I9H/DV+AqSHCaYbB92HDcDN0kqwSnUf5H1+osE9MR5DLBLhXdSiULSgxT3Or/\
 y2QgsgUK59WrjhlVMPEiHHRs15NZJbL1uQFXjgScdEarohcY3dilqotineFZCeN8\
 DwIDAQAB"
 
-from security_classes.test_identity_manager import TestIdentityManager 
+from security_classes.test_identity_manager import TestIdentityManager
 from security_classes.test_identity_storage import TestIdentityStorage
 from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
@@ -41,7 +41,7 @@ import unittest as ut
 import base64
 
 try:
-    from unittest.mock import Mock 
+    from unittest.mock import Mock
 except ImportError:
     from mock import Mock
 
@@ -55,22 +55,22 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.policyManager = SelfVerifyPolicyManager(self.identityStorage)
         self.keyChain = KeyChain(self.identityManager, self.policyManager)
 
-        
+
     def test_identity_create_delete(self):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
-        
+
         self.addCleanup(self.identityManager.deleteIdentity, identityName)
         keyName = self.keyChain.createIdentity(identityName)
-        
+
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName),
             "Identity was not added to IdentityStorage")
         self.assertIsNotNone(keyName, "New identity has no key")
-        self.assertTrue(self.identityStorage.doesKeyExist(keyName), 
+        self.assertTrue(self.identityStorage.doesKeyExist(keyName),
             "Key was not added to IdentityStorage")
         certificateName = self.identityManager.getDefaultCertificateNameForIdentity(
             identityName)
-        self.assertIsNotNone(certificateName, 
+        self.assertIsNotNone(certificateName,
             "Certificate was not added to IdentityStorage")
 
         self.identityManager.deleteIdentity(identityName)
@@ -90,7 +90,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.addCleanup(self.identityManager.deleteIdentity, identityName)
 
         keyName1 = self.keyChain.generateRSAKeyPair(identityName, True)
-        
+
         keyName2 = self.keyChain.generateRSAKeyPair(identityName, False)
         self.assertEqual(self.identityManager.getDefaultKeyNameForIdentity(identityName),
             keyName1, "Default key name was changed without explicit request")
@@ -109,7 +109,7 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         decodedKey = base64.b64decode(RSA_DER)
         self.identityStorage.addKey(keyName1, KeyType.RSA, Blob(decodedKey))
-        
+
         self.assertTrue(self.identityStorage.doesKeyExist(keyName1),
             "Key was not added")
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName),
@@ -120,11 +120,11 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         with self.assertRaises(SecurityException):
             self.identityStorage.getDefaultCertificateNameForKey(keyName1)
-        
+
         with self.assertRaises(SecurityException):
             # we have no private key for signing
             self.identityManager.selfSign(keyName1)
-        
+
         with self.assertRaises(SecurityException):
             self.identityStorage.getDefaultCertificateNameForKey(keyName1)
 
@@ -138,7 +138,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         certName1 = self.identityManager.getDefaultCertificateNameForIdentity(identityName)
         certName2 = self.identityStorage.getDefaultCertificateNameForKey(keyName2)
 
-        self.assertEqual(certName1, certName2, 
+        self.assertEqual(certName1, certName2,
             "Key-certificate mapping and identity-certificate mapping are not consistent")
 
         self.identityManager.deleteIdentity(identityName)
@@ -148,20 +148,20 @@ class TestSqlIdentityStorage(ut.TestCase):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
         self.addCleanup(self.identityManager.deleteIdentity, identityName)
-    
+
         self.identityManager.createIdentity(identityName)
         keyName1 = self.identityManager.getDefaultKeyNameForIdentity(identityName)
         cert2 = self.identityManager.selfSign(keyName1)
         self.identityStorage.addCertificate(cert2)
         certName2 = cert2.getName()
-    
+
         certName1 = self.identityManager.getDefaultCertificateNameForIdentity(identityName)
-        self.assertNotEqual(certName1, certName2, 
+        self.assertNotEqual(certName1, certName2,
             "New certificate was set as default without explicit request")
 
         self.identityStorage.deleteCertificateInfo(certName1)
         self.assertTrue(self.identityStorage.doesCertificateExist(certName2))
-        self.assertFalse(self.identityStorage.doesCertificateExist(certName1))  
+        self.assertFalse(self.identityStorage.doesCertificateExist(certName1))
 
         self.identityManager.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesCertificateExist(certName2))
@@ -169,14 +169,14 @@ class TestSqlIdentityStorage(ut.TestCase):
         # ndn-cxx/tests/unit-tests/security/test-sec-public-info-sqlite3.cpp
         identityName = Name("/TestSecPublicInfoSqlite3/Delete").appendVersion(
             int(time.time()))
-        
+
         self.addCleanup(self.identityManager.deleteIdentity, identityName)
         # ndn-cxx returns the cert name, but the IndentityManager docstring
         # specifies a key
         keyName1 = self.keyChain.createIdentity(identityName)
         certName1 = self.identityStorage.getDefaultCertificateNameForKey(keyName1)
         keyName2 = self.keyChain.generateRSAKeyPairAsDefault(identityName)
-    
+
         cert2 = self.identityManager.selfSign(keyName2)
         certName2 = cert2.getName()
         self.identityManager.addCertificateAsDefault(cert2)
@@ -224,7 +224,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertFalse(self.identityStorage.doesCertificateExist(certName1))
         self.assertFalse(self.identityStorage.doesKeyExist(keyName1))
         self.assertFalse(self.identityStorage.doesIdentityExist(identityName))
-        
+
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

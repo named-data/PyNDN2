@@ -51,8 +51,8 @@ codedInterest = Blob(bytearray([
 
 initialDump = ['name: /ndn/abc',
         'minSuffixComponents: 4',
-        'maxSuffixComponents: 6', 
-        'keyLocator: KeyLocatorDigest: 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f', 
+        'maxSuffixComponents: 6',
+        'keyLocator: KeyLocatorDigest: 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
         'exclude: abc,*',
         'childSelector: 1',
         'mustBeFresh: True',
@@ -71,7 +71,7 @@ def dumpInterest(interest):
          interest.getMaxSuffixComponents()
          if interest.getMaxSuffixComponents() is not None else "<none>"))
     if interest.getKeyLocator().getType() is not None:
-        if (interest.getKeyLocator().getType() == 
+        if (interest.getKeyLocator().getType() ==
             KeyLocatorType.KEY_LOCATOR_DIGEST):
             result.append(dump("keyLocator: KeyLocatorDigest:",
                  interest.getKeyLocator().getKeyData().toHex()))
@@ -113,7 +113,7 @@ def createFreshInterest():
     freshInterest.setMaxSuffixComponents(6)
     freshInterest.getKeyLocator().setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
     freshInterest.getKeyLocator().setKeyData(bytearray(
-      [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 
+      [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F]))
     freshInterest.getExclude().appendComponent(Name("abc")[0]).appendAny()
     freshInterest.setInterestLifetimeMilliseconds(30000)
@@ -127,7 +127,7 @@ def createFreshInterest():
 class TestInterestDump(ut.TestCase):
     def setUp(self):
         self.referenceInterest = Interest()
-        self.referenceInterest.wireDecode(codedInterest) 
+        self.referenceInterest.wireDecode(codedInterest)
 
     def test_dump(self):
         # see if the dump format is the same as we expect
@@ -156,8 +156,8 @@ class TestInterestDump(ut.TestCase):
 class TestInterestMethods(ut.TestCase):
     def setUp(self):
         self.referenceInterest = Interest()
-        self.referenceInterest.wireDecode(codedInterest) 
-    
+        self.referenceInterest.wireDecode(codedInterest)
+
     def test_copy_constructor(self):
         interest = Interest(self.referenceInterest)
         self.assertTrue(interestDumpsEqual(dumpInterest(interest), dumpInterest(self.referenceInterest)), 'Interest constructed as deep copy does not match original')

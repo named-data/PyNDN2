@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,15 +18,15 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the ProtobufTlv class which has static methods to encode and 
-decode an Protobuf Message object as NDN-TLV. The Protobuf tag value is used as 
-the TLV type code. A Protobuf message is encoded/decoded as a nested TLV 
-encoding. Protobuf types uint32, uint64 and enum are encoded/decoded as TLV 
-nonNegativeInteger. (It is an error if an enum value is negative.) Protobuf 
-types bytes and string are encoded/decoded as TLV bytes. The Protobuf type bool 
-is encoded/decoded as a TLV boolean (a zero length value for True, omitted for 
+This module defines the ProtobufTlv class which has static methods to encode and
+decode an Protobuf Message object as NDN-TLV. The Protobuf tag value is used as
+the TLV type code. A Protobuf message is encoded/decoded as a nested TLV
+encoding. Protobuf types uint32, uint64 and enum are encoded/decoded as TLV
+nonNegativeInteger. (It is an error if an enum value is negative.) Protobuf
+types bytes and string are encoded/decoded as TLV bytes. The Protobuf type bool
+is encoded/decoded as a TLV boolean (a zero length value for True, omitted for
 False). Other Protobuf types are an error.
- 
+
 Protobuf has no "outer" message type, so you need to put your TLV message
 inside an outer "typeless" message.
 """
@@ -41,9 +41,9 @@ class ProtobufTlv(object):
     def encode(message):
         """
         Encode the Protobuf message object as NDN-TLV.
-        
-        :param google.protobuf.message message: The Protobuf message object. 
-          This calls message.IsInitialized() to ensure that all required fields 
+
+        :param google.protobuf.message message: The Protobuf message object.
+          This calls message.IsInitialized() to ensure that all required fields
           are present and raises an exception if not.
         :return: The encoded buffer in a Blob object.
         :rtype: Blob
@@ -54,23 +54,23 @@ class ProtobufTlv(object):
 
         ProtobufTlv._encodeMessageValue(message, encoder)
         return Blob(encoder.getOutput(), False)
-    
+
     @staticmethod
     def decode(message, input):
         """
-        Decode the input as NDN-TLV and update the fields of the Protobuf 
+        Decode the input as NDN-TLV and update the fields of the Protobuf
         message object.
-        
-        :param google.protobuf.message message: The Protobuf message object. 
+
+        :param google.protobuf.message message: The Protobuf message object.
           This does not first clear the object.
         :param input: The array with the bytes to decode.
-        :type input: An array type with int elements        
+        :type input: An array type with int elements
         """
         # If input is a blob, get its buf().
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
         decoder = TlvDecoder(decodeBuffer)
         ProtobufTlv._decodeMessageValue(message, decoder, len(input))
-        
+
     @staticmethod
     def _encodeMessageValue(message, encoder):
         # Note: We can't use ListFields because it sorts by field number.
@@ -117,14 +117,14 @@ class ProtobufTlv(object):
     @staticmethod
     def _decodeMessageValue(message, decoder, endOffset):
         descriptor = message.DESCRIPTOR
-        
+
         for field in descriptor.fields:
             tlvType = field.number
-            
+
             if (field.label == field.LABEL_OPTIONAL and
                 not decoder.peekType(tlvType, endOffset)):
                 continue
-            
+
             if field.label == field.LABEL_REPEATED:
                 while decoder.peekType(tlvType, endOffset):
                     if field.type == field.TYPE_MESSAGE:
@@ -133,7 +133,7 @@ class ProtobufTlv(object):
                           getattr(message, field.name).add(), decoder, innerEndOffset)
                         decoder.finishNestedTlvs(innerEndOffset)
                     else:
-                        getattr(message, field.name).append( 
+                        getattr(message, field.name).append(
                           ProtobufTlv._decodeFieldValue(
                             field, tlvType, decoder, endOffset))
             else:
@@ -144,7 +144,7 @@ class ProtobufTlv(object):
                     decoder.finishNestedTlvs(innerEndOffset)
                 else:
                     setattr(
-                      message, field.name, 
+                      message, field.name,
                       ProtobufTlv._decodeFieldValue(
                         field, tlvType, decoder, endOffset))
 

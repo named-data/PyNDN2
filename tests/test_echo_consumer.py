@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -40,12 +40,12 @@ class Counter(object):
 
     def onTimeout(self, interest):
         self._callbackCount += 1
-        dump("Time out for interest", interest.getName().toUri()) 
+        dump("Time out for interest", interest.getName().toUri())
 
 def main():
     # The default Face will connect using a Unix socket, or to "localhost".
     face = Face()
-    
+
     counter = Counter()
 
     if sys.version_info[0] <= 2:
@@ -61,7 +61,7 @@ def main():
     while counter._callbackCount < 1:
         face.processEvents()
         # We need to sleep for a few milliseconds so we don't use 100% of the CPU.
-        time.sleep(0.01)    
+        time.sleep(0.01)
 
     face.shutdown()
 

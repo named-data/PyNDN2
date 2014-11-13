@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -166,7 +166,7 @@ def dumpInterest(interest):
          interest.getMaxSuffixComponents()
          if interest.getMaxSuffixComponents() != None else "<none>")
     if interest.getKeyLocator().getType() != None:
-        if (interest.getKeyLocator().getType() == 
+        if (interest.getKeyLocator().getType() ==
             KeyLocatorType.KEY_LOCATOR_DIGEST):
             dump("keyLocator: KeyLocatorDigest:",
                  interest.getKeyLocator().getKeyData().toHex())
@@ -207,13 +207,13 @@ def main():
     interest.wireDecode(TlvInterest)
     dump("Interest:")
     dumpInterest(interest)
-    
+
     # Set the name again to clear the cached encoding so we encode again.
     interest.setName(interest.getName())
     encoding = interest.wireEncode()
     dump("")
     dump("Re-encoded interest", encoding.toHex())
-    
+
     reDecodedInterest = Interest()
     reDecodedInterest.wireDecode(encoding)
     dump("Re-decoded Interest:")
@@ -226,7 +226,7 @@ def main():
     freshInterest.setMaxSuffixComponents(6)
     freshInterest.getKeyLocator().setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
     freshInterest.getKeyLocator().setKeyData(bytearray(
-      [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 
+      [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F]))
     freshInterest.getExclude().appendComponent(Name("abc")[0]).appendAny()
     freshInterest.setInterestLifetimeMilliseconds(30000)

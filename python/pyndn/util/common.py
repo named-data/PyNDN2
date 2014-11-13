@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -55,8 +55,8 @@ class Common(object):
     def getNowMilliseconds():
         """
         Get the current time in milliseconds.
-        
-        :return: The current time in milliseconds since 1/1/1970, including 
+
+        :return: The current time in milliseconds since 1/1/1970, including
           fractions of a millisecond.
         :rtype: float
         """
@@ -82,21 +82,21 @@ class Common(object):
         because Python 2 has two string types, str and unicode, but Python 3
         doesn't have type unicode so we have to be carefor to check for
         type(obj) is unicode.
-        
+
         :param any obj: The object to check if it is str or unicode.
         :return: True if obj is str or unicode, otherwise false
         :rtype: bool
         """
         return type(obj) is str or _haveTypeUnicode and type(obj) is unicode
-    
+
     @staticmethod
     def stringToUtf8Array(input):
         """
         If the input has type str (in Python 3) or unicode (in Python 2), then
         encode it as UTF8 and return an array of integers. If the input is
         str (in Python 2) then treat it as a "raw" string and just convert each
-        element to int.  Otherwise, if the input is not str or unicode, just 
-        return the input.  This is necessary because in Python 3 doesn't have 
+        element to int.  Otherwise, if the input is not str or unicode, just
+        return the input.  This is necessary because in Python 3 doesn't have
         the unicode type and the elements in a string a Unicode characters.
         But in Python 2 only the unicode type has Unicode characters, and str
         elements are bytes with value 0 to 255 (and often used to carry binary

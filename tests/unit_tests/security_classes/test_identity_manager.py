@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -30,12 +30,12 @@ from pyndn.security.security_exception import SecurityException
 import struct
 
 class TestIdentityManager(IdentityManager):
-        
+
     def createIdentity(self, identityName):
         """
-        Create an identity by creating a pair of Key-Signing-Key (KSK) for this 
+        Create an identity by creating a pair of Key-Signing-Key (KSK) for this
         identity and a self-signed certificate of the KSK.
-        
+
         :param Name identityName: The name of the identity.
         :return: The key name of the auto-generated KSK of the identity.
         :rtype: Name
@@ -55,7 +55,7 @@ class TestIdentityManager(IdentityManager):
         self._identityStorage.deleteIdentityInfo(identityName)
         keysToDelete = self._identityStorage.getAllKeysForIdentity(identityName)
         for keyName in keysToDelete:
-            self._privateKeyStorage.deleteKeyPair(keyName) 
+            self._privateKeyStorage.deleteKeyPair(keyName)
 
     def getPrivateKey(self, keyName):
         return self._privateKeyStorage.getPrivateKey(keyName)
@@ -66,12 +66,12 @@ class TestIdentityManager(IdentityManager):
     def generateRSAKeyPair(self, identityName, isKsk=False, keySize=2048):
         """
         Generate a pair of RSA keys for the specified identity.
-        
+
         :param Name identityName: The name of the identity.
-        :param bool isKsk: (optional) true for generating a Key-Signing-Key 
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
           (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
           Data-Signing-Key.
-        :param int keySize: (optional) The size of the key. If omitted, use a 
+        :param int keySize: (optional) The size of the key. If omitted, use a
           default secure key size.
         :return: The generated key name.
         :rtype: Name
@@ -82,20 +82,20 @@ class TestIdentityManager(IdentityManager):
         self._identityStorage.addKey(keyName, KeyType.RSA, publicKeyBits)
         newCert = self.selfSign(keyName)
         self.addCertificateAsDefault(newCert)
-        
+
 
         return keyName
-        
+
     def generateRSAKeyPairAsDefault(self, identityName, isKsk=False, keySize=2048):
         """
-        Generate a pair of RSA keys for the specified identity and set it as 
+        Generate a pair of RSA keys for the specified identity and set it as
         default key for the identity.
-        
+
         :param NameidentityName: The name of the identity.
-        :param bool isKsk: (optional) true for generating a Key-Signing-Key 
-          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a 
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
           Data-Signing-Key.
-        :param int keySize: (optional) The size of the key. If omitted, use a 
+        :param int keySize: (optional) The size of the key. If omitted, use a
           default secure key size.
         :return: The generated key name.
         :rtype: Name
@@ -103,15 +103,15 @@ class TestIdentityManager(IdentityManager):
         newKeyName = self.generateRSAKeyPair(identityName, isKsk, keySize)
         self._identityStorage.setDefaultKeyNameForIdentity(newKeyName)
         return newKeyName
-    
+
     def selfSign(self, keyName):
         """
         Generate a self-signed certificate for a public key.
-        
+
         :param Name keyName: The name of the public key.
         :return: The generated certificate.
         :rtype: IdentityCertificate
-        """ 
+        """
         certificate = self.generateCertificateForKey(keyName)
         self.signByCertificate(certificate, certificate.getName())
 
@@ -121,16 +121,16 @@ class TestIdentityManager(IdentityManager):
         # let any raised SecurityExceptions bubble up
         publicKeyBits = self._identityStorage.getKey(keyName)
         publicKeyType = self._identityStorage.getKeyType(keyName)
-    
+
         publicKey = PublicKey(publicKeyType, publicKeyBits)
 
         timestamp = Common.getNowMilliseconds()
-    
+
         # TODO: specify where the 'KEY' component is inserted
         # to delegate responsibility for cert delivery
         # cf: http://redmine.named-data.net/issues/1659
         certificateName = keyName.getPrefix(-1).append('KEY').append(keyName.get(-1))
-        certificateName.append("ID-CERT").append(Name.Component(struct.pack(">Q", timestamp)))        
+        certificateName.append("ID-CERT").append(Name.Component(struct.pack(">Q", timestamp)))
 
         certificate = IdentityCertificate(certificateName)
 

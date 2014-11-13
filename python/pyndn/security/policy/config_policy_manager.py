@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -43,35 +43,35 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 """
-This module manages trust according to a configuration file in the 
-Validator Configuration File Format  
+This module manages trust according to a configuration file in the
+Validator Configuration File Format
 (http://redmine.named-data.net/projects/ndn-cxx/wiki/CommandValidatorConf)
 
-Once a rule is matched, the ConfigPolicyManager looks in the 
-IdentityStorage for the IdentityCertificate matching the name in the KeyLocator 
-and uses its public key to verify the data packet or signed interest. If the 
+Once a rule is matched, the ConfigPolicyManager looks in the
+IdentityStorage for the IdentityCertificate matching the name in the KeyLocator
+and uses its public key to verify the data packet or signed interest. If the
 certificate can't be found, it is downloaded, verified and installed. A chain
 of certificates will be followed to a maximum depth.
 If the new certificate is accepted, it is used to complete the verification.
 
-The KeyLocators of data packets and signed interests MUST contain a name for 
+The KeyLocators of data packets and signed interests MUST contain a name for
 verification to succeed.
 """
 
 class ConfigPolicyManager(PolicyManager):
     """
-    Create a new ConfigPolicyManager which acts on the rules specified 
-    in the configuration file and downloads unknown certificates when necessary. 
-    
-    :param IdentityStorage identityStorage: The IdentityStorage for 
-      looking up the public key. This object must remain valid during the life 
+    Create a new ConfigPolicyManager which acts on the rules specified
+    in the configuration file and downloads unknown certificates when necessary.
+
+    :param IdentityStorage identityStorage: The IdentityStorage for
+      looking up the public key. This object must remain valid during the life
       of this ConfigPolicyManager.
     :param string configFileName: The path to the configuration file containing
       verification rules.
-    :param int searchDepth: (optional) The maximum number of links to follow 
+    :param int searchDepth: (optional) The maximum number of links to follow
       when verifying a certificate chain.
     """
-    def __init__(self, identityStorage, configFileName, 
+    def __init__(self, identityStorage, configFileName,
             searchDepth=5, graceInterval=3000, keyTimestampTtl=3600000,
             maxTrackedKeys=1000):
         super(ConfigPolicyManager, self).__init__()
@@ -84,7 +84,7 @@ class ConfigPolicyManager(PolicyManager):
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
         self._certificateCache = {}
-    
+
         # stores the timestamps for each public key used in command interests to avoid
         # replay attacks
         # key is public key name, value is last timestamp
@@ -100,27 +100,27 @@ class ConfigPolicyManager(PolicyManager):
 
     def requireVerify(self, dataOrInterest):
         """
-        If the configuration file contains the trust anchor 'any', 
+        If the configuration file contains the trust anchor 'any',
         nothing is verified.
         """
         return self.requiresVerification
 
     def checkSigningPolicy(self, dataName, certificateName):
         """
-        Override to always indicate that the signing certificate name and data 
+        Override to always indicate that the signing certificate name and data
         name satisfy the signing policy.
 
         :param Name dataName: The name of data to be signed.
         :param Name certificateName: The name of signing certificate.
-        :return: True to indicate that the signing certificate can be used to 
+        :return: True to indicate that the signing certificate can be used to
           sign the data.
         :rtype: boolean
         """
         return True
-    
+
     def skipVerifyAndTrust(self, dataOrInterest):
         """
-        If the configuration file contains the trust anchor 'any', 
+        If the configuration file contains the trust anchor 'any',
         nothing is verified.
         """
         return not self.requiresVerification
@@ -129,14 +129,14 @@ class ConfigPolicyManager(PolicyManager):
         """
         The configuration file allows 'trust anchor' certificates to be preloaded.
         The certificates may also be loaded from a directory, and if the 'refresh'
-        option is set to an interval, the certificates are reloaded at the 
+        option is set to an interval, the certificates are reloaded at the
         specified interval
         """
 
         try:
             anchors = self.config["validator/trust-anchor"]
         except KeyError:
-            return 
+            return
 
         for anchor in anchors:
             typeName = anchor["type"][0].getValue()
@@ -174,13 +174,13 @@ class ConfigPolicyManager(PolicyManager):
 
     def _checkSignatureMatch(self, signatureName, objectName, rule):
         """
-        Once a rule is found to match data or a signed interest, the name in the 
+        Once a rule is found to match data or a signed interest, the name in the
         KeyLocator must satisfy the condition in the 'checker' section of the rule,
         else the data or interest is rejected.
 
         :param Name signatureName: The certificate name from the KeyLocator .
-        :param Name objectName: The name of the data packet or interest. In the 
-          case of signed interests, this excludes the timestamp, nonce and signature 
+        :param Name objectName: The name of the data packet or interest. In the
+          case of signed interests, this excludes the timestamp, nonce and signature
           components.
         :param BoostInfoTree rule: The rule from the configuration file that matches
           the data or interest.
@@ -253,14 +253,14 @@ class ConfigPolicyManager(PolicyManager):
 
                     return self._matchesRelation(Name(nameMatchStr), Name(keyMatchPrefix), relationType)
                 except:
-                    pass 
+                    pass
 
         # unknown type
         return False
 
     def _lookupCertificate(self, certID, isPath):
         """
-        This looks up certificates specified as base64-encoded data or file names. 
+        This looks up certificates specified as base64-encoded data or file names.
         These are cached by filename or encoding to avoid repeated reading of files
         or decoding.
         """
@@ -285,11 +285,11 @@ class ConfigPolicyManager(PolicyManager):
             cert = self._identityStorage.getCertificate(Name(certUri))
 
         return cert
-        
+
     def _findMatchingRule(self, objName, matchType):
         """
-        Search the configuration file for the first rule that matches the data 
-        or signed interest name. In the case of interests, the name to match 
+        Search the configuration file for the first rule that matches the data
+        or signed interest name. In the case of interests, the name to match
         should exclude the timestamp, nonce, and signature components.
         :param Name objName: The name to be matched.
         :param string matchType: The rule type to match, "data" or "interest".
@@ -325,9 +325,9 @@ class ConfigPolicyManager(PolicyManager):
 
     def _matchesRelation(self, name, matchName, matchRelation):
         """
-        Determines if a name satisfies the relation to another name, which can 
+        Determines if a name satisfies the relation to another name, which can
         be one of:
-            'is-prefix-of' - passes if the name is equal to or has the other 
+            'is-prefix-of' - passes if the name is equal to or has the other
                name as a prefix
             'is-strict-prefix-of' - passes if the name has the other name as a
                prefix, and is not equal
@@ -346,15 +346,15 @@ class ConfigPolicyManager(PolicyManager):
             if matchName.equals(name):
                 passed = True
         return passed
-            
+
     def _extractSignature(self, dataOrInterest, wireFormat=None):
         """
         Extract the signature information from the interest name or from the
         data packet.
         :param dataOrInterest: The object whose signature is needed.
         :type dataOrInterest: Data or Interest
-        :param WireFormat wireFormat: (optional) The wire format used to decode 
-          signature information from the interest name. 
+        :param WireFormat wireFormat: (optional) The wire format used to decode
+          signature information from the interest name.
         """
         if isinstance(dataOrInterest, Data):
             return dataOrInterest.getSignature()
@@ -391,7 +391,7 @@ class ConfigPolicyManager(PolicyManager):
 
     def _updateTimestampForKey(self, keyName, timestamp):
         """
-        Trim the table size down if necessary, and insert/update the latest 
+        Trim the table size down if necessary, and insert/update the latest
         interest signing timestamp for the key.
 
         Any key which has not been used within the TTL period is purged. If the
@@ -422,12 +422,12 @@ class ConfigPolicyManager(PolicyManager):
 
 
 
-    
+
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
                                 onVerifyFailed, wireFormat = None):
         """
-        If there is a rule matching the data or interest, and the matching 
-        certificate is missing, download it. If there is no matching rule, 
+        If there is a rule matching the data or interest, and the matching
+        certificate is missing, download it. If there is no matching rule,
         verification fails. Otherwise, verify the signature using the public key
         in the IdentityStorage.
 
@@ -490,7 +490,7 @@ class ConfigPolicyManager(PolicyManager):
         self._refreshManager.refreshAnchors()
 
         # now finally check that the data or interest was signed correctly
-        # if we don't actually have the certificate yet, create a 
+        # if we don't actually have the certificate yet, create a
         # ValidationRequest for it
         if not self._identityStorage.doesCertificateExist(signatureName):
             certificateInterest = Interest(signatureName)
@@ -563,11 +563,11 @@ class ConfigPolicyManager(PolicyManager):
         """
         Verify the signature on the SignedBlob using the given public key.
         TODO: Move this general verification code to a more central location.
- 
+
         :param Sha256WithRsaSignature signature: The Sha256WithRsaSignature.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
         verify.
-        :param Blob publicKeyDer: The DER-encoded public key used to verify the 
+        :param Blob publicKeyDer: The DER-encoded public key used to verify the
           signature.
         :return: True if the signature verifies, False if not.
         :rtype: boolean
@@ -579,7 +579,7 @@ class ConfigPolicyManager(PolicyManager):
         else:
             publicKeyDerBytes = publicKeyDer.toBuffer()
         publicKey = RSA.importKey(publicKeyDerBytes)
-        
+
         # Get the bytes to verify.
         # wireEncode returns the cached encoding if available.
         signedPortion = signedBlob.toSignedBuffer()
@@ -595,7 +595,7 @@ class ConfigPolicyManager(PolicyManager):
             signatureBits = bytes(signature.getSignature().buf())
 
         # Hash and verify.
-        return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion), 
+        return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion),
                                                 signatureBits)
 
 # Depending on the Python version, PyCrypto uses str or bytes.
@@ -607,7 +607,7 @@ class TrustAnchorRefreshManager(object):
     """
     def __init__(self, identityStorage):
         super(TrustAnchorRefreshManager, self).__init__()
-        
+
         self._identityStorage = identityStorage
         # maps the directory name to certificate names so they can be
         # deleted when necessary
@@ -622,7 +622,7 @@ class TrustAnchorRefreshManager(object):
             return cert
 
     def addDirectory(self, directoryName, refreshPeriod):
-        allFiles = [f for f in os.listdir(directoryName) 
+        allFiles = [f for f in os.listdir(directoryName)
                 if os.path.isfile(os.path.join(directoryName, f))]
         certificateNames = []
         for f in allFiles:
@@ -634,8 +634,8 @@ class TrustAnchorRefreshManager(object):
             else:
                 self._identityStorage.addCertificate(cert)
                 certificateNames.append(cert.getName().toUri())
-        
-        self._refreshDirectories[directoryName] = {'certificates':certificateNames, 
+
+        self._refreshDirectories[directoryName] = {'certificates':certificateNames,
                 'nextRefresh':time.time()+refreshPeriod, 'refreshPeriod':refreshPeriod}
 
     def refreshAnchors(self):
@@ -658,4 +658,4 @@ class TrustAnchorRefreshManager(object):
                         break
                 self.addDirectory(directory, info['refreshPeriod'])
 
-                    
+

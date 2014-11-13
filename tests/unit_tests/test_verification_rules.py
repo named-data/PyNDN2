@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -24,7 +24,7 @@ from pyndn.security import KeyChain
 from pyndn.security.security_types import KeyType
 from pyndn import Name, Data
 from pyndn.util import Blob
-from test_utils import DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER 
+from test_utils import DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER
 from pyndn import Name
 import unittest as ut
 
@@ -40,7 +40,7 @@ class TestRegexMatching(ut.TestCase):
         self.privateKeyStorage = MemoryPrivateKeyStorage()
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
         self.privateKeyStorage = MemoryPrivateKeyStorage()
-        
+
         # not using keychain for verification so we don't neet to set the
         # policy manager
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
@@ -56,13 +56,13 @@ class TestRegexMatching(ut.TestCase):
         self.privateKeyStorage.setKeyPairForKeyName(
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
         self.shortCertName = self._certNameFromKeyName(keyName, -2)
-    
+
     def test_name_relation(self):
-        policyManagerPrefix = ConfigPolicyManager(self.identityStorage, 
+        policyManagerPrefix = ConfigPolicyManager(self.identityStorage,
             "policy_config/relation_ruleset_prefix.conf")
-        policyManagerStrict = ConfigPolicyManager(self.identityStorage, 
+        policyManagerStrict = ConfigPolicyManager(self.identityStorage,
             "policy_config/relation_ruleset_strict.conf")
-        policyManagerEqual = ConfigPolicyManager(self.identityStorage, 
+        policyManagerEqual = ConfigPolicyManager(self.identityStorage,
             "policy_config/relation_ruleset_equal.conf")
 
         dataName = Name('/TestRule1')
@@ -100,7 +100,7 @@ class TestRegexMatching(ut.TestCase):
                 "Strict-prefix relation should  not match inner components")
 
     def test_simple_regex(self):
-        policyManager = ConfigPolicyManager(self.identityStorage, 
+        policyManager = ConfigPolicyManager(self.identityStorage,
             "policy_config/regex_ruleset.conf")
         dataName1 = Name('/SecurityTestSecRule/Basic')
         dataName2 = Name('/SecurityTestSecRule/Basic/More')
@@ -126,7 +126,7 @@ class TestRegexMatching(ut.TestCase):
         self.assertIsNone(matchedRule5)
 
     def test_checker_hierarchical(self):
-        policyManager = ConfigPolicyManager(self.identityStorage, 
+        policyManager = ConfigPolicyManager(self.identityStorage,
             "policy_config/hierarchical_ruleset.conf")
 
         dataName1 = Name('/SecurityTestSecRule/Basic/Data1')
@@ -136,7 +136,7 @@ class TestRegexMatching(ut.TestCase):
         data2 = Data(dataName2)
 
         matchedRule = policyManager._findMatchingRule(dataName1, 'data')
-        self.assertEqual(matchedRule, 
+        self.assertEqual(matchedRule,
                 policyManager._findMatchingRule(dataName2, 'data'))
 
         self.keyChain.sign(data1, self.defaultCertName)
@@ -151,7 +151,7 @@ class TestRegexMatching(ut.TestCase):
 
         self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
             dataName2, matchedRule))
-        
+
         self.keyChain.sign(data1, self.shortCertName)
         self.keyChain.sign(data2, self.shortCertName)
 
@@ -165,7 +165,7 @@ class TestRegexMatching(ut.TestCase):
 
 
     def test_hyperrelation(self):
-        policyManager = ConfigPolicyManager(self.identityStorage, 
+        policyManager = ConfigPolicyManager(self.identityStorage,
             "policy_config/hyperrelation_ruleset.conf")
 
         dataName = Name('/SecurityTestSecRule/Basic/Longer/Data2')

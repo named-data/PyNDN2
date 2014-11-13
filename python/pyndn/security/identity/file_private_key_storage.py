@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the FilePrivateKeyStorage class which extends 
+This module defines the FilePrivateKeyStorage class which extends
 PrivateKeyStorage to implement private key storage using files.
 """
 
@@ -55,12 +55,12 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
     def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
         """
         Generate a pair of asymmetric keys.
-        
+
         :param Name keyName: The name of the key pair.
         :param keyType: (optional) The type of the key pair.  If omitted, use
           KeyType.RSA
         :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key pair.  If omitted, 
+        :param int keySize: (optional) The size of the key pair.  If omitted,
           use 2048.
         """
         raise RuntimeError("generateKeyPair is not implemented")
@@ -68,16 +68,16 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
     def getPublicKey(self, keyName):
         """
         Get the public key with the keyName.
-        
+
         :param Name keyName: The name of public key.
         :return: The public key.
         :rtype: PublicKey
         """
-        raise RuntimeError("getPublicKey is not implemented")        
-    
+        raise RuntimeError("getPublicKey is not implemented")
+
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
-        Fetch the private key for keyName and sign the data, returning a 
+        Fetch the private key for keyName and sign the data, returning a
         signature Blob.
 
         :param data: Pointer the input byte buffer to sign.
@@ -112,7 +112,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         # TODO: Use proper PKCS #8 decoding instead of this hack.
         pkcs8PreambleSize = 26
         privateKey = RSA.importKey(der[pkcs8PreambleSize:])
-        
+
         # Sign the hash of the data.
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert data.
@@ -124,17 +124,17 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
     def decrypt(self, keyName, data, isSymmetric = False):
         """
         Decrypt data.
-        
+
         :param Name keyName: The name of the decrypting key.
         :param data: The byte buffer to be decrypted.
         :type data: An array type with int elements
-        :param bool isSymmetric: (optional) If True symmetric encryption is 
+        :param bool isSymmetric: (optional) If True symmetric encryption is
           used, otherwise asymmetric encryption is used. If omitted, use
           asymmetric encryption.
         :return: The decrypted data.
         :rtype: Blob
         """
-        raise RuntimeError("decrypt is not implemented")                        
+        raise RuntimeError("decrypt is not implemented")
 
     def encrypt(self, keyName, data, isSymmetric = False):
         """
@@ -143,13 +143,13 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         :param Name keyName: The name of the encrypting key.
         :param data: The byte buffer to be encrypted.
         :type data: An array type with int elements
-        :param bool isSymmetric: (optional) If True symmetric encryption is 
+        :param bool isSymmetric: (optional) If True symmetric encryption is
           used, otherwise asymmetric encryption is used. If omitted, use
           asymmetric encryption.
         :return: The encrypted data.
         :rtype: Blob
         """
-        raise RuntimeError("encrypt is not implemented")                        
+        raise RuntimeError("encrypt is not implemented")
 
     def generateKey(self, keyName, keyType = KeyType.AES, keySize = 256):
         """
@@ -161,14 +161,14 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         :type keyType: int from KeyType
         :param int keySize: (optional) The size of the key. If omitted, use 256.
         """
-        raise RuntimeError("generateKey is not implemented")                        
-    
+        raise RuntimeError("generateKey is not implemented")
+
     def doesKeyExist(self, keyName, keyClass):
         """
         Check if a particular key exists.
-        
+
         :param Name keyName: The name of the key.
-        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC, 
+        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC,
            KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
         :type keyClass: int from KeyClass
         :return: True if the key exists, otherwise false.
@@ -187,7 +187,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
     def nameTransform(self, keyName, extension):
         """
         Create a file path from keyName and the extension
-        
+
         :param str keyName: The key name URI.
         :param str extension: The desired file name extension, e.g. ".pri".
         :return: The file path.
@@ -196,9 +196,9 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         hashInput = keyName
         if sys.version_info[0] > 2:
             # In Python 2.x, hash uses a str. Otherwise use Blob to convert.
-            hashInput = Blob(keyName, False).toBuffer()        
+            hashInput = Blob(keyName, False).toBuffer()
         hash = SHA256.new(hashInput).digest()
-        
+
         digest = base64.b64encode(hash)
         if type(digest) != str:
             # In Python 3, this is bytes, so convert to a str.

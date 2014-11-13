@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-""" 
+"""
     This is more or less a copy of one of the NDN-cxx unit tests:
           ndn-cxx / tests / unit-tests / security / test-encode-decode-certificate.cpp
 """
@@ -42,7 +42,7 @@ PUBLIC_KEY = bytearray([
 0xc1, 0xb8, 0xd7, 0xbf, 0x9b, 0xcf, 0x7d, 0x24, 0xc2, 0x63, 0xf3, 0x97, 0x17, 0xeb, 0xfe,
 0x62, 0x25, 0xba, 0x5b, 0x4d, 0x8a, 0xc2, 0x7a, 0xbd, 0x43, 0x8a, 0x8f, 0xb8, 0xf2, 0xf1,
 0xc5, 0x6a, 0x30, 0xd3, 0x50, 0x8c, 0xc8, 0x9a, 0xdf, 0xef, 0xed, 0x35, 0xe7, 0x7a, 0x62,
-0xea, 0x76, 0x7c, 0xbb, 0x08, 0x26, 0xc7, 0x02, 0x01, 0x11 
+0xea, 0x76, 0x7c, 0xbb, 0x08, 0x26, 0xc7, 0x02, 0x01, 0x11
     ])
 
 CERT_DUMP = bytearray([
@@ -152,7 +152,7 @@ class TestCertificate(ut.TestCase):
     def test_extension(self):
         # TODO: incomplete
         #now add an extension
-        
+
         self.toyCert.encode()
         extValueRoot = DerSequence()
         extValueName = DerOctetString("/hello/kitty")
@@ -188,4 +188,4 @@ class TestCertificate(ut.TestCase):
         self.assertEqual(oidString, derOid.toVal(), "Incorrect decoded OID")
 
 if __name__ == '__main__':
-   ut.main(verbosity=2) 
+   ut.main(verbosity=2)

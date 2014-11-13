@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -20,7 +20,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -50,7 +50,7 @@ class IdentityCertificate(Certificate):
         Create a new identity certificate.
         :param data: (optional) A Data object to copy the contents of
         :type data: Data
-        :throws: SecurityException if the name of this Data object is 
+        :throws: SecurityException if the name of this Data object is
         not a valid identity certificate name.
         """
         super(IdentityCertificate,self).__init__(value)
@@ -98,7 +98,7 @@ class IdentityCertificate(Certificate):
 
     def setName(self, name):
         """
-        Overrides Data.setName() to ensure that the new name is a valid identity 
+        Overrides Data.setName() to ensure that the new name is a valid identity
         certificate name.
         :param name: The new name for this IdentityCertificate
         :type name: Name

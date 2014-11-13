@@ -4,7 +4,7 @@
 # Author: Derek Kulinski <takeda@takeda.tk>
 # Author: Jeff Burke <jburke@ucla.edu>
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -22,8 +22,8 @@
 from pyndn import control_parameters, data, exclude, face, forwarding_entry
 from pyndn import forwarding_flags, interest, key_locator, meta_info, name
 from pyndn import sha256_with_rsa_signature, signature, threadsafe_face
-__all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_entry', 
-           'forwarding_flags', 'interest', 'key_locator', 'meta_info', 'name', 
+__all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_entry',
+           'forwarding_flags', 'interest', 'key_locator', 'meta_info', 'name',
            'sha256_with_rsa_signature', 'signature', 'threadsafe_face']
 
 import sys as _sys

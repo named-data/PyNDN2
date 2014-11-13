@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -36,7 +36,7 @@ class KeyClass(object):
     PUBLIC = 1
     PRIVATE = 2
     SYMMETRIC = 3
-    
+
 class DigestAlgorithm(object):
     SHA256 = 1
     # MD2

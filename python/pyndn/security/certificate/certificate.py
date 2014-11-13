@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +31,7 @@ class Certificate(Data):
     epochStart = datetime(1970,1,1)
     def __init__(self, other=None):
         """
-        Create a new certificate, optionally copying the 
+        Create a new certificate, optionally copying the
         contents of another Data object.
         :param other: (optional) A Data packet to copy the content from
         :type other: Data
@@ -91,15 +91,15 @@ class Certificate(Data):
         for idx in range(0, len(encodedKey), 64):
             s += encodedKey[idx:idx+64] + "\n"
 
-        
+
         if len(self._extensionList) > 0:
             s += "Extensions:\n"
             for ext in self._extensionList:
                 s += "  OID: "+ext.getOid()+"\n"
                 s += "  Is critical: " + ('Y' if ext.isCritical() else 'N') + "\n"
-                
-                s += "  Value: " + str(ext.getValue()).encode('hex') + "\n" 
-            
+
+                s += "  Value: " + str(ext.getValue()).encode('hex') + "\n"
+
         return s
 
 
@@ -153,7 +153,7 @@ class Certificate(Data):
     def encode(self):
         """
             Encode the contents of the certificate in DER format and set the
-            Content and MetaInfo fields. 
+            Content and MetaInfo fields.
         """
         root = self.toDer()
         outVal = root.encode()
@@ -165,7 +165,7 @@ class Certificate(Data):
             Populates the fields by decoding DER data from the Content.
         """
         root = DerNode.parse(self.getContent())
-        
+
         # we need to ensure that there are:
         #   validity (notBefore, notAfter)
         #   subject list

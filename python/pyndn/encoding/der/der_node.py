@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +23,7 @@ from pyndn.encoding.der.der_exceptions import NegativeLengthException, DerEncodi
 
 from datetime import datetime
 
-""" 
+"""
 This module defines the implemented DER node types used in encoding/decoding DER formatted data.
 """
 
@@ -110,7 +110,7 @@ class DerNode (object):
         return size
 
     def encode(self):
-        """ 
+        """
         :return: The raw data encoding for this node
         :rtype: Blob
         """
@@ -178,7 +178,7 @@ class DerNode (object):
         return newNode
 
     def toVal(self):
-        """ 
+        """
         Convert the encoded data to a standard representation. Overridden by some subclasses (e.g. DerBoolean)
         :return: The encoded data
         :rtype: Blob
@@ -196,7 +196,7 @@ class DerStructure(DerNode):
        self._childChanged = False
        self._nodeList = []
        self._size = 0
-       
+
     def getSize(self):
         """
         Get the total length of the encoding, including children
@@ -254,7 +254,7 @@ class DerStructure(DerNode):
         self._childChanged = True
 
     def encode(self):
-        """ 
+        """
         :return: The raw data encoding for this node and its children
         :rtype: Blob
         """
@@ -278,7 +278,7 @@ class DerStructure(DerNode):
         :type startIdx: int
         """
 
-        idx = startIdx 
+        idx = startIdx
         self._size = self._decodeHeader(inputBuf, idx)
         idx += len(self._header)
         accSize = 0
@@ -460,7 +460,7 @@ class DerOid(DerNode):
         oldOffset = offset
 
         while self._payload[offset] & flagMask:
-            result = 128 * result + self._payload[offset]-128 
+            result = 128 * result + self._payload[offset]-128
             offset += 1
 
         result = result * 128 + self._payload[offset]

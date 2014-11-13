@@ -115,33 +115,33 @@ class BasicIdentityStorage(IdentityStorage):
             for command in INIT_CERT_TABLE:
                 self._database.execute(command)
         cursor.close()
-            
+
         self._database.commit()
 
-    def doesIdentityExist(self, identityName):  
+    def doesIdentityExist(self, identityName):
         """
         Check if the specified identity already exists.
-        
+
         :param Name identityName: The identity name.
         :return: True if the identity exists, otherwise False.
         :rtype: bool
         """
         result = False
 
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT count(*) FROM Identity WHERE identity_name=?",
           (identityName.toUri(),))
         (count,) = cursor.fetchone()
         if count > 0:
             result = True
-            
+
         cursor.close()
         return result
-        
+
     def addIdentity(self, identityName):
         """
-        Add a new identity. An exception will be thrown if the identity already 
+        Add a new identity. An exception will be thrown if the identity already
         exists.
 
         :param Name identityName: The identity name.
@@ -157,19 +157,19 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def revokeIdentity(self):    
+    def revokeIdentity(self):
         """
         Revoke the identity.
-        
+
         :return: True if the identity was revoked, False if not.
         :rtype: bool
         """
         return False
 
-    def doesKeyExist(self, keyName):    
+    def doesKeyExist(self, keyName):
         """
         Check if the specified key already exists.
-        
+
         :param Name keyName: The name of the key.
         :return: True if the key exists, otherwise False.
         :rtype: bool
@@ -177,7 +177,7 @@ class BasicIdentityStorage(IdentityStorage):
         keyId = keyName[-1].toEscapedString()
         identityName = keyName[:-1]
 
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT count(*) FROM Key WHERE identity_name=? AND key_identifier=?",
           (identityName.toUri(), keyId))
@@ -185,14 +185,14 @@ class BasicIdentityStorage(IdentityStorage):
         (count,) = cursor.fetchone()
         if count > 0:
             keyIdExists = True
-            
+
         cursor.close()
         return keyIdExists
 
-    def addKey(self, keyName, keyType, publicKeyDer):    
+    def addKey(self, keyName, keyType, publicKeyDer):
         """
         Add a public key to the identity storage.
-        
+
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
@@ -200,7 +200,7 @@ class BasicIdentityStorage(IdentityStorage):
         """
         if keyName.size() == 0:
             return
-        
+
         if self.doesKeyExist(keyName):
             raise SecurityException("A key with the same name already exists!")
 
@@ -220,10 +220,10 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def getKey(self, keyName):    
+    def getKey(self, keyName):
         """
         Get the public key DER blob from the identity storage.
-        
+
         :param Name keyName: The name of the requested public key.
         :return: The DER Blob. If not found, return a isNull() Blob.
         :rtype: Blob
@@ -241,10 +241,10 @@ class BasicIdentityStorage(IdentityStorage):
         cursor.close()
         return Blob(bytearray(keyData))
 
-    def getKeyType(self, keyName):    
+    def getKeyType(self, keyName):
         """
         Get the KeyType of the public key with the given keyName.
-        
+
         :param Name keyName: The name of the requested public key.
         :return: The KeyType, for example KeyType.RSA.
         :rtype: an int from KeyType
@@ -252,12 +252,12 @@ class BasicIdentityStorage(IdentityStorage):
         keyId = keyName[-1].toEscapedString()
         identityName = keyName[:-1]
 
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT key_type FROM Key WHERE identity_name=? AND key_identifier=?",
           (identityName.toUri(), keyId))
         row = cursor.fetchone()
-        
+
         if row != None:
             (keyType,) = row
             cursor.close()
@@ -267,20 +267,20 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "Cannot get public key type because the keyName doesn't exist")
 
-    def activateKey(self, keyName):    
+    def activateKey(self, keyName):
         """
-        Activate a key. If a key is marked as inactive, its private part will 
+        Activate a key. If a key is marked as inactive, its private part will
         not be used in packet signing.
-        
+
         :param Name keyName: The name of the key.
         """
         raise RuntimeError("activateKey is not implemented")
 
-    def deactivateKey(self, keyName):    
+    def deactivateKey(self, keyName):
         """
-        Deactivate a key. If a key is marked as inactive, its private part will 
+        Deactivate a key. If a key is marked as inactive, its private part will
         not be used in packet signing.
-        
+
         :param Name keyName: The name of the key.
         """
         raise RuntimeError("deactivateKey is not implemented")
@@ -306,15 +306,15 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def doesCertificateExist(self, certificateName):    
+    def doesCertificateExist(self, certificateName):
         """
         Check if the specified certificate already exists.
-        
+
         :param Name certificateName: The name of the certificate.
         :return: True if the certificate exists, otherwise False.
         :rtype: bool
         """
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT count(*) FROM Certificate WHERE cert_name=?",
           (certificateName.toUri(),))
@@ -322,26 +322,26 @@ class BasicIdentityStorage(IdentityStorage):
         (count,) = cursor.fetchone()
         if count > 0:
             certExists = True
-            
+
         cursor.close()
         return certExists
 
-    def addCertificate(self, certificate):    
+    def addCertificate(self, certificate):
         """
         Add a certificate to the identity storage.
-        
-        :param IdentityCertificate certificate: The certificate to be added. 
+
+        :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
         """
         raise RuntimeError("addCertificate is not implemented")
 
-    def getCertificate(self, certificateName, allowAny = False):    
+    def getCertificate(self, certificateName, allowAny = False):
         """
         Get a certificate from the identity storage.
-        
+
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will 
-          be returned, otherwise validity is disregarded.  If omitted, 
+        :param bool allowAny: (optional) If False, only a valid certificate will
+          be returned, otherwise validity is disregarded.  If omitted,
           allowAny is False.
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
@@ -388,19 +388,19 @@ class BasicIdentityStorage(IdentityStorage):
     # Get/Set Default
     #
 
-    def getDefaultIdentity(self):    
+    def getDefaultIdentity(self):
         """
         Get the default identity.
-        
+
         :return: The name of default identity.
         :rtype: Name
         :raises SecurityException: if the default identity is not set.
         """
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT identity_name FROM Identity WHERE default_identity=1")
         row = cursor.fetchone()
-        
+
         if row != None:
             (identity,) = row
             cursor.close()
@@ -410,22 +410,22 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "BasicIdentityStorage::getDefaultIdentity: The default identity is not defined")
 
-    def getDefaultKeyNameForIdentity(self, identityName):    
+    def getDefaultKeyNameForIdentity(self, identityName):
         """
         Get the default key name for the specified identity.
-        
+
         :param Name identityName: The identity name.
         :return: The default key name.
         :rtype: Name
-        :raises SecurityException: if the default key name for the identity is 
+        :raises SecurityException: if the default key name for the identity is
           not set.
         """
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT key_identifier FROM Key WHERE identity_name=? AND default_key=1",
           (identityName.toUri(),))
         row = cursor.fetchone()
-        
+
         if row != None:
             (keyName,) = row
             cursor.close()
@@ -435,25 +435,25 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "BasicIdentityStorage::getDefaultKeyNameForIdentity: The default key for the identity is not defined")
 
-    def getDefaultCertificateNameForKey(self, keyName):    
+    def getDefaultCertificateNameForKey(self, keyName):
         """
         Get the default certificate name for the specified key.
-        
+
         :param Name keyName: The key name.
         :return: The default certificate name.
         :rtype: Name
-        :raises SecurityException: if the default certificate name for the key 
+        :raises SecurityException: if the default certificate name for the key
           name is not set.
         """
         keyId = keyName[-1].toEscapedString()
         identityName = keyName[:-1]
 
-        cursor = self._database.cursor()        
+        cursor = self._database.cursor()
         cursor.execute(
           "SELECT cert_name FROM Certificate WHERE identity_name=? AND key_identifier=? AND default_cert=1",
           (identityName.toUri(), keyId))
         row = cursor.fetchone()
-        
+
         if row != None:
             (certName,) = row
             cursor.close()
@@ -463,11 +463,11 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "BasicIdentityStorage::getDefaultCertificateNameForKey: The default certificate for the key name is not defined")
 
-    def setDefaultIdentity(self, identityName):    
+    def setDefaultIdentity(self, identityName):
         """
         Set the default identity. If the identityName does not exist, then clear
         the default identity so that getDefaultIdentity() raises an exception.
-        
+
         :param Name identityName: The default identity name.
         """
         # Reset previous default identity.
@@ -482,13 +482,13 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def setDefaultKeyNameForIdentity(self, keyName, identityNameCheck = None):    
+    def setDefaultKeyNameForIdentity(self, keyName, identityNameCheck = None):
         """
         Set the default key name for the specified identity.
-        
-        
+
+
         :param Name keyName: The key name.
-        :param Name identityNameCheck: (optional) The identity name to check the 
+        :param Name identityNameCheck: (optional) The identity name to check the
           keyName.
         """
         keyId = keyName[-1].toEscapedString()
@@ -515,10 +515,10 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def setDefaultCertificateNameForKey(self, keyName, certificateName):        
+    def setDefaultCertificateNameForKey(self, keyName, certificateName):
         """
         Set the default key name for the specified identity.
-                
+
         :param Name keyName: The key name.
         :param Name certificateName: The certificate name.
         """
