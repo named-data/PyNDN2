@@ -201,7 +201,7 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         with open(newPath, 'w') as keyFile:
             keyFile.write(encodedBits)
 
-    def _deleteKey(self, keyName, keyBits, keyClass):
+    def _deleteKey(self, keyName, keyClass):
         """
         Remove key data from the store.
         :param Name keyName: The name of the key

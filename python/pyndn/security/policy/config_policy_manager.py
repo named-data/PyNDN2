@@ -27,6 +27,7 @@ from warnings import warn
 
 from pyndn import Name, Data, Interest
 from pyndn.security.policy.policy_manager import PolicyManager
+from pyndn.security.policy.certificate_cache import CertificateCache
 from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.security.certificate.public_key import PublicKey
@@ -35,6 +36,7 @@ from pyndn.encoding import WireFormat
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
+
 
 from pyndn.util.boost_info_parser import BoostInfoParser
 from pyndn.util.ndn_regex import NdnRegexMatcher
@@ -63,19 +65,28 @@ class ConfigPolicyManager(PolicyManager):
     Create a new ConfigPolicyManager which acts on the rules specified
     in the configuration file and downloads unknown certificates when necessary.
 
-    :param IdentityStorage identityStorage: The IdentityStorage for
-      looking up the public key. This object must remain valid during the life
-      of this ConfigPolicyManager.
     :param string configFileName: The path to the configuration file containing
       verification rules.
+    :param CertificateCache certificateCache: (optional) A CertificateCache to
+        hold known certificates.
     :param int searchDepth: (optional) The maximum number of links to follow
       when verifying a certificate chain.
+    :param int graceInterval: (optional) The window of time difference (in
+        seconds) allowed between the timestamp of the first interest signed 
+        with a new public key and the validation time.
+    :param int keyTimestampTtl: (optional) How long a public key's last-used
+        timestamp is kept in the store.
+    :param int maxTrackedKeys: (optional) The maximum number of public key use
+        timestamps to track.
     """
-    def __init__(self, identityStorage, configFileName,
+    def __init__(self, configFileName, certificateCache=None,
             searchDepth=5, graceInterval=3000, keyTimestampTtl=3600000,
             maxTrackedKeys=1000):
         super(ConfigPolicyManager, self).__init__()
-        self._identityStorage = identityStorage
+        if certificateCache is None:
+            self._certificateCache = CertificateCache()
+        else:
+            self._certificateCache = certificateCache
         self._maxDepth = searchDepth
         self._keyGraceInterval = graceInterval
         self._keyTimestampTtl = keyTimestampTtl
@@ -83,7 +94,7 @@ class ConfigPolicyManager(PolicyManager):
 
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
-        self._certificateCache = {}
+        self._fixedCertificateCache = {}
 
         # stores the timestamps for each public key used in command interests to avoid
         # replay attacks
@@ -95,7 +106,7 @@ class ConfigPolicyManager(PolicyManager):
 
         self.requiresVerification = True
 
-        self._refreshManager = TrustAnchorRefreshManager(identityStorage)
+        self._refreshManager = TrustAnchorRefreshManager()
         self._loadTrustAnchorCertificates()
 
     def requireVerify(self, dataOrInterest):
@@ -265,24 +276,22 @@ class ConfigPolicyManager(PolicyManager):
         or decoding.
         """
         try:
-            certUri = self._certificateCache[certID]
+            certUri = self._fixedCertificateCache[certID]
         except KeyError:
             if isPath:
                 # load the certificate data (base64 encoded IdentityCertificate)
-                cert = self._refreshManager._loadIdentityCertificateFromFile(certID)
+                cert = self._refreshManager._loadIdentityCertificateFromFile(
+                        certID)
             else:
                 certData = b64decode(certID)
                 cert = IdentityCertificate()
                 cert.wireDecode(certData)
 
-            self._certificateCache[certID] = cert.getName().toUri()
-            try:
-                self._identityStorage.addCertificate(cert)
-            except SecurityException:
-                #already exists? it's okay
-                pass
+            certUri = cert.getName()[:-1].toUri()
+            self._fixedCertificateCache[certID] = certUri
+            self._certificateCache.insertCertificate(cert)
         else:
-            cert = self._identityStorage.getCertificate(Name(certUri))
+            cert = self._certificateCache.getCertificate(Name(certUri))
 
         return cert
 
@@ -481,7 +490,8 @@ class ConfigPolicyManager(PolicyManager):
             onVerifyFailed(dataOrInterest)
             return None
 
-        signatureMatches = self._checkSignatureMatch(signatureName, objectName, matchedRule)
+        signatureMatches = self._checkSignatureMatch(signatureName, objectName,
+                matchedRule)
         if not signatureMatches:
             onVerifyFailed(dataOrInterest)
             return None
@@ -492,35 +502,41 @@ class ConfigPolicyManager(PolicyManager):
         # now finally check that the data or interest was signed correctly
         # if we don't actually have the certificate yet, create a
         # ValidationRequest for it
-        if not self._identityStorage.doesCertificateExist(signatureName):
+        foundCert = self._refreshManager.getCertificate(signatureName)
+        if foundCert is None:
+            foundCert = self._certificateCache.getCertificate(signatureName)
+        if foundCert is None:
             certificateInterest = Interest(signatureName)
             def onCertificateDownloadComplete(certificate):
                 certificate = IdentityCertificate(certificate)
                 self._identityStorage.addCertificate(certificate)
-                self.checkVerificationPolicy(dataOrInterest, stepCount+1, onVerified, onVerifyFailed)
+                self.checkVerificationPolicy(dataOrInterest, stepCount+1, 
+                        onVerified, onVerifyFailed)
 
-            nextStep = ValidationRequest(certificateInterest, onCertificateDownloadComplete,
-                    onVerifyFailed, 2, stepCount+1)
+            nextStep = ValidationRequest(certificateInterest, 
+                    onCertificateDownloadComplete, onVerifyFailed, 
+                    2, stepCount+1)
+           
             return nextStep
-        else:
-            # for interests, we must check that the timestamp is fresh enough
-            # I do this after (possibly) downloading the certificate to avoid filling
-            # the cache with bad keys
-            if isinstance(dataOrInterest, Interest):
-                keyName = IdentityCertificate.certificateNameToPublicKeyName(signatureName)
-                timestamp = dataOrInterest.getName().get(-4).toNumber()/1000
+        
+        # for interests, we must check that the timestamp is fresh enough
+        # I do this after (possibly) downloading the certificate to avoid 
+        # filling the cache with bad keys
+        if isinstance(dataOrInterest, Interest):
+            keyName = foundCert.getPublicKeyName()
+            timestamp = dataOrInterest.getName().get(-4).toNumber()/1000
 
-                if not self._interestTimestampIsFresh(keyName, timestamp):
-                    onVerifyFailed(dataOrInterest)
-                    return None
-
-            # certificate is known, verify the signature
-            if self._verify(signature, dataOrInterest.wireEncode()):
-                onVerified(dataOrInterest)
-                if isinstance(dataOrInterest, Interest):
-                    self._updateTimestampForKey(keyName, timestamp)
-            else:
+            if not self._interestTimestampIsFresh(keyName, timestamp):
                 onVerifyFailed(dataOrInterest)
+                return None
+
+        # certificate is known, verify the signature
+        if self._verify(signature, dataOrInterest.wireEncode()):
+            onVerified(dataOrInterest)
+            if isinstance(dataOrInterest, Interest):
+                self._updateTimestampForKey(keyName, timestamp)
+        else:
+            onVerifyFailed(dataOrInterest)
 
     def _verify(self, signatureInfo, signedBlob):
         """
@@ -542,12 +558,16 @@ class ConfigPolicyManager(PolicyManager):
             raise SecurityException(
            "ConfigPolicyManager: Signature is not Sha256WithRsaSignature.")
 
-        if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME and
-            self._identityStorage != None):
+        if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME):
             # Assume the key name is a certificate name.
-            publicKeyDer = self._identityStorage.getKey(
-              IdentityCertificate.certificateNameToPublicKeyName(
-                signature.getKeyLocator().getKeyName()))
+            signatureName = signature.getKeyLocator().getKeyName()
+            certificate = self._refreshManager.getCertificate(signatureName)
+            if certificate is None:
+                certificate = self._certificateCache.getCertificate(signatureName)
+            if certificate is None:
+                return False
+
+            publicKeyDer = certificate.getPublicKeyInfo().getKeyDer()
             if publicKeyDer.isNull():
                 # Can't find the public key with the name.
                 return False
@@ -605,10 +625,10 @@ class TrustAnchorRefreshManager(object):
     """
     Manages the trust-anchor certificates, including refresh.
     """
-    def __init__(self, identityStorage):
+    def __init__(self):
         super(TrustAnchorRefreshManager, self).__init__()
 
-        self._identityStorage = identityStorage
+        self._certificateCache = CertificateCache()
         # maps the directory name to certificate names so they can be
         # deleted when necessary
         self._refreshDirectories = {}
@@ -621,6 +641,10 @@ class TrustAnchorRefreshManager(object):
             cert.wireDecode(Blob(decodedData, False))
             return cert
 
+    def getCertificate(self, certificateName):
+        # assumes timestamp is already removed
+        return self._certificateCache.getCertificate(certificateName)
+
     def addDirectory(self, directoryName, refreshPeriod):
         allFiles = [f for f in os.listdir(directoryName)
                 if os.path.isfile(os.path.join(directoryName, f))]
@@ -632,8 +656,10 @@ class TrustAnchorRefreshManager(object):
             except SecurityException:
                 pass # allow files that are not certificates
             else:
-                self._identityStorage.addCertificate(cert)
-                certificateNames.append(cert.getName().toUri())
+                # cut off timestamp so it matches KeyLocator Name format
+                certUri = cert.getName()[:-1].toUri()
+                self._certificateCache.insertCertificate(cert)
+                certificateNames.append(certUri)
 
         self._refreshDirectories[directoryName] = {'certificates':certificateNames,
                 'nextRefresh':time.time()+refreshPeriod, 'refreshPeriod':refreshPeriod}
@@ -647,15 +673,13 @@ class TrustAnchorRefreshManager(object):
                 # delete the certificates associated with this directory if possible
                 # then re-import
                 # IdentityStorage subclasses may not support deletion
+                # should we be deleting 
                 for c in certificateList:
                     try:
-                        self._identityStorage.deleteCertificateInfo(Name(c))
-                    except SecurityException:
+                        self._certificateCache.deleteCertificate(Name(c))
+                    except KeyError:
                         # was already removed? not supported?
                         pass
-                    except RuntimeError:
-                        #not implemented
-                        break
                 self.addDirectory(directory, info['refreshPeriod'])
 
 

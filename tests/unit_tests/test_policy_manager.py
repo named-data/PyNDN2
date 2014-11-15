@@ -23,6 +23,7 @@ from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
 from pyndn.security import KeyChain
 from pyndn.security.certificate import IdentityCertificate
+from pyndn.security.security_types import KeyType
 from pyndn.util import Blob
 from pyndn import Name, Data, Interest, Face
 from pyndn import Sha256WithRsaSignature
@@ -32,6 +33,7 @@ import time
 import os
 from base64 import b64decode, b64encode
 from collections import namedtuple
+from Crypto.PublicKey import RSA
 
 CERT_DUMP="Bv0C4AcxCAR0ZW1wCANLRVkIEWtzay0xNDE0MTk1Nzc5NjY1CAdJRC1DRVJUCAgA\
            AAFJRKMe3BQDGAECFf0BcDCCAWwwIhgPMjAxNDEwMjUwMDA5NDFaGA8yMDM0MTAy\
@@ -49,6 +51,8 @@ CERT_DUMP="Bv0C4AcxCAR0ZW1wCANLRVkIEWtzay0xNDE0MTk1Nzc5NjY1CAdJRC1DRVJUCAgA\
            DCp8sT/zjjGORj04Gh6qCp0QBEfNmZke8aI4DGor83AL5b9eDvWv3TtMNRzrWcF7\
            NgvRyxKNDIXJZym0qpHQQVjdQJezWNxf82swBV2S7nbJCI4djOwbRTnRFuwi4vHs\
            BmWVlUfyAg8noGdPRS8MGQs24vw="
+
+PUBLIC_KEY=""
 
 try:
     from unittest.mock import Mock
@@ -139,21 +143,37 @@ class TestConfigPolicyManager(ut.TestCase):
             pass
 
         self.identityStorage = TestIdentityStorage()
+        self.privateKeyStorage = TestPrivateKeyStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
-                TestPrivateKeyStorage())
-        self.policyManager = ConfigPolicyManager(self.identityStorage,
-                'policy_config/simple_rules.conf')
+                self.privateKeyStorage)
+        self.policyManager = ConfigPolicyManager('policy_config/simple_rules.conf')
 
-        self.identityName = Name('/TestConfigPolicyManager').appendVersion(
-                int(time.time()))
+        self.identityName = Name('/TestConfigPolicyManager/temp')
+        # to match the anchor cert
+        keyName = Name(self.identityName).append('ksk-1416010123')
+        # read an RSA key in
+        with open('policy_config/testKey.pri', 'r') as keyData:
+            encodedKey = keyData.read()
+            keyBytes = b64decode(encodedKey)
+            privateKey = RSA.importKey(keyBytes)
+            self.privateKeyStorage.addPrivateKey(keyName, Blob(keyBytes,False))
+            publicKeyBytes = Blob(privateKey.publickey().exportKey('DER'))
+            self.privateKeyStorage.addPublicKey(keyName, publicKeyBytes)
+            self.identityStorage.addKey(keyName, KeyType.RSA, publicKeyBytes)
+
+            cert = self.identityManager.selfSign(keyName)
+            self.identityStorage.setDefaultKeyNameForIdentity(keyName)
+            self.identityManager.addCertificateAsDefault(cert)
+
 
         self.keyChain = KeyChain(self.identityManager, self.policyManager)
-        self.keyChain.createIdentity(self.identityName)
+        self.keyName = keyName
 
         self.face = Face()
 
     def tearDown(self):
         self.identityStorage.deleteIdentityInfo(self.identityName)
+        self.privateKeyStorage.deleteKeyPair(self.keyName)
         self.face.shutdown()
 
     def test_interest_timestamp(self):
