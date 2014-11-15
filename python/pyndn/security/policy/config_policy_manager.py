@@ -509,7 +509,7 @@ class ConfigPolicyManager(PolicyManager):
             certificateInterest = Interest(signatureName)
             def onCertificateDownloadComplete(certificate):
                 certificate = IdentityCertificate(certificate)
-                self._identityStorage.addCertificate(certificate)
+                self._certificateCache.insertCertificate(certificate)
                 self.checkVerificationPolicy(dataOrInterest, stepCount+1, 
                         onVerified, onVerifyFailed)
 
