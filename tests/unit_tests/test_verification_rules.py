@@ -58,12 +58,9 @@ class TestRegexMatching(ut.TestCase):
         self.shortCertName = self._certNameFromKeyName(keyName, -2)
 
     def test_name_relation(self):
-        policyManagerPrefix = ConfigPolicyManager(self.identityStorage,
-            "policy_config/relation_ruleset_prefix.conf")
-        policyManagerStrict = ConfigPolicyManager(self.identityStorage,
-            "policy_config/relation_ruleset_strict.conf")
-        policyManagerEqual = ConfigPolicyManager(self.identityStorage,
-            "policy_config/relation_ruleset_equal.conf")
+        policyManagerPrefix = ConfigPolicyManager("policy_config/relation_ruleset_prefix.conf")
+        policyManagerStrict = ConfigPolicyManager("policy_config/relation_ruleset_strict.conf")
+        policyManagerEqual = ConfigPolicyManager("policy_config/relation_ruleset_equal.conf")
 
         dataName = Name('/TestRule1')
 
@@ -100,8 +97,7 @@ class TestRegexMatching(ut.TestCase):
                 "Strict-prefix relation should  not match inner components")
 
     def test_simple_regex(self):
-        policyManager = ConfigPolicyManager(self.identityStorage,
-            "policy_config/regex_ruleset.conf")
+        policyManager = ConfigPolicyManager("policy_config/regex_ruleset.conf")
         dataName1 = Name('/SecurityTestSecRule/Basic')
         dataName2 = Name('/SecurityTestSecRule/Basic/More')
         dataName3 = Name('/SecurityTestSecRule/')
@@ -126,8 +122,7 @@ class TestRegexMatching(ut.TestCase):
         self.assertIsNone(matchedRule5)
 
     def test_checker_hierarchical(self):
-        policyManager = ConfigPolicyManager(self.identityStorage,
-            "policy_config/hierarchical_ruleset.conf")
+        policyManager = ConfigPolicyManager("policy_config/hierarchical_ruleset.conf")
 
         dataName1 = Name('/SecurityTestSecRule/Basic/Data1')
         dataName2 = Name('/SecurityTestSecRule/Basic/Longer/Data2')
@@ -165,8 +160,7 @@ class TestRegexMatching(ut.TestCase):
 
 
     def test_hyperrelation(self):
-        policyManager = ConfigPolicyManager(self.identityStorage,
-            "policy_config/hyperrelation_ruleset.conf")
+        policyManager = ConfigPolicyManager("policy_config/hyperrelation_ruleset.conf")
 
         dataName = Name('/SecurityTestSecRule/Basic/Longer/Data2')
         data1 = Data(dataName)
