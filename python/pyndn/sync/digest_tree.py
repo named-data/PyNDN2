@@ -33,16 +33,16 @@ class DigestTree(object):
         self._root = "00"
 
     class Node(object):
-        def __init__(self, dataPrefix, sessionNo, sequenceNo):
-            """
-            Create a new DigestTree.Node with the given fields and compute the
-            digest.
+        """
+        Create a new DigestTree.Node with the given fields and compute the
+        digest.
 
-            :param str dataPrefix: The data prefix. In Python3, this is encoded
-            as UTF-8 to digest.
-            :param int sessionNo: The session number.
-            :param int sequenceNo: The sequence number.
-            """
+        :param str dataPrefix: The data prefix. In Python3, this is encoded
+        as UTF-8 to digest.
+        :param int sessionNo: The session number.
+        :param int sequenceNo: The sequence number.
+        """
+        def __init__(self, dataPrefix, sessionNo, sequenceNo):
             self._dataPrefix = dataPrefix
             self._sessionNo = sessionNo
             self._sequenceNo = sequenceNo
