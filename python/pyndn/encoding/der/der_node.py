@@ -147,8 +147,7 @@ class DerNode (object):
         if type(inputBuf) is Blob:
             inputBuf = inputBuf.buf()
 
-        idx = startIdx
-        nodeType = inputBuf[idx] # don't increment, we're just peeking
+        nodeType = inputBuf[startIdx] # don't increment, we're just peeking
 
         outputType = None
 
@@ -174,7 +173,7 @@ class DerNode (object):
             raise DerDecodingException("Unimplemented DER type {}".format(nodeType))
 
         newNode = outputType()
-        newNode.decode(inputBuf, idx)
+        newNode.decode(inputBuf, startIdx)
         return newNode
 
     def toVal(self):
