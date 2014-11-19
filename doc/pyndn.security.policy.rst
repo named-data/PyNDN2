@@ -4,6 +4,22 @@ pyndn.security.policy package
 Submodules
 ----------
 
+pyndn.security.policy.certificate_cache module
+----------------------------------------------
+
+.. automodule:: pyndn.security.policy.certificate_cache
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.policy.config_policy_manager module
+--------------------------------------------------
+
+.. automodule:: pyndn.security.policy.config_policy_manager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.policy.no_verify_policy_manager module
 -----------------------------------------------------
 

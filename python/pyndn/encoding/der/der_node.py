@@ -311,7 +311,7 @@ class DerByteString(DerNode):
 
     def toVal(self):
         """
-         For byte string types, the payload encodes the string directly, so it is used as a representation.
+        For byte string types, the payload encodes the string directly, so it is used as a representation.
         :return: The encoded string
         :rtype: bytearray
         """

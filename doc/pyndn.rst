@@ -9,6 +9,7 @@ Subpackages
     pyndn.contrib
     pyndn.encoding
     pyndn.security
+    pyndn.sync
     pyndn.transport
     pyndn.util
 

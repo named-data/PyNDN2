@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    pyndn.encoding.der
     pyndn.encoding.tlv
 
 Submodules

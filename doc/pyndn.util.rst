@@ -12,6 +12,14 @@ pyndn.util.blob module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.boost_info_parser module
+-----------------------------------
+
+.. automodule:: pyndn.util.boost_info_parser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.change_counter module
 --------------------------------
 
@@ -48,6 +56,14 @@ pyndn.util.memory_content_cache module
 --------------------------------------
 
 .. automodule:: pyndn.util.memory_content_cache
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.util.ndn_regex module
+---------------------------
+
+.. automodule:: pyndn.util.ndn_regex
     :members:
     :undoc-members:
     :show-inheritance:

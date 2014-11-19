@@ -38,7 +38,7 @@ class DigestTree(object):
         digest.
 
         :param str dataPrefix: The data prefix. In Python3, this is encoded
-        as UTF-8 to digest.
+          as UTF-8 to digest.
         :param int sessionNo: The session number.
         :param int sequenceNo: The sequence number.
         """

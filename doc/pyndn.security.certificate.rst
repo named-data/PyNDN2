@@ -4,6 +4,14 @@ pyndn.security.certificate package
 Submodules
 ----------
 
+pyndn.security.certificate.certificate module
+---------------------------------------------
+
+.. automodule:: pyndn.security.certificate.certificate
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.certificate.identity_certificate module
 ------------------------------------------------------
 
