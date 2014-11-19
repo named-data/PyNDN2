@@ -36,6 +36,7 @@ class CertificateCache(object):
     def deleteCertificate(self, certificateName):
         """
         Remove a certificate from the cache. Does nothing if it is not present.
+
         :param Name certificateName: The name of the certificate to remove.
             Assumes there is no timestamp in the name.
         """
@@ -47,6 +48,7 @@ class CertificateCache(object):
     def getCertificate(self, certificateName):
         """ 
         Fetch a certificate from the cache.
+        
         :param Name certificateName: The name of the certificate to remove.
             Assumes there is no timestamp in the name.
         """
