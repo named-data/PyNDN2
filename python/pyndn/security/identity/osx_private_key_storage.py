@@ -24,6 +24,7 @@ PrivateKeyStorage to implement private key storage using the OS X Keychain.
 """
 
 import sys
+import logging
 if sys.platform == 'darwin':
     from pyndn.contrib.cocoapy import *
 from pyndn.util import Blob
@@ -109,8 +110,6 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         :return: The signature, or an isNull() Blob pointer if signing fails.
         :rtype: Blob
         """
-        #_LOG_TRACE("OSXPrivateKeyStorage::Sign")
-
         privateKey = self._getKey(keyName, KeyClass.PRIVATE)
         if privateKey == None:
             raise SecurityException("private key not found")
@@ -288,7 +287,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             res = self._security.SecItemCopyMatching(attrDict, pointer(keyItem))
 
             if res != None:
-                #_LOG_DEBUG("Fail to find the key!");
+                logging.getLogger(__name__).debug("Fail to find the key!");
                 return None
             else:
                 return keyItem
@@ -310,7 +309,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         if keyType == KeyType.AES:
           return self._kSecAttrKeyTypeAES
         else:
-          #_LOG_DEBUG("Unrecognized key type!")
+          logging.getLogger(__name__).debug("Unrecognized key type!")
           return None
 
     def _getAsymmetricKeyType(self, keyType):
@@ -325,7 +324,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         if keyType == KeyType.RSA:
           return self._kSecAttrKeyTypeRSA
         else:
-          #_LOG_DEBUG("Unrecognized key type!")
+          logging.getLogger(__name__).debug("Unrecognized key type!")
           return None
 
     def _getKeyClass(self, keyClass):
@@ -345,7 +344,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         elif keyClass == KeyClass.SYMMETRIC:
           return self._kSecAttrKeyClassSymmetric
         else:
-          #_LOG_DEBUG("Unrecognized key class!")
+          logging.getLogger(__name__).debug("Unrecognized key class!")
           return None
 
     def _getDigestAlgorithm(self, digestAlgorithm):
@@ -360,7 +359,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         if digestAlgorithm == DigestAlgorithm.SHA256:
           return self._kSecDigestSHA2
         else:
-          #_LOG_DEBUG("Unrecognized digest algorithm!")
+          logging.getLogger(__name__).debug("Unrecognized digest algorithm!")
           return None
 
     def _getDigestSize(self, digestAlgorithm):
@@ -375,6 +374,6 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         if digestAlgorithm == DigestAlgorithm.SHA256:
           return 256
         else:
-          #_LOG_DEBUG("Unrecognized digest algorithm!")
+          logging.getLogger(__name__).debug("Unrecognized digest algorithm!")
           return -1
 
