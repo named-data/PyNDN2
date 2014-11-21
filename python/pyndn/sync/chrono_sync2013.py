@@ -426,7 +426,9 @@ class ChronoSync2013(object):
             "name: %s", data.getName().toUri())
         # TODO: Check if this works in Python 3.
         tempContent = sync_state_pb2.SyncStateMsg()
+#pylint: disable=E1103
         tempContent.ParseFromString(data.getContent().toRawStr())
+#pylint: enable=E1103
         content = getattr(tempContent, "ss")
         if self._digestTree.getRoot() == "00":
             isRecovery = True
@@ -510,7 +512,9 @@ class ChronoSync2013(object):
 
             if len(getattr(tempContent, "ss")) != 0:
                 # TODO: Check if this works in Python 3.
+#pylint: disable=E1103
                 array = tempContent.SerializeToString()
+#pylint: enable=E1103
                 data = Data(interest.getName())
                 data.setContent(Blob(array))
                 self._keyChain.sign(data, self._certificateName)
@@ -572,7 +576,9 @@ class ChronoSync2013(object):
             name = Name(self._applicationBroadcastPrefix)
             name.append(syncDigest)
             # TODO: Check if this works in Python 3.
+#pylint: disable=E1103
             array = tempContent.SerializeToString()
+#pylint: enable=E1103
             data = Data(name)
             data.setContent(Blob(array))
             self._keyChain.sign(data, self._certificateName)
