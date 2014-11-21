@@ -56,7 +56,7 @@ class ForwardingFlags(object):
         else:
             raise RuntimeError(
               "Unrecognized type for ForwardingFlags constructor: " +
-              repr(type(value)))
+              str(type(value)))
 
     ForwardingEntryFlags_ACTIVE         = 1
     ForwardingEntryFlags_CHILD_INHERIT  = 2

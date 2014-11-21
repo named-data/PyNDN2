@@ -83,7 +83,7 @@ class BinaryXmlStructureDecoder(object):
                     if self._level < 0:
                         raise RuntimeError(
                   "BinaryXmlStructureDecoder: Unexpected close tag at offset " +
-                          repr(self._offset - 1))
+                          str(self._offset - 1))
 
                     # Get ready for the next header.
                     self._startHeader()
@@ -151,7 +151,7 @@ class BinaryXmlStructureDecoder(object):
                 else:
                     raise RuntimeError(
                       "BinaryXmlStructureDecoder: Unrecognized header type " +
-                      repr(type))
+                      str(type))
             elif self._state == BinaryXmlStructureDecoder.READ_BYTES:
                 nRemainingBytes = len(input) - self._offset
                 if nRemainingBytes < self._nBytesToRead:
@@ -167,7 +167,7 @@ class BinaryXmlStructureDecoder(object):
                 # We don't expect this to happen.
                 raise RuntimeError(
                   "BinaryXmlStructureDecoder: Unrecognized state " +
-                  repr(self._state))
+                  str(self._state))
 
     def getOffset(self):
         """

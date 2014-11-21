@@ -45,7 +45,7 @@ class MetaInfo(object):
         else:
             raise RuntimeError(
               "Unrecognized type for MetaInfo constructor: " +
-              repr(type(value)))
+              str(type(value)))
 
         self._changeCount = 0
 

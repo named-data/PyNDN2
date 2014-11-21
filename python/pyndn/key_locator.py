@@ -47,7 +47,7 @@ class KeyLocator(object):
         else:
             raise RuntimeError(
               "Unrecognized type for KeyLocator constructor: " +
-              repr(type(value)))
+              str(type(value)))
 
         self._changeCount = 0
 

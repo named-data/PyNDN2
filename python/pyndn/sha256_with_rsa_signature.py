@@ -49,7 +49,7 @@ class Sha256WithRsaSignature(Signature):
         else:
             raise RuntimeError(
               "Unrecognized type for Sha256WithRsaSignature constructor: " +
-              repr(type(value)))
+              str(type(value)))
 
         self._changeCount = 0
 

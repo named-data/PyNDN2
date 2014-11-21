@@ -581,7 +581,7 @@ class Tlv0_1WireFormat(WireFormat):
             else:
                 # We don't expect this to happen, but check anyway.
                 raise RuntimeError("Unrecognized Exclude type" +
-                                   repr(entry.getType()))
+                                   str(entry.getType()))
 
         encoder.writeTypeAndLength(Tlv.Exclude, len(encoder) - saveLength)
 
@@ -680,7 +680,7 @@ class Tlv0_1WireFormat(WireFormat):
         else:
             raise RuntimeError(
               "decodeSignatureInfo: unrecognized SignatureInfo type" +
-              repr(signatureType))
+              str(signatureType))
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -698,7 +698,7 @@ class Tlv0_1WireFormat(WireFormat):
                                      keyLocator.getKeyData().buf())
             else:
                 raise RuntimeError("Unrecognized KeyLocatorType " +
-                                   repr(keyLocator.getType()))
+                                   str(keyLocator.getType()))
 
         encoder.writeTypeAndLength(type, len(encoder) - saveLength)
 

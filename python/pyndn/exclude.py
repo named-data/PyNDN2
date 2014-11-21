@@ -42,7 +42,7 @@ class Exclude(object):
         else:
             raise RuntimeError(
               "Unrecognized type for Interest constructor: " +
-              repr(type(value)))
+              str(type(value)))
 
         self._changeCount = 0
 
