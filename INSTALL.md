@@ -10,7 +10,7 @@ Prerequisites
 * Required: Python 2.7 or later
 * Required: PyCrypto
 * Optional: trollius (for asyncio in Python <= 3.2)
-* Optional: Protobuf (for the ProtobufTlv converter)
+* Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
 * Optional: Sphinx (to make documentation)
 * Optional: pytest, mock and gevent (for running unit tests)
 
