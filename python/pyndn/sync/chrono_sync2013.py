@@ -39,6 +39,11 @@ from pyndn.util.common import Common
 from pyndn.util.memory_content_cache import MemoryContentCache
 from pyndn.sync.digest_tree import DigestTree
 
+# Define this here once and suppress pylint errors.
+#pylint: disable=E1103
+SyncState_UPDATE = sync_state_pb2.SyncState.UPDATE
+#pylint: enable=E1103
+
 class ChronoSync2013(object):
     """
     Create a new ChronoSync2013 to communicate using the given face. Initialize
@@ -105,7 +110,8 @@ class ChronoSync2013(object):
         self._enabled = True
 
         emptyContent = sync_state_pb2.SyncStateMsg()
-        self._digestLog.append(self._DigestLogEntry("00", emptyContent.ss))
+        # Use getattr to avoid pylint errors.
+        self._digestLog.append(self._DigestLogEntry("00", getattr(emptyContent, "ss")))
 
         # Register the prefix with the contentCache_ and use our own onInterest
         #   as the onDataNotFound fallback.
@@ -196,15 +202,15 @@ class ChronoSync2013(object):
         self._sequenceNo += 1
 
         syncMessage = sync_state_pb2.SyncStateMsg()
-        content = syncMessage.ss.add()
+        content = getattr(syncMessage, "ss").add()
         content.name = self._applicationDataPrefixUri
-        content.type = sync_state_pb2.SyncState.UPDATE
+        content.type = SyncState_UPDATE
         content.seqno.seq = self._sequenceNo
         content.seqno.session = self._sessionNo
 
         self._broadcastSyncState(self._digestTree.getRoot(), syncMessage)
 
-        if not self._update(syncMessage.ss):
+        if not self._update(getattr(syncMessage, "ss")):
           # Since we incremented the sequence number, we expect there to be a
           #   new digest log entry.
           raise RuntimeError(
@@ -339,7 +345,7 @@ class ChronoSync2013(object):
         for i in range(len(content)):
             syncState = content[i]
 
-            if syncState.type == sync_state_pb2.SyncState.UPDATE:
+            if syncState.type == SyncState_UPDATE:
                 if self._digestTree.update(
                   syncState.name, syncState.seqno.session,
                   syncState.seqno.seq):
@@ -421,7 +427,7 @@ class ChronoSync2013(object):
         # TODO: Check if this works in Python 3.
         tempContent = sync_state_pb2.SyncStateMsg()
         tempContent.ParseFromString(data.getContent().toRawStr())
-        content = tempContent.ss
+        content = getattr(tempContent, "ss")
         if self._digestTree.getRoot() == "00":
             isRecovery = True
             #processing initial sync data
@@ -441,7 +447,7 @@ class ChronoSync2013(object):
             syncState = content[i]
 
             # Only report UPDATE sync states.
-            if syncState.type == sync_state_pb2.SyncState.UPDATE:
+            if syncState.type == SyncState_UPDATE:
                 syncStates.append(self.SyncState(
                   syncState.name, syncState.seqno.session,
                   syncState.seqno.seq))
@@ -474,12 +480,12 @@ class ChronoSync2013(object):
               "ChronoSync: sequenceNo_ is not the expected value of 0 for first use.")
 
         tempContent = sync_state_pb2.SyncStateMsg()
-        content = tempContent.ss.add()
+        content = getattr(tempContent, "ss").add()
         content.name = self._applicationDataPrefixUri
-        content.type = sync_state_pb2.SyncState.UPDATE
+        content.type = SyncState_UPDATE
         content.seqno.seq = self._sequenceNo
         content.seqno.session = self._sessionNo
-        self._update(tempContent.ss)
+        self._update(getattr(tempContent, "ss"))
 
         self._onInitialized()
 
@@ -496,13 +502,13 @@ class ChronoSync2013(object):
         if self._logFind(syncDigest) != -1:
             tempContent = sync_state_pb2.SyncStateMsg()
             for i in range(self._digestTree.size()):
-                content = tempContent.ss.add()
+                content = getattr(tempContent, "ss").add()
                 content.name = self._applicationDataPrefixUri
-                content.type = sync_state_pb2.SyncState.UPDATE
+                content.type = SyncState_UPDATE
                 content.seqno.seq = self._sequenceNo
                 content.seqno.session = self._digestTree.get(i).getSessionNo()
 
-            if len(tempContent.ss) != 0:
+            if len(getattr(tempContent, "ss")) != 0:
                 # TODO: Check if this works in Python 3.
                 array = tempContent.SerializeToString()
                 data = Data(interest.getName())
@@ -534,7 +540,7 @@ class ChronoSync2013(object):
             temp = self._digestLog[j].getData() # array of sync_state_pb2.SyncState.
             for i in range(len(temp)):
                 syncState = temp[i]
-                if syncState.type != sync_state_pb2.SyncState.UPDATE:
+                if syncState.type != SyncState_UPDATE:
                     continue
 
                 if self._digestTree.find(
@@ -555,14 +561,14 @@ class ChronoSync2013(object):
 
         tempContent = sync_state_pb2.SyncStateMsg()
         for i in range(len(nameList)):
-            content = tempContent.ss.add()
+            content = getattr(tempContent, "ss").add()
             content.name = nameList[i]
-            content.type = sync_state_pb2.SyncState.UPDATE
+            content.type = SyncState_UPDATE
             content.seqno.seq = sequenceNoList[i]
             content.seqno.session = sessionNoList[i]
 
         sent = False
-        if len(tempContent.ss) != 0:
+        if len(getattr(tempContent, "ss")) != 0:
             name = Name(self._applicationBroadcastPrefix)
             name.append(syncDigest)
             # TODO: Check if this works in Python 3.
@@ -658,27 +664,28 @@ class ChronoSync2013(object):
                 # If the user was an old comer, after add the static log he
                 #   needs to increase his sequence number by 1.
                 tempContent = sync_state_pb2.SyncStateMsg()
-                content2 = tempContent.ss.add()
+                # Use getattr to avoid pylint errors.
+                content2 = getattr(tempContent, "ss").add()
                 content2.name = self._applicationDataPrefixUri
-                content2.type = sync_state_pb2.SyncState.UPDATE
+                content2.type = SyncState_UPDATE
                 content2.seqno.seq = syncState.seqno.seq + 1
                 content2.seqno.session = self._sessionNo
 
-                if self._update(tempContent.ss):
+                if self._update(getattr(tempContent, "ss")):
                     self._onInitialized()
 
         tempContent2 = sync_state_pb2.SyncStateMsg()
         if self._sequenceNo >= 0:
             # Send the data packet with the new sequence number back.
-            content2 = tempContent2.ss.add()
+            content2 = getattr(tempContent2, "ss").add()
             content2.name = self._applicationDataPrefixUri
-            content2.type = sync_state_pb2.SyncState.UPDATE
+            content2.type = SyncState_UPDATE
             content2.seqno.seq = self._sequenceNo
             content2.seqno.session = self._sessionNo
         else:
-            content2 = tempContent2.ss.add()
+            content2 = getattr(tempContent2, "ss").add()
             content2.name = self._applicationDataPrefixUri
-            content2.type = sync_state_pb2.SyncState.UPDATE
+            content2.type = SyncState_UPDATE
             content2.seqno.seq = 0
             content2.seqno.session = self._sessionNo
 
@@ -690,13 +697,13 @@ class ChronoSync2013(object):
             logging.getLogger(__name__).info("initial state")
             self._sequenceNo += 1
             tempContent = sync_state_pb2.SyncStateMsg()
-            content2 = tempContent.ss.add()
+            content2 = getattr(tempContent, "ss").add()
             content2.name = self._applicationDataPrefixUri
-            content2.type = sync_state_pb2.SyncState.UPDATE
+            content2.type = SyncState_UPDATE
             content2.seqno.seq = self._sequenceNo
             content2.seqno.session = self._sessionNo
 
-            if self._update(tempContent.ss):
+            if self._update(getattr(tempContent, "ss")):
                 self._onInitialized()
 
     def _contentCacheAdd(self, data):
