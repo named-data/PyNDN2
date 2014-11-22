@@ -709,7 +709,7 @@ class Node(object):
 
                 logging.getLogger(__name__).info(
                   "Register prefix succeeded with the NDNx forwarder for prefix %s",
-                  info_.prefix_.toUri())
+                  self._prefix.toUri())
 
         def onTimeout(self, interest):
             """

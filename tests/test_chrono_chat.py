@@ -315,9 +315,9 @@ class Chat(object):
     def _messageCacheAppend(self, messageType, message):
         """
         Append a new CachedMessage to messageCache_, using given messageType and
-        message, the sequence number from sync_.getSequenceNo() and the current
+        message, the sequence number from _sync.getSequenceNo() and the current
         time. Also remove elements from the front of the cache as needed to keep
-        the size to maxMessageCacheLength_.
+        the size to _maxMessageCacheLength.
         """
         self._messageCache.append(self._CachedMessage(
           self._sync.getSequenceNo(), messageType, message,
