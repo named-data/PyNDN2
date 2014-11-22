@@ -12,6 +12,7 @@ Changes
 * In MemoryContentCache, added unregisterAll.
 * Added ConfigPolicyManager for heirarchical verification using an NDN config file. (Thanks to Adeola Bannis.)
 * In unit tests, added test_name_conventions, test-policy_manager and test_verification_rules.
+* In registerPrefix, use logging.info to log success or the reason for failure.
 * In each __init__.py, added import statements for each module (required by pylint).
 
 Deprecated

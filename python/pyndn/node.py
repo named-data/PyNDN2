@@ -23,6 +23,7 @@ class.
 """
 
 import hashlib
+import logging
 from random import SystemRandom
 from pyndn.name import Name
 from pyndn.interest import Interest
@@ -624,6 +625,8 @@ class Node(object):
             #   Do a quick check that the first byte is for DER encoding.
             if (ndndIdData.getContent().size() < 1 or
                   ndndIdData.getContent().buf()[0] != 0x30):
+                logging.getLogger(__name__).info(
+                  "Register prefix failed: The content returned when fetching the NDNx ID does not appear to be a public key")
                 self._onRegisterFailed(self._prefix)
                 return
 
@@ -643,6 +646,8 @@ class Node(object):
             """
             We timed out fetching the ndnd ID.
             """
+            logging.getLogger(__name__).info(
+              "Register prefix failed: Timeout fetching the NDNx ID")
             self._onRegisterFailed(self._prefix)
 
     class _RegisterResponse(object):
@@ -674,31 +679,45 @@ class Node(object):
                     decoder = TlvDecoder(responseData.getContent().buf())
                     decoder.readNestedTlvsStart(Tlv.NfdCommand_ControlResponse)
                     statusCode = decoder.readNonNegativeIntegerTlv(Tlv.NfdCommand_StatusCode)
-                except ValueError:
-                    # Error decoding the ControlResponse.
+                except ValueError as ex:
+                    logging.getLogger(__name__).info(
+                      "Register prefix failed: Error decoding the NFD response: %s",
+                      str(ex))
                     self._onRegisterFailed(self._prefix)
                     return
 
                 # Status code 200 is "OK".
                 if statusCode != 200:
+                  logging.getLogger(__name__).info(
+                    "Register prefix failed: Expected NFD status code 200, got: %d",
+                    statusCode)
                   self._onRegisterFailed(self._prefix)
 
-                # Otherwise, silently succeed.
+                logging.getLogger(__name__).info(
+                  "Register prefix succeeded with the NFD forwarder for prefix %s",
+                  self._prefix.toUri())
             else:
                 expectedName = Name("/ndnx/.../selfreg")
                 if (responseData.getName().size() < 4 or
                       responseData.getName()[0] != expectedName[0] or
                       responseData.getName()[2] != expectedName[2]):
+                    logging.getLogger(__name__).info(
+                      "Register prefix failed: Unexpected name in NDNx response: %s",
+                      responseData.getName().toUri())
                     self._onRegisterFailed(self._prefix)
                     return
 
-                # Otherwise, silently succeed.
+                logging.getLogger(__name__).info(
+                  "Register prefix succeeded with the NDNx forwarder for prefix %s",
+                  info_.prefix_.toUri())
 
         def onTimeout(self, interest):
             """
             We timed out waiting for the response.
             """
             if self._isNfdCommand:
+                logging.getLogger(__name__).info(
+                  "Timeout for NFD register prefix command. Attempting an NDNx command...")
                 # The application set the commandKeyChain, but we may be
                 #   connected to NDNx.
                 if self._node._ndndId == None:
@@ -723,5 +742,7 @@ class Node(object):
                 # An NDNx command was sent because there is no commandKeyChain,
                 #   so we can't try an NFD command. Or it was sent from this
                 #   callback after trying an NFD command. Fail.
+                logging.getLogger(__name__).info(
+                  "Register prefix failed: Timeout waiting for the response from the register prefix interest")
                 self._onRegisterFailed(self._prefix)
 
