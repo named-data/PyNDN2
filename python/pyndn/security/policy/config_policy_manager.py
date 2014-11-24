@@ -50,7 +50,7 @@ Validator Configuration File Format
 (http://redmine.named-data.net/projects/ndn-cxx/wiki/CommandValidatorConf)
 
 Once a rule is matched, the ConfigPolicyManager looks in the
-IdentityStorage for the IdentityCertificate matching the name in the KeyLocator
+CertificateCache for the IdentityCertificate matching the name in the KeyLocator
 and uses its public key to verify the data packet or signed interest. If the
 certificate can't be found, it is downloaded, verified and installed. A chain
 of certificates will be followed to a maximum depth.
