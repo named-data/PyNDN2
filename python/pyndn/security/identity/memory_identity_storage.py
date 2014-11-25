@@ -89,7 +89,8 @@ class MemoryIdentityStorage(IdentityStorage):
 
     def addKey(self, keyName, keyType, publicKeyDer):
         """
-        Add a public key to the identity storage.
+        Add a public key to the identity storage. Also call addIdentity to ensure
+        that the identityName for the key exists.
 
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
@@ -98,8 +99,7 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         identityName = keyName.getSubName(0, keyName.size() - 1)
 
-        if not self.doesIdentityExist(identityName):
-            self.addIdentity(identityName)
+        self.addIdentity(identityName)
 
         if self.doesKeyExist(keyName):
             raise SecurityException("A key with the same name already exists!")
