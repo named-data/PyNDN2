@@ -42,8 +42,7 @@ class IdentityStorage(object):
 
     def addIdentity(self, identityName):
         """
-        Add a new identity. An exception will be thrown if the identity already
-        exists.
+        Add a new identity. Do nothing if the identity already exists.
 
         :param Name identityName: The identity name.
         """
