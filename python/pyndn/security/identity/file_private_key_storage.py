@@ -24,6 +24,7 @@ PrivateKeyStorage to implement private key storage using files.
 
 import os
 import sys
+import stat
 import base64
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
@@ -33,6 +34,7 @@ from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
+from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
 
 class FilePrivateKeyStorage(PrivateKeyStorage):
@@ -63,7 +65,32 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         :param int keySize: (optional) The size of the key pair.  If omitted,
           use 2048.
         """
-        raise RuntimeError("generateKeyPair is not implemented")
+        if self.doesKeyExist(keyName, KeyClass.PUBLIC):
+            raise SecurityException("Public key already exists")
+        if self.doesKeyExist(keyName, KeyClass.PRIVATE):
+            raise SecurityException("Private key already exists")
+
+        publicKeyDer = None
+        privateKeyDer = None
+
+        if keyType == KeyType.RSA:
+            key = RSA.generate(keySize)
+            publicKeyDer = key.publickey().exportKey(format = 'DER')
+            privateKeyDer = key.exportKey(format = 'DER', pkcs = 8)
+        else:
+            raise SecurityException("Unsupported key type")
+
+        keyUri = keyName.toUri()
+        publicKeyFilePath = self.nameTransform(keyUri, ".pub")
+        privateKeyFilePath = self.nameTransform(keyUri, ".pri")
+
+        with open(publicKeyFilePath, 'w') as keyFile:
+            keyFile.write(base64.b64encode(publicKeyDer))
+        with open(privateKeyFilePath, 'w') as keyFile:
+            keyFile.write(base64.b64encode(privateKeyDer))
+
+        os.chmod(publicKeyFilePath,  stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+        os.chmod(privateKeyFilePath, stat.S_IRUSR)
 
     def getPublicKey(self, keyName):
         """
@@ -73,7 +100,20 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         :return: The public key.
         :rtype: PublicKey
         """
-        raise RuntimeError("getPublicKey is not implemented")
+        keyURI = keyName.toUri()
+
+        if not self.doesKeyExist(keyName, KeyClass.PUBLIC):
+            raise SecurityException(
+              "Public key doesn't exist")
+
+        base64Content = None
+        with open(self.nameTransform(keyURI, ".pub")) as keyFile:
+            base64Content = keyFile.read()
+        der = base64.b64decode(base64Content)
+        if not type(der) is str:
+            der = "".join(map(chr, der))
+
+        return PublicKey.fromDer(KeyType.RSA, Blob(der, False))
 
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
