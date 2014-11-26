@@ -345,9 +345,13 @@ class DerInteger(DerNode):
         if integer is not None:
             # convert the integer to bytes the easy/slow way
             temp = bytearray()
-            while integer > 0:
+            while True:
                 temp.insert(0, integer & 0xff)
                 integer >>= 8
+
+                if integer <= 0:
+                  # We check for 0 at the end so we encode one byte if it is 0.
+                  break
 
             self._payload.extend(temp)
             self._encodeHeader(len(self._payload))
