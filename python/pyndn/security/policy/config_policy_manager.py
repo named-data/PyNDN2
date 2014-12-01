@@ -578,49 +578,6 @@ class ConfigPolicyManager(PolicyManager):
             # Can't find a key to verify.
             return False
 
-    @staticmethod
-    def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
-        """
-        Verify the signature on the SignedBlob using the given public key.
-        TODO: Move this general verification code to a more central location.
-
-        :param Sha256WithRsaSignature signature: The Sha256WithRsaSignature.
-        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
-        verify.
-        :param Blob publicKeyDer: The DER-encoded public key used to verify the
-          signature.
-        :return: True if the signature verifies, False if not.
-        :rtype: boolean
-        """
-        # Get the public key.
-        if _PyCryptoUsesStr:
-            # PyCrypto in Python 2 requires a str.
-            publicKeyDerBytes = publicKeyDer.toRawStr()
-        else:
-            publicKeyDerBytes = publicKeyDer.toBuffer()
-        publicKey = RSA.importKey(publicKeyDerBytes)
-
-        # Get the bytes to verify.
-        # wireEncode returns the cached encoding if available.
-        signedPortion = signedBlob.toSignedBuffer()
-        # Sign the hash of the data.
-        if sys.version_info[0] == 2:
-            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
-            signedPortion = Blob(signedPortion, False).toRawStr()
-
-        # Convert the signature bits to a raw string or bytes as required.
-        if _PyCryptoUsesStr:
-            signatureBits = signature.getSignature().toRawStr()
-        else:
-            signatureBits = bytes(signature.getSignature().buf())
-
-        # Hash and verify.
-        return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion),
-                                                signatureBits)
-
-# Depending on the Python version, PyCrypto uses str or bytes.
-_PyCryptoUsesStr = type(SHA256.new().digest()) is str
-
 class TrustAnchorRefreshManager(object):
     """
     Manages the trust-anchor certificates, including refresh.
