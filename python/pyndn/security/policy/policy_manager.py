@@ -121,7 +121,6 @@ class PolicyManager(object):
     def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
         """
         Verify the signature on the SignedBlob using the given public key.
-        TODO: Move this general verification code to a more central location.
 
         :param Sha256WithRsaSignature signature: The Sha256WithRsaSignature.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
