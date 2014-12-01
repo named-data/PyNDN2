@@ -280,7 +280,7 @@ class ConfigPolicyManager(PolicyManager):
         except KeyError:
             if isPath:
                 # load the certificate data (base64 encoded IdentityCertificate)
-                cert = self._refreshManager._loadIdentityCertificateFromFile(
+                cert = TrustAnchorRefreshManager.loadIdentityCertificateFromFile(
                         certID)
             else:
                 certData = b64decode(certID)
@@ -590,7 +590,8 @@ class TrustAnchorRefreshManager(object):
         # deleted when necessary
         self._refreshDirectories = {}
 
-    def _loadIdentityCertificateFromFile(self, filename):
+    @staticmethod
+    def loadIdentityCertificateFromFile(filename):
         with open(filename, 'r') as certFile:
             encodedData = certFile.read()
             decodedData = b64decode(encodedData)
@@ -609,7 +610,7 @@ class TrustAnchorRefreshManager(object):
         for f in allFiles:
             try:
                 fullPath = os.path.join(directoryName, f)
-                cert = self._loadIdentityCertificateFromFile(fullPath)
+                cert = self.loadIdentityCertificateFromFile(fullPath)
             except SecurityException:
                 pass # allow files that are not certificates
             else:
