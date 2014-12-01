@@ -90,7 +90,7 @@ class ConfigPolicyManager(PolicyManager):
         self._maxDepth = searchDepth
         self._keyGraceInterval = graceInterval
         self._keyTimestampTtl = keyTimestampTtl
-        self._maxTrackedKeys = 1000
+        self._maxTrackedKeys = maxTrackedKeys
 
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
