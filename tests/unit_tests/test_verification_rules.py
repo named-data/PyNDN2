@@ -41,7 +41,7 @@ class TestRegexMatching(ut.TestCase):
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
         self.privateKeyStorage = MemoryPrivateKeyStorage()
 
-        # not using keychain for verification so we don't neet to set the
+        # not using keychain for verification so we don't need to set the
         # policy manager
         self.keyChain = KeyChain(IdentityManager(self.identityStorage, self.privateKeyStorage))
         self.identityName = Name('/SecurityTestSecRule/Basic/Longer')
