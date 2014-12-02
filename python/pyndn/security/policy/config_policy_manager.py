@@ -356,7 +356,8 @@ class ConfigPolicyManager(PolicyManager):
                 passed = True
         return passed
 
-    def _extractSignature(self, dataOrInterest, wireFormat=None):
+    @staticmethod
+    def _extractSignature(dataOrInterest, wireFormat=None):
         """
         Extract the signature information from the interest name or from the
         data packet.
