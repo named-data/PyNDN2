@@ -19,14 +19,9 @@
 
 from pyndn.security.identity import IdentityManager
 from pyndn.util.common import Common
-from pyndn.util import Blob
 from pyndn.name import Name
-from test_private_key_storage import TestPrivateKeyStorage
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_OAEP
 from pyndn.security.security_types import KeyType
 from pyndn.security.certificate import IdentityCertificate, PublicKey, CertificateSubjectDescription
-from pyndn.security.security_exception import SecurityException
 import struct
 
 class TestIdentityManager(IdentityManager):
