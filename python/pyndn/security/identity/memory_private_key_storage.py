@@ -95,6 +95,26 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         self.setPublicKeyForKeyName(keyName, keyType, publicKeyDer)
         self.setPrivateKeyForKeyName(keyName, keyType, privateKeyDer)
 
+    def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
+        """
+        Generate a pair of asymmetric keys.
+
+        :param Name keyName: The name of the key pair.
+        :param keyType: (optional) The type of the key pair.  If omitted, use
+          KeyType.RSA
+        :type keyType: int from KeyType
+        :param int keySize: (optional) The size of the key pair.  If omitted,
+          use 2048.
+        """
+        if keyType == KeyType.RSA:
+            key = RSA.generate(keySize)
+            self.setPublicKeyForKeyName(
+              keyName, KeyType.RSA, key.publickey().exportKey('DER'))
+            self.setPrivateKeyForKeyName(
+              keyName, KeyType.RSA, key.exportKey('DER'))
+        else:
+            raise RuntimeError("generateKeyPair: KeyType is not supported")
+
     def deleteKeyPair(self, keyName):
         """
         Delete a pair of asymmetric keys. If the key doesn't exist, do nothing.
