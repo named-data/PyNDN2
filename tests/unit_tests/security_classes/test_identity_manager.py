@@ -77,8 +77,8 @@ class TestIdentityManager(IdentityManager):
         :rtype: Name
         """
         keyName = self._identityStorage.getNewKeyName(identityName, isKsk)
-        self._privateKeyStorage.generateKeyPair(keyName, keySize)
-        publicKeyBits = self._privateKeyStorage.getPublicKey(keyName)
+        self._privateKeyStorage.generateKeyPair(keyName, KeyType.RSA, keySize)
+        publicKeyBits = self._privateKeyStorage.getPublicKey(keyName).getKeyDer()
         self._identityStorage.addKey(keyName, KeyType.RSA, publicKeyBits)
         newCert = self.selfSign(keyName)
         self.addCertificateAsDefault(newCert)
