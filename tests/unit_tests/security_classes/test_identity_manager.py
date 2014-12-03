@@ -57,12 +57,6 @@ class TestIdentityManager(IdentityManager):
         for keyName in keysToDelete:
             self._privateKeyStorage.deleteKeyPair(keyName)
 
-    def getPrivateKey(self, keyName):
-        return self._privateKeyStorage.getPrivateKey(keyName)
-
-    def addPrivateKey(self, keyName, keyDer):
-        self._privateKeyStorage.addPrivateKey(keyName, keyDer)
-
     def generateRSAKeyPair(self, identityName, isKsk=False, keySize=2048):
         """
         Generate a pair of RSA keys for the specified identity.
