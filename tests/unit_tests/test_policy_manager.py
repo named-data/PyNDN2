@@ -19,14 +19,13 @@
 
 from security_classes.test_identity_manager import TestIdentityManager
 from security_classes.test_identity_storage import TestIdentityStorage
-from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
 from pyndn.security import KeyChain
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.security_types import KeyType
+from pyndn.security.identity import MemoryPrivateKeyStorage
 from pyndn.util import Blob
 from pyndn import Name, Data, Interest, Face
-from pyndn import Sha256WithRsaSignature
 from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager, ConfigPolicyManager
 import unittest as ut
 import time
@@ -73,7 +72,7 @@ def doVerify(policyMan, toVerify):
 class TestSimplePolicyManager(ut.TestCase):
     def test_no_verify(self):
         identityStorage = TestIdentityStorage()
-        identityManager = TestIdentityManager(identityStorage, TestPrivateKeyStorage())
+        identityManager = TestIdentityManager(identityStorage, MemoryPrivateKeyStorage())
 
         policyManager = NoVerifyPolicyManager()
         identityName = Name('TestValidator/Null').appendVersion(int(time.time()))
@@ -98,7 +97,7 @@ class TestSimplePolicyManager(ut.TestCase):
 
     def test_self_verification(self):
         identityStorage = TestIdentityStorage()
-        identityManager = TestIdentityManager(identityStorage, TestPrivateKeyStorage())
+        identityManager = TestIdentityManager(identityStorage, MemoryPrivateKeyStorage())
         policyManager = SelfVerifyPolicyManager(identityStorage)
         keyChain = KeyChain(identityManager, policyManager)
 
@@ -143,7 +142,7 @@ class TestConfigPolicyManager(ut.TestCase):
             pass
 
         self.identityStorage = TestIdentityStorage()
-        self.privateKeyStorage = TestPrivateKeyStorage()
+        self.privateKeyStorage = MemoryPrivateKeyStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
                 self.privateKeyStorage)
         self.policyManager = ConfigPolicyManager('policy_config/simple_rules.conf')
@@ -156,9 +155,9 @@ class TestConfigPolicyManager(ut.TestCase):
             encodedKey = keyData.read()
             keyBytes = b64decode(encodedKey)
             privateKey = RSA.importKey(keyBytes)
-            self.privateKeyStorage.addPrivateKey(keyName, Blob(keyBytes,False))
             publicKeyBytes = Blob(privateKey.publickey().exportKey('DER'))
-            self.privateKeyStorage.addPublicKey(keyName, publicKeyBytes)
+            self.privateKeyStorage.setKeyPairForKeyName(
+              keyName, KeyType.RSA, publicKeyBytes, keyBytes)
             self.identityStorage.addKey(keyName, KeyType.RSA, publicKeyBytes)
 
             cert = self.identityManager.selfSign(keyName)
