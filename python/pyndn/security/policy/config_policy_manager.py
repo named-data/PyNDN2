@@ -468,7 +468,7 @@ class ConfigPolicyManager(PolicyManager):
 
         signatureName = signature.getKeyLocator().getKeyName()
         # no key name in KeyLocator -> fail
-        if signatureName is None:
+        if signatureName.size() == 0:
             onVerifyFailed(dataOrInterest)
             return None
 
