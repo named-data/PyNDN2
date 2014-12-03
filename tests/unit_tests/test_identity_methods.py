@@ -90,6 +90,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.addCleanup(self.identityManager.deleteIdentity, identityName)
 
         keyName1 = self.keyChain.generateRSAKeyPair(identityName, True)
+        self.keyChain.getIdentityManager().setDefaultKeyForIdentity(keyName1)
 
         keyName2 = self.keyChain.generateRSAKeyPair(identityName, False)
         self.assertEqual(self.identityManager.getDefaultKeyNameForIdentity(identityName),
@@ -109,6 +110,7 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         decodedKey = base64.b64decode(RSA_DER)
         self.identityStorage.addKey(keyName1, KeyType.RSA, Blob(decodedKey))
+        self.identityStorage.setDefaultKeyNameForIdentity(keyName1)
 
         self.assertTrue(self.identityStorage.doesKeyExist(keyName1),
             "Key was not added")
