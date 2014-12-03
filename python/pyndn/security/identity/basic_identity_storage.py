@@ -24,11 +24,13 @@ identity, public keys and certificates using SQLite.
 """
 
 import os
+import math
 import sqlite3
 from pyndn.name import Name
 from pyndn.util import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
+from pyndn.security.certificate.identity_certificate import IdentityCertificate
 
 INIT_ID_TABLE = ["""
 CREATE TABLE IF NOT EXISTS
@@ -76,21 +78,29 @@ CREATE TABLE IF NOT EXISTS
   "CREATE INDEX subject ON Certificate(identity_name);"]
 
 class BasicIdentityStorage(IdentityStorage):
-    def __init__(self):
+    """
+    Create a new BasicIdentityStorage to work with an SQLite file.
+
+    :param str databaseFilePath: (optional) The path of the SQLite file. If
+      omitted, use the default location.
+    """
+    def __init__(self, databaseFilePath = None):
         super(BasicIdentityStorage, self).__init__()
 
-        if not "HOME" in os.environ:
-            # Don't expect this to happen
-            home = "."
-        else:
-            home = os.environ["HOME"]
+        if databaseFilePath == None or databaseFilePath == "":
+            if not "HOME" in os.environ:
+                # Don't expect this to happen
+                home = "."
+            else:
+                home = os.environ["HOME"]
 
-        identityDirectory = os.path.join(home, ".ndn")
-        if not os.path.exists(identityDirectory):
-            os.makedirs(identityDirectory)
+            identityDirectory = os.path.join(home, ".ndn")
+            if not os.path.exists(identityDirectory):
+                os.makedirs(identityDirectory)
 
-        self._database = sqlite3.connect(
-          os.path.join(identityDirectory, "ndnsec-public-info.db"))
+            databaseFilePath = os.path.join(identityDirectory, "ndnsec-public-info.db")
+            
+        self._database = sqlite3.connect(databaseFilePath)
 
         # Check if the ID table exists.
         cursor = self._database.cursor()
@@ -141,18 +151,16 @@ class BasicIdentityStorage(IdentityStorage):
 
     def addIdentity(self, identityName):
         """
-        Add a new identity. An exception will be thrown if the identity already
-        exists.
+        Add a new identity. Do nothing if the identity already exists.
 
         :param Name identityName: The identity name.
         """
         identityUri = identityName.toUri()
         if self.doesIdentityExist(identityName):
-            raise SecurityException("The identity {} already exists".format(
-                identityUri))
+            return
 
         cursor = self._database.cursor()
-        cursor.execute("INSERT INTO Identity(identity_name) VALUES(?)",
+        cursor.execute("INSERT INTO Identity (identity_name) VALUES(?)",
             (identityUri,))
         self._database.commit()
         cursor.close()
@@ -191,7 +199,8 @@ class BasicIdentityStorage(IdentityStorage):
 
     def addKey(self, keyName, keyType, publicKeyDer):
         """
-        Add a public key to the identity storage.
+        Add a public key to the identity storage. Also call addIdentity to ensure
+        that the identityName for the key exists.
 
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
@@ -206,17 +215,16 @@ class BasicIdentityStorage(IdentityStorage):
 
         identityName = keyName[:-1]
         identityUri = identityName.toUri()
-        makeDefault = 0
-        if not self.doesIdentityExist(identityName):
-            self.addIdentity(identityName)
-            makeDefault = 1
+
+        self.addIdentity(identityName)
 
         keyId = keyName[-1].toEscapedString()
         keyBuffer = buffer(bytearray (publicKeyDer.buf()))
 
         cursor = self._database.cursor()
-        cursor.execute("INSERT INTO Key VALUES(?,?,?,?,?, ?)",
-            (identityUri, keyId, keyType, keyBuffer, makeDefault, 1))
+        cursor.execute(
+          "INSERT INTO Key (identity_name, key_identifier, key_type, public_key) VALUES(?,?,?,?)",
+          (identityUri, keyId, keyType, keyBuffer))
         self._database.commit()
         cursor.close()
 
@@ -333,7 +341,47 @@ class BasicIdentityStorage(IdentityStorage):
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
         """
-        raise RuntimeError("addCertificate is not implemented")
+        certificateName = certificate.getName()
+        keyName = certificate.getPublicKeyName()
+
+        if not self.doesKeyExist(keyName):
+            raise SecurityException("No corresponding Key record for certificate! " +
+              keyName.toUri() + " " + certificateName.toUri())
+
+        # Check if the certificate already exists.
+        if self.doesCertificateExist(certificateName):
+            raise SecurityException("Certificate has already been installed!")
+
+        keyId = keyName.get(-1).toEscapedString()
+        identity = keyName[:-1]
+
+        # Check if the public key of the certificate is the same as the key record.
+        keyBlob = self.getKey(keyName)
+        if (keyBlob.isNull() or
+            not keyBlob.equals(certificate.getPublicKeyInfo().getKeyDer())):
+            raise SecurityException("Certificate does not match public key")
+
+        # Insert the certificate.
+
+        # TODO: Support signature types other than Sha256WithRsaSignature.
+        signature = certificate.getSignature()
+        if not isinstance(signature, Sha256WithRsaSignature):
+            raise SecurityException(
+              "BasicIdentityStorage: addCertificate: Signature is not Sha256WithRsaSignature.")
+        signerName = signature.getKeyLocator().getKeyName()
+        # Convert from milliseconds to seconds since 1/1/1970.
+        notBefore = int(math.floor(certificate.getNotBefore() / 1000.0))
+        notAfter = int(math.floor(certificate.getNotAfter() / 1000.0))
+        encodedCert = buffer(bytearray(certificate.wireEncode().buf()))
+
+        cursor = self._database.cursor()
+        cursor.execute(
+          "INSERT INTO Certificate (cert_name, cert_issuer, identity_name, key_identifier, not_before, not_after, certificate_data) " +
+          "VALUES (?,?,?,?,?,?,?)",
+          (certificateName.toUri(), signerName.toUri(), identity.toUri(), keyId,
+                notBefore, notAfter, encodedCert))
+        self._database.commit()
+        cursor.close()
 
     def getCertificate(self, certificateName, allowAny = False):
         """
@@ -346,7 +394,22 @@ class BasicIdentityStorage(IdentityStorage):
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
         """
-        raise RuntimeError("getCertificate is not implemented")
+        if not self.doesCertificateExist(certificateName):
+            return None
+        
+        if not allowAny:
+            raise RuntimeError(
+              "BasicIdentityStorage.getCertificate for not allowAny is not implemented")
+
+        cursor = self._database.cursor()
+        cursor.execute("SELECT certificate_data FROM Certificate WHERE cert_name=?",
+            (certificateName.toUri()))
+        (certData, ) = cursor.fetchone()
+        cursor.close()
+
+        certificate = IdentityCertificate()
+        certificate.wireDecode(bytearray(certData))
+        return certificate
 
     def deleteCertificateInfo(self, certificateName):
         """
