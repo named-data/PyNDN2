@@ -42,6 +42,17 @@ class PrivateKeyStorage(object):
         """
         raise RuntimeError("generateKeyPair is not implemented")
 
+    def deleteKeyPair(self, keyName):
+        """
+        Delete a pair of asymmetric keys. If the key doesn't exist, do nothing.
+        Your derived class should override.
+
+        :param Name keyName: The name of the key pair.
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("deleteKeyPair is not implemented")
+
     def getPublicKey(self, keyName):
         """
         Get the public key with the keyName.

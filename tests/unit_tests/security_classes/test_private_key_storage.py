@@ -58,16 +58,6 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
             # an invalid keyClass was given
             raise SecurityException('Invalid key type given')
 
-    def deleteKeyPair(self, keyName):
-        try:
-            self._deleteKey(keyName, KeyClass.PRIVATE)
-        except SecurityException:
-            pass # I don't care if it doesn't exist
-        try:
-            self._deleteKey(keyName, KeyClass.PUBLIC)
-        except SecurityException:
-            pass # I don't care if it doesn't exist
-
     def addPublicKey(self, keyName, keyDer):
         """
         Add a private key to the store.
@@ -99,16 +89,3 @@ class TestPrivateKeyStorage(FilePrivateKeyStorage):
         encodedBits = base64.b64encode(keyBits.toRawStr())
         with open(newPath, 'w') as keyFile:
             keyFile.write(encodedBits)
-
-    def _deleteKey(self, keyName, keyClass):
-        """
-        Remove key data from the store.
-        :param Name keyName: The name of the key
-        :param int keyClass: A value from KeyClass
-        """
-        if not self.doesKeyExist(keyName, keyClass):
-            raise SecurityException("Key doesn't exist")
-
-        # Read the key data.
-        keyPath = self._getTransformedName(keyName, keyClass)
-        os.remove(keyPath)

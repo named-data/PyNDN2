@@ -60,6 +60,8 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         self._kSecAttrLabel = c_void_p.in_dll(self._security, "kSecAttrLabel")
         self._kSecAttrKeyClass = c_void_p.in_dll(self._security, "kSecAttrKeyClass")
         self._kSecReturnRef = c_void_p.in_dll(self._security, "kSecReturnRef")
+        self._kSecMatchLimit = c_void_p.in_dll(self._security, "kSecMatchLimit")
+        self._kSecMatchLimitAll = c_void_p.in_dll(self._security, "kSecMatchLimitAll")
 
         self._kSecAttrKeyTypeAES = c_void_p.in_dll(self._security, "kSecAttrKeyTypeAES")
         self._kSecAttrKeyTypeRSA = c_void_p.in_dll(self._security, "kSecAttrKeyTypeRSA")
@@ -85,6 +87,37 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
           use 2048.
         """
         raise RuntimeError("generateKeyPair is not implemented")
+
+    def deleteKeyPair(self, keyName):
+        """
+        Delete a pair of asymmetric keys. If the key doesn't exist, do nothing.
+
+        :param Name keyName: The name of the key pair.
+        """
+        keyLabel = None
+        searchDict = None
+
+        try:
+            keyNameUri = self._toInternalKeyName(keyName, keyClass)
+
+            keyLabel = CFSTR(keyNameUri)
+
+            searchDict = c_void_p(cf.CFDictionaryCreateMutable(
+              None, 5, cf.kCFTypeDictionaryKeyCallBacks, None))
+
+            cf.CFDictionaryAddValue(
+              searchDict, self._kSecClass, self._kSecClassKey)
+            cf.CFDictionaryAddValue(
+              searchDict, self._kSecAttrLabel, keyLabel)
+            cf.CFDictionaryAddValue(
+              searchDict, self._kSecMatchLimit, self._kSecMatchLimitAll)
+
+            self._security.SecItemDelete(searchDict)
+        finally:
+            if keyLabel != None:
+                cf.CFRelease(keyLabel)
+            if searchDict != None:
+                cf.CFRelease(attrDict)
 
     def getPublicKey(self, keyName):
         """

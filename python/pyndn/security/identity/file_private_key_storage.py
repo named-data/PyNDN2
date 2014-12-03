@@ -92,6 +92,19 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         os.chmod(publicKeyFilePath,  stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         os.chmod(privateKeyFilePath, stat.S_IRUSR)
 
+    def deleteKeyPair(self, keyName):
+        """
+        Delete a pair of asymmetric keys. If the key doesn't exist, do nothing.
+
+        :param Name keyName: The name of the key pair.
+        """
+        keyUri = keyName.toUri()
+
+        if self.doesKeyExist(keyName, KeyClass.PUBLIC):
+            os.remove(self.nameTransform(keyUri, ".pub"))
+        if self.doesKeyExist(keyName, KeyClass.PRIVATE):
+            os.remove(self.nameTransform(keyUri, ".pri"))
+        
     def getPublicKey(self, keyName):
         """
         Get the public key with the keyName.

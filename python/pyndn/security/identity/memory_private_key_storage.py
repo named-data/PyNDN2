@@ -95,6 +95,24 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         self.setPublicKeyForKeyName(keyName, keyType, publicKeyDer)
         self.setPrivateKeyForKeyName(keyName, keyType, privateKeyDer)
 
+    def deleteKeyPair(self, keyName):
+        """
+        Delete a pair of asymmetric keys. If the key doesn't exist, do nothing.
+
+        :param Name keyName: The name of the key pair.
+        """
+        keyUri = keyName.toUri()
+
+        try:
+            del self._publicKeyStore[keyUri]
+        except KeyError:
+            pass
+        
+        try:
+            del self._privateKeyStore[keyUri]
+        except KeyError:
+            pass
+
     def getPublicKey(self, keyName):
         """
         Get the public key with the keyName.
@@ -103,13 +121,13 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :return: The public key.
         :rtype: PublicKey
         """
-        keyNameUri = keyName.toUri()
-        if not (keyNameUri in self._publicKeyStore):
+        keyUri = keyName.toUri()
+        if not (keyUri in self._publicKeyStore):
             raise SecurityException(
               "MemoryPrivateKeyStorage: Cannot find public key " +
               keyName.toUri())
 
-        return self._publicKeyStore[keyNameUri]
+        return self._publicKeyStore[keyUri]
 
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
