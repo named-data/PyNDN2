@@ -98,9 +98,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         searchDict = None
 
         try:
-            keyNameUri = self._toInternalKeyName(keyName, keyClass)
-
-            keyLabel = CFSTR(keyNameUri)
+            keyLabel = CFSTR(keyName.toUri())
 
             searchDict = c_void_p(cf.CFDictionaryCreateMutable(
               None, 5, cf.kCFTypeDictionaryKeyCallBacks, None))
@@ -117,7 +115,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             if keyLabel != None:
                 cf.CFRelease(keyLabel)
             if searchDict != None:
-                cf.CFRelease(attrDict)
+                cf.CFRelease(searchDict)
 
     def getPublicKey(self, keyName):
         """
