@@ -27,15 +27,14 @@ DwIDAQAB"
 
 from security_classes.test_identity_manager import TestIdentityManager
 from security_classes.test_identity_storage import TestIdentityStorage
-from security_classes.test_private_key_storage import TestPrivateKeyStorage
 
 from pyndn.security import KeyChain
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
-from pyndn import Name, Data
+from pyndn.security.identity import FilePrivateKeyStorage
+from pyndn import Name
 from pyndn.util import Blob
-from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager
-from pyndn.security.certificate import IdentityCertificate
+from pyndn.security.policy import SelfVerifyPolicyManager
 import unittest as ut
 
 import base64
@@ -51,7 +50,7 @@ class TestSqlIdentityStorage(ut.TestCase):
     def setUp(self):
         self.identityStorage = TestIdentityStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
-             TestPrivateKeyStorage())
+             FilePrivateKeyStorage())
         self.policyManager = SelfVerifyPolicyManager(self.identityStorage)
         self.keyChain = KeyChain(self.identityManager, self.policyManager)
 
