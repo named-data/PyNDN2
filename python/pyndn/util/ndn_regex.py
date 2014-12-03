@@ -56,25 +56,6 @@ class NdnRegexMatcher(object):
         return newPattern
 
     @staticmethod
-    def _escapeComponents(pattern):
-        # escape all the components in the pattern to match the toUri format
-        componentPattern = '<(.*?)>(.*?)(?=<|$)'
-
-        originalPattern = pattern
-
-        componentMatches = re.finditer(componentPattern, pattern)
-        modifiedStr = pattern
-        for match in componentMatches:
-            start, end = match.span(1)
-            if start-end == 0:
-                continue
-            oldStr = match.group(1)
-            newStr = Name.Component(oldStr).toEscapedString()
-            modifiedStr = modifiedStr[:start] + newStr + modifiedStr[end:]
-
-        return modifiedStr
-
-    @staticmethod
     def match(pattern, name):
         """
         Determine if the provided NDN regex matches the given Name.
