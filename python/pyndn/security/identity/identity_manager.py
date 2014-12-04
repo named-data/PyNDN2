@@ -71,6 +71,15 @@ class IdentityManager(object):
         """
         raise RuntimeError("createIdentity is not implemented")
 
+    def setDefaultIdentity(self, identityName):
+        """
+        Set the default identity. If the identityName does not exist, then clear
+        the default identity so that getDefaultIdentity() raises an exception.
+
+        :param Name identityName: The default identity name.
+        """
+        self._identityStorage.setDefaultIdentity(identityName)
+
     def getDefaultIdentity(self):
         """
         Get the default identity.
