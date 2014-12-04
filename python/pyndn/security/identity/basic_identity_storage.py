@@ -527,6 +527,27 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "BasicIdentityStorage::getDefaultCertificateNameForKey: The default certificate for the key name is not defined")
 
+    def getAllKeyNamesOfIdentity(self, identityName, nameList, isDefault):
+        """
+        Append all the key names of a particular identity to the nameList.
+
+        :param Name identityName: The identity name to search for.
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If true, add only the default key name. If false,
+          add only the non-default key names.
+        """
+        if isDefault:
+            query = "SELECT key_identifier FROM Key WHERE default_key=1 and identity_name=?"
+        else:
+            query = "SELECT key_identifier FROM Key WHERE default_key=0 and identity_name=?"
+
+        cursor = self._database.cursor()
+        cursor.execute(query, (identityName.toUri(), ))
+        keyIds = cursor.fetchall()
+        for (keyId, ) in keyIds:
+            nameList.append(Name(identityName).append(keyId))
+        cursor.close()
+
     def setDefaultIdentity(self, identityName):
         """
         Set the default identity. If the identityName does not exist, then clear

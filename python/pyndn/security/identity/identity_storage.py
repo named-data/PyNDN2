@@ -247,6 +247,17 @@ class IdentityStorage(object):
         """
         raise RuntimeError("getDefaultCertificateNameForKey is not implemented")
 
+    def getAllKeyNamesOfIdentity(self, identityName, nameList, isDefault):
+        """
+        Append all the key names of a particular identity to the nameList.
+
+        :param Name identityName: The identity name to search for.
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If true, add only the default key name. If false,
+          add only the non-default key names.
+        """
+        raise RuntimeError("getAllKeyNamesOfIdentity is not implemented")
+
     def setDefaultIdentity(self, identityName):
         """
         Set the default identity. If the identityName does not exist, then clear
