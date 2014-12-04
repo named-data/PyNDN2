@@ -18,12 +18,12 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from security_classes.test_identity_manager import TestIdentityManager
-from security_classes.test_identity_storage import TestIdentityStorage
 
 from pyndn.security import KeyChain
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.security_types import KeyType
 from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security.identity import BasicIdentityStorage
 from pyndn.util import Blob
 from pyndn import Name, Data, Interest, Face
 from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager, ConfigPolicyManager
@@ -71,7 +71,7 @@ def doVerify(policyMan, toVerify):
 
 class TestSimplePolicyManager(ut.TestCase):
     def test_no_verify(self):
-        identityStorage = TestIdentityStorage()
+        identityStorage = BasicIdentityStorage()
         identityManager = TestIdentityManager(identityStorage, MemoryPrivateKeyStorage())
 
         policyManager = NoVerifyPolicyManager()
@@ -96,7 +96,7 @@ class TestSimplePolicyManager(ut.TestCase):
             vr.successCount))
 
     def test_self_verification(self):
-        identityStorage = TestIdentityStorage()
+        identityStorage = BasicIdentityStorage()
         identityManager = TestIdentityManager(identityStorage, MemoryPrivateKeyStorage())
         policyManager = SelfVerifyPolicyManager(identityStorage)
         keyChain = KeyChain(identityManager, policyManager)
@@ -141,7 +141,7 @@ class TestConfigPolicyManager(ut.TestCase):
             # already exists
             pass
 
-        self.identityStorage = TestIdentityStorage()
+        self.identityStorage = BasicIdentityStorage()
         self.privateKeyStorage = MemoryPrivateKeyStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
                 self.privateKeyStorage)

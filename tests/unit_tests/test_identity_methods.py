@@ -26,12 +26,12 @@ y2QgsgUK59WrjhlVMPEiHHRs15NZJbL1uQFXjgScdEarohcY3dilqotineFZCeN8\
 DwIDAQAB"
 
 from security_classes.test_identity_manager import TestIdentityManager
-from security_classes.test_identity_storage import TestIdentityStorage
 
 from pyndn.security import KeyChain
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity import FilePrivateKeyStorage
+from pyndn.security.identity import BasicIdentityStorage
 from pyndn import Name
 from pyndn.util import Blob
 from pyndn.security.policy import SelfVerifyPolicyManager
@@ -48,7 +48,7 @@ import time
 
 class TestSqlIdentityStorage(ut.TestCase):
     def setUp(self):
-        self.identityStorage = TestIdentityStorage()
+        self.identityStorage = BasicIdentityStorage()
         self.identityManager = TestIdentityManager(self.identityStorage,
              FilePrivateKeyStorage())
         self.policyManager = SelfVerifyPolicyManager(self.identityStorage)
