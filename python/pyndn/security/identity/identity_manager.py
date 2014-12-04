@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2014 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# Author: Adeola Bannis <thecodemaiden@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -25,15 +26,17 @@ operations related to identity, keys, and certificates.
 import sys
 from pyndn.name import Name
 from pyndn.data import Data
+from pyndn.util.common import Common
 from pyndn.encoding import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
-from pyndn import KeyLocatorType
+from pyndn.key_locator import KeyLocatorType
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStorage
 from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
 from pyndn.security.security_exception import SecurityException
-from pyndn.security.certificate.identity_certificate import  IdentityCertificate
-from pyndn.security.certificate.public_key import PublicKey
+from pyndn.security.security_types import KeyType
+from pyndn.security.certificate import IdentityCertificate
+from pyndn.security.certificate import PublicKey, CertificateSubjectDescription
 
 class IdentityManager(object):
     """
@@ -69,7 +72,27 @@ class IdentityManager(object):
         :return: The key name of the auto-generated KSK of the identity.
         :rtype: Name
         """
-        raise RuntimeError("createIdentity is not implemented")
+        self._identityStorage.addIdentity(identityName)
+        keyName = self.generateRSAKeyPairAsDefault(identityName, True)
+        newCert = self.selfSign(keyName)
+        self.addCertificateAsDefault(newCert)
+
+        return keyName
+
+    def deleteIdentity(self, identityName):
+        """
+        Delete the identity from the public and private key storage
+        :param Name identityName: The name of the identity to delete.
+        """
+        if (Name(self._identityStorage.getDefaultIdentity()) ==
+                identityName):
+            return # don't delete the default identity!
+        self._identityStorage.deleteIdentityInfo(identityName)
+        keysToDelete = []
+        self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, True)
+        self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, False)
+        for keyName in keysToDelete:
+            self._privateKeyStorage.deleteKeyPair(keyName)
 
     def setDefaultIdentity(self, identityName):
         """
@@ -103,7 +126,12 @@ class IdentityManager(object):
         :return: The generated key name.
         :rtype: Name
         """
-        raise RuntimeError("generateRSAKeyPair is not implemented")
+        keyName = self._identityStorage.getNewKeyName(identityName, isKsk)
+        self._privateKeyStorage.generateKeyPair(keyName, KeyType.RSA, keySize)
+        publicKeyBits = self._privateKeyStorage.getPublicKey(keyName).getKeyDer()
+        self._identityStorage.addKey(keyName, KeyType.RSA, publicKeyBits)
+
+        return keyName
 
     def setDefaultKeyForIdentity(self, keyName, identityName = None):
         """
@@ -142,7 +170,9 @@ class IdentityManager(object):
         :return: The generated key name.
         :rtype: Name
         """
-        raise RuntimeError("generateRSAKeyPairAsDefault is not implemented")
+        newKeyName = self.generateRSAKeyPair(identityName, isKsk, keySize)
+        self._identityStorage.setDefaultKeyNameForIdentity(newKeyName)
+        return newKeyName
 
     def getPublicKey(self, keyName):
         """
@@ -313,10 +343,10 @@ class IdentityManager(object):
         :return: The generated certificate.
         :rtype: IdentityCertificate
         """
-        raise RuntimeError("selfSign is not implemented")
+        certificate = self._generateCertificateForKey(keyName)
+        self.signByCertificate(certificate, certificate.getName())
 
-
-
+        return certificate
 
     # TODO: Move this to IdentityCertificate
     @staticmethod
@@ -345,3 +375,34 @@ class IdentityManager(object):
 
         return tmpName.getSubName(0, i).append(tmpName.getSubName(
                  i + 1, tmpName.size() - i - 1))
+
+    def _generateCertificateForKey(self, keyName):
+        # Let any raised SecurityExceptions bubble up.
+        publicKeyBits = self._identityStorage.getKey(keyName)
+        publicKeyType = self._identityStorage.getKeyType(keyName)
+
+        publicKey = PublicKey(publicKeyType, publicKeyBits)
+
+        timestamp = Common.getNowMilliseconds()
+
+        # TODO: Specify where the 'KEY' component is inserted
+        # to delegate responsibility for cert delivery.
+        # cf: http://redmine.named-data.net/issues/1659
+        certificateName = keyName.getPrefix(-1).append('KEY').append(keyName.get(-1))
+        certificateName.append("ID-CERT").append(
+          Name.Component.fromNumber(int(timestamp)))
+
+        certificate = IdentityCertificate(certificateName)
+
+        certificate.setNotBefore(timestamp)
+        certificate.setNotAfter((timestamp + 2*365*24*3600*1000)) # about 2 years.
+
+        certificate.setPublicKeyInfo(publicKey)
+
+        # ndnsec likes to put the key name in a subject description.
+        sd = CertificateSubjectDescription("2.5.4.41", keyName.toUri())
+        certificate.addSubjectDescription(sd)
+
+        certificate.encode()
+
+        return certificate
