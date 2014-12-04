@@ -17,9 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from security_classes.test_identity_manager import TestIdentityManager
-
-from pyndn.security import KeyChain
+from pyndn.security import KeyChain, IdentityManager
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.security_types import KeyType
 from pyndn.security.identity import MemoryPrivateKeyStorage
@@ -72,7 +70,7 @@ def doVerify(policyMan, toVerify):
 class TestSimplePolicyManager(ut.TestCase):
     def test_no_verify(self):
         identityStorage = BasicIdentityStorage()
-        identityManager = TestIdentityManager(identityStorage, MemoryPrivateKeyStorage())
+        identityManager = IdentityManager(identityStorage, MemoryPrivateKeyStorage())
 
         policyManager = NoVerifyPolicyManager()
         identityName = Name('TestValidator/Null').appendVersion(int(time.time()))
@@ -97,7 +95,7 @@ class TestSimplePolicyManager(ut.TestCase):
 
     def test_self_verification(self):
         identityStorage = BasicIdentityStorage()
-        identityManager = TestIdentityManager(identityStorage, MemoryPrivateKeyStorage())
+        identityManager = IdentityManager(identityStorage, MemoryPrivateKeyStorage())
         policyManager = SelfVerifyPolicyManager(identityStorage)
         keyChain = KeyChain(identityManager, policyManager)
 
@@ -143,7 +141,7 @@ class TestConfigPolicyManager(ut.TestCase):
 
         self.identityStorage = BasicIdentityStorage()
         self.privateKeyStorage = MemoryPrivateKeyStorage()
-        self.identityManager = TestIdentityManager(self.identityStorage,
+        self.identityManager = IdentityManager(self.identityStorage,
                 self.privateKeyStorage)
         self.policyManager = ConfigPolicyManager('policy_config/simple_rules.conf')
 

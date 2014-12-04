@@ -25,9 +25,8 @@ yx/I9H/DV+AqSHCaYbB92HDcDN0kqwSnUf5H1+osE9MR5DLBLhXdSiULSgxT3Or/\
 y2QgsgUK59WrjhlVMPEiHHRs15NZJbL1uQFXjgScdEarohcY3dilqotineFZCeN8\
 DwIDAQAB"
 
-from security_classes.test_identity_manager import TestIdentityManager
-
-from pyndn.security import KeyChain
+import time
+from pyndn.security import KeyChain, IdentityManager
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity import FilePrivateKeyStorage
@@ -49,7 +48,7 @@ import time
 class TestSqlIdentityStorage(ut.TestCase):
     def setUp(self):
         self.identityStorage = BasicIdentityStorage()
-        self.identityManager = TestIdentityManager(self.identityStorage,
+        self.identityManager = IdentityManager(self.identityStorage,
              FilePrivateKeyStorage())
         self.policyManager = SelfVerifyPolicyManager(self.identityStorage)
         self.keyChain = KeyChain(self.identityManager, self.policyManager)
@@ -182,6 +181,9 @@ class TestSqlIdentityStorage(ut.TestCase):
         certName2 = cert2.getName()
         self.identityManager.addCertificateAsDefault(cert2)
 
+        # The generated names use the current time in milliseconds, so wait a
+        #   couple milliseconds so we don't duplicate.
+        time.sleep(0.02)
         keyName3 = self.keyChain.generateRSAKeyPairAsDefault(identityName)
         cert3 = self.identityManager.selfSign(keyName3)
         certName3 = cert3.getName()
