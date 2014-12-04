@@ -48,7 +48,9 @@ class TestIdentityManager(IdentityManager):
                 identityName):
             return # don't delete the default identity!
         self._identityStorage.deleteIdentityInfo(identityName)
-        keysToDelete = self._identityStorage.getAllKeysForIdentity(identityName)
+        keysToDelete = []
+        self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, True)
+        self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, False)
         for keyName in keysToDelete:
             self._privateKeyStorage.deleteKeyPair(keyName)
 
