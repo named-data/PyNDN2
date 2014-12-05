@@ -71,11 +71,6 @@ class TestConfigPolicyManager(ut.TestCase):
     def setUp(self):
         testCertDirectory = 'policy_config/certs'
         self.testCertFile = os.path.join(testCertDirectory, 'test.cert')
-        try:
-            os.mkdir(testCertDirectory)
-        except OSError:
-            # already exists
-            pass
 
         # Reuse the policy_config subdirectory for the temporary SQLite file.
         self.databaseFilePath = "policy_config/test-public-info.db"
@@ -121,6 +116,10 @@ class TestConfigPolicyManager(ut.TestCase):
             pass
         self.privateKeyStorage.deleteKeyPair(self.keyName)
         self.face.shutdown()
+        try:
+            os.remove(self.testCertFile)
+        except OSError:
+            pass
 
     def test_no_verify(self):
         policyManager = NoVerifyPolicyManager()
@@ -239,7 +238,6 @@ class TestConfigPolicyManager(ut.TestCase):
         # we have to sign it with the current identity or the
         # policy manager will create an interest for the signing certificate
 
-        self.addCleanup(self._removeFile, self.testCertFile)
         with open(self.testCertFile, 'w') as certFile:
             cert = IdentityCertificate()
             certData = b64decode(CERT_DUMP)
