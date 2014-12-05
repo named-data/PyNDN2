@@ -26,6 +26,7 @@ y2QgsgUK59WrjhlVMPEiHHRs15NZJbL1uQFXjgScdEarohcY3dilqotineFZCeN8\
 DwIDAQAB"
 
 import time
+import os
 from pyndn.security import KeyChain, IdentityManager
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
@@ -47,7 +48,15 @@ import time
 
 class TestSqlIdentityStorage(ut.TestCase):
     def setUp(self):
-        self.identityStorage = BasicIdentityStorage()
+        # Reuse the policy_config subdirectory for the temporary SQLite file.
+        self.databaseFilePath = "policy_config/test-public-info.db"
+        try:
+            os.remove(self.databaseFilePath)
+        except OSError:
+            # no such file
+            pass
+        self.identityStorage = BasicIdentityStorage(self.databaseFilePath)
+
         self.identityManager = IdentityManager(self.identityStorage,
              FilePrivateKeyStorage())
         self.policyManager = SelfVerifyPolicyManager(self.identityStorage)

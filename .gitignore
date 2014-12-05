@@ -19,3 +19,6 @@ doc/_build
 /dist
 /python/PyNDN.egg-info
 /build
+
+# unit_test temporary files
+tests/unit_tests/policy_config/test-public-info.db
