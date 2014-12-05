@@ -81,7 +81,9 @@ class IdentityManager(object):
 
     def deleteIdentity(self, identityName):
         """
-        Delete the identity from the public and private key storage
+        Delete the identity from the public and private key storage. If the
+        identity to be deleted is current default system default, the method
+        will not delete the identity and will return immediately.
         :param Name identityName: The name of the identity to delete.
         """
         try:
@@ -91,10 +93,12 @@ class IdentityManager(object):
             # There is no default identity to check.
             pass
         
-        self._identityStorage.deleteIdentityInfo(identityName)
         keysToDelete = []
         self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, True)
         self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, False)
+
+        self._identityStorage.deleteIdentityInfo(identityName)
+
         for keyName in keysToDelete:
             self._privateKeyStorage.deleteKeyPair(keyName)
 
