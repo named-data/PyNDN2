@@ -84,9 +84,13 @@ class IdentityManager(object):
         Delete the identity from the public and private key storage
         :param Name identityName: The name of the identity to delete.
         """
-        if (Name(self._identityStorage.getDefaultIdentity()) ==
-                identityName):
-            return # don't delete the default identity!
+        try:
+            if (self._identityStorage.getDefaultIdentity() == identityName):
+                return # don't delete the default identity!
+        except SecurityException:
+            # There is no default identity to check.
+            pass
+        
         self._identityStorage.deleteIdentityInfo(identityName)
         keysToDelete = []
         self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, True)
