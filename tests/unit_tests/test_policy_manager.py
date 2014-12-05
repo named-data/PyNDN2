@@ -77,7 +77,15 @@ class TestConfigPolicyManager(ut.TestCase):
             # already exists
             pass
 
-        self.identityStorage = BasicIdentityStorage()
+        # Reuse the policy_config subdirectory for the temporary SQLite file.
+        self.databaseFilePath = "policy_config/test-public-info.db"
+        try:
+            os.remove(self.databaseFilePath)
+        except OSError:
+            # no such file
+            pass
+
+        self.identityStorage = BasicIdentityStorage(self.databaseFilePath)
         self.privateKeyStorage = MemoryPrivateKeyStorage()
         self.identityManager = IdentityManager(self.identityStorage,
                 self.privateKeyStorage)
@@ -107,20 +115,18 @@ class TestConfigPolicyManager(ut.TestCase):
         self.face = Face()
 
     def tearDown(self):
-        self.identityStorage.deleteIdentityInfo(self.identityName)
+        try:
+            os.remove(self.databaseFilePath)
+        except OSError:
+            pass
         self.privateKeyStorage.deleteKeyPair(self.keyName)
         self.face.shutdown()
 
     def test_no_verify(self):
-        identityStorage = BasicIdentityStorage()
-        identityManager = IdentityManager(identityStorage, MemoryPrivateKeyStorage())
-
         policyManager = NoVerifyPolicyManager()
         identityName = Name('TestValidator/Null').appendVersion(int(time.time()))
 
-        self.addCleanup(identityStorage.deleteIdentityInfo ,identityName)
-
-        keyChain = KeyChain(identityManager, policyManager)
+        keyChain = KeyChain(self.identityManager, policyManager)
         keyChain.createIdentity(identityName)
         data = Data(Name(identityName).append('data'))
         keyChain.signByIdentity(data, identityName)
@@ -137,13 +143,10 @@ class TestConfigPolicyManager(ut.TestCase):
             vr.successCount))
 
     def test_self_verification(self):
-        identityStorage = BasicIdentityStorage()
-        identityManager = IdentityManager(identityStorage, MemoryPrivateKeyStorage())
-        policyManager = SelfVerifyPolicyManager(identityStorage)
-        keyChain = KeyChain(identityManager, policyManager)
+        policyManager = SelfVerifyPolicyManager(self.identityStorage)
+        keyChain = KeyChain(self.identityManager, policyManager)
 
         identityName  = Name('TestValidator/RsaSignatureVerification')
-        self.addCleanup(identityStorage.deleteIdentityInfo, identityName)
         keyChain.createIdentity(identityName)
 
         data = Data(Name('/TestData/1'))
@@ -237,7 +240,6 @@ class TestConfigPolicyManager(ut.TestCase):
         # policy manager will create an interest for the signing certificate
 
         self.addCleanup(self._removeFile, self.testCertFile)
-        self.addCleanup(self.identityStorage.deleteIdentityInfo, Name('/temp'))
         with open(self.testCertFile, 'w') as certFile:
             cert = IdentityCertificate()
             certData = b64decode(CERT_DUMP)
