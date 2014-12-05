@@ -67,7 +67,50 @@ def doVerify(policyMan, toVerify):
     return VerificationResult(success.call_count,
             failure.call_count, result is not None)
 
-class TestSimplePolicyManager(ut.TestCase):
+class TestConfigPolicyManager(ut.TestCase):
+    def setUp(self):
+        testCertDirectory = 'policy_config/certs'
+        self.testCertFile = os.path.join(testCertDirectory, 'test.cert')
+        try:
+            os.mkdir(testCertDirectory)
+        except OSError:
+            # already exists
+            pass
+
+        self.identityStorage = BasicIdentityStorage()
+        self.privateKeyStorage = MemoryPrivateKeyStorage()
+        self.identityManager = IdentityManager(self.identityStorage,
+                self.privateKeyStorage)
+        self.policyManager = ConfigPolicyManager('policy_config/simple_rules.conf')
+
+        self.identityName = Name('/TestConfigPolicyManager/temp')
+        # to match the anchor cert
+        keyName = Name(self.identityName).append('ksk-1416010123')
+        # read an RSA key in
+        with open('policy_config/testKey.pri', 'r') as keyData:
+            encodedKey = keyData.read()
+            keyBytes = b64decode(encodedKey)
+            privateKey = RSA.importKey(keyBytes)
+            publicKeyBytes = Blob(privateKey.publickey().exportKey('DER'))
+            self.privateKeyStorage.setKeyPairForKeyName(
+              keyName, KeyType.RSA, publicKeyBytes, keyBytes)
+            self.identityStorage.addKey(keyName, KeyType.RSA, publicKeyBytes)
+
+            cert = self.identityManager.selfSign(keyName)
+            self.identityStorage.setDefaultKeyNameForIdentity(keyName)
+            self.identityManager.addCertificateAsDefault(cert)
+
+
+        self.keyChain = KeyChain(self.identityManager, self.policyManager)
+        self.keyName = keyName
+
+        self.face = Face()
+
+    def tearDown(self):
+        self.identityStorage.deleteIdentityInfo(self.identityName)
+        self.privateKeyStorage.deleteKeyPair(self.keyName)
+        self.face.shutdown()
+
     def test_no_verify(self):
         identityStorage = BasicIdentityStorage()
         identityManager = IdentityManager(identityStorage, MemoryPrivateKeyStorage())
@@ -128,50 +171,6 @@ class TestSimplePolicyManager(ut.TestCase):
         self.assertEqual(vr.failureCount, 1,
             "Verification failure callback called {} times instead of 1".format(
             vr.failureCount))
-
-class TestConfigPolicyManager(ut.TestCase):
-    def setUp(self):
-        testCertDirectory = 'policy_config/certs'
-        self.testCertFile = os.path.join(testCertDirectory, 'test.cert')
-        try:
-            os.mkdir(testCertDirectory)
-        except OSError:
-            # already exists
-            pass
-
-        self.identityStorage = BasicIdentityStorage()
-        self.privateKeyStorage = MemoryPrivateKeyStorage()
-        self.identityManager = IdentityManager(self.identityStorage,
-                self.privateKeyStorage)
-        self.policyManager = ConfigPolicyManager('policy_config/simple_rules.conf')
-
-        self.identityName = Name('/TestConfigPolicyManager/temp')
-        # to match the anchor cert
-        keyName = Name(self.identityName).append('ksk-1416010123')
-        # read an RSA key in
-        with open('policy_config/testKey.pri', 'r') as keyData:
-            encodedKey = keyData.read()
-            keyBytes = b64decode(encodedKey)
-            privateKey = RSA.importKey(keyBytes)
-            publicKeyBytes = Blob(privateKey.publickey().exportKey('DER'))
-            self.privateKeyStorage.setKeyPairForKeyName(
-              keyName, KeyType.RSA, publicKeyBytes, keyBytes)
-            self.identityStorage.addKey(keyName, KeyType.RSA, publicKeyBytes)
-
-            cert = self.identityManager.selfSign(keyName)
-            self.identityStorage.setDefaultKeyNameForIdentity(keyName)
-            self.identityManager.addCertificateAsDefault(cert)
-
-
-        self.keyChain = KeyChain(self.identityManager, self.policyManager)
-        self.keyName = keyName
-
-        self.face = Face()
-
-    def tearDown(self):
-        self.identityStorage.deleteIdentityInfo(self.identityName)
-        self.privateKeyStorage.deleteKeyPair(self.keyName)
-        self.face.shutdown()
 
     def test_interest_timestamp(self):
         interestName = Name('/ndn/ucla/edu/something')
