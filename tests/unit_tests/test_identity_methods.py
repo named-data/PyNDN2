@@ -62,6 +62,11 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.policyManager = SelfVerifyPolicyManager(self.identityStorage)
         self.keyChain = KeyChain(self.identityManager, self.policyManager)
 
+    def tearDown(self):
+        try:
+            os.remove(self.databaseFilePath)
+        except OSError:
+            pass
 
     def test_identity_create_delete(self):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
