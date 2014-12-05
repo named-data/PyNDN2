@@ -70,6 +70,15 @@ class KeyChain(object):
         """
         return self._identityManager.createIdentity(identityName)
 
+    def deleteIdentity(self, identityName):
+        """
+        Delete the identity from the public and private key storage. If the
+        identity to be deleted is current default system default, the method
+        will not delete the identity and will return immediately.
+        :param Name identityName: The name of the identity to delete.
+        """
+        self._identityManager.deleteIdentity(identityName)
+
     def getDefaultIdentity(self):
         """
         Get the default identity.

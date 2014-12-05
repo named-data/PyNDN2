@@ -84,7 +84,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertIsNotNone(certificateName,
             "Certificate was not added to IdentityStorage")
 
-        self.identityManager.deleteIdentity(identityName)
+        self.keyChain.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesIdentityExist(identityName),
             "Identity still in IdentityStorage after revoking")
         self.assertFalse(self.identityStorage.doesKeyExist(keyName),
@@ -111,7 +111,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.identityStorage.deletePublicKeyInfo(keyName2)
 
         self.assertFalse(self.identityStorage.doesKeyExist(keyName2))
-        self.identityManager.deleteIdentity(identityName)
+        self.keyChain.deleteIdentity(identityName)
 
     def test_key_autocreate_identity(self):
         keyName1 = Name('/TestSqlIdentityStorage/KeyType/RSA/ksk-12345')
@@ -152,7 +152,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertEqual(certName1, certName2,
             "Key-certificate mapping and identity-certificate mapping are not consistent")
 
-        self.identityManager.deleteIdentity(identityName)
+        self.keyChain.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesKeyExist(keyName1))
 
     def test_certificate_add_delete(self):
@@ -173,7 +173,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertTrue(self.identityStorage.doesCertificateExist(certName2))
         self.assertFalse(self.identityStorage.doesCertificateExist(certName1))
 
-        self.identityManager.deleteIdentity(identityName)
+        self.keyChain.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesCertificateExist(certName2))
     def test_stress(self):
         # ndn-cxx/tests/unit-tests/security/test-sec-public-info-sqlite3.cpp
@@ -230,7 +230,7 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertTrue(self.identityStorage.doesKeyExist(keyName1))
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName))
 
-        self.identityManager.deleteIdentity(identityName)
+        self.keyChain.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesCertificateExist(certName2))
         self.assertFalse(self.identityStorage.doesKeyExist(keyName2))
         self.assertFalse(self.identityStorage.doesCertificateExist(certName1))
