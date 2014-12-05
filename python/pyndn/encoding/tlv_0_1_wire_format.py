@@ -350,7 +350,7 @@ class Tlv0_1WireFormat(WireFormat):
         # TODO: Encode Uri.
 
         encoder.writeOptionalNonNegativeIntegerTlv(
-          Tlv.FaceID, controlParameters.getFaceId())
+          Tlv.ControlParameters_FaceId, controlParameters.getFaceId())
         self._encodeName(controlParameters.getName(), encoder)
 
         encoder.writeTypeAndLength(Tlv.ControlParameters_ControlParameters,
