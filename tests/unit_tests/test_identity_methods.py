@@ -72,7 +72,6 @@ class TestSqlIdentityStorage(ut.TestCase):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
 
-        self.addCleanup(self.identityManager.deleteIdentity, identityName)
         keyName = self.keyChain.createIdentity(identityName)
 
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName),
@@ -99,7 +98,6 @@ class TestSqlIdentityStorage(ut.TestCase):
     def test_key_create_delete(self):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
-        self.addCleanup(self.identityManager.deleteIdentity, identityName)
 
         keyName1 = self.keyChain.generateRSAKeyPair(identityName, True)
         self.keyChain.getIdentityManager().setDefaultKeyForIdentity(keyName1)
@@ -118,7 +116,6 @@ class TestSqlIdentityStorage(ut.TestCase):
     def test_key_autocreate_identity(self):
         keyName1 = Name('/TestSqlIdentityStorage/KeyType/RSA/ksk-12345')
         identityName = keyName1[:-1]
-        self.addCleanup(self.identityManager.deleteIdentity, identityName)
 
         decodedKey = base64.b64decode(RSA_DER)
         self.identityStorage.addKey(keyName1, KeyType.RSA, Blob(decodedKey))
@@ -161,7 +158,6 @@ class TestSqlIdentityStorage(ut.TestCase):
     def test_certificate_add_delete(self):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
-        self.addCleanup(self.identityManager.deleteIdentity, identityName)
 
         self.identityManager.createIdentity(identityName)
         keyName1 = self.identityManager.getDefaultKeyNameForIdentity(identityName)
@@ -184,7 +180,6 @@ class TestSqlIdentityStorage(ut.TestCase):
         identityName = Name("/TestSecPublicInfoSqlite3/Delete").appendVersion(
             int(time.time()))
 
-        self.addCleanup(self.identityManager.deleteIdentity, identityName)
         # ndn-cxx returns the cert name, but the IndentityManager docstring
         # specifies a key
         keyName1 = self.keyChain.createIdentity(identityName)
