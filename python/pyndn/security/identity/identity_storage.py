@@ -66,8 +66,13 @@ class IdentityStorage(object):
         :return: The generated key name.
         :rtype: Name
         """
-        nowString = repr(math.floor(
-          Common.getNowMilliseconds() / 1000.0)).replace(".0", "")
+        timestamp = math.floor(Common.getNowMilliseconds() / 1000.0)
+        while timestamp <= self._lastTimestamp:
+            # Make the timestamp unique.
+            timestamp += 1
+        self._lastTimestamp = timestamp
+
+        nowString = repr(timestamp).replace(".0", "")
         if useKsk:
             keyIdStr = "KSK-" + nowString
         else:
@@ -287,3 +292,6 @@ class IdentityStorage(object):
         """
         raise RuntimeError("setDefaultCertificateNameForKey is not implemented")
 
+    # A static value to make each timestamp unique among calls.
+    _lastTimestamp = math.floor(Common.getNowMilliseconds() / 1000.0)
+    

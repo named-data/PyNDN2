@@ -190,9 +190,6 @@ class TestSqlIdentityStorage(ut.TestCase):
         certName2 = cert2.getName()
         self.identityManager.addCertificateAsDefault(cert2)
 
-        # The generated names use the current time in milliseconds, so wait a
-        #   couple milliseconds so we don't duplicate.
-        time.sleep(0.02)
         keyName3 = self.keyChain.generateRSAKeyPairAsDefault(identityName)
         cert3 = self.identityManager.selfSign(keyName3)
         certName3 = cert3.getName()
