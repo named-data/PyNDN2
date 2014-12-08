@@ -32,6 +32,7 @@ from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.util import Blob
+from pyndn.util.common import Common
 from pyndn.encoding import WireFormat
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
@@ -72,10 +73,12 @@ class ConfigPolicyManager(PolicyManager):
     :param int searchDepth: (optional) The maximum number of links to follow
       when verifying a certificate chain.
     :param int graceInterval: (optional) The window of time difference (in
-        seconds) allowed between the timestamp of the first interest signed 
-        with a new public key and the validation time.
+        milliseconds) allowed between the timestamp of the first interest signed
+        with a new public key and the validation time. If omitted, use a default
+        value.
     :param int keyTimestampTtl: (optional) How long a public key's last-used
-        timestamp is kept in the store.
+        timestamp is kept in the store (milliseconds). If omitted, use a default
+        value.
     :param int maxTrackedKeys: (optional) The maximum number of public key use
         timestamps to track.
     """
@@ -174,7 +177,8 @@ class ConfigPolicyManager(PolicyManager):
                             if refreshMatch.group(2) != 'm':
                                 refreshPeriod *= 60
 
-                self._refreshManager.addDirectory(dirName, refreshPeriod)
+                # Convert refreshPeriod from seconds to milliseconds.
+                self._refreshManager.addDirectory(dirName, refreshPeriod * 1000)
                 continue
             elif typeName == "any":
                 # this disables all security!
@@ -392,7 +396,7 @@ class ConfigPolicyManager(PolicyManager):
         try:
             lastTimestamp = self._keyTimestamps[keyName.toUri()]
         except KeyError:
-            now = time.time()
+            now = Common.getNowMilliseconds()
             notBefore = now - self._keyGraceInterval
             notAfter = now + self._keyGraceInterval
             return timestamp > notBefore and timestamp < notAfter
@@ -414,7 +418,7 @@ class ConfigPolicyManager(PolicyManager):
         self._keyTimestamps[keyName.toUri()] = timestamp
 
         if len(self._keyTimestamps) >= self._maxTrackedKeys:
-            now = time.time()
+            now = Common.getNowMilliseconds()
             oldestTimestamp = now
             oldestKey = None
             trackedKeys = self._keyTimestamps.keys()
@@ -525,7 +529,7 @@ class ConfigPolicyManager(PolicyManager):
         # filling the cache with bad keys
         if isinstance(dataOrInterest, Interest):
             keyName = foundCert.getPublicKeyName()
-            timestamp = dataOrInterest.getName().get(-4).toNumber()/1000
+            timestamp = dataOrInterest.getName().get(-4).toNumber()
 
             if not self._interestTimestampIsFresh(keyName, timestamp):
                 onVerifyFailed(dataOrInterest)
@@ -604,6 +608,7 @@ class TrustAnchorRefreshManager(object):
         # assumes timestamp is already removed
         return self._certificateCache.getCertificate(certificateName)
 
+    # refershPeriod in milliseconds.
     def addDirectory(self, directoryName, refreshPeriod):
         allFiles = [f for f in os.listdir(directoryName)
                 if os.path.isfile(os.path.join(directoryName, f))]
@@ -620,11 +625,13 @@ class TrustAnchorRefreshManager(object):
                 self._certificateCache.insertCertificate(cert)
                 certificateNames.append(certUri)
 
-        self._refreshDirectories[directoryName] = {'certificates':certificateNames,
-                'nextRefresh':time.time()+refreshPeriod, 'refreshPeriod':refreshPeriod}
+        self._refreshDirectories[directoryName] = {
+          'certificates': certificateNames,
+          'nextRefresh': Common.getNowMilliseconds() + refreshPeriod,
+          'refreshPeriod':refreshPeriod }
 
     def refreshAnchors(self):
-        refreshTime =  time.time()
+        refreshTime =  Common.getNowMilliseconds()
         for directory, info in self._refreshDirectories.items():
             nextRefreshTime = info['nextRefresh']
             if nextRefreshTime <= refreshTime:
