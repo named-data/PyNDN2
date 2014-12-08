@@ -49,8 +49,6 @@ CERT_DUMP="Bv0C4AcxCAR0ZW1wCANLRVkIEWtzay0xNDE0MTk1Nzc5NjY1CAdJRC1DRVJUCAgA\
            NgvRyxKNDIXJZym0qpHQQVjdQJezWNxf82swBV2S7nbJCI4djOwbRTnRFuwi4vHs\
            BmWVlUfyAg8noGdPRS8MGQs24vw="
 
-PUBLIC_KEY=""
-
 try:
     from unittest.mock import Mock
 except ImportError:
