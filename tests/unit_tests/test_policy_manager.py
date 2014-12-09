@@ -251,7 +251,7 @@ class TestConfigPolicyManager(ut.TestCase):
         self.assertEqual(vr.failureCount, 0,
             "Verification of identity-signed data failed")
         self.assertEqual(vr.successCount, 1,
-            "Verification callback called {} times instead of 1".format(
+            "Verification success called {} times instead of 1".format(
             vr.successCount))
 
         data2 = Data(Name('/TestData/2'))
@@ -288,7 +288,7 @@ class TestConfigPolicyManager(ut.TestCase):
         self.assertEqual(vr.failureCount, 0,
                 "Verification of valid interest failed")
         self.assertEqual(vr.successCount, 1,
-                "Verification callback called {} times instead of 1".format(
+                "Verification success called {} times instead of 1".format(
                       vr.successCount))
 
         vr  = doVerify(self.policyManager,
