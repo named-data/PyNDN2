@@ -231,7 +231,7 @@ class TestConfigPolicyManager(ut.TestCase):
         self.assertEqual(vr.failureCount, 0,
             "Verification failed with NoVerifyPolicyManager")
         self.assertEqual(vr.successCount, 1,
-            "Verification callback called {} times instead of 1".format(
+            "Verification success called {} times instead of 1".format(
             vr.successCount))
 
     def test_self_verification(self):
@@ -356,7 +356,7 @@ class TestConfigPolicyManager(ut.TestCase):
         self.assertFalse(vr.hasFurtherSteps,
                 "ConfigPolicyManager did not refresh certificate store")
         self.assertEqual(vr.successCount, 1,
-                "Failure callback called {} times instead of 1".format(
+                "Verification success called {} times instead of 1".format(
                     vr.successCount))
         self.assertEqual(vr.failureCount, 0,
                 "ConfigPolicyManager did not verify valid signed data")
