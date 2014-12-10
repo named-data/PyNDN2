@@ -28,6 +28,7 @@ import logging
 if sys.platform == 'darwin':
     from pyndn.contrib.cocoapy import *
 from pyndn.util import Blob
+from pyndn.security.certificate import PublicKey
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
 from pyndn.security.security_types import KeyType
@@ -55,6 +56,9 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         self._security.SecTransformExecute.restype = c_void_p
         self._security.SecTransformExecute.argtypes = [c_void_p, POINTER(c_void_p)]
 
+        self._security.SecItemExport.restype = c_void_p
+        self._security.SecItemExport.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p, POINTER(c_void_p)]
+
         self._kSecClass = c_void_p.in_dll(self._security, "kSecClass")
         self._kSecClassKey = c_void_p.in_dll(self._security, "kSecClassKey")
         self._kSecAttrLabel = c_void_p.in_dll(self._security, "kSecAttrLabel")
@@ -74,6 +78,9 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         self._kSecDigestTypeAttribute = c_void_p.in_dll(self._security, "kSecDigestTypeAttribute")
         self._kSecDigestLengthAttribute = c_void_p.in_dll(self._security, "kSecDigestLengthAttribute")
 #pylint: enable=E1103
+
+        # enum values:
+        self._kSecFormatOpenSSL = 1
 
     def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
         """
@@ -125,7 +132,32 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         :return: The public key.
         :rtype: PublicKey
         """
-        raise RuntimeError("getPublicKey is not implemented")
+        publicKey = self._getKey(keyName, KeyClass.PUBLIC)
+        if publicKey == None:
+            raise SecurityException(
+              "The requested public key [" + keyName.toUri() +
+              "] does not exist in the OSX Keychain")
+
+        exportedKey = None
+
+        try:
+            exportedKey = c_void_p()
+            res = self._security.SecItemExport(
+              publicKey, self._kSecFormatOpenSSL, 0, None, pointer(exportedKey))
+            if res != None:
+                raise SecurityException(
+                  "Cannot export the requested public key from the OSX Keychain")
+
+            blob = self._CFDataToBlob(exportedKey)
+            print "blob", blob.toHex()
+
+            # TODO: Need to get the correct KeyType.
+            return PublicKey.fromDer(KeyType.RSA, blob)
+        finally:
+            if publicKey != None:
+                cf.CFRelease(publicKey)
+            if exportedKey != None:
+                cf.CFRelease(exportedKey)
 
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """
@@ -190,12 +222,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             if signature == None:
                 raise SecurityException("Signature is NULL!")
 
-            signatureLength = cf.CFDataGetLength(signature)
-            signatureBytes = (c_byte * signatureLength)()
-            cf.CFDataGetBytes(
-              signature, CFRange(0, signatureLength), signatureBytes)
-
-            return Blob(signatureBytes, False)
+            return self._CFDataToBlob(signature)
         finally:
             if privateKey != None:
                 cf.CFRelease(privateKey)
@@ -408,3 +435,12 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
           logging.getLogger(__name__).debug("Unrecognized digest algorithm!")
           return -1
 
+    @staticmethod
+    def _CFDataToBlob(cfData):
+        length = cf.CFDataGetLength(cfData)
+        array = (c_byte * length)()
+        cf.CFDataGetBytes(cfData, CFRange(0, length), array)
+
+        # Convert from signed byte to unsigned byte.
+        unsignedArray = [(x if x >= 0 else x + 256) for x in array]
+        return Blob(unsignedArray, False)
