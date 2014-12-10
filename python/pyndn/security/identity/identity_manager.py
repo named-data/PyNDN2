@@ -356,24 +356,25 @@ class IdentityManager(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # TODO: Handle signature algorithms other than Sha256WithRsa.
-        signature = Sha256WithRsaSignature()
-        signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
-        signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
+        digestAlgorithm = [0]
+        signature = self._makeSignatureByCertificate(
+          certificateName, digestAlgorithm)
 
         # Append the encoded SignatureInfo.
         interest.getName().append(wireFormat.encodeSignatureInfo(signature))
 
         # Append an empty signature so that the "signedPortion" is correct.
         interest.getName().append(Name.Component())
-        # Encode once to get the signed portion.
+        # Encode once to get the signed portion, and sign.
         encoding = interest.wireEncode(wireFormat)
-        signedSignature = self.signByCertificate(
-          encoding.toSignedBuffer(), certificateName)
+        signature.setSignature(self._privateKeyStorage.sign
+          (encoding.toSignedBuffer(),
+           self.certificateNameToPublicKeyName(certificateName),
+           digestAlgorithm[0]))
 
         # Remove the empty signature and append the real one.
         interest.setName(interest.getName().getPrefix(-1).append(
-          wireFormat.encodeSignatureValue(signedSignature)))
+          wireFormat.encodeSignatureValue(signature)))
 
     def selfSign(self, keyName):
         """
