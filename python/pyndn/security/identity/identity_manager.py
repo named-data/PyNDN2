@@ -423,7 +423,7 @@ class IdentityManager(object):
         :rtype: Signature
         """
         keyName = self.certificateNameToPublicKeyName(certificateName)
-        #publicKey = self._privateKeyStorage.getPublicKey(keyName)
+        publicKey = self._privateKeyStorage.getPublicKey(keyName)
 
         # For temporary usage, we support RSA + SHA256 only, but will support more.
         signature = Sha256WithRsaSignature()
