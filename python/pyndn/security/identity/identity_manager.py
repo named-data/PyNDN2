@@ -34,7 +34,7 @@ from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStorage
 from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
 from pyndn.security.security_exception import SecurityException
-from pyndn.security.security_types import KeyType
+from pyndn.security.security_types import KeyType, DigestAlgorithm
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.certificate import PublicKey, CertificateSubjectDescription
 
@@ -312,34 +312,30 @@ class IdentityManager(object):
 
         if isinstance(target, Data):
             data = target
-            keyName = self.certificateNameToPublicKeyName(certificateName)
+            digestAlgorithm = [0]
+            signature = self._makeSignatureByCertificate(
+              certificateName, digestAlgorithm)
 
-            # For temporary usage, we support RSA + SHA256 only, but will support more.
-            data.setSignature(Sha256WithRsaSignature())
-            # Get a pointer to the clone which Data made.
-            signature = data.getSignature()
-            signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
-            signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
-
+            data.setSignature(signature)
             # Encode once to get the signed portion.
             encoding = data.wireEncode(wireFormat)
 
-            signature.setSignature(self._privateKeyStorage.sign
-              (encoding.toSignedBuffer(), keyName))
+            data.getSignature().setSignature(self._privateKeyStorage.sign
+              (encoding.toSignedBuffer(),
+               self.certificateNameToPublicKeyName(certificateName),
+               digestAlgorithm[0]))
 
             # Encode again to include the signature.
             data.wireEncode(wireFormat)
         else:
-            keyName = self.certificateNameToPublicKeyName(certificateName)
-
-            # For temporary usage, we support RSA + SHA256 only, but will support more.
-            signature = Sha256WithRsaSignature()
-
-            signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
-            signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
+            digestAlgorithm = [0]
+            signature = self._makeSignatureByCertificate(
+              certificateName, digestAlgorithm)
 
             signature.setSignature(
-              self._privateKeyStorage.sign(target, keyName))
+              self._privateKeyStorage.sign(
+                target, self.certificateNameToPublicKeyName(certificateName),
+                digestAlgorithm[0]))
 
             return signature
 
@@ -414,3 +410,27 @@ class IdentityManager(object):
         certificate.encode()
 
         return certificate
+
+    def _makeSignatureByCertificate(self, certificateName, digestAlgorithm):
+        """
+        Return a new Signature object based on the signature algorithm of the
+        public key with keyName (derived from certificateName).
+
+        :param Name certificateName: The full certificate name.
+        :param Array digestAlgorithm: Set digestAlgorithm[0] to the signature
+          algorithm's digest algorithm, e.g. DigestAlgorithm.SHA256 .
+        :return: The related public key name.
+        :rtype: Signature
+        """
+        keyName = self.certificateNameToPublicKeyName(certificateName)
+        publicKey = self._privateKeyStorage.getPublicKey(keyName)
+
+        # For temporary usage, we support RSA + SHA256 only, but will support more.
+        signature = Sha256WithRsaSignature()
+        digestAlgorithm[0] = DigestAlgorithm.SHA256
+
+        signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+        signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
+
+        return signature
+
