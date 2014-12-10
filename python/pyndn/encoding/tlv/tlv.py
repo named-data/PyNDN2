@@ -63,6 +63,7 @@ class Tlv(object):
 
     SignatureType_DigestSha256 = 0
     SignatureType_SignatureSha256WithRsa = 1
+    SignatureType_SignatureSha256WithEcdsa = 3
 
     ContentType_Default = 0
     ContentType_Link = 1
