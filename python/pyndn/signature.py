@@ -36,6 +36,32 @@ class Signature(object):
         """
         raise RuntimeError("Signature.clone is not implemented")
 
+    def getSignature(self):
+        """
+        Get the data packet's signature bytes.
+        Your derived class should override.
+
+        :return: The signature bytes as a Blob, which maybe isNull().
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("Signature.getSignature is not implemented")
+
+    def setSignature(self, signature):
+        """
+        Set the signature bytes to the given value.
+        Your derived class should override.
+
+        :param signature: The array with the signature bytes. If signature is
+          not a Blob, then create a new Blob to copy the bytes (otherwise
+          take another pointer to the same Blob).
+        :type signature: A Blob or an array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("Signature.setSignature is not implemented")
+
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object
