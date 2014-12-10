@@ -281,48 +281,14 @@ class KeyChain(object):
         :rtype: An object of a subclass of Signature
         """
         if isinstance(target, Interest):
-            self._signInterest(target, certificateName, wireFormat)
+            self._identityManager.signInterestByCertificate(
+              target, certificateName, wireFormat)
         elif isinstance(target, Data):
             self._identityManager.signByCertificate(
               target, certificateName, wireFormat)
         else:
             return self._identityManager.signByCertificate(
               target, certificateName)
-
-    def _signInterest(self, interest, certificateName, wireFormat = None):
-        """
-        Append a SignatureInfo to the Interest name, sign the name components
-        and append a final name component with the signature bits.
-
-        :param Interest interest: The Interest object to be signed. This appends
-          name components of SignatureInfo and the signature bits.
-        :param Name certificateName: The certificate name of the key to use for
-          signing.
-        :param wireFormat: (optional) A WireFormat object used to encode the
-           input. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat
-        """
-        if wireFormat == None:
-            # Don't use a default argument since getDefaultWireFormat can change.
-            wireFormat = WireFormat.getDefaultWireFormat()
-
-        # TODO: Handle signature algorithms other than Sha256WithRsa.
-        signature = Sha256WithRsaSignature()
-        signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
-        signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
-
-        # Append the encoded SignatureInfo.
-        interest.getName().append(wireFormat.encodeSignatureInfo(signature))
-
-        # Append an empty signature so that the "signedPortion" is correct.
-        interest.getName().append(Name.Component())
-        # Encode once to get the signed portion.
-        encoding = interest.wireEncode(wireFormat)
-        signedSignature = self.sign(encoding.toSignedBuffer(), certificateName)
-
-        # Remove the empty signature and append the real one.
-        interest.setName(interest.getName().getPrefix(-1).append(
-          wireFormat.encodeSignatureValue(signedSignature)))
 
     def signByIdentity(self, target, identityName = None, wireFormat = None):
         """
