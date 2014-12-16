@@ -162,7 +162,7 @@ class Certificate(Data):
 
     def decode(self):
         """
-            Populates the fields by decoding DER data from the Content.
+        Populates the fields by decoding DER data from the Content.
         """
         root = DerNode.parse(self.getContent())
 
@@ -174,12 +174,12 @@ class Certificate(Data):
 
         rootChildren = root.getChildren()
         # 1st: validity info
-        validityChildren = rootChildren[0].getChildren()
+        validityChildren = DerNode.getSequence(rootChildren, 0).getChildren()
         self._notBefore = validityChildren[0].toVal()
         self._notAfter = validityChildren[1].toVal()
 
         # 2nd: subjectList
-        subjectChildren = rootChildren[1].getChildren()
+        subjectChildren = DerNode.getSequence(rootChildren, 1).getChildren()
         for sd in subjectChildren:
             descriptionChildren = sd.getChildren()
             oidStr = descriptionChildren[0].toVal()
@@ -193,7 +193,7 @@ class Certificate(Data):
         self._publicKey = PublicKey(KeyType.RSA, publicKeyInfo)
 
         if len(rootChildren) > 3:
-            extensionChildren = rootChildren[3]
+            extensionChildren = DerNode.getSequence(rootChildren, 3).getChildren()
             for extInfo in extensionChildren:
                 children = extInfo.getChildren()
                 oidStr = children[0].toVal()

@@ -184,6 +184,29 @@ class DerNode (object):
         """
         return self.encode()
 
+    @staticmethod
+    def getSequence(children, index):
+        """
+        Check that index is in bounds for the children list, and return
+        children[index].
+        :param children: The list of DerNode, usually returned by another
+          call to getChildren.
+        :type children: array of DerNode
+        :param int index: The index of the children.
+        :return: children[index] which is a DerSequence
+        :rtype: DerSequence
+        :raises: DerDecodingException if index is out of bounds or if
+          children[index] is not a DerSequence.
+        """
+        if index < 0 or index >= len(children):
+            raise DerDecodingException("getSequence: Child index is out of bounds")
+
+        if not (type(children[index]) is DerSequence):
+            raise DerDecodingException(
+              "getSequence: Child DerNode is not a DerSequence")
+
+        return children[index]
+
 class DerStructure(DerNode):
     def __init__(self, nodeType):
        """
