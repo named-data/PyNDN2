@@ -184,6 +184,16 @@ class DerNode (object):
         """
         return self.encode()
 
+    def getChildren(self):
+        """
+        If this object is a DerSequence, get the children of this node. Otherwise,
+        raise an exception. (DerSequence overrides to implement this method.)
+        :return: The children of this node
+        :rtype: array of DerNode
+        :raises: DerDecodingException if this object is not a DerSequence.
+        """
+        raise DerDecodingException("getChildren: This DerNode is not DerSequence")
+
     @staticmethod
     def getSequence(children, index):
         """
