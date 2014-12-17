@@ -24,9 +24,11 @@ for use by the security library.
 
 from Crypto.PublicKey import RSA
 from pyndn.util import Blob
+from pyndn.encoding.der.der_node import DerNode
+from pyndn.encoding.der.der_exceptions import DerDecodingException
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
-from pyndn.security.security_exception import SecurityException
+from pyndn.security.security_exception import SecurityException, UnrecognizedKeyFormatException
 
 from pyndn.encoding.der import DerNode
 
@@ -34,17 +36,44 @@ from Crypto.Hash import SHA256
 
 class PublicKey(object):
     """
-    Create a new PublicKey with the given values.
+    Create a new PublicKey by decoding the keyDer. Set the key type from the
+    decoding.
 
-    :param keyType: The KeyType, such as KeyType.RSA.
-    :type keyType: an int from KeyType
     :param Blob keyDer: The blob of the PublicKeyInfo in terms of DER.
+    :raises: UnrecognizedKeyFormatException if can't decode the key DER.
     """
-    def __init__(self, keyType, keyDer):
-        self._keyType = keyType
+    def __init__(self, keyDer = None):
+        # TODO: Implementation of managed properties?
+
+        if keyDer == None:
+            self._keyDer = Blob()
+            self._keyType = None
+            return
+        
         self._keyDer = keyDer
 
-        # TODO: Implementation of managed properties?
+        # Get the public key OID.
+        oidString = ""
+        try:
+            parsedNode = DerNode.parse(keyDer.buf(), 0)
+            rootChildren = parsedNode.getChildren()
+            algorithmIdChildren = DerNode.getSequence(
+              rootChildren, 0).getChildren()
+            oidString = algorithmIdChildren[0].toVal()
+        except DerDecodingException as ex:
+          raise UnrecognizedKeyFormatException(
+            "PublicKey.decodeKeyType: Error decoding the public key" + ex)
+
+        # Verify that the we can decode.
+        if oidString == self.RSA_ENCRYPTION_OID:
+            self._keyType = KeyType.RSA
+            RSA.importKey(keyDer.toRawStr())
+        elif oidString == self.EC_ENCRYPTION_OID:
+            self._keyType = KeyType.EC
+            # TODO: Check EC decoding.
+        else:
+            raise UnrecognizedKeyFormatException(
+              "PublicKey.decodeKeyType: Unrecognized OID")
 
     def toDer(self):
         """
@@ -54,24 +83,6 @@ class PublicKey(object):
         :rtype: DerNode
         """
         return DerNode.parse(self._keyDer)
-
-    @staticmethod
-    def fromDer(keyType, keyDer):
-        """
-        Decode the public key from DER blob.
-
-        :param keyType: The KeyType, such as KeyType.RSA.
-        :type keyType: an int from KeyType
-        :param Blob keyDer: The DER blob.
-        :return: The decoded public key.
-        :rtype: PublicKey
-        """
-        if keyType == KeyType.RSA:
-            RSA.importKey(keyDer.toRawStr())
-        else:
-            raise SecurityException("PublicKey::fromDer: Unrecognized keyType")
-
-        return PublicKey(keyType, keyDer)
 
     def getDigest(self, digestAlgorithm = DigestAlgorithm.SHA256):
         """
@@ -109,4 +120,7 @@ class PublicKey(object):
         :rtype: Blob
         """
         return self._keyDer
+
+    RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
+    EC_ENCRYPTION_OID = "1.2.840.10045.2.1"
 
