@@ -250,32 +250,6 @@ class BasicIdentityStorage(IdentityStorage):
         cursor.close()
         return Blob(bytearray(keyData))
 
-    def getKeyType(self, keyName):
-        """
-        Get the KeyType of the public key with the given keyName.
-
-        :param Name keyName: The name of the requested public key.
-        :return: The KeyType, for example KeyType.RSA.
-        :rtype: an int from KeyType
-        """
-        keyId = keyName[-1].toEscapedString()
-        identityName = keyName[:-1]
-
-        cursor = self._database.cursor()
-        cursor.execute(
-          "SELECT key_type FROM Key WHERE identity_name=? AND key_identifier=?",
-          (identityName.toUri(), keyId))
-        row = cursor.fetchone()
-
-        if row != None:
-            (keyType,) = row
-            cursor.close()
-            return keyType
-        else:
-            cursor.close()
-            raise SecurityException(
-              "Cannot get public key type because the keyName doesn't exist")
-
     def activateKey(self, keyName):
         """
         Activate a key. If a key is marked as inactive, its private part will
