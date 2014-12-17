@@ -23,13 +23,13 @@ to report an exception from the security library.
 """
 
 class SecurityException(Exception):
-    def __init__(message):
+    def __init__(self, message):
         super(SecurityException, self).__init__(message)
 
 class UnrecognizedKeyFormatException(SecurityException):
-    def __init__(message):
+    def __init__(self, message):
         super(UnrecognizedKeyFormatException, self).__init__(message)
 
 class UnrecognizedDigestAlgorithmException(SecurityException):
-    def __init__(message):
+    def __init__(self, message):
         super(UnrecognizedDigestAlgorithmException, self).__init__(message)
