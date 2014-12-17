@@ -190,7 +190,7 @@ class Certificate(Data):
 
         # 3rd: public key
         publicKeyInfo = rootChildren[2].encode()
-        self._publicKey = PublicKey(KeyType.RSA, publicKeyInfo)
+        self._publicKey = PublicKey(publicKeyInfo)
 
         if len(rootChildren) > 3:
             extensionChildren = DerNode.getSequence(rootChildren, 3).getChildren()

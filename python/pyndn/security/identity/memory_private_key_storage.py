@@ -53,8 +53,8 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :type publicKeyDer: str, or an array type with int elements which is
           converted to str
         """
-        self._publicKeyStore[keyName.toUri()] = PublicKey.fromDer(
-          keyType, Blob(publicKeyDer, True))
+        self._publicKeyStore[keyName.toUri()] = PublicKey(
+          Blob(publicKeyDer, True))
 
     def setPrivateKeyForKeyName(self, keyName, keyType, privateKeyDer):
         """

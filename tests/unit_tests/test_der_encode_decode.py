@@ -132,7 +132,7 @@ class TestCertificate(ut.TestCase):
         cert._notAfter = 1388100174000L
 
         cert.addSubjectDescription(CertificateSubjectDescription(TEST_OID, "TEST NAME"))
-        key = PublicKey(KeyType.RSA, Blob(PUBLIC_KEY))
+        key = PublicKey(Blob(PUBLIC_KEY))
 
         cert._publicKey = key
         self.toyCert = cert

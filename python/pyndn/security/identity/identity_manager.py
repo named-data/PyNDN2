@@ -190,9 +190,7 @@ class IdentityManager(object):
         :return: The public key.
         :rtype: PublicKey
         """
-        return PublicKey.fromDer(
-          self._identityStorage.getKeyType(keyName),
-          self._identityStorage.getKey(keyName))
+        return PublicKey(self._identityStorage.getKey(keyName))
 
     # TODO: Add two versions of createIdentityCertificate.
 
@@ -420,9 +418,8 @@ class IdentityManager(object):
     def _generateCertificateForKey(self, keyName):
         # Let any raised SecurityExceptions bubble up.
         publicKeyBits = self._identityStorage.getKey(keyName)
-        publicKeyType = self._identityStorage.getKeyType(keyName)
 
-        publicKey = PublicKey(publicKeyType, publicKeyBits)
+        publicKey = PublicKey(publicKeyBits)
 
         timestamp = Common.getNowMilliseconds()
 

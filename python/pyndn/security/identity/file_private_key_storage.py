@@ -126,7 +126,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         if not type(der) is str:
             der = "".join(map(chr, der))
 
-        return PublicKey.fromDer(KeyType.RSA, Blob(der, False))
+        return PublicKey(Blob(der, False))
 
     def sign(self, data, keyName, digestAlgorithm = DigestAlgorithm.SHA256):
         """

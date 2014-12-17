@@ -151,8 +151,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             blob = self._CFDataToBlob(exportedKey)
             print "blob", blob.toHex()
 
-            # TODO: Need to get the correct KeyType.
-            return PublicKey.fromDer(KeyType.RSA, blob)
+            return PublicKey(blob)
         finally:
             if publicKey != None:
                 cf.CFRelease(publicKey)
