@@ -185,13 +185,11 @@ class Tlv0_1_1WireFormat(WireFormat):
         saveLength = len(encoder)
 
         # Encode backwards.
-        # TODO: The library needs to handle other signature types than
-        #   SignatureSha256WithRsa.
         encoder.writeBlobTlv(Tlv.SignatureValue,
                              data.getSignature().getSignature().buf())
         signedPortionEndOffsetFromBack = len(encoder)
 
-        self._encodeSignatureSha256WithRsa(data.getSignature(), encoder)
+        self._encodeSignatureInfo(data.getSignature(), encoder)
         encoder.writeBlobTlv(Tlv.Content, data.getContent().buf())
         self._encodeMetaInfo(data.getMetaInfo(), encoder)
         self._encodeName(data.getName(), encoder)
@@ -369,8 +367,7 @@ class Tlv0_1_1WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
-        # TODO: This assumes it is a Sha256WithRsaSignature.
-        self._encodeSignatureSha256WithRsa(signature, encoder)
+        self._encodeSignatureInfo(signature, encoder)
 
         return Blob(encoder.getOutput(), False)
 
@@ -652,14 +649,25 @@ class Tlv0_1_1WireFormat(WireFormat):
         decoder.finishNestedTlvs(endOffset)
 
     @staticmethod
-    def _encodeSignatureSha256WithRsa(signature, encoder):
+    def _encodeSignatureInfo(signature, encoder):
+        """
+        An internal method to encode signature as the appropriate form of
+        SignatureInfo in NDN-TLV.
+
+        :param Signature signature: An object of a subclass of Signature to encode.
+        :param TlvEncoder encoder: The TlvEncoder to receive the encoding.
+        """
         saveLength = len(encoder)
 
-        # Encode backwards.
-        Tlv0_1_1WireFormat._encodeKeyLocator(
-          Tlv.KeyLocator, signature.getKeyLocator(), encoder)
-        encoder.writeNonNegativeIntegerTlv(
-          Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
+        if type(signature) is Sha256WithRsaSignature:
+            # Encode backwards.
+            Tlv0_1_1WireFormat._encodeKeyLocator(
+              Tlv.KeyLocator, signature.getKeyLocator(), encoder)
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
+        else:
+            raise RuntimeError(
+              "encodeSignatureInfo: Unrecognized Signature object type")
 
         encoder.writeTypeAndLength(Tlv.SignatureInfo, len(encoder) - saveLength)
 
