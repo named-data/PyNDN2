@@ -126,6 +126,23 @@ class KeyLocator(object):
         self._keyData = Blob()
         self._changeCount += 1
 
+    @staticmethod
+    def getFromSignature(signature):
+        """
+        If the signature is a type that has a KeyLocator, then return it. Otherwise
+        throw an error.
+
+        :param Signature signature: An object of a subclass of Signature.
+        :return: The signature's KeyLocator. It is an error if signature doesn't
+          have a KeyLocator.
+        :rtype: KeyLocator
+        """
+        if type(signature) is Sha256WithRsaSignature:
+            return signature.getKeyLocator()
+        else:
+            raise RuntimeError(
+              "KeyLocator.getFromSignature: Signature type does not have a KeyLocator")
+
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object
@@ -164,3 +181,6 @@ class KeyLocatorType(object):
     """
     KEYNAME = 1
     KEY_LOCATOR_DIGEST = 2
+
+# Put this last to avoid an import loop.
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
