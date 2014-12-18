@@ -69,6 +69,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
 
         self._kSecAttrKeyTypeAES = c_void_p.in_dll(self._security, "kSecAttrKeyTypeAES")
         self._kSecAttrKeyTypeRSA = c_void_p.in_dll(self._security, "kSecAttrKeyTypeRSA")
+        self._kSecAttrKeyTypeECDSA = c_void_p.in_dll(self._security, "kSecAttrKeyTypeECDSA")
         self._kSecAttrKeyClassPrivate = c_void_p.in_dll(self._security, "kSecAttrKeyClassPrivate")
         self._kSecAttrKeyClassPublic = c_void_p.in_dll(self._security, "kSecAttrKeyClassPublic")
         self._kSecAttrKeyClassSymmetric = c_void_p.in_dll(self._security, "kSecAttrKeyClassSymmetric")
@@ -380,6 +381,8 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         """
         if keyType == KeyType.RSA:
           return self._kSecAttrKeyTypeRSA
+        if keyType == KeyType.EC:
+          return self._kSecAttrKeyTypeECDSA
         else:
           logging.getLogger(__name__).debug("Unrecognized key type!")
           return None
