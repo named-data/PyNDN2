@@ -22,6 +22,8 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from pyndn.util import Blob
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.security.security_exception import SecurityException
 
 """
 This module defines the PolicyManager class which is an abstract base class to
@@ -118,6 +120,30 @@ class PolicyManager(object):
         raise RuntimeError("inferSigningIdentity is not implemented")
 
     @staticmethod
+    def verifySignature(signature, signedBlob, publicKeyDer):
+        """
+        Check the type of signature and use the publicKeyDer to verify the
+        signedBlob using the appropriate signature algorithm.
+
+        :param Blob signature: An object of a subclass of Signature, e.g.
+          Sha256WithRsaSignature.
+        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
+        verify.
+        :param Blob publicKeyDer: The DER-encoded public key used to verify the
+          signature.
+        :return: True if the signature verifies, False if not.
+        :rtype: boolean
+        :raises: SecurityException if the signature type is not recognized or if
+          publicKeyDer can't be decoded.
+        """
+        if isinstance(signature, Sha256WithRsaSignature):
+            return PolicyManager._verifySha256WithRsaSignature(
+              signature.getSignature(), signedBlob, publicKeyDer)
+        else:
+            raise SecurityException(
+              "PolicyManager.verify: Signature type is unknown")
+
+    @staticmethod
     def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
         """
         Verify the signature on the SignedBlob using the given public key.
@@ -136,7 +162,11 @@ class PolicyManager(object):
             publicKeyDerBytes = publicKeyDer.toRawStr()
         else:
             publicKeyDerBytes = publicKeyDer.toBuffer()
-        publicKey = RSA.importKey(publicKeyDerBytes)
+        publicKey = None
+        try:
+            publicKey = RSA.importKey(publicKeyDerBytes)
+        except:
+            raise SecurityException("Cannot decode RSA public key")
 
         # Get the bytes to verify.
         # wireEncode returns the cached encoding if available.
