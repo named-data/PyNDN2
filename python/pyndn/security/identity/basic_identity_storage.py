@@ -338,12 +338,8 @@ class BasicIdentityStorage(IdentityStorage):
 
         # Insert the certificate.
 
-        # TODO: Support signature types other than Sha256WithRsaSignature.
         signature = certificate.getSignature()
-        if not isinstance(signature, Sha256WithRsaSignature):
-            raise SecurityException(
-              "BasicIdentityStorage: addCertificate: Signature is not Sha256WithRsaSignature.")
-        signerName = signature.getKeyLocator().getKeyName()
+        signerName = KeyLocator.getFromSignature(signature).getKeyName()
         # Convert from milliseconds to seconds since 1/1/1970.
         notBefore = int(math.floor(certificate.getNotBefore() / 1000.0))
         notAfter = int(math.floor(certificate.getNotAfter() / 1000.0))
