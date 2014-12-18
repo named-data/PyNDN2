@@ -228,8 +228,6 @@ class Tlv0_1_1WireFormat(WireFormat):
         self._decodeSignatureInfo(data, decoder)
 
         signedPortionEndOffset = decoder.getOffset()
-        # TODO: The library needs to handle other signature types than
-        #   SignatureSha256WithRsa.
         data.getSignature().setSignature(Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
 
         decoder.finishNestedTlvs(endOffset)
@@ -399,8 +397,6 @@ class Tlv0_1_1WireFormat(WireFormat):
         self._decodeSignatureInfo(signatureHolder, decoder)
 
         decoder = TlvDecoder(signatureValue)
-        # TODO: The library needs to handle other signature types than
-        #   SignatureSha256WithRsa.
         signatureHolder.getSignature().setSignature(
           Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
 
@@ -418,7 +414,6 @@ class Tlv0_1_1WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
-        # TODO: This assumes it is a Sha256WithRsaSignature.
         encoder.writeBlobTlv(Tlv.SignatureValue, signature.getSignature().buf())
 
         return Blob(encoder.getOutput(), False)
@@ -676,8 +671,6 @@ class Tlv0_1_1WireFormat(WireFormat):
         endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
 
         signatureType = decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
-        # TODO: The library needs to handle other signature types than
-        #     SignatureSha256WithRsa.
         if signatureType == Tlv.SignatureType_SignatureSha256WithRsa:
             data.setSignature(Sha256WithRsaSignature())
             # Modify data's signature object because if we create an object
