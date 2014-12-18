@@ -17,20 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-import sys
 import os
-import time
 import re
 from base64 import b64decode
 
-from warnings import warn
-
-from pyndn import Name, Data, Interest
+from pyndn import Name, Data, Interest, KeyLocator
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.policy.certificate_cache import CertificateCache
 from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
-from pyndn.security.certificate.public_key import PublicKey
 from pyndn.util import Blob
 from pyndn.util.common import Common
 from pyndn.encoding import WireFormat
@@ -38,13 +33,9 @@ from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
 
-
 from pyndn.util.boost_info_parser import BoostInfoParser
 from pyndn.util.ndn_regex import NdnRegexMatcher
 
-from Crypto.Hash import SHA256
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
 """
 This module manages trust according to a configuration file in the
 Validator Configuration File Format
@@ -470,7 +461,15 @@ class ConfigPolicyManager(PolicyManager):
             onVerifyFailed(dataOrInterest)
             return None
 
-        signatureName = signature.getKeyLocator().getKeyName()
+        keyLocator = None
+        try:
+            keyLocator = KeyLocator.getFromSignature(signature);
+        except:
+            # No key locator -> fail.
+            onVerifyFailed(dataOrInterest)
+            return None
+        
+        signatureName = keyLocator.getKeyName()
         # no key name in KeyLocator -> fail
         if signatureName.size() == 0:
             onVerifyFailed(dataOrInterest)
@@ -558,14 +557,12 @@ class ConfigPolicyManager(PolicyManager):
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         """
-        signature = signatureInfo
-        if not isinstance(signature, Sha256WithRsaSignature):
-            raise SecurityException(
-           "ConfigPolicyManager: Signature is not Sha256WithRsaSignature.")
+        # We have already checked once that there is a key locator.
+        keyLocator = KeyLocator.getFromSignature(signatureInfo)
 
-        if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME):
+        if (keyLocator.getType() == KeyLocatorType.KEYNAME):
             # Assume the key name is a certificate name.
-            signatureName = signature.getKeyLocator().getKeyName()
+            signatureName = keyLocator.getKeyName()
             certificate = self._refreshManager.getCertificate(signatureName)
             if certificate is None:
                 certificate = self._certificateCache.getCertificate(signatureName)
@@ -577,8 +574,7 @@ class ConfigPolicyManager(PolicyManager):
                 # Can't find the public key with the name.
                 return False
 
-            return self._verifySha256WithRsaSignature(
-              signature.getSignature(), signedBlob, publicKeyDer)
+            return self.verifySignature(signatureInfo, signedBlob, publicKeyDer)
         else:
             # Can't find a key to verify.
             return False
