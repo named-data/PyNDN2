@@ -29,7 +29,8 @@ from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.encoding import WireFormat
-from pyndn.key_locator import KeyLocatorType
+from pyndn.util import Blob
+from pyndn.key_locator import KeyLocator, KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.policy.policy_manager import PolicyManager
@@ -161,23 +162,32 @@ class SelfVerifyPolicyManager(PolicyManager):
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         """
-        signature = signatureInfo
-        if not isinstance(signature, Sha256WithRsaSignature):
+        if not isinstance(signatureInfo, Sha256WithRsaSignature):
             raise SecurityException(
            "SelfVerifyPolicyManager: Signature is not Sha256WithRsaSignature.")
 
-        if (signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME and
+        publicKeyDer = self._getPublicKeyDer(
+          KeyLocator.getFromSignature(signatureInfo))
+        if publicKeyDer.isNull():
+            return False
+
+        return self._verifySha256WithRsaSignature(
+          signatureInfo.getSignature(), signedBlob, publicKeyDer)
+
+    def _getPublicKeyDer(self, keyLocator):
+        """
+        Look in the IdentityStorage for the public key with the name in the
+        KeyLocator. If the public key can't be found, return and empty Blob.
+
+        :param KeyLocator keyLocator: The KeyLocator.
+        :return: The public key DER or an empty Blob if not found.
+        :rtype: Blob
+        """
+        if (keyLocator.getType() == KeyLocatorType.KEYNAME and
             self._identityStorage != None):
             # Assume the key name is a certificate name.
-            publicKeyDer = self._identityStorage.getKey(
+            return self._identityStorage.getKey(
               IdentityCertificate.certificateNameToPublicKeyName(
-                signature.getKeyLocator().getKeyName()))
-            if publicKeyDer.isNull():
-                # Can't find the public key with the name.
-                return False
-
-            return self._verifySha256WithRsaSignature(
-              signature.getSignature(), signedBlob, publicKeyDer)
+                keyLocator.getKeyName()))
         else:
-            # Can't find a key to verify.
-            return False
+            return Blob()
