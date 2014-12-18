@@ -184,19 +184,22 @@ def dumpData(data):
          data.getMetaInfo().getFinalBlockId().toEscapedString()
          if data.getMetaInfo().getFinalBlockId().getValue().size() > 0
          else "<none>")
+    keyLocator = None
     signature = data.getSignature()
     if type(signature) is Sha256WithRsaSignature:
-        dump("signature.signature:",
+        dump("Sha256WithRsa signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
-        if signature.getKeyLocator().getType() != None:
-            if (signature.getKeyLocator().getType() ==
+        keyLocator = signature.getKeyLocator()
+    if keyLocator != None:
+        if keyLocator.getType() != None:
+            if (keyLocator.getType() ==
                 KeyLocatorType.KEY_LOCATOR_DIGEST):
                 dump("signature.keyLocator: KeyLocatorDigest:",
-                     signature.getKeyLocator().getKeyData().toHex())
-            elif signature.getKeyLocator().getType() == KeyLocatorType.KEYNAME:
+                     keyLocator.getKeyData().toHex())
+            elif keyLocator.getType() == KeyLocatorType.KEYNAME:
                 dump("signature.keyLocator: KeyName:",
-                     signature.getKeyLocator().getKeyName().toUri())
+                     keyLocator.getKeyName().toUri())
             else:
                 dump("signature.keyLocator: <unrecognized KeyLocatorType")
         else:
