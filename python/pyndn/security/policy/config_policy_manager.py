@@ -578,7 +578,7 @@ class ConfigPolicyManager(PolicyManager):
                 return False
 
             return self._verifySha256WithRsaSignature(
-              signature, signedBlob, publicKeyDer)
+              signature.getSignature(), signedBlob, publicKeyDer)
         else:
             # Can't find a key to verify.
             return False

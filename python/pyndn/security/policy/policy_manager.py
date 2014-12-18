@@ -122,7 +122,7 @@ class PolicyManager(object):
         """
         Verify the signature on the SignedBlob using the given public key.
 
-        :param Sha256WithRsaSignature signature: The Sha256WithRsaSignature.
+        :param Blob signature: The signature bits.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
         verify.
         :param Blob publicKeyDer: The DER-encoded public key used to verify the
@@ -148,9 +148,9 @@ class PolicyManager(object):
 
         # Convert the signature bits to a raw string or bytes as required.
         if _PyCryptoUsesStr:
-            signatureBits = signature.getSignature().toRawStr()
+            signatureBits = signature.toRawStr()
         else:
-            signatureBits = bytes(signature.getSignature().buf())
+            signatureBits = bytes(signature.buf())
 
         # Hash and verify.
         return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion),
