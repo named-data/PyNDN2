@@ -35,12 +35,12 @@ from pyndn.encoding.tlv.tlv import Tlv
 _systemRandom = SystemRandom()
 
 """
-This module defines the Tlv0_1WireFormat class which extends WireFormat to
+This module defines the Tlv0_1_1WireFormat class which extends WireFormat to
 override its methods to implment encoding and decoding Interest, Data, etc.
-with the NDN-TLV wire format, version 0.1a2.
+with the NDN-TLV wire format, version 0.1.1.
 """
 
-class Tlv0_1WireFormat(WireFormat):
+class Tlv0_1_1WireFormat(WireFormat):
     _instance = None
 
     def encodeName(self, name):
@@ -429,14 +429,14 @@ class Tlv0_1WireFormat(WireFormat):
     @classmethod
     def get(self):
         """
-        Get a singleton instance of a Tlv0_1WireFormat.  To always use the
+        Get a singleton instance of a Tlv0_1_1WireFormat.  To always use the
         preferred version NDN-TLV, you should use TlvWireFormat.get().
 
         :return: The singleton instance.
-        :rtype: Tlv0_1WireFormat
+        :rtype: Tlv0_1_1WireFormat
         """
         if self._instance == None:
-            self._instance = Tlv0_1WireFormat()
+            self._instance = Tlv0_1_1WireFormat()
         return self._instance
 
     @staticmethod
@@ -522,9 +522,9 @@ class Tlv0_1WireFormat(WireFormat):
         encoder.writeOptionalNonNegativeIntegerTlv(
           Tlv.ChildSelector, interest.getChildSelector())
         if interest.getExclude().size() > 0:
-            Tlv0_1WireFormat._encodeExclude(interest.getExclude(), encoder)
+            Tlv0_1_1WireFormat._encodeExclude(interest.getExclude(), encoder)
         if interest.getKeyLocator().getType() != None:
-            Tlv0_1WireFormat._encodeKeyLocator(
+            Tlv0_1_1WireFormat._encodeKeyLocator(
               Tlv.PublisherPublicKeyLocator, interest.getKeyLocator(), encoder)
         encoder.writeOptionalNonNegativeIntegerTlv(
           Tlv.MaxSuffixComponents, interest.getMaxSuffixComponents())
@@ -547,13 +547,13 @@ class Tlv0_1WireFormat(WireFormat):
             (Tlv.MaxSuffixComponents, endOffset))
 
         if decoder.peekType(Tlv.PublisherPublicKeyLocator, endOffset):
-            Tlv0_1WireFormat._decodeKeyLocator(
+            Tlv0_1_1WireFormat._decodeKeyLocator(
               Tlv.PublisherPublicKeyLocator, interest.getKeyLocator(), decoder)
         else:
             interest.getKeyLocator().clear()
 
         if decoder.peekType(Tlv.Exclude, endOffset):
-            Tlv0_1WireFormat._decodeExclude(interest.getExclude(), decoder)
+            Tlv0_1_1WireFormat._decodeExclude(interest.getExclude(), decoder)
         else:
             interest.getExclude().clear()
 
@@ -656,7 +656,7 @@ class Tlv0_1WireFormat(WireFormat):
         saveLength = len(encoder)
 
         # Encode backwards.
-        Tlv0_1WireFormat._encodeKeyLocator(
+        Tlv0_1_1WireFormat._encodeKeyLocator(
           Tlv.KeyLocator, signature.getKeyLocator(), encoder)
         encoder.writeNonNegativeIntegerTlv(
           Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
@@ -675,7 +675,7 @@ class Tlv0_1WireFormat(WireFormat):
             # Modify data's signature object because if we create an object
             #   and set it, then data will have to copy all the fields.
             signatureInfo = data.getSignature()
-            Tlv0_1WireFormat._decodeKeyLocator(
+            Tlv0_1_1WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),
               decoder)
         else:
@@ -692,7 +692,7 @@ class Tlv0_1WireFormat(WireFormat):
         # Encode backwards.
         if keyLocator.getType() != None:
             if keyLocator.getType() == KeyLocatorType.KEYNAME:
-                Tlv0_1WireFormat._encodeName(keyLocator.getKeyName(), encoder)
+                Tlv0_1_1WireFormat._encodeName(keyLocator.getKeyName(), encoder)
             elif (keyLocator.getType() == KeyLocatorType.KEY_LOCATOR_DIGEST and
                   len(keyLocator.getKeyData()) > 0):
                 encoder.writeBlobTlv(Tlv.KeyLocatorDigest,
@@ -716,7 +716,7 @@ class Tlv0_1WireFormat(WireFormat):
         if decoder.peekType(Tlv.Name, endOffset):
             # KeyLocator is a Name.
             keyLocator.setType(KeyLocatorType.KEYNAME)
-            Tlv0_1WireFormat._decodeName(keyLocator.getKeyName(), decoder)
+            Tlv0_1_1WireFormat._decodeName(keyLocator.getKeyName(), decoder)
         elif decoder.peekType(Tlv.KeyLocatorDigest, endOffset):
             # KeyLocator is a KeyLocatorDigest.
             keyLocator.setType(KeyLocatorType.KEY_LOCATOR_DIGEST)

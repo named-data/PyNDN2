@@ -18,15 +18,15 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn.encoding.wire_format import WireFormat
-from pyndn.encoding.tlv_0_1_wire_format import Tlv0_1WireFormat
+from pyndn.encoding.tlv_0_1_1_wire_format import Tlv0_1_1WireFormat
 
 """
-This module defines the TlvWireFormat class which extends Tlv0_1WireFormat to
-override its methods to implement encoding and decoding using the preferred
+This module defines the TlvWireFormat class which extends WireFormat to override
+its methods to implement encoding and decoding using the preferred
 implementation of NDN-TLV.
 """
 
-class TlvWireFormat(Tlv0_1WireFormat):
+class TlvWireFormat(Tlv0_1_1WireFormat):
     _instance = None
 
     @classmethod

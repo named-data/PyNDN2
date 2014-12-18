@@ -5,14 +5,14 @@
 # See COPYING for copyright and distribution information.
 
 # Don't include internal modules.
-from pyndn.encoding import tlv_0_1_wire_format, tlv_wire_format, wire_format
-__all__ = ['tlv_0_1_wire_format', 'tlv_wire_format', 'wire_format']
+from pyndn.encoding import tlv_0_1_1_wire_format, tlv_wire_format, wire_format
+__all__ = ['tlv_0_1_1_wire_format', 'tlv_wire_format', 'wire_format']
 
 import sys as _sys
 
 try:
     from pyndn.encoding.protobuf_tlv import *
-    from pyndn.encoding.tlv_0_1_wire_format import *
+    from pyndn.encoding.tlv_0_1_1_wire_format import *
     from pyndn.encoding.tlv_wire_format import *
     from pyndn.encoding.wire_format import *
 except ImportError:
