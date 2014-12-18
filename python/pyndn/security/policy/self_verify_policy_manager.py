@@ -31,8 +31,6 @@ from pyndn.data import Data
 from pyndn.encoding import WireFormat
 from pyndn.util import Blob
 from pyndn.key_locator import KeyLocator, KeyLocatorType
-from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
-from pyndn.security.security_exception import SecurityException
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 
@@ -162,17 +160,13 @@ class SelfVerifyPolicyManager(PolicyManager):
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         """
-        if not isinstance(signatureInfo, Sha256WithRsaSignature):
-            raise SecurityException(
-           "SelfVerifyPolicyManager: Signature is not Sha256WithRsaSignature.")
-
         publicKeyDer = self._getPublicKeyDer(
           KeyLocator.getFromSignature(signatureInfo))
         if publicKeyDer.isNull():
             return False
 
-        return self._verifySha256WithRsaSignature(
-          signatureInfo.getSignature(), signedBlob, publicKeyDer)
+        return self.verifySignature(
+          signatureInfo, signedBlob, publicKeyDer)
 
     def _getPublicKeyDer(self, keyLocator):
         """
