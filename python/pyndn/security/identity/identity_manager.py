@@ -458,13 +458,15 @@ class IdentityManager(object):
         """
         keyName = self.certificateNameToPublicKeyName(certificateName)
         publicKey = self._privateKeyStorage.getPublicKey(keyName)
+        keyType = publicKey.getKeyType()
 
-        # For temporary usage, we support RSA + SHA256 only, but will support more.
-        signature = Sha256WithRsaSignature()
-        digestAlgorithm[0] = DigestAlgorithm.SHA256
+        if keyType == KeyType.RSA:
+            signature = Sha256WithRsaSignature()
+            digestAlgorithm[0] = DigestAlgorithm.SHA256
 
-        signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
-        signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
+            signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+            signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
 
-        return signature
-
+            return signature
+        else:
+            raise SecurityException("Key type is not recognized")
