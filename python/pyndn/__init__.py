@@ -21,10 +21,12 @@
 
 from pyndn import control_parameters, data, exclude, face, forwarding_entry
 from pyndn import forwarding_flags, interest, key_locator, meta_info, name
-from pyndn import sha256_with_rsa_signature, signature, threadsafe_face
+from pyndn import digest_sha256_signature, sha256_with_rsa_signature, signature
+from pyndn import threadsafe_face
 __all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_entry',
            'forwarding_flags', 'interest', 'key_locator', 'meta_info', 'name',
-           'sha256_with_rsa_signature', 'signature', 'threadsafe_face']
+           'digest_sha256_signature', 'sha256_with_rsa_signature', 'signature',
+           'threadsafe_face']
 
 import sys as _sys
 
@@ -39,6 +41,7 @@ try:
     from pyndn.key_locator import *
     from pyndn.meta_info import *
     from pyndn.name import *
+    from pyndn.digest_sha256_signature import *
     from pyndn.sha256_with_rsa_signature import *
     from pyndn.signature import *
     from pyndn.threadsafe_face import *
