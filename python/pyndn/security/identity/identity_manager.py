@@ -24,12 +24,15 @@ operations related to identity, keys, and certificates.
 """
 
 import sys
+from Crypto.Hash import SHA256
 from pyndn.name import Name
 from pyndn.data import Data
 from pyndn.util.common import Common
+from pyndn.util.blob import Blob
 from pyndn.encoding import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.key_locator import KeyLocatorType
+from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStorage
 from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
@@ -369,6 +372,75 @@ class IdentityManager(object):
           (encoding.toSignedBuffer(),
            self.certificateNameToPublicKeyName(certificateName),
            digestAlgorithm[0]))
+
+        # Remove the empty signature and append the real one.
+        interest.setName(interest.getName().getPrefix(-1).append(
+          wireFormat.encodeSignatureValue(signature)))
+
+    def signWithSha256(self, data, wireFormat = None):
+        """
+        Wire encode the Data object, digest it and set its SignatureInfo to a
+        DigestSha256.
+
+        :param Data data: The Data object to be signed. This updates its
+          signature and wireEncoding.
+        :param wireFormat: (optional) A WireFormat object used to encode the
+           input. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        data.setSignature(DigestSha256Signature())
+        # Encode once to get the signed portion.
+        encoding = data.wireEncode(wireFormat)
+
+        # Get the bytes to sign.
+        signedPortion = encoding.toSignedBuffer()
+        if sys.version_info[0] == 2:
+            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
+            signedPortion = Blob(signedPortion, False).toRawStr()
+
+        # Digest and set the signature.
+        data.getSignature().setSignature(Blob(SHA256.new(signedPortion).digest()))
+
+        # Encode again to include the signature.
+        data.wireEncode(wireFormat)
+
+    def signInterestWithSha256(self, interest, wireFormat = None):
+        """
+        Append a SignatureInfo for DigestSha256 to the Interest name, digest the
+        name components and append a final name component with the signature
+        bits (which is the digest).
+
+        :param Interest interest: The Interest object to be signed. This appends
+          name components of SignatureInfo and the signature bits.
+        :param wireFormat: (optional) A WireFormat object used to encode the
+           input. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        signature = DigestSha256Signature()
+        # Append the encoded SignatureInfo.
+        interest.getName().append(wireFormat.encodeSignatureInfo(signature))
+
+        # Append an empty signature so that the "signedPortion" is correct.
+        interest.getName().append(Name.Component())
+        # Encode once to get the signed portion.
+        encoding = interest.wireEncode(wireFormat)
+
+        # Get the bytes to sign.
+        signedPortion = encoding.toSignedBuffer()
+        if sys.version_info[0] == 2:
+            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
+            signedPortion = Blob(signedPortion, False).toRawStr()
+
+        # Digest and set the signature.
+        signature.setSignature(Blob(SHA256.new(signedPortion).digest()))
 
         # Remove the empty signature and append the real one.
         interest.setName(interest.getName().getPrefix(-1).append(
