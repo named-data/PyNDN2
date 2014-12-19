@@ -160,10 +160,12 @@ class SelfVerifyPolicyManager(PolicyManager):
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         """
-        publicKeyDer = self._getPublicKeyDer(
-          KeyLocator.getFromSignature(signatureInfo))
-        if publicKeyDer.isNull():
-            return False
+        publicKeyDer = None
+        if KeyLocator.canGetFromSignature(signatureInfo):
+            publicKeyDer = self._getPublicKeyDer(
+              KeyLocator.getFromSignature(signatureInfo))
+            if publicKeyDer.isNull():
+                return False
 
         return self.verifySignature(
           signatureInfo, signedBlob, publicKeyDer)
