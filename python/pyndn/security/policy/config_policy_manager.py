@@ -450,7 +450,6 @@ class ConfigPolicyManager(PolicyManager):
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
-
         if stepCount > self._maxDepth:
             onVerifyFailed(dataOrInterest)
             return None
@@ -458,6 +457,11 @@ class ConfigPolicyManager(PolicyManager):
         signature = self._extractSignature(dataOrInterest, wireFormat)
         # no signature -> fail
         if signature is None:
+            onVerifyFailed(dataOrInterest)
+            return None
+
+        if not KeyLocator.canGetFromSignature(signature):
+            # We only support signature types with key locators.
             onVerifyFailed(dataOrInterest)
             return None
 
