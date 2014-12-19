@@ -127,6 +127,23 @@ class KeyLocator(object):
         self._changeCount += 1
 
     @staticmethod
+    def canGetFromSignature(signature):
+        """
+        If the signature is a type that has a KeyLocator (so that
+        getFromSignature will succeed), return true.
+        Note: This is a static method of KeyLocator instead of a method of
+        Signature so that the Signature base class does not need to be overloaded
+        with all the different kinds of information that various signature
+        algorithms may use.
+
+        :param Signature signature: An object of a subclass of Signature.
+        :return: True if the signature is a type that has a KeyLocator,
+          otherwise False.
+        :rtype: bool
+        """
+        return type(signature) is Sha256WithRsaSignature
+
+    @staticmethod
     def getFromSignature(signature):
         """
         If the signature is a type that has a KeyLocator, then return it. Otherwise
