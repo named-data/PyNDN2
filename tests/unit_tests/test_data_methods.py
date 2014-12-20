@@ -177,5 +177,17 @@ class TestDataDump(ut.TestCase):
         self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
         self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
 
+    def test_verify_digest_sha256(self):
+        # We create 'mock' objects to replace callbacks since we're not
+        # interested in the effect of the callbacks themselves.
+        failedCallback = Mock()
+        verifiedCallback = Mock()
+
+        self.credentials.signDataWithSha256(self.freshData)
+
+        self.credentials.verifyData(self.freshData, verifiedCallback, failedCallback)
+        self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
+        self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
+
 if __name__ == '__main__':
     ut.main(verbosity=2)
