@@ -22,6 +22,7 @@ from pyndn.exclude import Exclude
 from pyndn.meta_info import ContentType
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
+from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.util import Blob
 from pyndn.encoding.wire_format import WireFormat
@@ -660,6 +661,9 @@ class Tlv0_1_1WireFormat(WireFormat):
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
+        elif type(signature) is DigestSha256Signature:
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.SignatureType, Tlv.SignatureType_DigestSha256)
         else:
             raise RuntimeError(
               "encodeSignatureInfo: Unrecognized Signature object type")
@@ -667,18 +671,20 @@ class Tlv0_1_1WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.SignatureInfo, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeSignatureInfo(data, decoder):
+    def _decodeSignatureInfo(signatureHolder, decoder):
         endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
 
         signatureType = decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
         if signatureType == Tlv.SignatureType_SignatureSha256WithRsa:
-            data.setSignature(Sha256WithRsaSignature())
-            # Modify data's signature object because if we create an object
-            #   and set it, then data will have to copy all the fields.
-            signatureInfo = data.getSignature()
+            signatureHolder.setSignature(Sha256WithRsaSignature())
+            # Modify signatureHolder's signature object because if we create an object
+            #   and set it, then signatureHolder will have to copy all the fields.
+            signatureInfo = signatureHolder.getSignature()
             Tlv0_1_1WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),
               decoder)
+        elif signatureType == Tlv.SignatureType_DigestSha256:
+            signatureHolder.setSignature(DigestSha256Signature())
         else:
             raise RuntimeError(
               "decodeSignatureInfo: unrecognized SignatureInfo type" +

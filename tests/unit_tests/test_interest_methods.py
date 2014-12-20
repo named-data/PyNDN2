@@ -25,8 +25,19 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn import KeyLocatorType
 from pyndn.util import Blob
+from pyndn.security import KeyChain
+from pyndn.security.identity import IdentityManager
+from pyndn.security.identity import MemoryIdentityStorage
+from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security.policy import SelfVerifyPolicyManager
 
 from test_utils import dump
+
+# use Python 3's mock library if it's available
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 
 codedInterest = Blob(bytearray([
 0x05, 0x53, # Interest
@@ -175,6 +186,24 @@ class TestInterestMethods(ut.TestCase):
         interest.getExclude().clear();
         self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
 
+    def test_verify_digest_sha256(self):
+        # Create a KeyChain but we don't need to add keys.
+        identityStorage = MemoryIdentityStorage()
+        keyChain = KeyChain(
+          IdentityManager(identityStorage, MemoryPrivateKeyStorage()),
+          SelfVerifyPolicyManager(identityStorage))
+
+        interest = Interest(Name("/test/signed-interest"))
+        keyChain.signWithSha256(interest)
+
+        # We create 'mock' objects to replace callbacks since we're not
+        # interested in the effect of the callbacks themselves.
+        failedCallback = Mock()
+        verifiedCallback = Mock()
+
+        keyChain.verifyInterest(interest, verifiedCallback, failedCallback)
+        self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
+        self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

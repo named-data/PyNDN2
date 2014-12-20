@@ -146,11 +146,13 @@ class CredentialStorage:
         self.privateKeyStorage.setKeyPairForKeyName(
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
 
-
     def signData(self, data, certificateName = None):
         if certificateName is None:
             certificateName = self.defaultCertName
         self.keyChain.sign(data, certificateName)
+
+    def signDataWithSha256(self, data):
+        self.keyChain.signWithSha256(data)
 
     def verifyData(self, data, verifiedCallback, failedCallback):
         self.keyChain.verifyData(data, verifiedCallback, failedCallback)

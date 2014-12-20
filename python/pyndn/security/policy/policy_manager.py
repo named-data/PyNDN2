@@ -22,6 +22,7 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from pyndn.util import Blob
+from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
 
@@ -42,7 +43,7 @@ class PolicyManager(object):
         :type dataOrInterest: Data or Interest
         :return: True if the data or interest does not need to be verified to be
           trusted as valid, otherwise False.
-        :rtype: boolean
+        :rtype: bool
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -57,7 +58,7 @@ class PolicyManager(object):
         :param dataOrInterest: The received data packet or interest.
         :type dataOrInterest: Data or Interest
         :return: True if the data or interest must be verified, otherwise False.
-        :rtype: boolean
+        :rtype: bool
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -99,7 +100,7 @@ class PolicyManager(object):
         :param Name certificateName: The name of signing certificate.
         :return: True if the signing certificate can be used to sign the data,
           otherwise False.
-        :rtype: boolean
+        :rtype: bool
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -130,15 +131,19 @@ class PolicyManager(object):
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
         verify.
         :param Blob publicKeyDer: The DER-encoded public key used to verify the
-          signature.
+          signature. This is ignored if the signature type does not require a
+          public key.
         :return: True if the signature verifies, False if not.
-        :rtype: boolean
+        :rtype: bool
         :raises: SecurityException if the signature type is not recognized or if
           publicKeyDer can't be decoded.
         """
         if isinstance(signature, Sha256WithRsaSignature):
             return PolicyManager._verifySha256WithRsaSignature(
               signature.getSignature(), signedBlob, publicKeyDer)
+        elif isinstance(signature, DigestSha256Signature):
+            return PolicyManager._verifyDigestSha256Signature(
+              signature.getSignature(), signedBlob)
         else:
             raise SecurityException(
               "PolicyManager.verify: Signature type is unknown")
@@ -150,11 +155,11 @@ class PolicyManager(object):
 
         :param Blob signature: The signature bits.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
-        verify.
+          verify.
         :param Blob publicKeyDer: The DER-encoded public key used to verify the
           signature.
         :return: True if the signature verifies, False if not.
-        :rtype: boolean
+        :rtype: bool
         """
         # Get the public key.
         if _PyCryptoUsesStr:
@@ -169,7 +174,6 @@ class PolicyManager(object):
             raise SecurityException("Cannot decode RSA public key")
 
         # Get the bytes to verify.
-        # wireEncode returns the cached encoding if available.
         signedPortion = signedBlob.toSignedBuffer()
         # Sign the hash of the data.
         if sys.version_info[0] == 2:
@@ -185,6 +189,35 @@ class PolicyManager(object):
         # Hash and verify.
         return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion),
                                                 signatureBits)
+
+    @staticmethod
+    def _verifyDigestSha256Signature(signature, signedBlob):
+        """
+        Verify the DigestSha256 signature on the SignedBlob by verifying that
+        the digest of SignedBlob equals the signature.
+
+        :param Blob signature: The signature bits.
+        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
+          verify.
+        :return: True if the signature verifies, False if not.
+        :rtype: bool
+        """
+        # Get the bytes to verify.
+        signedPortion = signedBlob.toSignedBuffer()
+        # Sign the hash of the data.
+        if sys.version_info[0] == 2:
+            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
+            signedPortion = Blob(signedPortion, False).toRawStr()
+
+        signedPortionDigest = SHA256.new(signedPortion).digest()
+
+        # Convert the signature bits to a raw string or bytes as required.
+        if _PyCryptoUsesStr:
+            signatureBits = signature.toRawStr()
+        else:
+            signatureBits = bytes(signature.buf())
+
+        return signatureBits == signedPortionDigest
 
 # Depending on the Python version, PyCrypto uses str or bytes.
 _PyCryptoUsesStr = type(SHA256.new().digest()) is str

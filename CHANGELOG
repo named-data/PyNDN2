@@ -1,4 +1,4 @@
-Interim changes after PyNDN v2.0beta1 (2014-11-21)
+Interim changes after PyNDN v2.0beta1 (2014-12-19)
 --------------------------------------------------
 
 Changes
@@ -11,9 +11,13 @@ Changes
 * In MetaInfo, added get/setFinalBlockId (replaces the deprecated get/setFinalBlockID).
 * In MemoryContentCache, added unregisterAll.
 * Added ConfigPolicyManager for heirarchical verification using an NDN config file. (Thanks to Adeola Bannis.)
-* In unit tests, added test_name_conventions, test-policy_manager and test_verification_rules.
+* Added DigestSha256Signature. Support encoding/decoding it in interests and data packets.
+* In KeyChain, added signWithSha256.
 * In registerPrefix, use logging.info to log success or the reason for failure.
 * In each __init__.py, added import statements for each module (required by pylint).
+* In unit tests, added test_name_conventions, test-policy_manager and test_verification_rules.
+* Unit tests: In test-data-methods, added VerifyDigestSha256.
+* Unit tests: In test-interest-methods, added VerifyDigestSha256.
 
 Deprecated
 * In MetaInfo, deprecated get/setFinalBlockID. Use get/setFinalBlockId.

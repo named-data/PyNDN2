@@ -21,6 +21,7 @@ from pyndn import Name
 from pyndn import Data
 from pyndn import ContentType
 from pyndn import KeyLocatorType
+from pyndn import DigestSha256Signature
 from pyndn import Sha256WithRsaSignature
 from pyndn.security import KeyType
 from pyndn.security import KeyChain
@@ -191,6 +192,10 @@ def dumpData(data):
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
         keyLocator = signature.getKeyLocator()
+    elif type(signature) is DigestSha256Signature:
+        dump("DigestSha256 signature.signature:",
+             "<none>" if signature.getSignature().size() == 0
+                      else signature.getSignature().toHex())
     if keyLocator != None:
         if keyLocator.getType() != None:
             if (keyLocator.getType() ==

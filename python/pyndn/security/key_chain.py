@@ -311,7 +311,6 @@ class KeyChain(object):
         if identityName == None:
             identityName = Name()
 
-
         if isinstance(target, Data):
             if identityName.size() == 0:
                 inferredIdentity = self._policyManager.inferSigningIdentity(
@@ -344,6 +343,26 @@ class KeyChain(object):
 
             return self._identityManager.signByCertificate(
               target, signingCertificateName)
+
+    def signWithSha256(self, target, wireFormat = None):
+        """
+        Sign the target using DigestSha256.
+
+        :param target: If this is a Data object, wire encode for signing,
+          digest it and set its SignatureInfo to a DigestSha256, updating its
+          signature and wireEncoding. If this is an Interest object, wire encode
+          for signing, append a SignatureInfo for DigestSha256 to the Interest
+          name, digest the name components and append a final name component
+          with the signature bits.
+        :type target: Data or Interest
+        :param wireFormat: (optional) A WireFormat object used to encode the
+           input. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        """
+        if isinstance(target, Interest):
+            self._identityManager.signInterestWithSha256(target, wireFormat)
+        else:
+            self._identityManager.signWithSha256(target, wireFormat)
 
     def verifyData(self, data, onVerified, onVerifyFailed, stepCount = 0):
         """
