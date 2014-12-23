@@ -4,7 +4,7 @@
 # and from Alex Afanasyev's file at https://github.com/cawka/PyNDN2/blob/master/setup.py
 
 # To build/upload the package, do the following as described in
-# https://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html
+# https://python-packaging-user-guide.readthedocs.org/en/latest/distributing.html
 # python setup.py sdist
 # python setup.py bdist_wheel --universal
 # python setup.py sdist bdist_wheel upload
