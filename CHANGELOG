@@ -1,5 +1,5 @@
-Interim changes after PyNDN v2.0beta1 (2014-12-19)
---------------------------------------------------
+PyNDN v2.0beta2 (2014-12-23)
+----------------------------
 
 Changes
 * Support getter and setter properties in the classes Interest, Data, MetaInfo,
