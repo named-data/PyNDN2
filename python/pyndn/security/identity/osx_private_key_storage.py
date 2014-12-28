@@ -150,7 +150,6 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
                   "Cannot export the requested public key from the OSX Keychain")
 
             blob = self._CFDataToBlob(exportedKey)
-            print "blob", blob.toHex()
 
             return PublicKey(blob)
         finally:
