@@ -327,7 +327,8 @@ class ConfigPolicyManager(PolicyManager):
 
         return None
 
-    def _matchesRelation(self, name, matchName, matchRelation):
+    @staticmethod
+    def _matchesRelation(name, matchName, matchRelation):
         """
         Determines if a name satisfies the relation to another name, which can
         be one of:
