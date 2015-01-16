@@ -198,7 +198,7 @@ class Certificate(Data):
                 children = extInfo.getChildren()
                 oidStr = children[0].toVal()
                 isCritical = children[1].toVal()
-                value = children[2].encode()
+                value = children[2].toVal()
                 extension = CertificateExtension(oidStr, isCritical, value)
                 self.addExtension(extension)
 
