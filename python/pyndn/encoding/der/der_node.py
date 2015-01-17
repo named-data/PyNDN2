@@ -389,6 +389,13 @@ class DerInteger(DerNode):
             self._payload.extend(temp)
             self._encodeHeader(len(self._payload))
 
+    def toVal(self):
+        result = 0
+        for i in range(len(self._payload)):
+            result *= 256
+            result += self._payload[i]
+        return result
+
 class DerBitString(DerNode):
     def __init__(self, inputBuf=None, padding=None):
         """
