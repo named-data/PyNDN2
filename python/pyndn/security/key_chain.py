@@ -55,7 +55,6 @@ class KeyChain(object):
 
         self._identityManager = identityManager
         self._policyManager = policyManager
-        self._encryptionManager = None
         self._face = None
         self._maxSteps = 100
 
@@ -427,60 +426,6 @@ class KeyChain(object):
             onVerified(interest)
         else:
             onVerifyFailed(interest)
-
-    #
-    # Encrypt/Decrypt
-    #
-
-    def generateSymmetricKey(self, keyName, keyType):
-        """
-        Generate a symmetric key.
-
-        :param Name keyName: The name of the generated key.
-        :param keyType: The type of the key, e.g. KeyType.AES
-        :type keyType: int from KeyType
-        """
-        self._encryptionManager.createSymmetricKey(keyName, keyType)
-
-    def encrypt(self, keyName, data, useSymmetric = True,
-                encryptMode = EncryptMode.DEFAULT):
-        """
-        Encrypt a byte array.
-
-        :param Name keyName: The name of the encrypting key.
-        :param data: The byte array that will be encrypted.
-        :type data: an array which implements the buffer protocol
-        :param bool useSymmetric: (optional) If true then symmetric encryption
-          is used, otherwise asymmetric encryption is used. If omitted, use
-          symmetric encryption.
-        :param encryptMode: (optional) The encryption mode. If omitted, use
-          EncryptMode.DEFAULT .
-        :type encryptMode: int from EncryptMode
-        :return: The encrypted data as an immutable Blob.
-        :rtype: Blob
-        """
-        return self._encryptionManager.encrypt(
-          keyName, data, useSymmetric, encryptMode)
-
-    def decrypt(self, keyName, data, useSymmetric = True,
-                encryptMode = EncryptMode.DEFAULT):
-        """
-        Decrypt a byte array.
-
-        :param Name keyName: The name of the decrypting key.
-        :param data: The byte array that will be decrypted.
-        :type data: an array which implements the buffer protocol
-        :param bool useSymmetric: (optional) If true then symmetric encryption
-          is used, otherwise asymmetric encryption is used. If omitted, use
-          symmetric encryption.
-        :param encryptMode: (optional) The encryption mode. If omitted, use
-          EncryptMode.DEFAULT .
-        :type encryptMode: int from EncryptMode
-        :return: The decrypted data as an immutable Blob.
-        :rtype: Blob
-        """
-        return self._encryptionManager.decrypt(
-          keyName, data, useSymmetric, encryptMode)
 
     def setFace(self, face):
         """
