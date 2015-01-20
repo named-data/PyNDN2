@@ -17,10 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from pyndn.encoding.oid import OID
 from pyndn.encoding.der.der_node import *
 from pyndn.encoding.der.der import *
 from pyndn.security.certificate.public_key import PublicKey
-from pyndn.security.security_types import KeyType
 from pyndn.util import Blob
 from pyndn import Data, ContentType
 from datetime import datetime
@@ -83,7 +83,7 @@ class Certificate(Data):
         s += "  NotAfter: " + notAfterStr + "\n"
         for sd in self._subjectDescriptionList:
             s += "Subject Description:\n"
-            s += "  "+sd.getOid()+": " + str(sd.getValue()) + "\n"
+            s += "  " + str(sd.getOid()) + ": " + str(sd.getValue()) + "\n"
 
         s += "Public key bits:\n"
         keyDer = self._publicKey.getKeyDer()
@@ -267,23 +267,28 @@ class Certificate(Data):
         return self.getExtensionList()
 
 class CertificateSubjectDescription:
-    def __init__(self, oidStr, value):
+    def __init__(self, oid, value):
         """
         Create a subject description field for a certificate.
-        :param oidStr: The object identifier
-        :type oidStr: strig
+        :param oid: The object identifier
+        :type oid: str or OID
         :param value: The value of the description field
         :type value: Blob or bytearray
         """
-        self._oidStr = oidStr
+        if type(oid) is str:
+            self._oid = OID(oid)
+        else:
+            # Assume oid is already an OID.
+            self._oid = oid
+
         self._value = Blob(value)
 
     def getOid(self):
         """
         :return: The object identifier of the subject description field.
-        :rtype: string
+        :rtype: OID
         """
-        return self._oidStr
+        return self._oid
 
     def getValue(self):
         """
@@ -300,7 +305,7 @@ class CertificateSubjectDescription:
         """
         root = DerSequence()
 
-        oid = DerOid(self._oidStr)
+        oid = DerOid(self._oid)
         value = DerPrintableString(self._value)
 
         root.addChild(oid)
@@ -308,17 +313,22 @@ class CertificateSubjectDescription:
         return root
 
 class CertificateExtension:
-    def __init__(self, oidStr, isCritical, value):
+    def __init__(self, oid, isCritical, value):
         """
         Create a certificate extension field.
-        :param oidStr: The object identifier for the extension
-        :type oidStr: string
+        :param oid: The object identifier for the extension
+        :type oid: str or OID
         :param isCritical: Whether this extension is critical to the certificate
         :type isCritical: boolean
         :param value: The value of the extension field
         :type value: bytearray or Blob
         """
-        self._oidStr = oidStr
+        if type(oid) is str:
+            self._oid = OID(oid)
+        else:
+            # Assume oid is already an OID.
+            self._oid = oid
+
         self._isCritical = isCritical
         self._value = Blob(value)
 
@@ -330,7 +340,7 @@ class CertificateExtension:
         """
         root = DerSequence()
 
-        extensionId = DerOid(self._oidStr)
+        extensionId = DerOid(self._oid)
         isCritical = DerBoolean(self._isCritical)
         extensionValue = DerOctetString(self._value)
 
@@ -343,9 +353,9 @@ class CertificateExtension:
     def getOid(self):
         """
         :return: The object identifier of the subject description field.
-        :rtype: string
+        :rtype: OID
         """
-        return self._oidStr
+        return self._oid
 
     def getIsCritical(self):
         """
