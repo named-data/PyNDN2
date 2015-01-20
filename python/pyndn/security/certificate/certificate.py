@@ -347,12 +347,18 @@ class CertificateExtension:
         """
         return self._oidStr
 
-    def isCritical(self):
+    def getIsCritical(self):
         """
         :return: Whether the extension is critical to the certificate
         :rtype: boolean
         """
         return self._isCritical
+
+    def isCritical(self):
+        """
+        :deprecated: Use getIsCritical.
+        """
+        return self.getIsCritical()
 
     def getValue(self):
         """
