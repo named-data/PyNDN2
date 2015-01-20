@@ -253,12 +253,18 @@ class Certificate(Data):
         """
         return self._subjectDescriptionList
 
-    def getExtensions(self):
+    def getExtensionList(self):
         """
         :return: The extension fields of the certificate.
         :rtype: list of CertificateExtension
         """
         return self._extensionList
+
+    def getExtensions(self):
+        """
+        :deprecated: Use getExtensionList.
+        """
+        return self.getExtensionList()
 
 class CertificateSubjectDescription:
     def __init__(self, oidStr, value):
