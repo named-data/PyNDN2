@@ -30,7 +30,6 @@ from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn import KeyLocatorType
-from pyndn.security.security_types import EncryptMode
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
