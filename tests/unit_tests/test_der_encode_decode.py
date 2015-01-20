@@ -25,8 +25,7 @@
 from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger, DerOid
 from pyndn.util import Blob
 from pyndn.security.certificate import PublicKey, Certificate, CertificateSubjectDescription, CertificateExtension
-from pyndn.security.security_types import KeyType
-from pyndn import Name
+from pyndn import Name, Data
 
 import unittest as ut
 
@@ -150,14 +149,15 @@ class TestCertificate(ut.TestCase):
         self.assertEqual(str(self.toyCert), str(decoded_cert), 'Certificate representation changed after encoding')
 
     def test_extension(self):
-        # TODO: incomplete
         #now add an extension
 
-        self.toyCert.encode()
+        name = "/hello/kitty"
+        trustClass = 0
+        trustLevel = 300
         extValueRoot = DerSequence()
-        extValueName = DerOctetString("/hello/kitty")
-        extValueTrustClass = DerInteger(0)
-        extValueTrustLevel = DerInteger(10)
+        extValueName = DerOctetString(name)
+        extValueTrustClass = DerInteger(trustClass)
+        extValueTrustLevel = DerInteger(trustLevel)
 
         extValueRoot.addChild(extValueName)
         extValueRoot.addChild(extValueTrustClass)
@@ -165,11 +165,44 @@ class TestCertificate(ut.TestCase):
 
         extValueData = extValueRoot.encode()
 
-        certExtension = CertificateExtension("1.3.6.1.5.32.1", True, extValueData)
+        oidString = "1.3.6.1.5.32.1"
+        isCritical = True
+        certExtension = CertificateExtension(oidString, isCritical, extValueData)
+        self.toyCert.encode()
         cert = Certificate(self.toyCert)
         cert.addExtension(certExtension)
 
+        cert.encode()
+        certData = cert.getContent()
+        plainData = Data()
+        plainData.setContent(certData)
+        # The constructor Certificate(Data) calls decode().
+        decodedCert = Certificate(plainData)
+        self.assertEqual(1, len(decodedCert.getExtensionList()),
+          "Wrong number of certificate extensions after decoding")
 
+        decodedExtension = decodedCert.getExtensionList()[0]
+        self.assertEqual(oidString, str(decodedExtension.getOid()),
+          "Certificate extension has the wrong OID after decoding")
+        self.assertEqual(isCritical, decodedExtension.getIsCritical(),
+          "Certificate extension has the wrong isCritical value after decoding")
+
+        # Decode and check the extension value.
+        parsedExtValue = DerNode.parse(decodedExtension.getValue().buf())
+        decodedExtValueRoot = parsedExtValue.getChildren()
+        self.assertEqual(3, len(decodedExtValueRoot),
+          "Wrong number of certificate extension value items after decoding")
+
+        decodedName = decodedExtValueRoot[0]
+        decodedTrustClass = decodedExtValueRoot[1]
+        decodedTrustLevel = decodedExtValueRoot[2]
+        # Use Blob to get a string.
+        self.assertEqual(name, Blob(decodedName.toVal()).toRawStr(),
+          "Wrong extension value name after decoding")
+        self.assertEqual(trustClass, decodedTrustClass.toVal(),
+          "Wrong extension value trust class after decoding")
+        self.assertEqual(trustLevel, decodedTrustLevel.toVal(),
+          "Wrong extension value trust level after decoding")
 
     def test_decode(self):
         realCert = Certificate(Name("/tmp"))
