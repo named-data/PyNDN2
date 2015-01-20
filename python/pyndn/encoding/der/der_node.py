@@ -432,18 +432,21 @@ class DerNull(DerNode):
         self._encodeHeader(0)
 
 class DerOid(DerNode):
-    def __init__(self, oidStr=None):
+    def __init__(self, oid = None):
         """
         Create a DerNode to encode an object identifier.
         The object identifier string must begin with 0,1, or 2 and must contain at least 2 digits.
-        :param oidStr: The OID to encode
-        :type oidStr: string
+        :param oid: The OID to encode
+        :type oid: string or OID
         """
         super(DerOid, self).__init__(Der.ObjectIdentifier)
-        if oidStr is not None:
-            parts = [int(p) for p in oidStr.split('.')]
-
-            self.prepareEncoding(parts)
+        if oid is not None:
+            if type(oid) is str:
+                parts = [int(p) for p in oid.split('.')]
+                self.prepareEncoding(parts)
+            else:
+                # Assume oid is of type OID.
+                self.prepareEncoding(oid.getIntegerList())
 
     def prepareEncoding(self, value):
         """
