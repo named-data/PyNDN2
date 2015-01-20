@@ -39,11 +39,3 @@ class KeyClass(object):
 
 class DigestAlgorithm(object):
     SHA256 = 1
-    # MD2
-    # MD5
-    # SHA1
-
-class EncryptMode(object):
-    DEFAULT = 1
-    CFB_AES = 2
-    # CBC_AES
