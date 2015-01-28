@@ -139,7 +139,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         :param digestAlgorithm: (optional) the digest algorithm. If omitted,
           use DigestAlgorithm.SHA256.
         :type digestAlgorithm: int from DigestAlgorithm
-        :return: The signature, or an isNull() Blob pointer if signing fails.
+        :return: The signature Blob.
         :rtype: Blob
         """
         keyURI = keyName.toUri()

@@ -160,12 +160,13 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :param digestAlgorithm: (optional) the digest algorithm. If omitted,
           use DigestAlgorithm.SHA256.
         :type digestAlgorithm: int from DigestAlgorithm
-        :return: The signature, or an isNull() Blob pointer if signing fails.
+        :return: The signature Blob.
         :rtype: Blob
         :raises SecurityException: if can't find the private key with keyName.
         """
         if digestAlgorithm != DigestAlgorithm.SHA256:
-          return Blob()
+            raise SecurityException(
+              "MemoryPrivateKeyStorage.sign: Unsupported digest algorithm")
 
         # Find the private key.
         keyUri = keyName.toUri()
