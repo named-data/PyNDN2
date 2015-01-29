@@ -69,7 +69,7 @@ class PublicKey(object):
             self._keyType = KeyType.RSA
             RSA.importKey(keyDer.toRawStr())
         elif oidString == self.EC_ENCRYPTION_OID:
-            self._keyType = KeyType.EC
+            self._keyType = KeyType.ECDSA
             # TODO: Check EC decoding.
         else:
             raise UnrecognizedKeyFormatException(

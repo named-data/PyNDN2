@@ -30,7 +30,7 @@ class KeyType(object):
     # DES
     # RC4
     # RC2
-    EC = 2
+    ECDSA = 2
 
 class KeyClass(object):
     PUBLIC = 1

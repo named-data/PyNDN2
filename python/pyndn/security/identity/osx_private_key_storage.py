@@ -380,7 +380,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         """
         if keyType == KeyType.RSA:
           return self._kSecAttrKeyTypeRSA
-        if keyType == KeyType.EC:
+        if keyType == KeyType.ECDSA:
           return self._kSecAttrKeyTypeECDSA
         else:
           logging.getLogger(__name__).debug("Unrecognized key type!")
