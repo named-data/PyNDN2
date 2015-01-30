@@ -54,16 +54,12 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         if not os.path.exists(self._keyStorePath):
             os.makedirs(self._keyStorePath)
 
-    def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
+    def generateKeyPair(self, keyName, params):
         """
         Generate a pair of asymmetric keys.
 
         :param Name keyName: The name of the key pair.
-        :param keyType: (optional) The type of the key pair.  If omitted, use
-          KeyType.RSA
-        :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key pair.  If omitted,
-          use 2048.
+        :param KeyParams params: The parameters of the key.
         """
         if self.doesKeyExist(keyName, KeyClass.PUBLIC):
             raise SecurityException("Public key already exists")
@@ -73,8 +69,8 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         publicKeyDer = None
         privateKeyDer = None
 
-        if keyType == KeyType.RSA:
-            key = RSA.generate(keySize)
+        if params.getKeyType() == KeyType.RSA:
+            key = RSA.generate(params.getKeySize())
             publicKeyDer = key.publickey().exportKey(format = 'DER')
             privateKeyDer = key.exportKey(format = 'DER', pkcs = 8)
         else:
@@ -200,14 +196,12 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         """
         raise RuntimeError("encrypt is not implemented")
 
-    def generateKey(self, keyName, keyType = KeyType.AES, keySize = 256):
+    def generateKey(self, keyName, params):
         """
         Generate a symmetric key.
 
         :param Name keyName: The name of the key.
-        :param keyType: (optional) The type of the key. If omitted, use
-          KeyType.AES .
-        :type keyType: int from KeyType
+        :param KeyParams params: The parameters of the key.
         :param int keySize: (optional) The size of the key. If omitted, use 256.
         """
         raise RuntimeError("generateKey is not implemented")

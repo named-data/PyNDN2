@@ -83,16 +83,12 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         # enum values:
         self._kSecFormatOpenSSL = 1
 
-    def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
+    def generateKeyPair(self, keyName, params):
         """
         Generate a pair of asymmetric keys.
 
         :param Name keyName: The name of the key pair.
-        :param keyType: (optional) The type of the key pair.  If omitted, use
-          KeyType.RSA
-        :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key pair.  If omitted,
-          use 2048.
+        :param KeyParams params: The parameters of the key.
         """
         raise RuntimeError("generateKeyPair is not implemented")
 
@@ -264,15 +260,12 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         """
         raise RuntimeError("encrypt is not implemented")
 
-    def generateKey(self, keyName, keyType = KeyType.AES, keySize = 256):
+    def generateKey(self, keyName, params):
         """
         Generate a symmetric key.
 
         :param Name keyName: The name of the key.
-        :param keyType: (optional) The type of the key. If omitted, use
-          KeyType.AES .
-        :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key. If omitted, use 256.
+        :param KeyParams params: The parameters of the key.
         """
         raise RuntimeError("generateKey is not implemented")
 

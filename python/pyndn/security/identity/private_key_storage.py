@@ -22,21 +22,16 @@ This module defines the PrivateKeyStorage abstract class which declares
 methods for working with a private key storage.  You should use a subclass.
 """
 
-from pyndn.security.security_types import KeyType
 from pyndn.security.security_types import DigestAlgorithm
 
 class PrivateKeyStorage(object):
-    def generateKeyPair(self, keyName, keyType = KeyType.RSA, keySize = 2048):
+    def generateKeyPair(self, keyName, params):
         """
         Generate a pair of asymmetric keys.
         Your derived class should override.
 
         :param Name keyName: The name of the key pair.
-        :param keyType: (optional) The type of the key pair.  If omitted, use
-          KeyType.RSA
-        :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key pair.  If omitted,
-          use 2048.
+        :param KeyParams params: The parameters of the key.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -121,16 +116,13 @@ class PrivateKeyStorage(object):
         """
         raise RuntimeError("encrypt is not implemented")
 
-    def generateKey(self, keyName, keyType = KeyType.AES, keySize = 256):
+    def generateKey(self, keyName, params):
         """
         Generate a symmetric key.
         Your derived class should override.
 
         :param Name keyName: The name of the key.
-        :param keyType: (optional) The type of the key. If omitted, use
-          KeyType.AES .
-        :type keyType: int from KeyType
-        :param int keySize: (optional) The size of the key. If omitted, use 256.
+        :param KeyParams params: The parameters of the key.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
