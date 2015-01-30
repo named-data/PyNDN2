@@ -38,6 +38,7 @@ from pyndn.security.identity.file_private_key_storage import FilePrivateKeyStora
 from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.security_types import KeyType, DigestAlgorithm
+from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.certificate import PublicKey, CertificateSubjectDescription
 
@@ -66,7 +67,7 @@ class IdentityManager(object):
         self._identityStorage = identityStorage
         self._privateKeyStorage = privateKeyStorage
 
-    def createIdentity(self, identityName):
+    def createIdentity(self, identityName, params):
         """
         Create an identity by creating a pair of Key-Signing-Key (KSK) for this
         identity and a self-signed certificate of the KSK.
@@ -76,7 +77,8 @@ class IdentityManager(object):
         :rtype: Name
         """
         self._identityStorage.addIdentity(identityName)
-        keyName = self.generateRSAKeyPairAsDefault(identityName, True)
+        keyName = self._generateKeyPair(identityName, True, params)
+        self._identityStorage.setDefaultKeyNameForIdentity(keyName, identityName)
         newCert = self.selfSign(keyName)
         self.addCertificateAsDefault(newCert)
 
@@ -137,11 +139,7 @@ class IdentityManager(object):
         :return: The generated key name.
         :rtype: Name
         """
-        keyName = self._identityStorage.getNewKeyName(identityName, isKsk)
-        self._privateKeyStorage.generateKeyPair(keyName, KeyType.RSA, keySize)
-        publicKeyBits = self._privateKeyStorage.getPublicKey(keyName).getKeyDer()
-        self._identityStorage.addKey(keyName, KeyType.RSA, publicKeyBits)
-
+        keyName = self._generateKeyPair(identityName, isKsk, RsaKeyParams(keySize))
         return keyName
 
     def setDefaultKeyForIdentity(self, keyName, identityName = None):
@@ -182,7 +180,7 @@ class IdentityManager(object):
         :rtype: Name
         """
         newKeyName = self.generateRSAKeyPair(identityName, isKsk, keySize)
-        self._identityStorage.setDefaultKeyNameForIdentity(newKeyName)
+        self._identityStorage.setDefaultKeyNameForIdentity(newKeyName, identityName)
         return newKeyName
 
     def getPublicKey(self, keyName):
@@ -542,3 +540,22 @@ class IdentityManager(object):
             return signature
         else:
             raise SecurityException("Key type is not recognized")
+
+    def _generateKeyPair(self, identityName, isKsk, params):
+        """
+        Generate a pair of keys for the specified identity.
+
+        :param Name identityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
+          Data-Signing-Key.
+        :param KeyParams params: The parameters of the key.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        keyName = self._identityStorage.getNewKeyName(identityName, isKsk)
+        self._privateKeyStorage.generateKeyPair(keyName, params)
+        publicKeyBits = self._privateKeyStorage.getPublicKey(keyName).getKeyDer()
+        self._identityStorage.addKey(keyName, params.getKeyType(), publicKeyBits)
+
+        return keyName
