@@ -28,13 +28,11 @@ http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
-from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
-from pyndn import KeyLocatorType
 from pyndn.security.security_exception import SecurityException
+from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.encoding.wire_format import WireFormat
-
 
 class KeyChain(object):
     """
@@ -57,16 +55,20 @@ class KeyChain(object):
         self._face = None
         self._maxSteps = 100
 
-    def createIdentity(self, identityName):
+    def createIdentity(self, identityName, params = None):
         """
         Create an identity by creating a pair of Key-Signing-Key (KSK) for this
         identity and a self-signed certificate of the KSK.
 
         :param Name identityName: The name of the identity.
+        :param KeyParams params: (optional) The key parameters if a key needs to
+          be generated for the identity. If omitted, use DEFAULT_KEY_PARAMS.
         :return: The key name of the auto-generated KSK of the identity.
         :rtype: Name
         """
-        return self._identityManager.createIdentity(identityName)
+        if params == None:
+            params = KeyChain.DEFAULT_KEY_PARAMS
+        return self._identityManager.createIdentity(identityName, params)
 
     def deleteIdentity(self, identityName):
         """
@@ -433,6 +435,8 @@ class KeyChain(object):
         :param Face face: The Face object.
         """
         self._face = face
+
+    DEFAULT_KEY_PARAMS = RsaKeyParams()
 
     #
     # Private methods
