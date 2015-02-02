@@ -40,7 +40,7 @@ except ImportError:
 
 class TestFaceInterestMethods(ut.TestCase):
     def setUp(self):
-        self.face = Face("aleph.ndn.ucla.edu")
+        self.face = Face("localhost")
 
     def tearDown(self):
         self.face.shutdown()
