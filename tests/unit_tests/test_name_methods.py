@@ -19,11 +19,8 @@
 
 import unittest as ut
 from pyndn import Name
-from pyndn import Interest
-from pyndn import KeyLocatorType
 from pyndn.util import Blob
 
-from test_utils import dump
 
 class TestNameComponentMethods(ut.TestCase):
     def setUp(self):
@@ -43,7 +40,7 @@ class TestNameMethods(ut.TestCase):
 
     def setUp(self):
         self.entree = Name.Component(u"entr\u00E9e")
-        self.comp1 = Name.Component(bytearray(['.']*4))
+        self.comp1 = Name.Component(bytearray([ord('.')]*4))
         self.comp2 = Name.Component(bytearray([0x00, 0x01, 0x02, 0x03]))
         self.expectedURI = "/entr%C3%A9e/..../%00%01%02%03"
 
