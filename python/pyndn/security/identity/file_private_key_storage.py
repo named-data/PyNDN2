@@ -119,8 +119,6 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         with open(self.nameTransform(keyURI, ".pub")) as keyFile:
             base64Content = keyFile.read()
         der = base64.b64decode(base64Content)
-        if not type(der) is str:
-            der = "".join(map(chr, der))
 
         return PublicKey(Blob(der, False))
 
