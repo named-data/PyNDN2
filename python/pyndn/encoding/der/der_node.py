@@ -36,7 +36,7 @@ class DerNode (object):
         :type nodeType: An int defined in the Der class
         """
         self._parent = None
-        self._nodeType = chr(nodeType)
+        self._nodeType = nodeType
         self._header = bytearray()
         self._payload = bytearray()
 
@@ -68,7 +68,7 @@ class DerNode (object):
                 tempBuf.insert(0, (val & 0xff))
                 val >>= 8
                 n += 1
-            tempBuf.insert(0,chr(((1<<7)|n) & 0xff))
+            tempBuf.insert(0, ((1<<7) |n ) & 0xff)
             self._header.extend(tempBuf)
 
     def _decodeHeader(self, inputBuf, startIdx=0):
@@ -409,7 +409,7 @@ class DerBitString(DerNode):
         if inputBuf is not None:
             if type(inputBuf) is Blob:
                 inputBuf = inputBuf.buf()
-            self._payload.append(chr(padding))
+            self._payload.append(padding)
             self._payload.extend(inputBuf)
 
             self._encodeHeader(len(self._payload))
@@ -485,7 +485,7 @@ class DerOid(DerNode):
         mask = (1 << 7) - 1
         outBytes = bytearray()
         if value < 128:
-            outBytes.append(chr(value & mask))
+            outBytes.append(value & mask)
         else:
             outBytes.insert(0, value & mask)
             value >>= 7
