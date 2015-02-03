@@ -127,8 +127,8 @@ class TestCertificate(ut.TestCase):
     def setUp(self):
         cert = Certificate()
 
-        cert._notBefore = 1388100174000L
-        cert._notAfter = 1388100174000L
+        cert._notBefore = 1388100174000
+        cert._notAfter = 1388100174000
 
         cert.addSubjectDescription(CertificateSubjectDescription(TEST_OID, "TEST NAME"))
         key = PublicKey(Blob(PUBLIC_KEY))
