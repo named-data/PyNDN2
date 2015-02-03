@@ -568,7 +568,7 @@ class DerGeneralizedTime(DerNode):
         """
         if msSince1970 is not None:
             derTime = self.toDerTimeString(msSince1970)
-            self._payload.extend(bytearray(derTime))
+            self._payload.extend(bytearray(derTime, 'ascii'))
             self._encodeHeader(len(self._payload))
 
     @staticmethod
@@ -577,6 +577,8 @@ class DerGeneralizedTime(DerNode):
         Convert a UNIX timestamp to the internal string representation
         :param msSince1970: Timestamp as milliseconds since Jan 1, 1970
         :type msSince1970: float
+        :return: The time string
+        :rtype: str
         """
         secondsSince1970 = msSince1970/1000.0
         utcTime = datetime.utcfromtimestamp(secondsSince1970)
@@ -590,7 +592,7 @@ class DerGeneralizedTime(DerNode):
         :return: The timestamp encoded in this node as milliseconds since 1970
         :rtype: float
         """
-        timeStr = str(self._payload)
+        timeStr = Blob(self._payload, False).toRawStr()
         dt = datetime.strptime(timeStr, "%Y%m%d%H%M%SZ")
         epochStart = datetime(1970, 1,1)
         msSince1970 = (dt-epochStart).total_seconds()*1000
