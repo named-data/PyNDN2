@@ -155,7 +155,7 @@ class TestCertificate(ut.TestCase):
         trustClass = 0
         trustLevel = 300
         extValueRoot = DerSequence()
-        extValueName = DerOctetString(name)
+        extValueName = DerOctetString(Blob(name).buf())
         extValueTrustClass = DerInteger(trustClass)
         extValueTrustLevel = DerInteger(trustLevel)
 
