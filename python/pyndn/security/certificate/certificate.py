@@ -83,7 +83,7 @@ class Certificate(Data):
         s += "  NotAfter: " + notAfterStr + "\n"
         for sd in self._subjectDescriptionList:
             s += "Subject Description:\n"
-            s += "  " + str(sd.getOid()) + ": " + str(sd.getValue()) + "\n"
+            s += "  " + str(sd.getOid()) + ": " + sd.getValue().toRawStr() + "\n"
 
         s += "Public key bits:\n"
         keyDer = self._publicKey.getKeyDer()
