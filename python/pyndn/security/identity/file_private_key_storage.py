@@ -81,9 +81,9 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         privateKeyFilePath = self.nameTransform(keyUri, ".pri")
 
         with open(publicKeyFilePath, 'w') as keyFile:
-            keyFile.write(base64.b64encode(publicKeyDer))
+            keyFile.write(Blob(base64.b64encode(publicKeyDer), False).toRawStr())
         with open(privateKeyFilePath, 'w') as keyFile:
-            keyFile.write(base64.b64encode(privateKeyDer))
+            keyFile.write(Blob(base64.b64encode(privateKeyDer), False).toRawStr())
 
         os.chmod(publicKeyFilePath,  stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         os.chmod(privateKeyFilePath, stat.S_IRUSR)
@@ -119,8 +119,6 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         with open(self.nameTransform(keyURI, ".pub")) as keyFile:
             base64Content = keyFile.read()
         der = base64.b64decode(base64Content)
-        if not type(der) is str:
-            der = "".join(map(chr, der))
 
         return PublicKey(Blob(der, False))
 

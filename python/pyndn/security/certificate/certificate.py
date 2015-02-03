@@ -83,13 +83,14 @@ class Certificate(Data):
         s += "  NotAfter: " + notAfterStr + "\n"
         for sd in self._subjectDescriptionList:
             s += "Subject Description:\n"
-            s += "  " + str(sd.getOid()) + ": " + str(sd.getValue()) + "\n"
+            s += "  " + str(sd.getOid()) + ": " + sd.getValue().toRawStr() + "\n"
 
         s += "Public key bits:\n"
         keyDer = self._publicKey.getKeyDer()
-        encodedKey = base64.b64encode(keyDer.toRawStr())
+        encodedKey = base64.b64encode(keyDer.toBuffer())
         for idx in range(0, len(encodedKey), 64):
-            s += encodedKey[idx:idx+64] + "\n"
+            # Use Blob to convert to a str.
+            s += Blob(encodedKey[idx:idx+64], False).toRawStr() + "\n"
 
 
         if len(self._extensionList) > 0:

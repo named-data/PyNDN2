@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+import math
 from pyndn.encoding.der.der import Der
 from pyndn.util import Blob
 from pyndn.encoding.der.der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
@@ -36,7 +37,7 @@ class DerNode (object):
         :type nodeType: An int defined in the Der class
         """
         self._parent = None
-        self._nodeType = chr(nodeType)
+        self._nodeType = nodeType
         self._header = bytearray()
         self._payload = bytearray()
 
@@ -68,7 +69,7 @@ class DerNode (object):
                 tempBuf.insert(0, (val & 0xff))
                 val >>= 8
                 n += 1
-            tempBuf.insert(0,chr(((1<<7)|n) & 0xff))
+            tempBuf.insert(0, ((1<<7) |n ) & 0xff)
             self._header.extend(tempBuf)
 
     def _decodeHeader(self, inputBuf, startIdx=0):
@@ -409,7 +410,7 @@ class DerBitString(DerNode):
         if inputBuf is not None:
             if type(inputBuf) is Blob:
                 inputBuf = inputBuf.buf()
-            self._payload.append(chr(padding))
+            self._payload.append(padding)
             self._payload.extend(inputBuf)
 
             self._encodeHeader(len(self._payload))
@@ -485,7 +486,7 @@ class DerOid(DerNode):
         mask = (1 << 7) - 1
         outBytes = bytearray()
         if value < 128:
-            outBytes.append(chr(value & mask))
+            outBytes.append(value & mask)
         else:
             outBytes.insert(0, value & mask)
             value >>= 7
@@ -525,7 +526,7 @@ class DerOid(DerNode):
             components.append(nextVal)
         # for some odd reason, the first digits are represented in one byte
         firstByte = components[0]
-        firstDigit = firstByte/40
+        firstDigit = int(math.floor(firstByte/40))
         secondDigit = firstByte%40
         components = [firstDigit, secondDigit]+components[1:]
         return '.'.join([str(b) for b in components])
@@ -555,7 +556,7 @@ class DerPrintableString(DerByteString):
         :return: The string encoded in the node
         :rtype: string
         """
-        return str(self._payload)
+        return Blob(self._payload, False).toRawStr()
 
 class DerGeneralizedTime(DerNode):
     def __init__(self, msSince1970 = None):
@@ -567,7 +568,7 @@ class DerGeneralizedTime(DerNode):
         """
         if msSince1970 is not None:
             derTime = self.toDerTimeString(msSince1970)
-            self._payload.extend(bytearray(derTime))
+            self._payload.extend(bytearray(derTime, 'ascii'))
             self._encodeHeader(len(self._payload))
 
     @staticmethod
@@ -576,6 +577,8 @@ class DerGeneralizedTime(DerNode):
         Convert a UNIX timestamp to the internal string representation
         :param msSince1970: Timestamp as milliseconds since Jan 1, 1970
         :type msSince1970: float
+        :return: The time string
+        :rtype: str
         """
         secondsSince1970 = msSince1970/1000.0
         utcTime = datetime.utcfromtimestamp(secondsSince1970)
@@ -589,7 +592,7 @@ class DerGeneralizedTime(DerNode):
         :return: The timestamp encoded in this node as milliseconds since 1970
         :rtype: float
         """
-        timeStr = str(self._payload)
+        timeStr = Blob(self._payload, False).toRawStr()
         dt = datetime.strptime(timeStr, "%Y%m%d%H%M%SZ")
         epochStart = datetime(1970, 1,1)
         msSince1970 = (dt-epochStart).total_seconds()*1000

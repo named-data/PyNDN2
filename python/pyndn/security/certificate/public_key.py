@@ -62,7 +62,7 @@ class PublicKey(object):
             oidString = algorithmIdChildren[0].toVal()
         except DerDecodingException as ex:
           raise UnrecognizedKeyFormatException(
-            "PublicKey.decodeKeyType: Error decoding the public key" + ex)
+            "PublicKey.decodeKeyType: Error decoding the public key" + str(ex))
 
         # Verify that the we can decode.
         if oidString == self.RSA_ENCRYPTION_OID:
@@ -73,7 +73,7 @@ class PublicKey(object):
             # TODO: Check EC decoding.
         else:
             raise UnrecognizedKeyFormatException(
-              "PublicKey.decodeKeyType: Unrecognized OID")
+              "PublicKey.decodeKeyType: Unrecognized OID " + oidString)
 
     def toDer(self):
         """

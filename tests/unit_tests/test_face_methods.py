@@ -28,14 +28,15 @@ import unittest as ut
 import gevent
 import time
 
-from test_utils import CredentialStorage
-
 # use Python 3's mock library if it's available
 # else you'll have to pip install mock
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
+
+def getNowMilliseconds():
+    return time.time() * 1000.0
 
 
 class TestFaceInterestMethods(ut.TestCase):
@@ -53,19 +54,13 @@ class TestFaceInterestMethods(ut.TestCase):
         timeoutCallback = Mock()
         self.face.expressInterest(name, dataCallback, timeoutCallback)
 
-        def waitForCallbacks():
-            while 1:
-                self.face.processEvents()
-                gevent.sleep()
-                if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
-                    break
-
-        task = gevent.spawn(waitForCallbacks)
-        task.join(timeout=10)
+        while True:
+            self.face.processEvents()
+            time.sleep(0.01)
+            if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
+                break
 
         return dataCallback, timeoutCallback
-
-
 
     def test_any_interest(self):
         uri = "/"
@@ -119,17 +114,17 @@ class TestFaceInterestMethods(ut.TestCase):
 
         interestID = self.face.expressInterest(name, dataCallback, timeoutCallback)
 
-        def removeInterestAndWait():
-            self.face.removePendingInterest(interestID)
-            while 1:
-                self.face.processEvents()
-                gevent.sleep()
-                currentTime = time.clock()
-                if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
-                    break
+        self.face.removePendingInterest(interestID)
 
-        task = gevent.spawn(removeInterestAndWait)
-        task.join(timeout=10)
+        timeout = 10000
+        startTime = getNowMilliseconds()
+        while True:
+            self.face.processEvents()
+            time.sleep(0.01)
+            if getNowMilliseconds() - startTime >= timeout:
+                break
+            if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
+                break
 
         self.assertEqual(dataCallback.call_count, 0, 'Should not have called data callback after interest was removed')
         self.assertEqual(timeoutCallback.call_count, 0, 'Should not have called timeout callback after interest was removed')
@@ -151,7 +146,6 @@ class TestFaceRegisterMethods(ut.TestCase):
         encodedData = data.wireEncode()
         transport.send(encodedData.toBuffer())
 
-
     def test_register_prefix_response(self):
         # gotta sign it (WAT)
         prefixName = Name("/test")
@@ -164,7 +158,7 @@ class TestFaceRegisterMethods(ut.TestCase):
         self.face_in.registerPrefix(prefixName, interestCallback, failedCallback)
         server = gevent.spawn(self.face_process_events, self.face_in, [interestCallback, failedCallback], 'h')
 
-        gevent.sleep(1) # give the 'server' time to register the interest
+        time.sleep(1) # give the 'server' time to register the interest
 
         # express an interest on another face
         dataCallback = Mock()
@@ -190,7 +184,6 @@ class TestFaceRegisterMethods(ut.TestCase):
         expectedBlob = Blob(bytearray("SUCCESS"))
         self.assertTrue(expectedBlob == data.getContent(), 'Data received on face does not match expected format')
 
-
     def face_process_events(self, face, callbacks, name=None):
         # implemented as a 'greenlet': something like a thread, but semi-synchronous
         # callbacks should be a list
@@ -202,8 +195,6 @@ class TestFaceRegisterMethods(ut.TestCase):
 
                 if (c.call_count > 0):
                     done = True
-
-
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

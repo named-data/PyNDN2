@@ -336,8 +336,8 @@ class TestConfigPolicyManager(ut.TestCase):
             certData = b64decode(CERT_DUMP)
             cert.wireDecode(Blob(certData, False))
             self.keyChain.signByIdentity(cert, self.identityName)
-            encodedCert = b64encode(str(cert.wireEncode()))
-            certFile.write(encodedCert)
+            encodedCert = b64encode(cert.wireEncode().toBuffer())
+            certFile.write(Blob(encodedCert, False).toRawStr())
 
         # still too early for refresh to pick it up
         vr = doVerify(self.policyManager, data)

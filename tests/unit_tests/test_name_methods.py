@@ -19,11 +19,8 @@
 
 import unittest as ut
 from pyndn import Name
-from pyndn import Interest
-from pyndn import KeyLocatorType
 from pyndn.util import Blob
 
-from test_utils import dump
 
 class TestNameComponentMethods(ut.TestCase):
     def setUp(self):
@@ -43,7 +40,7 @@ class TestNameMethods(ut.TestCase):
 
     def setUp(self):
         self.entree = Name.Component(u"entr\u00E9e")
-        self.comp1 = Name.Component(bytearray(['.']*4))
+        self.comp1 = Name.Component(bytearray([ord('.')]*4))
         self.comp2 = Name.Component(bytearray([0x00, 0x01, 0x02, 0x03]))
         self.expectedURI = "/entr%C3%A9e/..../%00%01%02%03"
 
@@ -71,7 +68,7 @@ class TestNameMethods(ut.TestCase):
         name = Name(uri)
         name2 = Name("/localhost").append(Name("/user/folders/"))
         self.assertEqual(len(name2), 3, 'Name constructed by appending names has ' + str(len(name2)) + ' components instead of 3')
-        self.assertTrue(name2[2].getValue() == Blob(bytearray("folders")), 'Name constructed with append has wrong suffix')
+        self.assertTrue(name2[2].getValue() == Blob("folders"), 'Name constructed with append has wrong suffix')
         name2 = name2.append("files")
         self.assertEqual(len(name2), 4, 'Name constructed by appending string has ' + str(len(name2)) + ' components instead of 4')
         name2 = name2.appendSegment(15)
@@ -148,7 +145,7 @@ class TestNameMethods(ut.TestCase):
     def test_compare(self):
         names = [Name(x) for x in  [ "/a/b/d", "/c", "/c/a", "/bb", "/a/b/cc"]]
         expectedOrder = ["/a/b/d", "/a/b/cc", "/c", "/c/a", "/bb"]
-        sortedNames = sorted(names, cmp=lambda x,y: x.compare(y))
+        sortedNames = sorted(names)
         sortedURIs = [x.toUri() for x in sortedNames]
         self.assertEqual(sortedURIs, expectedOrder, 'Name comparison gave incorrect order')
 

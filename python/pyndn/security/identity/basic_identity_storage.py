@@ -219,7 +219,7 @@ class BasicIdentityStorage(IdentityStorage):
         self.addIdentity(identityName)
 
         keyId = keyName[-1].toEscapedString()
-        keyBuffer = buffer(bytearray (publicKeyDer.buf()))
+        keyBuffer = sqlite3.Binary(bytearray(publicKeyDer.buf()))
 
         cursor = self._database.cursor()
         cursor.execute(
@@ -342,7 +342,7 @@ class BasicIdentityStorage(IdentityStorage):
         # Convert from milliseconds to seconds since 1/1/1970.
         notBefore = int(math.floor(certificate.getNotBefore() / 1000.0))
         notAfter = int(math.floor(certificate.getNotAfter() / 1000.0))
-        encodedCert = buffer(bytearray(certificate.wireEncode().buf()))
+        encodedCert = sqlite3.Binary(bytearray(certificate.wireEncode().buf()))
 
         cursor = self._database.cursor()
         cursor.execute(
