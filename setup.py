@@ -26,7 +26,7 @@ elif sys.version_info[0] == 3:
 setup(
     name='PyNDN',
 
-    version='2.0b2',
+    version='2.0b3',
 
     description='An NDN client library with TLV wire format support in native Python',
 
@@ -39,7 +39,7 @@ setup(
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries',
