@@ -73,7 +73,7 @@ class PublicKey(object):
             # TODO: Check EC decoding.
         else:
             raise UnrecognizedKeyFormatException(
-              "PublicKey.decodeKeyType: Unrecognized OID")
+              "PublicKey.decodeKeyType: Unrecognized OID " + oidString)
 
     def toDer(self):
         """

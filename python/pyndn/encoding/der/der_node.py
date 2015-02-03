@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+import math
 from pyndn.encoding.der.der import Der
 from pyndn.util import Blob
 from pyndn.encoding.der.der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
@@ -525,7 +526,7 @@ class DerOid(DerNode):
             components.append(nextVal)
         # for some odd reason, the first digits are represented in one byte
         firstByte = components[0]
-        firstDigit = firstByte/40
+        firstDigit = int(math.floor(firstByte/40))
         secondDigit = firstByte%40
         components = [firstDigit, secondDigit]+components[1:]
         return '.'.join([str(b) for b in components])
