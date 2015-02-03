@@ -68,7 +68,7 @@ class TestNameMethods(ut.TestCase):
         name = Name(uri)
         name2 = Name("/localhost").append(Name("/user/folders/"))
         self.assertEqual(len(name2), 3, 'Name constructed by appending names has ' + str(len(name2)) + ' components instead of 3')
-        self.assertTrue(name2[2].getValue() == Blob(bytearray("folders")), 'Name constructed with append has wrong suffix')
+        self.assertTrue(name2[2].getValue() == Blob("folders"), 'Name constructed with append has wrong suffix')
         name2 = name2.append("files")
         self.assertEqual(len(name2), 4, 'Name constructed by appending string has ' + str(len(name2)) + ' components instead of 4')
         name2 = name2.appendSegment(15)
