@@ -145,7 +145,7 @@ class TestNameMethods(ut.TestCase):
     def test_compare(self):
         names = [Name(x) for x in  [ "/a/b/d", "/c", "/c/a", "/bb", "/a/b/cc"]]
         expectedOrder = ["/a/b/d", "/a/b/cc", "/c", "/c/a", "/bb"]
-        sortedNames = sorted(names, cmp=lambda x,y: x.compare(y))
+        sortedNames = sorted(names)
         sortedURIs = [x.toUri() for x in sortedNames]
         self.assertEqual(sortedURIs, expectedOrder, 'Name comparison gave incorrect order')
 
