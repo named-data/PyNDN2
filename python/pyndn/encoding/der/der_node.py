@@ -556,7 +556,7 @@ class DerPrintableString(DerByteString):
         :return: The string encoded in the node
         :rtype: string
         """
-        return str(self._payload)
+        return Blob(self._payload, False).toRawStr()
 
 class DerGeneralizedTime(DerNode):
     def __init__(self, msSince1970 = None):
