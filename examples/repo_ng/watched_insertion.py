@@ -19,7 +19,8 @@
 
 """
 This modules shows an example of the repo-ng watched prefix insertion protocol,
-described at http://redmine.named-data.net/projects/repo-ng/wiki .
+described here:
+http://redmine.named-data.net/projects/repo-ng/wiki/Watched_Prefix_Insertion_Protocol
 See main() for more details.
 """
 
