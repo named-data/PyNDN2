@@ -16,6 +16,7 @@
 doc/_build
 
 # setuptools files
+/MANIFEST
 /dist
 /python/PyNDN.egg-info
 /build
