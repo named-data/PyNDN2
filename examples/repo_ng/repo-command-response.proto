@@ -1,3 +1,5 @@
+// This is the Protobuf definition for RepoCommandResponse, described at:
+// http://redmine.named-data.net/projects/repo-ng/wiki/Repo_Command
 // Compile this file using:
 // protoc --python_out=. repo-command-response.proto
 

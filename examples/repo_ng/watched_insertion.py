@@ -18,7 +18,8 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This modules shows an example of the repo-ng watched prefix insertion protocol.
+This modules shows an example of the repo-ng watched prefix insertion protocol,
+described at http://redmine.named-data.net/projects/repo-ng/wiki .
 See main() for more details.
 """
 
