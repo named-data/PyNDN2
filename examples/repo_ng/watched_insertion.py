@@ -177,7 +177,7 @@ def main():
     """
     Call startRepoWatch and register a prefix so that SendSegments will answer
     interests from the repo to send data packets for the watched prefix.  When
-    all the data is sent (or an error), call startRepoWatch.
+    all the data is sent (or an error), call stopRepoWatch.
     """
     repoCommandPrefix = Name("/example/repo/1")
     repoDataPrefix = Name("/example/data/1")
