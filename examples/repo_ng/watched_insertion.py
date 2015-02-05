@@ -63,7 +63,7 @@ def startRepoWatch(face, repoCommandPrefix, watchPrefix, onRepoWatchStarted, onF
     parameter = repo_command_parameter_pb2.RepoCommandParameterMessage()
     for i in range(watchPrefix.size()):
         parameter.repo_command_parameter.name.component.append(
-          str.encode(watchPrefix[i].getValue().toRawStr()))
+          watchPrefix[i].getValue().toRawStr())
 
     # Create the command interest.
     interest = Interest(Name(repoCommandPrefix).append("watch").append("start")
