@@ -32,8 +32,8 @@ def main():
     # Construct a sample FibEntry message using the structure in fib_entry_pb2
     # which was produced by protoc.
     message = fib_entry_pb2.FibEntryMessage()
-    message.fib_entry.name.component.append("ndn")
-    message.fib_entry.name.component.append("ucla")
+    message.fib_entry.name.component.append(b"ndn")
+    message.fib_entry.name.component.append(b"ucla")
     nextHopRecord = message.fib_entry.next_hop_records.add()
     nextHopRecord.face_id = 16
     nextHopRecord.cost = 1

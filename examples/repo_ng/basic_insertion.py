@@ -72,7 +72,7 @@ def requestInsert(face, repoCommandPrefix, fetchName, onInsertStarted, onFailed,
     # Add the Name.
     for i in range(fetchName.size()):
         parameter.repo_command_parameter.name.component.append(
-          fetchName[i].getValue().toRawStr())
+          str.encode(fetchName[i].getValue().toRawStr()))
     # Add startBlockId and endBlockId if supplied.
     if startBlockId != None:
         parameter.repo_command_parameter.start_block_id = startBlockId
