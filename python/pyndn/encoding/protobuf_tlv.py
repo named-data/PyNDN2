@@ -31,6 +31,7 @@ Protobuf has no "outer" message type, so you need to put your TLV message
 inside an outer "typeless" message.
 """
 
+import sys
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.util import Blob
@@ -159,9 +160,14 @@ class ProtobufTlv(object):
               field.type == field.TYPE_UINT64 or
               field.type == field.TYPE_ENUM):
             return decoder.readNonNegativeIntegerTlv(tlvType)
-        elif (field.type == field.TYPE_BYTES or
-              field.type == field.TYPE_STRING):
-            # TODO: Does Python 3 use bytes?
+        elif field.type == field.TYPE_BYTES:
+            if sys.version_info[0] > 2:
+                # Return a real bytes type.
+                return bytes(decoder.readBlobTlv(tlvType))
+            else:
+                # For Python 2, just return the raw string.
+                return "".join(map(chr, decoder.readBlobTlv(tlvType)))
+        elif field.type == field.TYPE_STRING:
             return "".join(map(chr, decoder.readBlobTlv(tlvType)))
         elif field.type == field.TYPE_BOOL:
             return decoder.readBooleanTlv(tlvType, endOffset)
