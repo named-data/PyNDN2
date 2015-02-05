@@ -146,6 +146,26 @@ class Blob(object):
         else:
             return "".join(map(chr, self.buf()))
 
+    def toBytes(self):
+        """
+        Return an object which is the same as the bytes() operator. In Python 2,
+        this simply calls self.toRawStr() because bytes is the same as str. In
+        Python 3, this converts the byte array to a bytes type. This method is
+        necessary because the bytes type is different in Python 2 and 3. This
+        does not do any character encoding such as UTF-8.
+
+        :return: The array as a bytes type, or None if isNull().
+        :rtype: bytes (str in Python 2)
+        """
+        if self._array == None:
+            return None
+        else:
+            if sys.version_info[0] > 2:
+                return bytes(self._array)
+            else:
+                # For Python 2, just return the raw string.
+                return self.toRawStr()
+
     # Python operators
 
     def __eq__(self, other):

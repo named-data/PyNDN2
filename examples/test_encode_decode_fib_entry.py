@@ -21,6 +21,7 @@
 # protoc --python_out=. fib-entry.proto
 import fib_entry_pb2
 from pyndn.encoding import ProtobufTlv
+from pyndn.util import Blob
 
 def dump(*list):
     result = ""
@@ -48,7 +49,8 @@ def main():
     # This should print the same values that we put in message above.
     value = ""
     for component in decodedMessage.fib_entry.name.component:
-      value += "/" + component
+      # component may be a bytes type, so use Blob to convert to str.
+      value += "/" + Blob(component, False).toRawStr()
     value += " nexthops = {"
     for next_hop_record in decodedMessage.fib_entry.next_hop_records:
       value += ("faceid=" + repr(next_hop_record.face_id)
