@@ -572,8 +572,9 @@ class Name(object):
         if len(self._components) > len(name._components):
             return False
 
-        # Check if at least one of given components doesn't match.
-        for i in range(len(self._components)):
+        # Check if at least one of given components doesn't match. Check from
+        # last to first since the last components are more likely to differ.
+        for i in range(len(self._components) - 1, -1, -1):
             if not self._components[i].getValue().equals(
                   name._components[i].getValue()):
                 return False
