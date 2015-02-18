@@ -225,3 +225,4 @@ This has the following example programs:
 * examples/test_encode_decode_data.py: Encode and decode a data packet, including signing the data packet.
 * examples/test_encode_decode_forwarding_entry.py: Encode and decode a forwarding entry packet.
 * examples/test_encode_decode_fib_entry.py: Encode and decode a sample Protobuf message using ProtobufTlv.
+* examples/test_chrono_chat.py: A command-line chat application using the ChronoSync2013 API, compatible with ChronoChat-js.
