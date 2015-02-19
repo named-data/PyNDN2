@@ -24,7 +24,7 @@ To use easy_install, change directory to the PyNDN root and enter:
 
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
-## Mac OS X 10.7.3, Mac OS X 10.8.5
+## OS X 10.8.5
 Install Xcode.  
 In Xcode Preferences > Downloads, install "Command Line Tools".  
 In a terminal, enter:  
@@ -52,8 +52,8 @@ Optional: To install pytest, mock and gevent, in a terminal enter:
 
     sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
 
-## Mac OS X 10.9
-Install Xcode.  (Xcode on OS X 10.9 seems to already have the Command Line Tools.)  
+## OS X 10.9.5, OS X 10.10.2
+Install Xcode.  (Xcode seems to already have the Command Line Tools.)  
 In a terminal, enter:
 
     sudo easy_install pip
