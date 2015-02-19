@@ -466,6 +466,10 @@ def promptAndInput(prompt):
         return input(prompt)
 
 def main():
+    # Uncomment these lines to print ChronoSync debug messages.
+    # logging.getLogger('').addHandler(logging.StreamHandler(sys.stdout))
+    # logging.getLogger('').setLevel(logging.INFO)
+
     screenName = promptAndInput("Enter your chat username: ")
 
     defaultHubPrefix = "ndn/edu/ucla/remap"
