@@ -505,9 +505,9 @@ class ChronoSync2013(object):
             tempContent = sync_state_pb2.SyncStateMsg()
             for i in range(self._digestTree.size()):
                 content = getattr(tempContent, "ss").add()
-                content.name = self._applicationDataPrefixUri
+                content.name = self._digestTree.get(i).getDataPrefix()
                 content.type = SyncState_UPDATE
-                content.seqno.seq = self._sequenceNo
+                content.seqno.seq = self._digestTree.get(i).getSequenceNo()
                 content.seqno.session = self._digestTree.get(i).getSessionNo()
 
             if len(getattr(tempContent, "ss")) != 0:
