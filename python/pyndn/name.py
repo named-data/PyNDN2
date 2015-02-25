@@ -512,7 +512,8 @@ class Name(object):
         if len(self._components) != len(name._components):
             return False
 
-        for i in range(len(self._components)):
+        # Check from last to first since the last components are more likely to differ.
+        for i in range(len(self._components) - 1, -1, -1):
             if not self._components[i].equals(name._components[i]):
                 return False
 
