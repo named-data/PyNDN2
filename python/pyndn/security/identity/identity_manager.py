@@ -548,9 +548,8 @@ class IdentityManager(object):
         Generate a pair of keys for the specified identity.
 
         :param Name identityName: The name of the identity.
-        :param bool isKsk: (optional) true for generating a Key-Signing-Key
-          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
-          Data-Signing-Key.
+        :param bool isKsk: true for generating a Key-Signing-Key (KSK), false
+          for a Data-Signing-Key (DSK).
         :param KeyParams params: The parameters of the key.
         :return: The generated key name.
         :rtype: Name
