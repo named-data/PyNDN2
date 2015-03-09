@@ -73,6 +73,8 @@ class IdentityManager(object):
         identity and a self-signed certificate of the KSK.
 
         :param Name identityName: The name of the identity.
+        :param KeyParams params: The key parameters if a key needs to be
+          generated for the identity.
         :return: The key name of the auto-generated KSK of the identity.
         :rtype: Name
         """
