@@ -117,3 +117,12 @@ class Common(object):
                 return input.encode('utf-8')
             else:
                 return input
+
+    """
+    The practical limit of the size of a network-layer packet. If a packet is
+    larger than this, the library or application MAY drop it. This constant is
+    defined in this low-level header file so that internal code can use it, but
+    applications should use the static API method
+    Face.getMaxNdnPacketSize() which is equivalent.
+    """
+    MAX_NDN_PACKET_SIZE = 8800
