@@ -18,6 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn import Name
+from pyndn import Interest
 from pyndn import Face
 from pyndn import Data
 from pyndn import Blob
@@ -128,6 +129,25 @@ class TestFaceInterestMethods(ut.TestCase):
 
         self.assertEqual(dataCallback.call_count, 0, 'Should not have called data callback after interest was removed')
         self.assertEqual(timeoutCallback.call_count, 0, 'Should not have called timeout callback after interest was removed')
+
+    def test_max_ndn_packet_size(self):
+        # Construct an interest whose encoding is one byte larger than getMaxNdnPacketSize.
+        targetSize = Face.getMaxNdnPacketSize() + 1
+        # Start with an interest which is almost the right size.
+        interest = Interest()
+        interest.getName().append(bytearray(targetSize))
+        initialSize = interest.wireEncode().size()
+        # Now replace the component with the desired size which trims off the extra encoding.
+        interest.setName(
+          (Name().append(bytearray(targetSize - (initialSize - targetSize)))))
+        interestSize = interest.wireEncode().size()
+        self.assertEqual(targetSize, interestSize,
+          "Wrong interest size for MaxNdnPacketSize")
+
+        with self.assertRaises(RuntimeError):
+            # If no error is raised, then expressInterest didn't throw an
+            # exception when the interest size exceeds getMaxNdnPacketSize()
+            self.face.expressInterest(interest, Mock(), Mock())
 
 class TestFaceRegisterMethods(ut.TestCase):
     def setUp(self):
