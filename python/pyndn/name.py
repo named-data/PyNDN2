@@ -419,17 +419,24 @@ class Name(object):
         return self._components[i]
 
     _slash = bytearray([ord('/')])
-    def toUri(self):
+    def toUri(self, includeScheme = False):
         """
         Encode this name as a URI according to the NDN URI Scheme.
+
+        :param bool includeScheme: (optional) If True, include the "ndn:" scheme
+          in the URI, e.g. "ndn:/example/name". If False, just return the path,
+          e.g. "/example/name". If ommitted, then just return the path which is
+          the default case where toUri() is used for display.
 
         :return: The encoded URI.
         :rtype: str
         """
         if len(self._components) == 0:
-            return "/"
+            return "ndn:/" if includeScheme else "/"
 
         result = BytesIO()
+        if includeScheme:
+            result.write("ndn:")
         for component in self._components:
             # write is required to take a byte buffer.
             result.write(Name._slash)
