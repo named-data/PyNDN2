@@ -116,6 +116,8 @@ class Face(object):
         :return:  The pending interest ID which can be used with
           removePendingInterest.
         :rtype: int
+        :throws: RuntimeError If the encoded interest size exceeds
+          Face.getMaxNdnPacketSize().
         """
         # expressInterest(interest, onData)
         # expressInterest(interest, onData, wireFormat)
@@ -321,4 +323,14 @@ class Face(object):
         Shut down and disconnect this Face.
         """
         self._node.shutdown()
-
+        
+    @staticmethod
+    def getMaxNdnPacketSize():
+        """
+        Get the practical limit of the size of a network-layer packet. If a packet
+        is larger than this, the library or application MAY drop it.
+        
+        :return: The maximum NDN packet size.
+        :rtype: int
+        """
+        return Common.MAX_NDN_PACKET_SIZE
