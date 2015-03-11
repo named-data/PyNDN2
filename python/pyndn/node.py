@@ -80,6 +80,8 @@ class Node(object):
         :type onTimeout: function object
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
+        :throws: RuntimeError If the encoded interest size exceeds
+          getMaxNdnPacketSize().
         """
         # TODO: Properly check if we are already connected to the expected host.
         if not self._transport.getIsConnected():
@@ -92,7 +94,12 @@ class Node(object):
 
         # Special case: For _timeoutPrefix we don't actually send the interest.
         if not self._timeoutPrefix.match(interest.getName()):
-          self._transport.send(interest.wireEncode(wireFormat).toBuffer())
+            encoding = interest.wireEncode(wireFormat)
+            if encoding.size() > self.getMaxNdnPacketSize():
+                raise RuntimeError(
+                  "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
+
+            self._transport.send(encoding.toBuffer())
 
         return pendingInterestId
 
@@ -300,6 +307,17 @@ class Node(object):
         Call getTransport().close().
         """
         self._transport.close()
+
+    @staticmethod
+    def getMaxNdnPacketSize():
+        """
+        Get the practical limit of the size of a network-layer packet. If a packet
+        is larger than this, the library or application MAY drop it.
+
+        :return: The maximum NDN packet size.
+        :rtype: int
+        """
+        return Common.MAX_NDN_PACKET_SIZE
 
     def _extractEntriesForExpressedInterest(self, name):
         """

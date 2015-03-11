@@ -23,7 +23,7 @@ communication over UDP.
 """
 
 import socket
-from pyndn.util import Blob
+from pyndn.util import Blob, Common
 from pyndn.transport.transport import Transport
 from pyndn.transport.socket_poller import SocketPoller
 from pyndn.encoding.element_reader import ElementReader
@@ -35,7 +35,7 @@ class UdpTransport(Transport):
     def __init__(self):
         self._socket = None
         self._socketPoller = None
-        self._buffer = bytearray(8000)
+        self._buffer = bytearray(Common.MAX_NDN_PACKET_SIZE)
         # Create a Blob and take its buf() since this creates a memoryview
         #   which is more efficient for slicing.
         self._bufferView = Blob(self._buffer, False).buf()
