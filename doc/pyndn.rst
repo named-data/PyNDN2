@@ -32,6 +32,14 @@ pyndn.data module
     :undoc-members:
     :show-inheritance:
 
+pyndn.digest_sha256_signature module
+------------------------------------
+
+.. automodule:: pyndn.digest_sha256_signature
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.exclude module
 --------------------
 

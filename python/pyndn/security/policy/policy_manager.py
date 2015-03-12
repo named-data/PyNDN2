@@ -129,7 +129,7 @@ class PolicyManager(object):
         :param Blob signature: An object of a subclass of Signature, e.g.
           Sha256WithRsaSignature.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
-        verify.
+          verify.
         :param Blob publicKeyDer: The DER-encoded public key used to verify the
           signature. This is ignored if the signature type does not require a
           public key.

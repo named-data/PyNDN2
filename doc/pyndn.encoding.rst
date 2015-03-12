@@ -36,10 +36,26 @@ pyndn.encoding.element_reader module
     :undoc-members:
     :show-inheritance:
 
+pyndn.encoding.oid module
+-------------------------
+
+.. automodule:: pyndn.encoding.oid
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.encoding.protobuf_tlv module
 ----------------------------------
 
 .. automodule:: pyndn.encoding.protobuf_tlv
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.encoding.tlv_0_1_1_wire_format module
+-------------------------------------------
+
+.. automodule:: pyndn.encoding.tlv_0_1_1_wire_format
     :members:
     :undoc-members:
     :show-inheritance:
