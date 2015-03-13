@@ -167,66 +167,140 @@ class Interest(object):
         return self._interestLifetimeMilliseconds
 
     def setName(self, name):
+        """
+        Set the interest name.
+
+        :note: You can also call getName and change the name values directly.
+        :param Name name: The interest name. This makes a copy of the name.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._name.set(name if type(name) is Name else Name(name))
         self._changeCount += 1
+        return self
 
     def setMinSuffixComponents(self, minSuffixComponents):
+        """
+        Set the min suffix components count.
+
+        :param int minSuffixComponents: The min suffix components count. If not
+          specified, set to None.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._minSuffixComponents = minSuffixComponents
         self._changeCount += 1
+        return self
 
     def setMaxSuffixComponents(self, maxSuffixComponents):
+        """
+        Set the max suffix components count.
+
+        :param int maxSuffixComponents: The max suffix components count. If not
+          specified, set to None.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._maxSuffixComponents = maxSuffixComponents
         self._changeCount += 1
+        return self
 
     def setKeyLocator(self, keyLocator):
         """
-        Set this interest to use a copy of the given keyLocator.
-        Note: You can also change this interest's key locator modifying
-        the object from getKeyLocator().
+        Set this interest to use a copy of the given KeyLocator object.
 
-        :param KeyLocator keyLocator: The KeyLocator that is copied.
+        :note: You can also call getKeyLocator and change the key locator directly.
+        :param KeyLocator keyLocator: The KeyLocator object. This makes a copy
+          of the object. If no key locator is specified, set to a new default
+          KeyLocator(), or to a KeyLocator with an unspecified type.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
         """
         self._keyLocator.set(
           keyLocator if type(keyLocator) is KeyLocator
                      else KeyLocator())
         self._changeCount += 1
+        return self
 
     def setExclude(self, exclude):
         """
-        Set this interest to use a copy of the given exclude object.
-        Note: You can also change this interest's exclude object modifying
-        the object from getExclude().
+        Set this interest to use a copy of the given Exclude object.
 
-        :param Exclude exclude: The exlcude object that is copied.
+        :note: You can also call getExclude and change the exclude entries directly.
+        :param Exclude exclude: The Exclude object. This makes a copy of the
+          object. If no exclude is specified, set to a new default Exclude(), or
+          to an Exclude with size() 0.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
         """
         self._exclude.set(
           Exclude(exclude) if type(exclude) is Exclude else Exclude())
         self._changeCount += 1
+        return self
 
     def setChildSelector(self, childSelector):
+        """
+        Set the child selector.
+
+        :param int childSelector: The child selector. If not specified, set to None.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._childSelector = childSelector
         self._changeCount += 1
+        return self
 
     def setMustBeFresh(self, mustBeFresh):
+        """
+        Set the MustBeFresh flag.
+
+        :param bool mustBeFresh: True if the content must be fresh, otherwise
+          False. If you do not set this flag, the default value is true.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._mustBeFresh = True if mustBeFresh else False
         self._changeCount += 1
+        return self
 
     def setNonce(self, nonce):
+        """
+        :deprecated: You should let the wire encoder generate a random nonce
+          internally before sending the interest.
+        """
         self._nonce = nonce if type(nonce) is Blob else Blob(nonce)
         # Set _getNonceChangeCount so that the next call to getNonce() won't
         #   clear _nonce.
         self._changeCount += 1
         self._getNonceChangeCount = self.getChangeCount()
+        return self
 
     def setScope(self, scope):
+        """
+        Set the interest scope.
+
+        :param int scope: The interest scope. If not specified, set to None.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._scope = scope
         self._changeCount += 1
+        return self
 
     def setInterestLifetimeMilliseconds(self, interestLifetimeMilliseconds):
+        """
+        Set the interest lifetime.
+
+        :param float interestLifetimeMilliseconds: The interest lifetime in
+          milliseconds. If not specified, set to -1.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
         self._interestLifetimeMilliseconds = (None
            if interestLifetimeMilliseconds == None
            else float(interestLifetimeMilliseconds))
         self._changeCount += 1
+        return self
 
     def wireEncode(self, wireFormat = None):
         """
