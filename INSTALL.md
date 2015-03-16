@@ -198,7 +198,10 @@ To run the unit tests, in a terminal change to the directory `<PyNDN root>/tests
 
     python -m pytest test_*.py
 
-(If TestFaceRegisterMethods fails, make sure the local NFD is running.)
+To run the integration tests (you must be running NFD), in a terminal change to
+the directory `<PyNDN root>/tests/integration_tests` and enter:
+
+    python -m pytest test_*.py
 
 Example files are in `<PyNDN root>/examples`.  For example in a terminal enter:
 

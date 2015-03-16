@@ -5,6 +5,7 @@ Changes
 * http://redmine.named-data.net/issues/1921 In Face, added getMaxNdnPacketSize().
   expressInterest throws an exception if the encoded interest size exceeds it.
 * In Interest setter methods, return this so that you can chain calls to update values.
+* Moved tests which need NFD from tests/unit_tests to tests/integration_tests.
 
 Bug fixes
 * http://redmine.named-data.net/issues/2478 Fix ProtobufTlv for Python 3.
