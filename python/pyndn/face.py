@@ -300,6 +300,24 @@ class Face(object):
         """
         self._node.removeRegisteredPrefix(registeredPrefixId)
 
+    def putData(self, data, wireFormat = None):
+        """
+        The OnInterest callback calls this to put a Data packet which satisfies
+        an Interest.
+
+        :param Data data: The Data packet which satisfies the interest.
+        :param WireFormat wireFormat: (optional) A WireFormat object used to
+          encode the Data packet. If omitted, use
+          WireFormat.getDefaultWireFormat().
+        :throws: RuntimeError If the encoded Data packet size exceeds
+          getMaxNdnPacketSize().
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        self._node.putData(data, wireFormat)
+
     def processEvents(self):
         """
         Process any packets to receive and call callbacks such as onData,
