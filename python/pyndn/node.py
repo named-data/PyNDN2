@@ -112,14 +112,20 @@ class Node(object):
 
         :param int pendingInterestId: The ID returned from expressInterest.
         """
+        count = 0
         # Go backwards through the list so we can erase entries.
         # Remove all entries even though pendingInterestId should be unique.
         i = len(self._pendingInterestTable) - 1
         while i >= 0:
             if (self._pendingInterestTable[i].getPendingInterestId() ==
                   pendingInterestId):
+                count += 1
                 self._pendingInterestTable.pop(i)
             i -= 1
+
+        if count == 0:
+            logging.getLogger(__name__).debug(
+              "removePendingInterest: Didn't find pendingInterestId " + pendingInterestId)
 
     def makeCommandInterest(self, interest, keyChain, certificateName, wireFormat):
         """
@@ -202,14 +208,20 @@ class Node(object):
 
         :param int registeredPrefixId: The ID returned from registerPrefix.
         """
+        count = 0
         # Go backwards through the list so we can erase entries.
         # Remove all entries even though registeredPrefixId should be unique.
         i = len(self._registeredPrefixTable) - 1
         while i >= 0:
             if (self._registeredPrefixTable[i].getRegisteredPrefixId() ==
                   registeredPrefixId):
+                count += 1
                 self._registeredPrefixTable.pop(i)
             i -= 1
+
+        if count == 0:
+            logging.getLogger(__name__).debug(
+              "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
 
     def putData(self, data, wireFormat):
         """
