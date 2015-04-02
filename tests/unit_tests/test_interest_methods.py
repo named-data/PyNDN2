@@ -24,6 +24,7 @@ import unittest as ut
 from pyndn import Name
 from pyndn import Interest
 from pyndn import KeyLocatorType
+from pyndn import InterestFilter
 from pyndn.util import Blob
 from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
@@ -183,7 +184,7 @@ class TestInterestMethods(ut.TestCase):
         self.assertFalse(self.referenceInterest.getNonce().isNull())
         interest = Interest(self.referenceInterest)
         # Change a child object.
-        interest.getExclude().clear();
+        interest.getExclude().clear()
         self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
 
     def test_verify_digest_sha256(self):
@@ -204,6 +205,24 @@ class TestInterestMethods(ut.TestCase):
         keyChain.verifyInterest(interest, verifiedCallback, failedCallback)
         self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
         self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
+
+    def test_interest_filter_matching(self):
+        self.assertEqual(True,  InterestFilter("/a").doesMatch(Name("/a/b")))
+        self.assertEqual(True,  InterestFilter("/a/b").doesMatch(Name("/a/b")))
+        self.assertEqual(False, InterestFilter("/a/b/c").doesMatch(Name("/a/b")))
+
+        self.assertEqual(True,  InterestFilter("/a", "<b>").doesMatch(Name("/a/b")))
+        self.assertEqual(False, InterestFilter("/a/b", "<b>").doesMatch(Name("/a/b")))
+
+        self.assertEqual(False, InterestFilter("/a/b", "<c>").doesMatch(Name("/a/b/c/d")))
+        self.assertEqual(False, InterestFilter("/a/b", "<b>").doesMatch(Name("/a/b/c/b")))
+        self.assertEqual(True,  InterestFilter("/a/b", "<>*<b>").doesMatch(Name("/a/b/c/b")))
+
+        self.assertEqual(False, InterestFilter("/a", "<b>").doesMatch(Name("/a/b/c/d")))
+        self.assertEqual(True,  InterestFilter("/a", "<b><>*").doesMatch(Name("/a/b/c/d")))
+        self.assertEqual(True,  InterestFilter("/a", "<b><>*").doesMatch(Name("/a/b")))
+        self.assertEqual(False, InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b")))
+        self.assertEqual(True,  InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b/c")))
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
