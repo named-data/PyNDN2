@@ -52,12 +52,19 @@ class InterestFilter(object):
       remaining name components.
     """
     def __init__(self, prefix, regexFilter = None):
-        self._prefix = Name(prefix)
-        self._regexFilter = regexFilter
-        if regexFilter != None:
-            self._regexFilterPattern = self.makePattern(regexFilter)
+        if type(prefix) is InterestFilter:
+            interestFilter = prefix
+            # The copy constructor.
+            self._prefix = Name(interestFilter._prefix)
+            self._regexFilter = interestFilter._regexFilter
+            self._regexFilterPattern = interestFilter._regexFilterPattern
         else:
-            self._regexFilterPattern = None
+            self._prefix = Name(prefix)
+            self._regexFilter = regexFilter
+            if regexFilter != None:
+                self._regexFilterPattern = self.makePattern(regexFilter)
+            else:
+                self._regexFilterPattern = None
 
     def doesMatch(self, name):
         """
