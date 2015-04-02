@@ -80,6 +80,14 @@ pyndn.interest module
     :undoc-members:
     :show-inheritance:
 
+pyndn.interest_filter module
+----------------------------
+
+.. automodule:: pyndn.interest_filter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.key_locator module
 ------------------------
 
