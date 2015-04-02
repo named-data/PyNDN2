@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import re
-from pyndn import Name
+from pyndn.name import Name
 
 """
 Convert an NDN regex (http://redmine.named-data.net/projects/ndn-cxx/wiki/Regex)
