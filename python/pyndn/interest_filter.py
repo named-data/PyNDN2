@@ -28,22 +28,9 @@ from pyndn.util.ndn_regex import NdnRegexMatcher
 class InterestFilter(object):
     """
     Create an InterestFilter to match any Interest whose name starts with the
-    given prefix. If the optional refexFilter is provided then the remaining
-    components match the regexFilter regular expression.
-    For example, the following InterestFilter:
-
-       InterestFilter("/hello", "<world><>+")
-
-    will match all Interests, whose name has the prefix `/hello` which is
-    followed by a component `world` and has at least one more component after it.
-    Examples:
-
-       /hello/world/!
-       /hello/world/x/y/z
-
-    Note that the regular expression will need to match all remaining components
-    (e.g., there are implicit heading `^` and trailing `$` symbols in the
-    regular expression).
+    given prefix. If the optional regexFilter is provided then the remaining
+    components match the regexFilter regular expression as described in
+    doesMatch.
 
     :param prefix: The prefix. If a Name then this makes a copy of the Name.
       Otherwise it create a Name from the URI string.
@@ -68,7 +55,23 @@ class InterestFilter(object):
 
     def doesMatch(self, name):
         """
-        Check if the given name matches this filter.
+        Check if the given name matches this filter. Match if name starts with
+        this filter's prefix. If this filter has the optional regexFilter then
+        the remaining components match the regexFilter regular expression.
+        For example, the following InterestFilter:
+
+           InterestFilter("/hello", "<world><>+")
+
+        will match all Interests, whose name has the prefix `/hello` which is
+        followed by a component `world` and has at least one more component
+        after it. Examples:
+
+           /hello/world/!
+           /hello/world/x/y/z
+
+        Note that the regular expression will need to match all remaining
+        components (e.g., there are implicit heading `^` and trailing `$`
+        symbols in the regular expression).
 
         :param Name name: The name to check against this filter.
         :return: True if name matches this filter, otherwise False.
