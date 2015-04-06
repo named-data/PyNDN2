@@ -48,10 +48,10 @@ The following logic is implemented in SegmentFetcher:
 
    >> Interest: /<prefix>/<version>/<segment=(N+1))>
 
-6. Call the OnComplete callback with a blob that concatenates the content
+6. Call the onComplete callback with a Blob that concatenates the content
    from all the segmented objects.
 
-If an error occurs during the fetching process, the OnError callback is called
+If an error occurs during the fetching process, the onError callback is called
 with a proper error code.  The following errors are possible:
 
 - `INTEREST_TIMEOUT`: if any of the Interests times out
@@ -59,27 +59,24 @@ with a proper error code.  The following errors are possible:
   as the last component of the name (not counting the implicit digest)
 - `SEGMENT_VERIFICATION_FAILED`: if any retrieved segment fails
   the user-provided VerifySegment callback
-- `IO_ERROR`: for I/O errors when sending an Interest.
 
-In order to validate individual segments, a VerifySegment callback needs to
-be specified. If the callback returns false, the fetching process is aborted
+In order to validate individual segments, a verifySegment callback needs to
+be specified. If the callback returns False, the fetching process is aborted
 with SEGMENT_VERIFICATION_FAILED. If data validation is not required, the
 provided DontVerifySegment object can be used.
 
 Example:
-    Interest interest = new Interest(new Name("/data/prefix"));
-    interest.setInterestLifetimeMilliseconds(1000);
+    def onComplete(content):
+        ...
 
-    SegmentFetcher.fetch
-      (face, interest, SegmentFetcher.DontVerifySegment,
-       new SegmentFetcher.OnComplete() {
-         public void onComplete(Blob content) {
-           ...
-         }},
-       new SegmentFetcher.OnError() {
-         public void onError(SegmentFetcher.ErrorCode errorCode, String message) {
-           ...
-         }});
+    def onError(errorCode, message):
+        ...
+        
+    interest = Interest(Name("/data/prefix"))
+    interest.setInterestLifetimeMilliseconds(1000)
+
+    SegmentFetcher.fetch(
+      face, interest, SegmentFetcher.DontVerifySegment, onComplete, onError)
 """
 
 from pyndn.interest import Interest
