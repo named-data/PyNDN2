@@ -1,10 +1,11 @@
-Interim changes since PyNDN v2.0beta3 (2015-03-12)
+Interim changes since PyNDN v2.0beta3 (2015-04-06)
 --------------------------------------------------
 
 Changes
 * http://redmine.named-data.net/issues/1921 In Face, added getMaxNdnPacketSize().
   expressInterest throws an exception if the encoded interest size exceeds it.
 * In Interest setter methods, return this so that you can chain calls to update values.
+* Added class util/SegmentFetcher, ported from ndn-cxx. Use it in examples test_list_rib.
 * Moved tests which need NFD from tests/unit_tests to tests/integration_tests.
 
 Bug fixes

@@ -17,13 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.util import blob, signed_blob
-__all__ = ['blob', 'signed_blob']
+from pyndn.util import blob, memory_content_cache, segment_fetcher, signed_blob
+__all__ = ['blob', 'memory_content_cache', 'segment_fetcher', 'signed_blob']
 
 import sys as _sys
 
 try:
     from pyndn.util.blob import *
+    from pyndn.util.memory_content_cache import *
+    from pyndn.util.segment_fetcher import *
     from pyndn.util.signed_blob import *
 except ImportError:
     del _sys.modules[__name__]
