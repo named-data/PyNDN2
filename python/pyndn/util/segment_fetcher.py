@@ -187,7 +187,7 @@ class SegmentFetcher(object):
             # We don't expect a name without a segment number.  Treat it as
             # a bad packet.
             self._onError(
-              ErrorCode.DATA_HAS_NO_SEGMENT,
+              self.ErrorCode.DATA_HAS_NO_SEGMENT,
                "Got an unexpected packet without a segment number: " +
                data.getName().toUri())
         else:
@@ -242,7 +242,7 @@ class SegmentFetcher(object):
                         return
 
                 # Fetch the next segment.
-                fetchNextSegment(
+                self._fetchNextSegment(
                   originalInterest, data.getName(), expectedSegmentNumber + 1)
 
     def _onTimeout(self, interest):
