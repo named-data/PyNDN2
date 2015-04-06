@@ -29,7 +29,7 @@ from pyndn.name import Name
 from pyndn.data import Data
 from pyndn.util.common import Common
 from pyndn.util.blob import Blob
-from pyndn.encoding import WireFormat
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature

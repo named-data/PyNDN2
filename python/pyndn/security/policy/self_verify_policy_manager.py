@@ -28,7 +28,7 @@ found, the verification fails.
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
-from pyndn.encoding import WireFormat
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
 from pyndn.key_locator import KeyLocator, KeyLocatorType
 from pyndn.security.policy.policy_manager import PolicyManager

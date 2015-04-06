@@ -810,4 +810,4 @@ class Name(object):
 
 # Import these at the end of the file to avoid circular references.
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
-from pyndn.encoding import WireFormat
+from pyndn.encoding.wire_format import WireFormat

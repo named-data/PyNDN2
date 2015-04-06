@@ -28,7 +28,7 @@ from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
-from pyndn.encoding import WireFormat
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.key_locator import KeyLocatorType
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
