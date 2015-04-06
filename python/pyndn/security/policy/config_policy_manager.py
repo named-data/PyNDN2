@@ -26,7 +26,7 @@ from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.policy.certificate_cache import CertificateCache
 from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.encoding import WireFormat
 from pyndn.key_locator import KeyLocatorType

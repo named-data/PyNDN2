@@ -29,7 +29,7 @@ from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.encoding import WireFormat
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.key_locator import KeyLocator, KeyLocatorType
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate

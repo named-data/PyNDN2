@@ -34,7 +34,7 @@ inside an outer "typeless" message.
 import sys
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 
 class ProtobufTlv(object):

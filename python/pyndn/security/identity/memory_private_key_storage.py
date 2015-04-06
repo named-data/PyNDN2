@@ -26,7 +26,7 @@ import sys
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
 from pyndn.security.security_types import KeyType

@@ -26,7 +26,7 @@ To use permanent file-based storage, see BasicIdentityStorage.
 """
 
 from pyndn.name import Name
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
 from pyndn.security.certificate import IdentityCertificate

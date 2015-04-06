@@ -23,7 +23,7 @@ holds the signature bits (which are only the SHA256 digest) and an empty
 SignatureInfo for a data packet or signed interest.
 """
 
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.signature import Signature
 
 class DigestSha256Signature(Signature):

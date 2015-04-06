@@ -22,7 +22,7 @@ This module defines the NDN Interest class.
 """
 
 from pyndn.encoding import WireFormat
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.util import SignedBlob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name

@@ -27,7 +27,7 @@ import sys
 import logging
 if sys.platform == 'darwin':
     from pyndn.contrib.cocoapy import *
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.security.certificate import PublicKey
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass

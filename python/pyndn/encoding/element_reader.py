@@ -26,7 +26,7 @@ This handles the case where a single call to onReceivedData may contain multiple
 elements.
 """
 
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.encoding.binary_xml_structure_decoder import BinaryXmlStructureDecoder
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_structure_decoder import TlvStructureDecoder

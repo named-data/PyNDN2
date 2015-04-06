@@ -27,7 +27,7 @@ import os
 import math
 import sqlite3
 from pyndn import Name, KeyLocator
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
 from pyndn.security.certificate.identity_certificate import IdentityCertificate

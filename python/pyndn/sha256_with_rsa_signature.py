@@ -24,7 +24,7 @@ in a data packet.
 """
 
 from pyndn.util.change_counter import ChangeCounter
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.signature import Signature
 from pyndn.key_locator import KeyLocator
 

@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 
 """
 This module defines the TlvDecoder class for decoding in the NDN-TLV wire

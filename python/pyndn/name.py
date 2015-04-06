@@ -22,7 +22,7 @@ This module defines the NDN Name class.
 """
 
 from io import BytesIO
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 
 class Name(object):

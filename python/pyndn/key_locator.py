@@ -23,7 +23,7 @@ is used in a Sha256WithRsaSignature and Interest selectors.
 """
 
 from pyndn.util.change_counter import ChangeCounter
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.name import Name
 
 class KeyLocator(object):

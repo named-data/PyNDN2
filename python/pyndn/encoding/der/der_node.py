@@ -19,7 +19,7 @@
 
 import math
 from pyndn.encoding.der.der import Der
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
 
 from datetime import datetime

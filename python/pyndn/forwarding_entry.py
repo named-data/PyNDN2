@@ -25,7 +25,7 @@ prefix and other fields for a forwarding entry.
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.name import Name
 from pyndn.encoding import WireFormat
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 
 class ForwardingEntry(object):
     def __init__(self):

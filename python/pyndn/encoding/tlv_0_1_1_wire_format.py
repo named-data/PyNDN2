@@ -24,7 +24,7 @@ from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder

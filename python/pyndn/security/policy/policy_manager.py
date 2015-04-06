@@ -21,7 +21,7 @@ import sys
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException

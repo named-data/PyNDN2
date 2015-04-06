@@ -23,7 +23,7 @@ communication over TCP.
 """
 
 import socket
-from pyndn.util import Blob, Common
+from pyndn.util.blob import Blob, Common
 from pyndn.transport.transport import Transport
 from pyndn.transport.socket_poller import SocketPoller
 from pyndn.encoding.element_reader import ElementReader

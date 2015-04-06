@@ -26,7 +26,7 @@ interest to register a prefix with a forwarder.
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.name import Name
 from pyndn.encoding import WireFormat
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 
 class ControlParameters(object):
     def __init__(self):

@@ -21,7 +21,7 @@ from pyndn.encoding.oid import OID
 from pyndn.encoding.der.der_node import *
 from pyndn.encoding.der.der import *
 from pyndn.security.certificate.public_key import PublicKey
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn import Data, ContentType
 from datetime import datetime
 

@@ -34,7 +34,7 @@ import logging
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
-from pyndn.util import Blob
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.util.memory_content_cache import MemoryContentCache
 from pyndn.sync.digest_tree import DigestTree
