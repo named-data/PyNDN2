@@ -23,7 +23,7 @@ This module defines the NDN Data class.
 
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
-from pyndn.util import SignedBlob
+from pyndn.util.signed_blob import SignedBlob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.meta_info import MetaInfo
