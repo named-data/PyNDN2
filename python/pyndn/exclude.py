@@ -19,7 +19,6 @@
 
 from io import BytesIO
 from pyndn.name import Name
-from pyndn.util.common import Common
 
 """
 This module defines the Exclude class which is used by Interest and represents
@@ -280,3 +279,6 @@ class Exclude(object):
             return self._entries[key]
         else:
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
+
+# Import these at the end of the file to avoid circular references.
+from pyndn.util.common import Common
