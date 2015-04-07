@@ -46,7 +46,7 @@ def main():
 
     interest = Interest(Name("/localhost/nfd/rib/list"))
     interest.setInterestLifetimeMilliseconds(4000)
-    dump("Express interest" + interest.getName().toUri())
+    dump("Express interest", interest.getName().toUri())
 
     enabled = [True]
 
