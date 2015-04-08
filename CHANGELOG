@@ -7,6 +7,8 @@ Changes
 * In Interest setter methods, return this so that you can chain calls to update values.
 * Added class util/SegmentFetcher, ported from ndn-cxx. Use it in examples test_list_rib.
 * Moved tests which need NFD from tests/unit_tests to tests/integration_tests.
+* examples: Added test_list_channels, test_list_faces, test_list_rib and
+  test_register_route to query NFD.
 
 Bug fixes
 * http://redmine.named-data.net/issues/2478 Fix ProtobufTlv for Python 3.
