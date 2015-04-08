@@ -30,7 +30,7 @@ from pyndn import Interest
 from pyndn.encoding import ProtobufTlv
 from pyndn.util.segment_fetcher import SegmentFetcher
 # This include is produced by:
-# protoc --python_out=. rib-entry.proto
+# protoc --python_out=. channel-status.proto
 import channel_status_pb2
 
 def dump(*list):
@@ -43,11 +43,11 @@ def main():
     # The default Face connects to the local NFD.
     face = Face()
 
-    enabled = [True]
-
     interest = Interest(Name("/localhost/nfd/faces/channels"))
     interest.setInterestLifetimeMilliseconds(4000)
     dump("Express interest", interest.getName().toUri())
+
+    enabled = [True]
 
     def onComplete(content):
         enabled[0] = False
@@ -68,6 +68,12 @@ def main():
         time.sleep(0.01)
 
 def printChannelStatuses(encodedMessage):
+    """
+    This is called when all the segments are received to decode the
+    encodedMessage repeated TLV ChannelStatus messages and display the values.
+
+    :param Blob encodedMessage: The repeated TLV-encoded ChannelStatus.
+    """
     channelStatusMessage = channel_status_pb2.ChannelStatusMessage()
     ProtobufTlv.decode(channelStatusMessage, encodedMessage)
     
