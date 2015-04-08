@@ -17,8 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-# This include is produced by:
-# protoc --python_out=. fib-entry.proto
+# This module is produced by: protoc --python_out=. fib-entry.proto
 import fib_entry_pb2
 from pyndn.encoding import ProtobufTlv
 from pyndn.util import Blob

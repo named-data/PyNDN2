@@ -29,8 +29,7 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn.encoding import ProtobufTlv
 from pyndn.util.segment_fetcher import SegmentFetcher
-# This include is produced by:
-# protoc --python_out=. channel-status.proto
+# This module is produced by: protoc --python_out=. channel-status.proto
 import channel_status_pb2
 
 def dump(*list):
