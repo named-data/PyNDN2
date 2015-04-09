@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0beta3 (2015-04-06)
+Interim changes since PyNDN v2.0beta3 (2015-04-09)
 --------------------------------------------------
 
 Changes
@@ -6,6 +6,11 @@ Changes
   expressInterest throws an exception if the encoded interest size exceeds it.
 * In Interest setter methods, return this so that you can chain calls to update values.
 * Added class util/SegmentFetcher, ported from ndn-cxx. Use it in examples test_list_rib.
+* http://redmine.named-data.net/issues/2532#change-8836 In Face.registerPrefix,
+  if connected to a remote NFD then use localhop to do remote registration. (For
+  remote registration, the remote NFD must be configured for localhop_security.)
+  Added the optional method Face.isLocal() for the application to check if the
+  connection is local.
 * Moved tests which need NFD from tests/unit_tests to tests/integration_tests.
 * examples: Added test_list_channels, test_list_faces, test_list_rib and
   test_register_route to query NFD.

@@ -61,6 +61,17 @@ class UnixTransport(Transport):
             """
             return self._filePath
 
+    def isLocal(self, connectionInfo):
+        """
+        Determine whether this transport connecting according to connectionInfo
+        is to a node on the current machine. Unix transports are always local.
+
+        :param UnixTransport.ConnectionInfo connectionInfo: This is ignored.
+        :return: True because Unix transports are always local.
+        :rtype: bool
+        """
+        return True
+
     def connect(self, connectionInfo, elementListener):
         """
         Connect according to the info in connectionInfo, and use

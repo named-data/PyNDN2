@@ -332,6 +332,17 @@ class Node(object):
             for pendingInterest in pendingInterests:
                 pendingInterest.getOnData()(pendingInterest.getInterest(), data)
 
+    def isLocal(self):
+        """
+        Check if the face is local based on the current connection through the
+        Transport; some Transport may cause network I/O (e.g. an IP host name
+        lookup).
+
+        :return: True if the face is local, False if not.
+        :rtype bool:
+        """
+        return self._transport.isLocal(self._connectionInfo)
+
     def shutdown(self):
         """
         Call getTransport().close().
@@ -476,14 +487,20 @@ class Node(object):
         controlParameters = ControlParameters()
         controlParameters.setName(prefix)
 
-        commandInterest = Interest(Name("/localhost/nfd/rib/register"))
+        commandInterest = Interest()
+        if self.isLocal():
+            commandInterest.setName(Name("/localhost/nfd/rib/register"))
+            # The interest is answered by the local host, so set a short timeout.
+            commandInterest.setInterestLifetimeMilliseconds(2000.0)
+        else:
+            commandInterest.setName(Name("/localhop/nfd/rib/register"))
+            # The host is remote, so set a longer timeout.
+            commandInterest.setInterestLifetimeMilliseconds(4000.0)
         # NFD only accepts TlvWireFormat packets.
         commandInterest.getName().append(controlParameters.wireEncode(TlvWireFormat.get()))
         self.makeCommandInterest(
           commandInterest, commandKeyChain, commandCertificateName,
           TlvWireFormat.get())
-        # The interest is answered by the local host, so set a short timeout.
-        commandInterest.setInterestLifetimeMilliseconds(2000.0)
 
         if registeredPrefixId != 0:
             # Save the onInterest callback and send the registration interest.

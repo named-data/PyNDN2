@@ -73,6 +73,17 @@ class UdpTransport(Transport):
             """
             return self._port
 
+    def isLocal(self, connectionInfo):
+        """
+        Determine whether this transport connecting according to connectionInfo
+        is to a node on the current machine. UDP transports are always non-local.
+
+        :param UdpTransport.ConnectionInfo connectionInfo: This is ignored.
+        :return: False because UDP transports are always non-local.
+        :rtype: bool
+        """
+        return False
+
     def connect(self, connectionInfo, elementListener):
         """
         Connect according to the info in connectionInfo, and use
