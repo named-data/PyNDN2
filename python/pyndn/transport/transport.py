@@ -30,6 +30,21 @@ class Transport(object):
         """
         pass
 
+    def isLocal(self, connectionInfo):
+        """
+        Determine whether this transport connecting according to connectionInfo
+        is to a node on the current machine. This affects the processing of
+        Face.registerPrefix(): if the NFD is local, registration occurs with the
+        '/localhost/nfd...' prefix; if non-local, the library will attempt to
+        use remote prefix registration using '/localhop/nfd...'
+
+        :param connectionInfo: A ConnectionInfo with the host to check.
+        :type connectionInfo: A subclass of ConnectionInfo
+        :return: True if the host is local, False if not.
+        :rtype bool:
+        """
+        raise RuntimeError("isLocal is not implemented")
+
     def connect(self, connectionInfo, elementListener):
         """
         Connect according to the info in ConnectionInfo, and use

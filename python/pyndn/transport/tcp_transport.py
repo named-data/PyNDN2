@@ -40,6 +40,8 @@ class TcpTransport(Transport):
         #   which is more efficient for slicing.
         self._bufferView = Blob(self._buffer, False).buf()
         self._elementReader = None
+        self._connectionInfo = None
+        self._isLocal = False
 
     class ConnectionInfo(Transport.ConnectionInfo):
         """
@@ -72,6 +74,42 @@ class TcpTransport(Transport):
             :rtype: int
             """
             return self._port
+
+    def isLocal(self, connectionInfo):
+        """
+        Determine whether this transport connecting according to connectionInfo
+        is to a node on the current machine; results are cached. According to
+        http://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face,
+        TCP transports with a loopback address are local. If connectionInfo
+        contains a host name, this will do a blocking DNS lookup; otherwise
+        this will parse the IP address and examine the first octet to determine
+        if it is a loopback address (e.g. the first IPv4 octet is 127 or IPv6 is
+        "::1").
+
+        :param TcpTransport.ConnectionInfo connectionInfo: A
+          TcpTransport.ConnectionInfo with the host to check.
+        :return: True if the host is local, False if not.
+        :rtype bool:
+        """
+        if (self._connectionInfo == None or
+            self._connectionInfo.getHost() != connectionInfo.getHost()):
+            # Only look at the first result.
+            family, _, _, _, sockaddr = socket.getaddrinfo(
+              connectionInfo.getHost(), None, socket.AF_UNSPEC,
+              socket.SOCK_STREAM)[0]
+            if family == socket.AF_INET:
+                # IPv4
+                address, _ = sockaddr
+                self._isLocal = address.startswith("127.")
+            else:
+                # IPv6
+                address, _, _, _ = sockaddr
+                self._isLocal = (address == "::1")
+
+            # Cache the result in _isLocal and save _connectionInfo for next time.
+            self._connectionInfo = connectionInfo
+
+        return self._isLocal
 
     def connect(self, connectionInfo, elementListener):
         """
