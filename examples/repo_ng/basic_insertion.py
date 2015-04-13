@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This modules shows an example of the repo-ng basic insertion protocol,
+This module shows an example of the repo-ng basic insertion protocol,
 described here:
 http://redmine.named-data.net/projects/repo-ng/wiki/Basic_Repo_Insertion_Protocol
 See main() for more details.
@@ -111,25 +111,25 @@ class ProduceSegments(object):
     different way.  This sends data packets until it has sent
     (endBlockId - startBlockId) + 1 packets.  It might be simpler to finish
     when onInterest has sent the packet for segment endBlockId, but there is no
-    guarantee that the interest will arrive in order.  Therefore we send packets
+    guarantee that the interests will arrive in order.  Therefore we send packets
     until the total is sent.
 
     :param KeyChain keyChain: This calls keyChain.sign.
     :param Name certificateName: The certificateName for keyChain.sign.
-    :param array enabled: This sets self._enabled[0] = False when onInterest has
-      sent all the Data packets, or if register fails.
     :param int startBlockId: The startBlockId given to requestInsert().
     :param int endBlockId: The endBlockId given to requestInsert().
+    :param onFinished: When the final segment has been sent, this calls
+      onFinished().
+    :type onFinished: function object
     """
-    def __init__(self, keyChain, certificateName, enabled, startBlockId, endBlockId):
+    def __init__(self, keyChain, certificateName, startBlockId, endBlockId,
+                 onFinished):
         self._keyChain = keyChain
         self._certificateName = certificateName
-        self._enabled = enabled
         self._startBlockId = startBlockId
         self._endBlockId = endBlockId
         self._nSegmentsSent = 0
-
-        self._enabled[0] = True
+        self._onFinished = onFinished
 
     def onInterest(self, prefix, interest, transport, registeredPrefixId):
         """
@@ -151,19 +151,13 @@ class ProduceSegments(object):
         self._nSegmentsSent += 1
         if self._nSegmentsSent >= (self._endBlockId - self._startBlockId) + 1:
             # We sent the final segment.
-            self._enabled[0] = False
-
-    def onRegisterFailed(self, prefix):
-        """
-        Print a message and set self._enabled[0] = False .
-        """
-        dump("Register failed for prefix", prefix.toUri())
-        self._enabled[0] = False
+            self._onFinished()
 
 def main():
     """
     Call requestInsert and register a prefix so that ProduceSegments will answer
-    interests from the repo to send the data packets.
+    interests from the repo to send the data packets. This assumes that repo-ng
+    is already running (e.g. `sudo ndn-repo-ng`).
     """
     repoCommandPrefix = Name("/example/repo/1")
     repoDataPrefix = Name("/example/data/1")
@@ -181,11 +175,18 @@ def main():
     startBlockId = 0
     endBlockId = 1
     enabled = [True]
+    def onFinished():
+        dump("All data was inserted.")
+        enabled[0] = False
     produceSegments = ProduceSegments(
-      keyChain, keyChain.getDefaultCertificateName(), enabled, startBlockId, endBlockId)
+      keyChain, keyChain.getDefaultCertificateName(), startBlockId, endBlockId,
+      onFinished)
     dump("Register prefix", fetchPrefix.toUri())
+    def onRegisterFailed(prefix):
+        dump("Register failed for prefix", prefix.toUri())
+        enabled[0] = False
     face.registerPrefix(
-      fetchPrefix, produceSegments.onInterest, produceSegments.onRegisterFailed)
+      fetchPrefix, produceSegments.onInterest, onRegisterFailed)
 
     def onInsertStarted():
         dump("Insert started for", fetchPrefix.toUri())
@@ -200,8 +201,6 @@ def main():
         face.processEvents()
         # We need to sleep for a few milliseconds so we don't use 100% of the CPU.
         time.sleep(0.01)
-
-    dump("All data was inserted.")
 
     face.shutdown()
 
