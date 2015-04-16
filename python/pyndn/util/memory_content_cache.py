@@ -58,6 +58,7 @@ class MemoryContentCache(object):
         # elements are MemoryContentCache.StaleTimeContent
         self._staleTimeCache = []
         self._emptyComponent = Name.Component()
+        self._pendingInterestTable = [] # of PendingInterest
 
     def registerPrefix(
       self, prefix, onRegisterFailed, onDataNotFound = None, flags = None,
@@ -72,9 +73,16 @@ class MemoryContentCache(object):
           reason, this calls onRegisterFailed(prefix) where prefix is the prefix
           given to registerPrefix.
         :type onRegisterFailed: function object
-        :param onDataNotFound: If a data packet is not found in the cache, this
-          calls onInterest(prefix, interest, transport) to forward the interest.
-          If omitted, this does not use it.
+        :param onDataNotFound: (optional) If a data packet for an interest is
+          not found in the cache, this forwards the interest by calling
+          onDataNotFound(prefix, interest, transport, registeredPrefixId). Your
+          callback can find the Data packet for the interest and call
+          transport.send. If your callback cannot find the Data packet, it can
+          optionally call storePendingInterest(interest, face) to store the
+          pending interest in this object to be satisfied by a later call to
+          add(data). If you want to automatically store all pending interests,
+          you can simply use getStorePendingInterest() for onDataNotFound. If
+          onDataNotFound is omitted or None, this does not use it.
         :type onDataNotFound: function object
         :param ForwardingFlags flags: (optional) See Face.registerPrefix.
         :param wireFormat: (optional) See Face.registerPrefix.
@@ -107,7 +115,10 @@ class MemoryContentCache(object):
         staleness time to now plus data.getFreshnessPeriod(), which is checked
         during cleanup to remove stale content. This also checks if
         cleanupIntervalMilliseconds milliseconds have passed and removes stale
-        content from the cache.
+        content from the cache. After removing stale content, remove timed-out
+        pending interests from storePendingInterest(), then if the added Data
+        packet satisfies any interest, send it through the transport and remove
+        the interest from the pending interest table.
 
         :param Data data: The Data packet object to put in the cache. This
           copies the fields from the object.
@@ -133,6 +144,65 @@ class MemoryContentCache(object):
         else:
             # The data does not go stale, so use _noStaleTimeCache.
             self._noStaleTimeCache.append(MemoryContentCache._Content(data))
+
+        # Remove timed-out interests and check if the data packet matches any
+        #   pending interest.
+        # Go backwards through the list so we can erase entries.
+        nowMilliseconds = Common.getNowMilliseconds()
+        for i in range(len(self._pendingInterestTable) - 1, -1, -1):
+            pendingInterest = self._pendingInterestTable[i]
+            if pendingInterest.isTimedOut(nowMilliseconds):
+                self._pendingInterestTable.pop(i)
+                continue
+
+            if pendingInterest.getInterest().matchesName(data.getName()):
+                try:
+                    # Send to the same transport from the original call to onInterest.
+                    # wireEncode returns the cached encoding if available.
+                    pendingInterest.getTransport().send(data.wireEncode().toBuffer())
+                except Exception as ex:
+                    logging.getLogger(__name__).error(
+                      "Error in transport.send: %s", str(ex))
+                    return
+
+                # The pending interest is satisfied, so remove it.
+                self._pendingInterestTable.pop(i)
+
+    def storePendingInterest(self, interest, transport):
+        """
+        Store an interest from an OnInterest callback in the internal pending
+        interest table (normally because there is no Data packet available yet
+        to satisfy the interest). add(data) will check if the added Data packet
+        satisfies any pending interest and send it through the face.
+
+        :param Interest interest: The Interest for which we don't have a Data
+          packet yet. You should not modify the interest after calling this.
+        :param Transport transport: The Transport with the connection which
+          received the interest. This comes from the OnInterest callback.
+        """
+        self._pendingInterestTable.append(
+          self._PendingInterest(interest, transport))
+
+    def getStorePendingInterest(self):
+        """
+        Return a callback to use for onDataNotFound in registerPrefix which
+        simply calls storePendingInterest() to store the interest that doesn't
+        match a Data packet. add(data) will check if the added Data packet
+        satisfies any pending interest and send it.
+
+        :return: A callback to use for onDataNotFound in registerPrefix().
+        :rtype: function object
+        """
+        return self._storePendingInterestCallback
+
+    def _storePendingInterestCallback(
+          self, prefix, interest, transport, registeredPrefixId):
+        """
+        This is a private method to return from getStorePendingInterest(). We
+        need a separate method because the arguments are different from
+        storePendingInterest.
+        """
+        self.storePendingInterest(interest, transport)
 
     def _onInterest(self, prefix, interest, transport, registeredPrefixId):
         """
@@ -193,9 +263,8 @@ class MemoryContentCache(object):
         else:
             # Call the onDataNotFound callback (if defined).
             if prefix.toUri() in self._onDataNotFoundForPrefix:
-                # TODO: Include registeredPrefixId.
                 self._onDataNotFoundForPrefix[prefix.toUri()](
-                  prefix, interest, transport, 0)
+                  prefix, interest, transport, registeredPrefixId)
 
     def _doCleanup(self):
         """
@@ -269,3 +338,53 @@ class MemoryContentCache(object):
             :rtype: bool
             """
             return self._staleTimeMilliseconds <= nowMilliseconds
+
+    class _PendingInterest(object):
+        """
+        A PendingInterest holds an interest which onInterest received but could
+        not satisfy. When we add a new data packet to the cache, we will also
+        check if it satisfies a pending interest.
+
+        Create a new PendingInterest and set the _timeoutTime based on the
+        current time and the interest lifetime.
+
+        :param Interest interest: The interest.
+        :param Transport transport: The transport from the onInterest callback.
+          If the interest is satisfied later by a new data packet, we will send
+          the data packet to the transport.
+        """
+        def __init__(self, interest, transport):
+            self._interest = interest
+            self._transport = transport
+
+            # Set up _timeoutTimeMilliseconds.
+            if self._interest.getInterestLifetimeMilliseconds() >= 0.0:
+              self._timeoutTimeMilliseconds = (Common.getNowMilliseconds() +
+                self._interest.getInterestLifetimeMilliseconds())
+            else:
+              # No timeout.
+              self._timeoutTimeMilliseconds = -1.0
+
+        def getInterest(self):
+            """
+            Return the interest given to the constructor.
+            """
+            return self._interest
+
+        def getTransport(self):
+            """
+            Return the transport given to the constructor.
+            """
+            return self._transport
+
+        def isTimedOut(self, nowMilliseconds):
+            """
+            Check if this interest is timed out.
+
+            :param float nowMilliseconds: The current time in milliseconds from
+              Common.getNowMilliseconds.
+            :return: True if this interest timed out, otherwise False.
+            :rtype: bool
+            """
+            return (self._timeoutTimeMilliseconds >= 0.0 and
+                    nowMilliseconds >= self._timeoutTimeMilliseconds)
