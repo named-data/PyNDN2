@@ -35,7 +35,6 @@ from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.util.blob import Blob
-from pyndn.util.common import Common
 from pyndn.util.memory_content_cache import MemoryContentCache
 from pyndn.sync.digest_tree import DigestTree
 
@@ -106,7 +105,6 @@ class ChronoSync2013(object):
         self._digestLog = [] # of _DigestLogEntry
         self._digestTree = DigestTree()
         self._sequenceNo = -1
-        self._pendingInterestTable = [] # of PendingInterest
         self._enabled = True
 
         emptyContent = sync_state_pb2.SyncStateMsg()
@@ -264,56 +262,6 @@ class ChronoSync2013(object):
             :rtype: array of sync_state_pb2.SyncState.
             """
             return self._data
-
-    class _PendingInterest(object):
-        """
-        A PendingInterest holds an interest which onInterest received but could
-        not satisfy. When we add a new data packet to the _contentCache, we will
-        also check if it satisfies a pending interest.
-
-        Create a new PendingInterest and set the _timeoutTime based on the
-        current time and the interest lifetime.
-
-        :param Interest interest: The interest.
-        :param Transport transport: The transport from the onInterest callback.
-          If the interest is satisfied later by a new data packet, we will send
-          the data packet to the transport.
-        """
-        def __init__(self, interest, transport):
-            self._interest = interest
-            self._transport = transport
-
-            # Set up _timeoutTimeMilliseconds.
-            if self._interest.getInterestLifetimeMilliseconds() >= 0.0:
-              self._timeoutTimeMilliseconds = (Common.getNowMilliseconds() +
-                self._interest.getInterestLifetimeMilliseconds())
-            else:
-              # No timeout.
-              self._timeoutTimeMilliseconds = -1.0
-
-        def getInterest(self):
-            """
-            Return the interest given to the constructor.
-            """
-            return self._interest
-
-        def getTransport(self):
-            """
-            Return the transport given to the constructor.
-            """
-            return self._transport
-
-        def isTimedOut(self, nowMilliseconds):
-            """
-            Check if this interest is timed out.
-
-            :param float nowMilliseconds: The current time in milliseconds from
-              Common.getNowMilliseconds.
-            :return: True if this interest timed out, otherwise False.
-            :rtype: bool
-            """
-            return (self._timeoutTimeMilliseconds >= 0.0 and
-                    nowMilliseconds >= self._timeoutTimeMilliseconds)
                     
     def _broadcastSyncState(self, digest, syncMessage):
         """
@@ -329,7 +277,7 @@ class ChronoSync2013(object):
         # TODO: Check if this works in Python 3.
         data.setContent(Blob(syncMessage.SerializeToString()))
         self._keyChain.sign(data, self._certificateName)
-        self._contentCacheAdd(data)
+        self._contentCache.add(data)
 
     def _update(self, content):
         """
@@ -371,6 +319,11 @@ class ChronoSync2013(object):
         return -1
 
     def _onInterest(self, prefix, interest, transport, registerPrefixId):
+        """
+        Process the sync interest from the applicationBroadcastPrefix. If we
+        can't satisfy the interest, add it to the pending interest table in
+        the _contentCache so that a future call to contentCacheAdd may satisfy it.
+        """
         if not self._enabled:
             # Ignore callbacks after the application calls shutdown().
             return
@@ -391,9 +344,7 @@ class ChronoSync2013(object):
             # Recovery interest or newcomer interest.
             self._processRecoveryInterest(interest, syncDigest, transport)
         else:
-            # Save the unanswered interest in our local pending interest table.
-            self._pendingInterestTable.append(self._PendingInterest(
-              interest, transport))
+            self._contentCache.storePendingInterest(interest, transport)
 
             if syncDigest != self._digestTree.getRoot():
                 index = self._logFind(syncDigest)
@@ -711,40 +662,6 @@ class ChronoSync2013(object):
 
             if self._update(getattr(tempContent, "ss")):
                 self._onInitialized()
-
-    def _contentCacheAdd(self, data):
-        """
-        Add the data packet to the _contentCache. Remove timed-out entries
-        from _pendingInterestTable. If the data packet satisfies any pending
-        interest, then send the data packet to the pending interest's transport
-        and remove from the _pendingInterestTable.
-
-        :param Data data: The data packet to add.
-        """
-        self._contentCache.add(data)
-
-        # Remove timed-out interests and check if the data packet matches any
-        #   pending interest.
-        # Go backwards through the list so we can erase entries.
-        nowMilliseconds = Common.getNowMilliseconds()
-        for i in range(len(self._pendingInterestTable) - 1, -1, -1):
-            pendingInterest = self._pendingInterestTable[i]
-            if pendingInterest.isTimedOut(nowMilliseconds):
-                self._pendingInterestTable.pop(i)
-                continue
-
-            if pendingInterest.getInterest().matchesName(data.getName()):
-                try:
-                    # Send to the same transport from the original call to onInterest.
-                    # wireEncode returns the cached encoding if available.
-                    pendingInterest.getTransport().send(data.wireEncode().toBuffer())
-                except Exception as ex:
-                    logging.getLogger(__name__).error(
-                      "Error in transport.send: %s", str(ex))
-                    return
-
-                # The pending interest is satisfied, so remove it.
-                self._pendingInterestTable.pop(i)
 
     @staticmethod
     def _dummyOnData(interest, data):
