@@ -26,6 +26,7 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 """
 
+import logging
 from pyndn.name import Name
 from pyndn.util.common import Common
 
