@@ -104,20 +104,22 @@ class ElementReader(object):
                     #   memoryview which is more efficient for slicing.
                     partialDataView = Blob(
                       self._partialData.getArray(), False).buf()
-                    self._elementListener.onReceivedElement(
-                      partialDataView[:self._partialDataLength])
+                    element = partialDataView[:self._partialDataLength]
                     # Assume we don't need to use partialData anymore until
                     #   needed.
                     self._usePartialData = False
                 else:
                     # We are not using partialData, so just point to the input
                     #   data buffer.
-                    self._elementListener.onReceivedElement(data[:offset])
+                    element = data[:offset]
 
-                # Need to read a new object.
+                # Reset to read a new object. Do this before calling
+                # onReceivedElement in case it throws an exception.
                 data = data[offset:]
                 self._binaryXmlStructureDecoder = BinaryXmlStructureDecoder()
                 self._tlvStructureDecoder = TlvStructureDecoder()
+
+                self._elementListener.onReceivedElement(element)
                 if len(data) == 0:
                     # No more data in the packet.
                     return
