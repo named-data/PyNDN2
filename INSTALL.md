@@ -221,11 +221,9 @@ This has the following example programs:
 
 * examples/test_get_async.py: Connect to one of the NDN testbed hubs, express an interest and display the received data.
 * examples/test_get_async_threadsafe.py: The same as test_get_async.py, but use asyncio and the ThreadsafeFace.
-* examples/test_publish_async_ndnx.py: Connect to the local NDNx hub, accept interests with prefix /testecho and echo back a data packet. See test_echo_consumer.py.
 * examples/test_publish_async_nfd.py: Connect to the local NFD hub, accept interests with prefix /testecho and echo back a data packet. See test_echo_consumer.py.
 * examples/test_echo_consumer.py: Prompt for a word, send the interest /testecho/word to the local hub which is echoed by test_publish_async_nfd.py (or test_publish_async_ndnx.py).
 * examples/test_encode_decode_interest.py: Encode and decode an interest, testing interest selectors and the name URI.
 * examples/test_encode_decode_data.py: Encode and decode a data packet, including signing the data packet.
-* examples/test_encode_decode_forwarding_entry.py: Encode and decode a forwarding entry packet.
 * examples/test_encode_decode_fib_entry.py: Encode and decode a sample Protobuf message using ProtobufTlv.
 * examples/test_chrono_chat.py: A command-line chat application using the ChronoSync2013 API, compatible with ChronoChat-js.
