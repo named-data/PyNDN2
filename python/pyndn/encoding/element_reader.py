@@ -139,6 +139,15 @@ class ElementReader(object):
                     self._usePartialData = True
                     self._partialDataLength = 0
 
+                if self._partialDataLength + len(data) > Common.MAX_NDN_PACKET_SIZE:
+                    # Reset to read a new element on the next call.
+                    self._usePartialData = False
+                    self._binaryXmlStructureDecoder = BinaryXmlStructureDecoder()
+                    self._tlvStructureDecoder = TlvStructureDecoder()
+
+                    raise ValueError(
+                      "The incoming packet exceeds the maximum limit Face.getMaxNdnPacketSize()")
+                    
                 self._partialData.copy(data, self._partialDataLength)
                 self._partialDataLength += len(data)
 
