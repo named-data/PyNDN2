@@ -31,6 +31,7 @@ from pyndn.encoding.binary_xml_structure_decoder import BinaryXmlStructureDecode
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_structure_decoder import TlvStructureDecoder
 from pyndn.util.dynamic_byte_array import DynamicByteArray
+from pyndn.util.common import Common
 
 class ElementReader(object):
     """
