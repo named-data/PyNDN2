@@ -62,34 +62,42 @@ class ElementReader(object):
 
         # Process multiple objects in the data.
         while True:
-            if not self._usePartialData:
-                # This is the beginning of an element. Check whether it is
-                #  Binary XML or TLV.
-                if len(data) <= 0:
-                    # Wait for more data.
-                    return
+            try:
+                if not self._usePartialData:
+                    # This is the beginning of an element. Check whether it is
+                    #  Binary XML or TLV.
+                    if len(data) <= 0:
+                        # Wait for more data.
+                        return
 
-                # The type codes for TLV Interest and Data packets are chosen to not
-                #   conflict with the first byte of a binary XML packet, so we can
-                #   just look at the first byte.
-                if (data[0] == Tlv.Interest or data[0] == Tlv.Data or
-                    data[0] == 0x80):
-                    self._useTlv = True
+                    # The type codes for TLV Interest and Data packets are chosen to not
+                    #   conflict with the first byte of a binary XML packet, so we can
+                    #   just look at the first byte.
+                    if (data[0] == Tlv.Interest or data[0] == Tlv.Data or
+                        data[0] == 0x80):
+                        self._useTlv = True
+                    else:
+                        # Binary XML.
+                        self._useTlv = False
+
+                if self._useTlv:
+                    # Scan the input to check if a whole TLV element has been read.
+                    self._tlvStructureDecoder.seek(0)
+                    gotElementEnd = self._tlvStructureDecoder.findElementEnd(data)
+                    offset = self._tlvStructureDecoder.getOffset()
                 else:
-                    # Binary XML.
-                    self._useTlv = False
+                    # Scan the input to check if a whole Binary XML element has been
+                    #   read.
+                    self._binaryXmlStructureDecoder.seek(0)
+                    gotElementEnd = self._binaryXmlStructureDecoder.findElementEnd(data)
+                    offset = self._binaryXmlStructureDecoder.getOffset()
+            except ValueError as ex:
+                # Reset to read a new element on the next call.
+                self._usePartialData = False
+                self._binaryXmlStructureDecoder = BinaryXmlStructureDecoder()
+                self._tlvStructureDecoder = TlvStructureDecoder()
 
-            if self._useTlv:
-                # Scan the input to check if a whole TLV element has been read.
-                self._tlvStructureDecoder.seek(0)
-                gotElementEnd = self._tlvStructureDecoder.findElementEnd(data)
-                offset = self._tlvStructureDecoder.getOffset()
-            else:
-                # Scan the input to check if a whole Binary XML element has been
-                #   read.
-                self._binaryXmlStructureDecoder.seek(0)
-                gotElementEnd = self._binaryXmlStructureDecoder.findElementEnd(data)
-                offset = self._binaryXmlStructureDecoder.getOffset()
+                raise ex
 
             if gotElementEnd:
                 # Got the remainder of an element. Report to the caller.
