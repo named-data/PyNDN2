@@ -318,7 +318,7 @@ class ChronoSync2013(object):
 
         return -1
 
-    def _onInterest(self, prefix, interest, transport, registerPrefixId):
+    def _onInterest(self, prefix, interest, face, interestFilterId, filter):
         """
         Process the sync interest from the applicationBroadcastPrefix. If we
         can't satisfy the interest, add it to the pending interest table in
@@ -342,9 +342,9 @@ class ChronoSync2013(object):
         if (interest.getName().size() == self._applicationBroadcastPrefix.size() + 2 or
              syncDigest == "00"):
             # Recovery interest or newcomer interest.
-            self._processRecoveryInterest(interest, syncDigest, transport)
+            self._processRecoveryInterest(interest, syncDigest, face)
         else:
-            self._contentCache.storePendingInterest(interest, transport)
+            self._contentCache.storePendingInterest(interest, face)
 
             if syncDigest != self._digestTree.getRoot():
                 index = self._logFind(syncDigest)
@@ -357,11 +357,11 @@ class ChronoSync2013(object):
                     timeout.setInterestLifetimeMilliseconds(2000)
                     self._face.expressInterest(
                       timeout, self._dummyOnData,
-                      self._makeJudgeRecovery(syncDigest, transport))
+                      self._makeJudgeRecovery(syncDigest, face))
                     logging.getLogger(__name__).info("set timer recover")
                 else:
                     # common interest processing
-                    self._processSyncInterest(index, syncDigest, transport)
+                    self._processSyncInterest(index, syncDigest, face)
 
     def _onData(self, interest, data):
         """
@@ -450,7 +450,7 @@ class ChronoSync2013(object):
         logging.getLogger(__name__).info("Syncinterest expressed:")
         logging.getLogger(__name__).info("%s", name.toUri())
 
-    def _processRecoveryInterest(self, interest, syncDigest, transport):
+    def _processRecoveryInterest(self, interest, syncDigest, face):
         logging.getLogger(__name__).info("processRecoveryInterest")
         if self._logFind(syncDigest) != -1:
             tempContent = sync_state_pb2.SyncStateMsg()
@@ -470,16 +470,16 @@ class ChronoSync2013(object):
                 data.setContent(Blob(array))
                 self._keyChain.sign(data, self._certificateName)
                 try:
-                    transport.send(data.wireEncode().toBuffer())
+                    face.putData(data)
                 except Exception as ex:
                     logging.getLogger(__name__).error(
-                      "Error in transport.send: %s", str(ex))
+                      "Error in face.putData: %s", str(ex))
                     return
 
                 logging.getLogger(__name__).info("send recovery data back")
                 logging.getLogger(__name__).info("%s", interest.getName().toUri())
 
-    def _processSyncInterest(self, index, syncDigest, transport):
+    def _processSyncInterest(self, index, syncDigest, face):
         """
         Common interest processing, using digest log to find the difference
         after syncDigest.
@@ -535,10 +535,10 @@ class ChronoSync2013(object):
             self._keyChain.sign(data, self._certificateName)
 
             try:
-                transport.send(data.wireEncode().toBuffer())
+                face.putData(data)
             except Exception as ex:
                 logging.getLogger(__name__).error(
-                  "Error in transport.send: %s", str(ex))
+                  "Error in face.putData: %s", str(ex))
                 return
 
             sent = True
@@ -560,15 +560,15 @@ class ChronoSync2013(object):
         logging.getLogger(__name__).info("Recovery Syncinterest expressed:")
         logging.getLogger(__name__).info("%s", name.toUri())
 
-    def _makeJudgeRecovery(self, syncDigest, transport):
+    def _makeJudgeRecovery(self, syncDigest, face):
         """
         Return a function for onTimeout which calls _judgeRecovery.
         """
         def f(interest):
-            self._judgeRecovery(interest, syncDigest, transport)
+            self._judgeRecovery(interest, syncDigest, face)
         return f
 
-    def _judgeRecovery(self, interest, syncDigest, transport):
+    def _judgeRecovery(self, interest, syncDigest, face):
         """
         This is called by _onInterest after a timeout to check if a recovery is
         needed.
@@ -580,7 +580,7 @@ class ChronoSync2013(object):
         index2 = self._logFind(syncDigest)
         if index2 != -1:
             if syncDigest != self._digestTree.getRoot():
-                self._processSyncInterest(index2, syncDigest, transport)
+                self._processSyncInterest(index2, syncDigest, face)
         else:
             self._sendRecovery(syncDigest)
 
