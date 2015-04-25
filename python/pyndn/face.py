@@ -26,6 +26,7 @@ import os
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.interest_filter import InterestFilter
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.transport.tcp_transport import TcpTransport
 from pyndn.transport.unix_transport import UnixTransport
@@ -264,7 +265,7 @@ class Face(object):
         :param onInterest: (optional) If not None, this creates an interest
           filter from prefix so that when an Interest is received which matches
           the filter, this calls
-          onInterest(prefix, interest, transport, interestFilterId).
+          onInterest(prefix, interest, face, interestFilterId, filter).
           NOTE: You must not change the prefix or filter objects - if you need to
           change them then make a copy. If onInterest is None, it is ignored and
           you must call setInterestFilter.
@@ -289,7 +290,7 @@ class Face(object):
         # Node.expressInterest requires a copy of the prefix.
         return self._node.registerPrefix(
           prefix, onInterest, onRegisterFailed, flags, wireFormat,
-          self._commandKeyChain, self._commandCertificateName)
+          self._commandKeyChain, self._commandCertificateName, self)
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -320,17 +321,17 @@ class Face(object):
         :param Name prefix: The Name prefix used to match the name of an
           incoming Interest.
         :param onInterest: When an Interest is received which matches the filter,
-          this calls onInterest(prefix, interest, transport, interestFilterId).
+          this calls onInterest(prefix, interest, face, interestFilterId, filter).
         :type onInterest: function object
         :return: The interest filter ID which can be used with unsetInterestFilter.
         :rtype: int
         """
         if type(filterOrPrefix) is InterestFilter:
-          return self._node.setInterestFilter(filterOrPrefix, onInterest)
+          return self._node.setInterestFilter(filterOrPrefix, onInterest, self)
         else:
           # Assume it is a prefix Name.
           return self._node.setInterestFilter(
-            InterestFilter(filterOrPrefix), onInterest)
+            InterestFilter(filterOrPrefix), onInterest, self)
 
     def unsetInterestFilter(self, interestFilterId):
         """
