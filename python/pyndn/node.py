@@ -298,6 +298,20 @@ class Node(object):
 
         self._transport.send(encoding.toBuffer())
 
+    def send(self, encoding):
+        """
+        Send the encoded packet out through the transport.
+
+        :param encoding: The array of bytes for the encoded packet to send.
+        :type encoding: An array type with int elements
+        :throws: RuntimeError If the packet size exceeds getMaxNdnPacketSize().
+        """
+        if len(encoding) > self.getMaxNdnPacketSize():
+            raise RuntimeError(
+              "The encoded packet size exceeds the maximum limit getMaxNdnPacketSize()")
+
+        self._transport.send(encoding)
+
     def processEvents(self):
         """
         Process any packets to receive and call callbacks such as onData,

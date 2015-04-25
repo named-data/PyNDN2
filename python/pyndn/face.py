@@ -29,6 +29,7 @@ from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.transport.tcp_transport import TcpTransport
 from pyndn.transport.unix_transport import UnixTransport
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.node import Node
 
@@ -317,6 +318,19 @@ class Face(object):
             wireFormat = WireFormat.getDefaultWireFormat()
 
         self._node.putData(data, wireFormat)
+
+    def send(self, encoding):
+        """
+        Send the encoded packet out through the face.
+
+        :param encoding: The blob or array with the the encoded packet to send.
+        :type encoding: Blob or an array type with int elements
+        :throws: RuntimeError If the packet size exceeds getMaxNdnPacketSize().
+        """
+        # If encoding is a Blob, get its buf().
+        encodingBuffer = encoding.buf() if isinstance(encoding, Blob) else encoding
+
+        self._node.send(encodingBuffer)
 
     def processEvents(self):
         """
