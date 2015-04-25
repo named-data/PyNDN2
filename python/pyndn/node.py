@@ -157,9 +157,14 @@ class Node(object):
 
         :param Name prefix: The Name for the prefix to register which is NOT
           copied for this internal Node method. The Face registerPrefix is
-          reponsible for making a copy for Node to use..
-        :param onInterest: A function object to call when a matching interest is
-          received.
+          reponsible for making a copy for Node to use.
+        :param onInterest: (optional) If not None, this creates an interest
+          filter from prefix so that when an Interest is received which matches
+          the filter, this calls
+          onInterest(prefix, interest, transport, interestFilterId).
+          NOTE: You must not change the prefix or filter objects - if you need to
+          change them then make a copy. If onInterest is None, it is ignored and
+          you must call setInterestFilter.
         :type onInterest: function object
         :param onRegisterFailed: A function object to call if failed to retrieve
           the connected hub's ID or failed to register the prefix.
