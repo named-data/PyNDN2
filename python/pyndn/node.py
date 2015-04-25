@@ -23,6 +23,7 @@ class.
 """
 
 import hashlib
+import inspect
 import logging
 from random import SystemRandom
 from pyndn.name import Name
@@ -150,7 +151,7 @@ class Node(object):
 
     def registerPrefix(
       self, prefix, onInterest, onRegisterFailed, flags, wireFormat,
-      commandKeyChain, commandCertificateName):
+      commandKeyChain, commandCertificateName, face):
         """
         Register prefix with the connected NDN hub and call onInterest when a
         matching interest is received.
@@ -161,7 +162,7 @@ class Node(object):
         :param onInterest: (optional) If not None, this creates an interest
           filter from prefix so that when an Interest is received which matches
           the filter, this calls
-          onInterest(prefix, interest, transport, interestFilterId).
+          onInterest(prefix, interest, face, interestFilterId, filter).
           NOTE: You must not change the prefix or filter objects - if you need to
           change them then make a copy. If onInterest is None, it is ignored and
           you must call setInterestFilter.
@@ -177,6 +178,8 @@ class Node(object):
           interests. If null, assume we are connected to a legacy NDNx forwarder.
         :param Name commandCertificateName: The certificate name for signing
           interests.
+        :param Face face: The face which is passed to the onInterest callback.
+          If onInterest is None, this is ignored.
         """
         # Get the registeredPrefixId now so we can return it to the caller.
         registeredPrefixId = Node._RegisteredPrefix.getNextRegisteredPrefixId()
@@ -189,7 +192,7 @@ class Node(object):
                 # First fetch the ndndId of the connected hub.
                 fetcher = Node._NdndIdFetcher(
                   self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
-                  flags, wireFormat)
+                  flags, wireFormat, face)
                 # We send the interest using the given wire format so that the hub
                 # receives (and sends) in the application's desired wire format.
                 self.expressInterest(
@@ -198,12 +201,13 @@ class Node(object):
             else:
                 self._registerPrefixHelper(
                   registeredPrefixId, Name(prefix), onInterest, onRegisterFailed,
-                  flags, wireFormat)
+                  flags, wireFormat, face)
         else:
             # The application set the KeyChain for signing NFD interests.
             self._nfdRegisterPrefix(
               registeredPrefixId, Name(prefix), onInterest,
-              onRegisterFailed, flags, commandKeyChain, commandCertificateName)
+              onRegisterFailed, flags, commandKeyChain, commandCertificateName,
+              face)
 
         return registeredPrefixId
 
@@ -238,7 +242,7 @@ class Node(object):
             logging.getLogger(__name__).debug(
               "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
 
-    def setInterestFilter(self, filter, onInterest):
+    def setInterestFilter(self, filter, onInterest, face):
         """
         Add an entry to the local interest filter table to call the onInterest
         callback for a matching incoming Interest. This method only modifies the
@@ -250,14 +254,15 @@ class Node(object):
           optional regex filter used to match the name of an incoming Interest.
           This makes a copy of filter.
         :param onInterest: When an Interest is received which matches the filter,
-          this calls onInterest(prefix, interest, transport, interestFilterId).
+          this calls onInterest(prefix, interest, face, interestFilterId, filter).
         :type onInterest: function object
+        :param Face face: The face which is passed to the onInterest callback.
         :return: The interest filter ID which can be used with unsetInterestFilter.
         :rtype: int
         """
         interestFilterId = Node._InterestFilterEntry.getNextInterestFilterId()
         self._interestFilterTable.append(Node._InterestFilterEntry
-          (interestFilterId, InterestFilter(filter), onInterest))
+          (interestFilterId, InterestFilter(filter), onInterest, face))
 
         return interestFilterId
 
@@ -401,9 +406,27 @@ class Node(object):
             for i in range(len(self._interestFilterTable)):
                 entry = self._interestFilterTable[i]
                 if entry.getFilter().doesMatch(interest.getName()):
-                    entry.getOnInterest()(
-                      entry.getFilter().getPrefix(), interest, self._transport,
-                      entry.getInterestFilterId())
+                    includeFilter = True
+                    # Use getcallargs to test if onInterest accepts 5 args.
+                    try:
+                        inspect.getcallargs(entry.getOnInterest(),
+                          None, None, None, None, None)
+                    except TypeError:
+                        # Assume onInterest is old-style with 4 arguments.
+                        includeFilter = False
+
+                    if includeFilter:
+                        entry.getOnInterest()(
+                          entry.getFilter().getPrefix(), interest,
+                          entry.getFace(), entry.getInterestFilterId(),
+                          entry.getFilter())
+                    else:
+                        # Old-style onInterest without the filter argument. We
+                        # still pass a Face instead of Transport since Face also
+                        # has a send method.
+                        entry.getOnInterest()(
+                          entry.getFilter().getPrefix(), interest,
+                          entry.getFace(), entry.getInterestFilterId())
         elif data != None:
             pendingInterests = self._extractEntriesForExpressedInterest(
               data.getName())
@@ -464,7 +487,7 @@ class Node(object):
 
     def _registerPrefixHelper(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
-      wireFormat):
+      wireFormat, face):
         """
         Do the work of registerPrefix to register with NDNx once we have an
         _ndndId.
@@ -514,20 +537,21 @@ class Node(object):
                 # registerPrefix was call with the "combined" form that includes
                 # the callback, so add an InterestFilterEntry.
                 interestFilterId = self.setInterestFilter(
-                  InterestFilter(prefix), onInterest)
+                  InterestFilter(prefix), onInterest, face)
 
             self._registeredPrefixTable.append(Node._RegisteredPrefix(
               registeredPrefixId, prefix, interestFilterId))
 
         # Send the registration interest.
         response = Node._RegisterResponse(
-          self, prefix, onInterest, onRegisterFailed, flags, wireFormat, False)
+          self, prefix, onInterest, onRegisterFailed, flags, wireFormat, False,
+          face)
         self.expressInterest(
           interest, response.onData, response.onTimeout, wireFormat)
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
-      commandKeyChain, commandCertificateName):
+      commandKeyChain, commandCertificateName, face):
         """
         Do the work of registerPrefix to register with NFD.
 
@@ -567,7 +591,7 @@ class Node(object):
                 # registerPrefix was call with the "combined" form that includes
                 # the callback, so add an InterestFilterEntry.
                 interestFilterId = self.setInterestFilter(
-                  InterestFilter(prefix), onInterest)
+                  InterestFilter(prefix), onInterest, face)
 
             self._registeredPrefixTable.append(Node._RegisteredPrefix(
               registeredPrefixId, prefix, interestFilterId))
@@ -575,7 +599,7 @@ class Node(object):
         # Send the registration interest.
         response = Node._RegisterResponse(
           self, prefix, onInterest, onRegisterFailed, flags,
-          TlvWireFormat.get(), True)
+          TlvWireFormat.get(), True, face)
         self.expressInterest(
           commandInterest, response.onData, response.onTimeout,
           TlvWireFormat.get())
@@ -744,11 +768,14 @@ class Node(object):
         :param InterestFilter filter: The InterestFilter for this entry.
         :param onInterest: The callback to call.
         :type onInterest: function object
+        :param Face face: The face on which was called registerPrefix or
+          setInterestFilter which is passed to the onInterest callback.
         """
-        def __init__(self, interestFilterId, filter, onInterest):
+        def __init__(self, interestFilterId, filter, onInterest, face):
             self._interestFilterId = interestFilterId
             self._filter = filter
             self._onInterest = onInterest
+            self._face = face
 
         @staticmethod
         def getNextInterestFilterId():
@@ -790,13 +817,22 @@ class Node(object):
             """
             return self._onInterest
 
+        def getFace(self):
+            """
+            Get the Face given to the constructor.
+
+            :return: The Face.
+            :rtype: Face
+            """
+            return self._face
+
     class _NdndIdFetcher(object):
         """
         An _NdndIdFetcher receives the Data packet with the publisher public key
         digest for the connected NDN hub.
         """
         def __init__(self, node, registeredPrefixId, prefix, onInterest,
-                     onRegisterFailed, flags, wireFormat):
+                     onRegisterFailed, flags, wireFormat, face):
             self._node = node
             self._registeredPrefixId = registeredPrefixId
             self._prefix = prefix
@@ -804,6 +840,7 @@ class Node(object):
             self._onRegisterFailed = onRegisterFailed
             self._flags = flags
             self._wireFormat = wireFormat
+            self._face = face
 
         def onData(self, interest, ndndIdData):
             """
@@ -828,7 +865,7 @@ class Node(object):
             self._node._ndndId = Blob(digest, False)
             self._node._registerPrefixHelper(
               self._registeredPrefixId, self._prefix, self._onInterest,
-              self._onRegisterFailed, self._flags, self._wireFormat)
+              self._onRegisterFailed, self._flags, self._wireFormat, self._face)
 
         def onTimeout(self, interest):
             """
@@ -845,7 +882,7 @@ class Node(object):
         response or a timeout, call onRegisterFailed.
         """
         def __init__(self, node, prefix, onInterest, onRegisterFailed, flags,
-                     wireFormat, isNfdCommand):
+                     wireFormat, isNfdCommand, face):
             self._node = node
             self._prefix = prefix
             self._onInterest = onInterest
@@ -853,6 +890,7 @@ class Node(object):
             self._flags = flags
             self._wireFormat = wireFormat
             self._isNfdCommand = isNfdCommand
+            self._face = face
 
         def onData(self, interest, responseData):
             """
@@ -914,7 +952,8 @@ class Node(object):
                     #   _registeredPrefixTable on the first try.
                     fetcher = Node._NdndIdFetcher(
                       self._node, 0, self._prefix, self._onInterest,
-                      self._onRegisterFailed, self._flags, self._wireFormat)
+                      self._onRegisterFailed, self._flags, self._wireFormat,
+                      self._face)
                     # We send the interest using the given wire format so that the hub
                     # receives (and sends) in the application's desired wire format.
                     self._node.expressInterest(
