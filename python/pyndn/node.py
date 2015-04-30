@@ -760,7 +760,7 @@ class Node(object):
 
     class _InterestFilterEntry(object):
         """
-        An InterestFilterEntry holds an interestFilterId, an InterestFilter and
+        An _InterestFilterEntry holds an interestFilterId, an InterestFilter
         and the OnInterestCallback with its related Face.
         Create a new InterestFilterEntry with the given values.
 
