@@ -1,9 +1,22 @@
-Interim changes since PyNDN v2.0beta3 (2015-04-21)
+Interim changes since PyNDN v2.0beta3 (2015-04-30)
 --------------------------------------------------
 
 Changes
 * http://redmine.named-data.net/issues/1921 In Face, added getMaxNdnPacketSize().
-  expressInterest throws an exception if the encoded interest size exceeds it.
+  expressInterest and putData throw an exception if the encoded size exceeds it.
+* http://redmine.named-data.net/issues/2566 In Face, added setInterestFilter. In
+  registerPrefix, make the onInterest callback optional.
+* Face: In registerPrefix, changed the onInterest callback to pass interestFilterId
+  instead of registeredPrefixId.
+* http://redmine.named-data.net/issues/2579 In registerPrefix and setInterestFilter,
+  support the onInterest callback form
+  onInterest(prefix, interest, face, interestFilterId, filter).
+  The new callback form is passed the Face instead of Transport so that you can
+  supply the Data with face.putData(). It also takes the InterestFilter supplied
+  to setInterestFilter.
+* MemoryContentCache: In registerPrefix, changed the onDataNotFound callback to call
+  onDataNotFound(prefix, interest, face, interestFilterId, filter).
+  If your application uses onDataNotFound, you must update your callback function.
 * In Interest setter methods, return this so that you can chain calls to update values.
 * Added class util/SegmentFetcher, ported from ndn-cxx. Use it in examples test_list_rib.
 * http://redmine.named-data.net/issues/2532#change-8836 In Face.registerPrefix,
@@ -21,6 +34,13 @@ Changes
   show interaction with the repo-ng repository.
 * examples: Removed test_encode_decode_forwarding_entry and
   test_publish_async_ndnx because NDNx support is deprecated.
+
+Deprecated
+* In Face, deprecated registerPrefix where the onInterest callback has the form
+  onInterest(prefix, interest, transport, interestFilterId). Use the
+  registerPrefix where onInterest has the form
+  onInterest(prefix, interest, face, interestFilterId, filter) so you can call
+  face.putData().
 
 Bug fixes
 * http://redmine.named-data.net/issues/2478 Fix ProtobufTlv for Python 3.
