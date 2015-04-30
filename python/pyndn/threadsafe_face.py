@@ -90,6 +90,43 @@ class ThreadsafeFace(Face):
             super(ThreadsafeFace, self).removeRegisteredPrefix,
             registeredPrefixId)
 
+    def setInterestFilter(self, filterOrPrefix, onInterest):
+        """
+        Use the event loop given to the constructor to schedule
+        setInterestFilter to be called in a threadsafe manner. See
+        Face.setInterestFilter for calling details.
+        """
+        self._loop.call_soon_threadsafe(
+            super(ThreadsafeFace, self).setInterestFilter, filterOrPrefix,
+            onInterest)
+
+    def unsetInterestFilter(self, interestFilterId):
+        """
+        Use the event loop given to the constructor to schedule
+        unsetInterestFilter to be called in a threadsafe manner. See
+        Face.unsetInterestFilter for calling details.
+        """
+        self._loop.call_soon_threadsafe(
+            super(ThreadsafeFace, self).unsetInterestFilter, interestFilterId)
+
+    def putData(self, data, wireFormat = None):
+        """
+        Use the event loop given to the constructor to schedule
+        putData to be called in a threadsafe manner. See
+        Face.putData for calling details.
+        """
+        self._loop.call_soon_threadsafe(
+            super(ThreadsafeFace, self).putData, data, wireFormat)
+
+    def send(self, encoding):
+        """
+        Use the event loop given to the constructor to schedule
+        send to be called in a threadsafe manner. See
+        Face.send for calling details.
+        """
+        self._loop.call_soon_threadsafe(
+            super(ThreadsafeFace, self).send, encoding)
+
     def shutdown(self):
         """
         Unschedule the process events from being called in the event loop,
