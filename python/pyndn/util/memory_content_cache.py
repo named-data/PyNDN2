@@ -76,9 +76,9 @@ class MemoryContentCache(object):
         :type onRegisterFailed: function object
         :param onDataNotFound: (optional) If a data packet for an interest is
           not found in the cache, this forwards the interest by calling
-          onDataNotFound(prefix, interest, transport, registeredPrefixId). Your
+          onDataNotFound(prefix, interest, face, registeredPrefixId, filter). Your
           callback can find the Data packet for the interest and call
-          transport.send. If your callback cannot find the Data packet, it can
+          face.putData(data). If your callback cannot find the Data packet, it can
           optionally call storePendingInterest(interest, face) to store the
           pending interest in this object to be satisfied by a later call to
           add(data). If you want to automatically store all pending interests,
@@ -119,7 +119,7 @@ class MemoryContentCache(object):
         removes stale content from the cache. After removing stale content,
         remove timed-out pending interests from storePendingInterest(), then if
         the added Data packet satisfies any interest, send it through the
-        transport and remove the interest from the pending interest table.
+        face and remove the interest from the pending interest table.
 
         :param Data data: The Data packet object to put in the cache. This
           copies the fields from the object.
@@ -158,18 +158,18 @@ class MemoryContentCache(object):
 
             if pendingInterest.getInterest().matchesName(data.getName()):
                 try:
-                    # Send to the same transport from the original call to onInterest.
+                    # Send to the same face from the original call to onInterest.
                     # wireEncode returns the cached encoding if available.
-                    pendingInterest.getTransport().send(data.wireEncode().toBuffer())
+                    pendingInterest.getFace().send(data.wireEncode())
                 except Exception as ex:
                     logging.getLogger(__name__).error(
-                      "Error in transport.send: %s", str(ex))
+                      "Error in face.send: %s", str(ex))
                     return
 
                 # The pending interest is satisfied, so remove it.
                 self._pendingInterestTable.pop(i)
 
-    def storePendingInterest(self, interest, transport):
+    def storePendingInterest(self, interest, face):
         """
         Store an interest from an OnInterest callback in the internal pending
         interest table (normally because there is no Data packet available yet
@@ -178,11 +178,11 @@ class MemoryContentCache(object):
 
         :param Interest interest: The Interest for which we don't have a Data
           packet yet. You should not modify the interest after calling this.
-        :param Transport transport: The Transport with the connection which
+        :param Face face: The Face with the connection which
           received the interest. This comes from the OnInterest callback.
         """
         self._pendingInterestTable.append(
-          self._PendingInterest(interest, transport))
+          self._PendingInterest(interest, face))
 
     def getStorePendingInterest(self):
         """
@@ -197,22 +197,22 @@ class MemoryContentCache(object):
         return self._storePendingInterestCallback
 
     def _storePendingInterestCallback(
-          self, prefix, interest, transport, registeredPrefixId):
+          self, prefix, interest, face, registeredPrefixId, filter):
         """
         This is a private method to return from getStorePendingInterest(). We
         need a separate method because the arguments are different from
         storePendingInterest.
         """
-        self.storePendingInterest(interest, transport)
+        self.storePendingInterest(interest, face)
 
-    def _onInterest(self, prefix, interest, transport, registeredPrefixId):
+    def _onInterest(self, prefix, interest, face, registeredPrefixId, filter):
         """
         This is the OnInterest callback which is called when the library
         receives an interest whose name has the prefix given to registerPrefix.
         First check if cleanupIntervalMilliseconds milliseconds have passed and
         remove stale content from the cache. Then search the cache for the Data
         packet, matching any interest selectors including ChildSelector, and
-        send the Data packet to the transport. If no matching Data packet is in
+        send the Data packet to the face. If no matching Data packet is in
         the cache, call the callback in onDataNotFoundForPrefix (if defined).
         """
         self._doCleanup()
@@ -231,7 +231,7 @@ class MemoryContentCache(object):
             if (interest.matchesName(content.getName())):
                 if (interest.getChildSelector() < 0):
                     # No child selector, so send the first match that we have found.
-                    transport.send(content.getDataEncoding())
+                    face.send(content.getDataEncoding())
                     return
                 else:
                     # Update selectedEncoding based on the child selector.
@@ -260,12 +260,12 @@ class MemoryContentCache(object):
 
         if selectedEncoding != None:
             # We found the leftmost or rightmost child.
-            transport.send(selectedEncoding)
+            face.send(selectedEncoding)
         else:
             # Call the onDataNotFound callback (if defined).
             if prefix.toUri() in self._onDataNotFoundForPrefix:
                 self._onDataNotFoundForPrefix[prefix.toUri()](
-                  prefix, interest, transport, registeredPrefixId)
+                  prefix, interest, face, registeredPrefixId, filter)
 
     def _doCleanup(self):
         """
@@ -350,13 +350,13 @@ class MemoryContentCache(object):
         current time and the interest lifetime.
 
         :param Interest interest: The interest.
-        :param Transport transport: The transport from the onInterest callback.
+        :param Face face: The face from the onInterest callback.
           If the interest is satisfied later by a new data packet, we will send
-          the data packet to the transport.
+          the data packet to the face.
         """
-        def __init__(self, interest, transport):
+        def __init__(self, interest, face):
             self._interest = interest
-            self._transport = transport
+            self._face = face
 
             # Set up _timeoutTimeMilliseconds.
             if self._interest.getInterestLifetimeMilliseconds() >= 0.0:
@@ -372,11 +372,11 @@ class MemoryContentCache(object):
             """
             return self._interest
 
-        def getTransport(self):
+        def getFace(self):
             """
-            Return the transport given to the constructor.
+            Return the face given to the constructor.
             """
-            return self._transport
+            return self._face
 
         def isTimedOut(self, nowMilliseconds):
             """

@@ -26,9 +26,11 @@ import os
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.interest_filter import InterestFilter
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.transport.tcp_transport import TcpTransport
 from pyndn.transport.unix_transport import UnixTransport
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.node import Node
 
@@ -258,14 +260,15 @@ class Face(object):
         request. If need to register a prefix with NFD, you must first call
         setCommandSigningInfo.
 
-        :param Name prefix: The Name for the prefix to register which is NOT
-          copied for this internal Node method. The Face registerPrefix is
-          reponsible for making a copy for Node to use..
-        :param onInterest: When an interest is received which matches the name
-          prefix, this calls
-          onInterest(prefix, interest, transport, registeredPrefixId). NOTE:
-          You must not change the prefix object - if you need to change it then
-          make a copy.
+        :param Name prefix: The Name for the prefix to register. This copies the
+          Name.
+        :param onInterest: (optional) If not None, this creates an interest
+          filter from prefix so that when an Interest is received which matches
+          the filter, this calls
+          onInterest(prefix, interest, face, interestFilterId, filter).
+          NOTE: You must not change the prefix or filter objects - if you need to
+          change them then make a copy. If onInterest is None, it is ignored and
+          you must call setInterestFilter.
         :type onInterest: function object
         :param onRegisterFailed: If register prefix fails for any reason, this
           calls onRegisterFailed(prefix).
@@ -287,7 +290,7 @@ class Face(object):
         # Node.expressInterest requires a copy of the prefix.
         return self._node.registerPrefix(
           prefix, onInterest, onRegisterFailed, flags, wireFormat,
-          self._commandKeyChain, self._commandCertificateName)
+          self._commandKeyChain, self._commandCertificateName, self)
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -299,6 +302,47 @@ class Face(object):
         :param int registeredPrefixId: The ID returned from registerPrefix.
         """
         self._node.removeRegisteredPrefix(registeredPrefixId)
+
+    def setInterestFilter(self, filterOrPrefix, onInterest):
+        """
+        Add an entry to the local interest filter table to call the onInterest
+        callback for a matching incoming Interest. This method only modifies the
+        library's local callback table and does not register the prefix with the
+        forwarder. It will always succeed. To register a prefix with the
+        forwarder, use registerPrefix. There are two forms of setInterestFilter.
+        The first form uses the exact given InterestFilter:
+        setInterestFilter(filter, onInterest).
+        The second form creates an InterestFilter from the given prefix Name:
+        setInterestFilter(prefix, onInterest).
+
+        :param InterestFilter filter: The InterestFilter with a prefix an
+          optional regex filter used to match the name of an incoming Interest.
+          This makes a copy of filter.
+        :param Name prefix: The Name prefix used to match the name of an
+          incoming Interest.
+        :param onInterest: When an Interest is received which matches the filter,
+          this calls onInterest(prefix, interest, face, interestFilterId, filter).
+        :type onInterest: function object
+        :return: The interest filter ID which can be used with unsetInterestFilter.
+        :rtype: int
+        """
+        if type(filterOrPrefix) is InterestFilter:
+          return self._node.setInterestFilter(filterOrPrefix, onInterest, self)
+        else:
+          # Assume it is a prefix Name.
+          return self._node.setInterestFilter(
+            InterestFilter(filterOrPrefix), onInterest, self)
+
+    def unsetInterestFilter(self, interestFilterId):
+        """
+        Remove the interest filter entry which has the interestFilterId from the
+        interest filter table. This does not affect another interest filter with
+        a different interestFilterId, even if it has the same prefix name. If
+        there is no entry with the interestFilterId, do nothing.
+
+        :param int interestFilterId: The ID returned from setInterestFilter.
+        """
+        self._node.unsetInterestFilter(interestFilterId)
 
     def putData(self, data, wireFormat = None):
         """
@@ -317,6 +361,19 @@ class Face(object):
             wireFormat = WireFormat.getDefaultWireFormat()
 
         self._node.putData(data, wireFormat)
+
+    def send(self, encoding):
+        """
+        Send the encoded packet out through the face.
+
+        :param encoding: The blob or array with the the encoded packet to send.
+        :type encoding: Blob or an array type with int elements
+        :throws: RuntimeError If the packet size exceeds getMaxNdnPacketSize().
+        """
+        # If encoding is a Blob, get its buf().
+        encodingBuffer = encoding.buf() if isinstance(encoding, Blob) else encoding
+
+        self._node.send(encodingBuffer)
 
     def processEvents(self):
         """

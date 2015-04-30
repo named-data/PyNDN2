@@ -131,7 +131,7 @@ class ProduceSegments(object):
         self._nSegmentsSent = 0
         self._onFinished = onFinished
 
-    def onInterest(self, prefix, interest, transport, registeredPrefixId):
+    def onInterest(self, prefix, interest, face, interestFilterId, filter):
         """
         Create and send a Data packet with the interest name.
         If the last packet is sent, then set self._enabled[0] = False.
@@ -143,9 +143,8 @@ class ProduceSegments(object):
         content = "Data packet " + interest.name.toUri()
         data.content = content
         self._keyChain.sign(data, self._certificateName)
-        encodedData = data.wireEncode()
 
-        transport.send(encodedData.toBuffer())
+        face.putData(data)
         dump("Sent data packet", data.name.toUri())
 
         self._nSegmentsSent += 1
