@@ -315,7 +315,7 @@ class Face(object):
         The second form creates an InterestFilter from the given prefix Name:
         setInterestFilter(prefix, onInterest).
 
-        :param InterestFilter filter: The InterestFilter with a prefix an
+        :param InterestFilter filter: The InterestFilter with a prefix and
           optional regex filter used to match the name of an incoming Interest.
           This makes a copy of filter.
         :param Name prefix: The Name prefix used to match the name of an

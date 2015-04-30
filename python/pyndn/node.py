@@ -250,7 +250,7 @@ class Node(object):
         forwarder. It will always succeed. To register a prefix with the
         forwarder, use registerPrefix.
 
-        :param InterestFilter filter: The InterestFilter with a prefix an
+        :param InterestFilter filter: The InterestFilter with a prefix and
           optional regex filter used to match the name of an incoming Interest.
           This makes a copy of filter.
         :param onInterest: When an Interest is received which matches the filter,
@@ -277,7 +277,7 @@ class Node(object):
         """
         count = 0
         # Go backwards through the list so we can erase entries.
-        # Remove all entries even though registeredPrefixId should be unique.
+        # Remove all entries even though interestFilterId should be unique.
         i = len(self._interestFilterTable) - 1
         while i >= 0:
             if (self._interestFilterTable[i].getInterestFilterId() ==
@@ -534,7 +534,7 @@ class Node(object):
         if registeredPrefixId != 0:
             interestFilterId = 0
             if onInterest != None:
-                # registerPrefix was call with the "combined" form that includes
+                # registerPrefix was called with the "combined" form that includes
                 # the callback, so add an InterestFilterEntry.
                 interestFilterId = self.setInterestFilter(
                   InterestFilter(prefix), onInterest, face)
@@ -588,7 +588,7 @@ class Node(object):
         if registeredPrefixId != 0:
             interestFilterId = 0
             if onInterest != None:
-                # registerPrefix was call with the "combined" form that includes
+                # registerPrefix was called with the "combined" form that includes
                 # the callback, so add an InterestFilterEntry.
                 interestFilterId = self.setInterestFilter(
                   InterestFilter(prefix), onInterest, face)
@@ -711,7 +711,7 @@ class Node(object):
         :param Name prefix: The name prefix.
         :param int relatedInterestFilterId: (optional) The related
           interestFilterId for the filter set in the same registerPrefix
-          operation. If omitted, set  * to 0.
+          operation. If omitted, set to 0.
         """
         def __init__(self, registeredPrefixId, prefix, relatedInterestFilterId):
             self._registeredPrefixId = registeredPrefixId
