@@ -158,7 +158,7 @@ class SendSegments(object):
         self._onFinished = onFinished
         self._segment = -1
 
-    def onInterest(self, prefix, interest, transport, registeredPrefixId):
+    def onInterest(self, prefix, interest, face, interestFilterId, filter):
         """
         Append the next segment number to the prefix and send a new data packet.
         If the last packet is sent, then call self._onFinished().
@@ -176,9 +176,8 @@ class SendSegments(object):
         content = "Segment number " + repr(self._segment)
         data.content = content
         self._keyChain.sign(data, self._certificateName)
-        encodedData = data.wireEncode()
 
-        transport.send(encodedData.toBuffer())
+        face.putData(data)
         dump("Sent data packet", data.name.toUri())
 
         if self._segment >= maxSegment:

@@ -160,7 +160,7 @@ class Chat(object):
             interest.setInterestLifetimeMilliseconds(self._syncLifetime)
             self._face.expressInterest(interest, self._onData, self._chatTimeout)
 
-    def _onInterest(self, prefix, interest, transport, registeredPrefixId):
+    def _onInterest(self, prefix, interest, face, interestFilterId, filter):
         """
         Send back a Chat Data Packet which contains the user's message.
         """
@@ -194,7 +194,7 @@ class Chat(object):
             data.setContent(Blob(array))
             self._keyChain.sign(data, self._certificateName)
             try:
-                transport.send(data.wireEncode().toBuffer())
+                face.putData(data)
             except Exception as ex:
                 logging.getLogger(__name__).error(
                   "Error in transport.send: %s", str(ex))

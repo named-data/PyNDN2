@@ -35,7 +35,7 @@ class Echo(object):
         self._certificateName = certificateName
         self._responseCount = 0
 
-    def onInterest(self, prefix, interest, transport, registeredPrefixId):
+    def onInterest(self, prefix, interest, face, interestFilterId, filter):
         self._responseCount += 1
 
         # Make and sign a Data packet.
@@ -43,10 +43,9 @@ class Echo(object):
         content = "Echo " + interest.getName().toUri()
         data.setContent(content)
         self._keyChain.sign(data, self._certificateName)
-        encodedData = data.wireEncode()
 
         dump("Sent content", content)
-        transport.send(encodedData.toBuffer())
+        face.putData(data)
 
     def onRegisterFailed(self, prefix):
         self._responseCount += 1
