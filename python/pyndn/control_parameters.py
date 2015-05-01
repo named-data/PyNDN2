@@ -29,17 +29,28 @@ from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
 
 class ControlParameters(object):
-    def __init__(self):
-        self._name = Name()
-        self._faceId = None
-        # TODO: Add "Uri" string.
-        self._localControlFeature = None
-        self._origin = None
-        self._cost = None
-        self._forwardingFlags = ForwardingFlags()
-        # TODO: Add "Strategy" name.
-        self._expirationPeriod = None
-
+    def __init__(self, value = None):
+        if type(value) is ControlParameters:
+            # Make a deep copy.
+            self._name = None if value._name == None else Name(value._name)
+            self._faceId = value._faceId
+            # TODO: Add "Uri" string.
+            self._localControlFeature = value._localControlFeature
+            self._origin = value._origin
+            self._cost = value._cost
+            self._forwardingFlags = ForwardingFlags(value._forwardingFlags)
+            # TODO: Add "Strategy" name.
+            self._expirationPeriod = value._expirationPeriod
+        else:
+            self._name = None
+            self._faceId = None
+            # TODO: Add "Uri" string.
+            self._localControlFeature = None
+            self._origin = None
+            self._cost = None
+            self._forwardingFlags = ForwardingFlags()
+            # TODO: Add "Strategy" name.
+            self._expirationPeriod = None
 
     def wireEncode(self, wireFormat = None):
         """
@@ -80,7 +91,7 @@ class ControlParameters(object):
         """
         Get the name.
 
-        :return: The name.
+        :return: The name. If not specified, return None.
         :rtype: Name
         """
         return self._name
@@ -141,11 +152,12 @@ class ControlParameters(object):
 
     def setName(self, name):
         """
-        Set the name to a copy of the give Name.
+        Set the name.
 
-        :param Name name: The new Name to copy.
+        :param Name name: The name. If not specified, set to None. If specified,
+          this makes a copy of the name.
         """
-        self._name = Name(name) if type(name) is Name else Name()
+        self._name = Name(name) if type(name) is Name else None
 
     def setFaceId(self, faceId):
         """
