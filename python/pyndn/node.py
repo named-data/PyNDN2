@@ -918,6 +918,7 @@ class Node(object):
                     "Register prefix failed: Expected NFD status code 200, got: %d",
                     statusCode)
                   self._onRegisterFailed(self._prefix)
+                  return
 
                 logging.getLogger(__name__).info(
                   "Register prefix succeeded with the NFD forwarder for prefix %s",
