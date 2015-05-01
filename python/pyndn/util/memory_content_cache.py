@@ -76,7 +76,7 @@ class MemoryContentCache(object):
         :type onRegisterFailed: function object
         :param onDataNotFound: (optional) If a data packet for an interest is
           not found in the cache, this forwards the interest by calling
-          onDataNotFound(prefix, interest, face, registeredPrefixId, filter). Your
+          onDataNotFound(prefix, interest, face, interestFilterId, filter). Your
           callback can find the Data packet for the interest and call
           face.putData(data). If your callback cannot find the Data packet, it can
           optionally call storePendingInterest(interest, face) to store the
@@ -197,7 +197,7 @@ class MemoryContentCache(object):
         return self._storePendingInterestCallback
 
     def _storePendingInterestCallback(
-          self, prefix, interest, face, registeredPrefixId, filter):
+          self, prefix, interest, face, interestFilterId, filter):
         """
         This is a private method to return from getStorePendingInterest(). We
         need a separate method because the arguments are different from
@@ -205,7 +205,7 @@ class MemoryContentCache(object):
         """
         self.storePendingInterest(interest, face)
 
-    def _onInterest(self, prefix, interest, face, registeredPrefixId, filter):
+    def _onInterest(self, prefix, interest, face, interestFilterId, filter):
         """
         This is the OnInterest callback which is called when the library
         receives an interest whose name has the prefix given to registerPrefix.
@@ -265,7 +265,7 @@ class MemoryContentCache(object):
             # Call the onDataNotFound callback (if defined).
             if prefix.toUri() in self._onDataNotFoundForPrefix:
                 self._onDataNotFoundForPrefix[prefix.toUri()](
-                  prefix, interest, face, registeredPrefixId, filter)
+                  prefix, interest, face, interestFilterId, filter)
 
     def _doCleanup(self):
         """
