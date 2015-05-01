@@ -348,7 +348,7 @@ class Tlv0_1_1WireFormat(WireFormat):
 
         encoder.writeOptionalNonNegativeIntegerTlv(
           Tlv.ControlParameters_FaceId, controlParameters.getFaceId())
-        if controlParameters.getName().size() > 0:
+        if controlParameters.getName() != None:
           self._encodeName(controlParameters.getName(), encoder)
 
         encoder.writeTypeAndLength(Tlv.ControlParameters_ControlParameters,

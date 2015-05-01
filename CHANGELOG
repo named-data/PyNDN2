@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0beta3 (2015-04-30)
+Interim changes since PyNDN v2.0beta3 (2015-05-01)
 --------------------------------------------------
 
 Changes
@@ -45,6 +45,7 @@ Deprecated
 Bug fixes
 * http://redmine.named-data.net/issues/2478 Fix ProtobufTlv for Python 3.
 * http://redmine.named-data.net/issues/2544 Fix test_chrono_chat bug affecting OS X 10.10.
+* http://redmine.named-data.net/issues/2758 ControlParameters with empty name not properly encoded.
 
 PyNDN v2.0beta3 (2015-02-03)
 ----------------------------
