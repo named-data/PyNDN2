@@ -138,7 +138,6 @@ class Face(object):
         else:
             # The first argument is a name. Make the interest from the name and
             #   possible template.
-            interest = Interest(interestOrName)
 
             # expressInterest(name, interestTemplate, onData)
             # expressInterest(name, interestTemplate, onData, wireFormat)
@@ -146,16 +145,9 @@ class Face(object):
             # expressInterest(name, interestTemplate, onData, onTimeout, wireFormat)
             if type(arg2) is Interest:
                 template = arg2
-                interest.setMinSuffixComponents(template.getMinSuffixComponents())
-                interest.setMaxSuffixComponents(template.getMaxSuffixComponents())
-                interest.setKeyLocator(template.getKeyLocator())
-                interest.setExclude(template.getExclude())
-                interest.setChildSelector(template.getChildSelector())
-                interest.setMustBeFresh(template.getMustBeFresh())
-                interest.setScope(template.getScope())
-                interest.setInterestLifetimeMilliseconds(
-                  template.getInterestLifetimeMilliseconds())
-                # Don't copy the nonce.
+                # Copy the template.
+                interest = Interest(template)
+                interest.setName(interestOrName)
 
                 onData = arg3
                 if isinstance(arg4, WireFormat):
@@ -169,6 +161,7 @@ class Face(object):
             # expressInterest(name, onData, onTimeout)
             # expressInterest(name, onData, onTimeout, wireFormat)
             else:
+                interest = Interest(interestOrName)
                 # Set a default interest lifetime.
                 interest.setInterestLifetimeMilliseconds(4000.0)
                 onData = arg2
