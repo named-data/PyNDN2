@@ -24,6 +24,12 @@ You should use a derived class such as TlvWireFormat.
 """
 
 class WireFormat(object):
+    # NDNx support and binary XML (ccnb or ndnb) encoding is deprecated and code
+    # with throw an exception. To enable support while you upgrade your code to
+    # use NFD, set WireFormat.ENABLE_NDNX = True . NDNx support will be
+    # completely removed in an upcoming release.
+    ENABLE_NDNX = False
+
     _defaultWireFormat = None
 
     def encodeName(self, name):
