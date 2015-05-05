@@ -29,6 +29,10 @@ from pyndn.util.blob import Blob
 
 class ForwardingEntry(object):
     def __init__(self):
+        if not WireFormat.ENABLE_NDNX:
+            raise RuntimeError(
+              "ForwardingEntry is for NDNx and is deprecated. To enable while you upgrade your code to use NFD, set WireFormat.ENABLE_NDNX = True")
+
         self._action = None
         self._prefix = Name()
         self._faceId = None
