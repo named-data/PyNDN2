@@ -38,6 +38,7 @@ from pyndn.util.common import Common
 from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
 
 _systemRandom = SystemRandom()
@@ -187,6 +188,9 @@ class Node(object):
         # If we have an _ndndId, we know we already connected to NDNx.
         if self._ndndId != None or commandKeyChain == None:
             # Assume we are connected to a legacy NDNx server.
+            if not WireFormat.ENABLE_NDNX:
+                raise RuntimeError(
+                  "registerPrefix with NDNx is deprecated. To enable while you upgrade your code to use NFD, set WireFormat.ENABLE_NDNX = True")
 
             if self._ndndId == None:
                 # First fetch the ndndId of the connected hub.
@@ -387,6 +391,11 @@ class Node(object):
         #   look at the first byte.
         if not (element[0] == Tlv.Interest or element[0] == Tlv.Data):
             # Ignore non-TLV elements.
+            # Assume it is Binary XML.
+            if not WireFormat.ENABLE_NDNX:
+                raise RuntimeError(
+                  "BinaryXmlWireFormat (NDNx) is deprecated. To enable while you upgrade your network to use NDN-TLV, set WireFormat.ENABLE_NDNX = True")
+
             return
 
         # First, decode as Interest or Data.
@@ -497,6 +506,11 @@ class Node(object):
           so it could return it to the caller. If this is 0, then don't add to
           _registeredPrefixTable (assuming it has already been done).
         """
+        if not WireFormat.ENABLE_NDNX:
+            # We can get here if the command signing info is set, but running NDNx.
+            raise RuntimeError(
+              "registerPrefix with NDNx is deprecated. To enable while you upgrade your code to use NFD, set WireFormat.ENABLE_NDNX = True")
+
         # Create a ForwardingEntry.
         # Note: ndnd ignores any freshness that is larger than 3600 seconds and
         #   sets 300 seconds instead. To register "forever", (=2000000000 sec),
