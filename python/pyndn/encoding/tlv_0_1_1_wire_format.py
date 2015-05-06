@@ -18,7 +18,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from random import SystemRandom
+from pyndn.name import Name
 from pyndn.exclude import Exclude
+from pyndn.name import Name
 from pyndn.meta_info import ContentType
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
@@ -328,7 +330,12 @@ class Tlv0_1_1WireFormat(WireFormat):
           Tlv.ControlParameters_ExpirationPeriod,
           controlParameters.getExpirationPeriod())
 
-        # TODO: Encode Strategy.
+        if controlParameters.getStrategy().size() > 0:
+            strategySaveLength = len(encoder)
+            self._encodeName(controlParameters.getStrategy(), encoder)
+            encoder.writeTypeAndLength(
+              Tlv.ControlParameters_Strategy,
+              len(encoder) - strategySaveLength)
 
         flags = controlParameters.getForwardingFlags().getNfdForwardingFlags()
         if (flags != ForwardingFlags().getNfdForwardingFlags()):
@@ -344,7 +351,9 @@ class Tlv0_1_1WireFormat(WireFormat):
           Tlv.ControlParameters_LocalControlFeature,
           controlParameters.getLocalControlFeature())
 
-        # TODO: Encode Uri.
+        if len(controlParameters.getUri()) != 0:
+            encoder.writeBlobTlv(
+              Tlv.ControlParameters_Uri, Blob(controlParameters.getUri()).buf())
 
         encoder.writeOptionalNonNegativeIntegerTlv(
           Tlv.ControlParameters_FaceId, controlParameters.getFaceId())
@@ -355,6 +364,71 @@ class Tlv0_1_1WireFormat(WireFormat):
                                    len(encoder) - saveLength)
 
         return Blob(encoder.getOutput(), False)
+
+    def decodeControlParameters(self, controlParameters, input):
+        """
+        Decode input as an NDN-TLV ControlParameters and set the fields of the
+        controlParameters object.
+
+        :param ControlParameters controlParameters: The ControlParameters object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        controlParameters.clear()
+
+        decoder = TlvDecoder(input)
+        endOffset = decoder.readNestedTlvsStart(
+          Tlv.ControlParameters_ControlParameters)
+
+        # decode name
+        if decoder.peekType(Tlv.Name, endOffset):
+            name = Name()
+            self._decodeName(name, decoder)
+            controlParameters.setName(name)
+
+        # decode face ID
+        controlParameters.setFaceId(decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_FaceId, endOffset))
+
+        # decode URI
+        if decoder.peekType(Tlv.ControlParameters_Uri, endOffset):
+            uri = Blob(
+              decoder.readOptionalBlobTlv(Tlv.ControlParameters_Uri, endOffset),
+              False)
+            controlParameters.setUri(str(uri))
+
+        # decode integers
+        controlParameters.setLocalControlFeature(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_LocalControlFeature, endOffset))
+        controlParameters.setOrigin(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_Origin, endOffset))
+        controlParameters.setCost(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_Cost, endOffset))
+
+        # set forwarding flags
+        if decoder.peekType(Tlv.ControlParameters_Flags, endOffset):
+            flags = ForwardingFlags()
+            flags.setNfdForwardingFlags(
+              decoder.readNonNegativeIntegerTlv(Tlv.ControlParameters_Flags))
+            controlParameters.setForwardingFlags(flags)
+
+        # decode strategy
+        if decoder.peekType(Tlv.ControlParameters_Strategy, endOffset):
+            strategyEndOffset = decoder.readNestedTlvsStart(
+              Tlv.ControlParameters_Strategy)
+            self._decodeName(controlParameters.getStrategy(), decoder)
+            decoder.finishNestedTlvs(strategyEndOffset)
+
+        # decode expiration period
+        controlParameters.setExpirationPeriod(
+          decoder.readOptionalNonNegativeIntegerTlv(
+            Tlv.ControlParameters_ExpirationPeriod, endOffset))
+
+        decoder.finishNestedTlvs(endOffset)
 
     def encodeSignatureInfo(self, signature):
         """
