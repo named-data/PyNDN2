@@ -68,6 +68,14 @@ pyndn.util.ndn_regex module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.segment_fetcher module
+---------------------------------
+
+.. automodule:: pyndn.util.segment_fetcher
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.signed_blob module
 -----------------------------
 
