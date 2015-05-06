@@ -181,11 +181,11 @@ class Blob(object):
         (For both Python 2 and 3, this is the reverse of calling the Blob
         constructor with a str.)
 
-        :return: The array as a str, or None if isNull().
+        :return: The array as a str, or "" if isNull().
         :rtype: str
         """
         if self._array == None:
-            return None
+            return ""
         else:
             if sys.version_info[0] > 2:
                 # Decode the UTF8 byte array.
