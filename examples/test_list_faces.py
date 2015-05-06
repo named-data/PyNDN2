@@ -97,5 +97,5 @@ def printFaceStatuses(encodedMessage):
           " " + ("multi-access" if faceStatus.link_type == 1 else "point-to-point"))
 
         dump(line)
-        
+
 main()

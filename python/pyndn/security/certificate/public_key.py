@@ -49,7 +49,7 @@ class PublicKey(object):
             self._keyDer = Blob()
             self._keyType = None
             return
-        
+
         self._keyDer = keyDer
 
         # Get the public key OID.

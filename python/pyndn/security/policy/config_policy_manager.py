@@ -473,7 +473,7 @@ class ConfigPolicyManager(PolicyManager):
             # No key locator -> fail.
             onVerifyFailed(dataOrInterest)
             return None
-        
+
         signatureName = keyLocator.getKeyName()
         # no key name in KeyLocator -> fail
         if signatureName.size() == 0:
@@ -519,17 +519,17 @@ class ConfigPolicyManager(PolicyManager):
             def onCertificateDownloadComplete(certificate):
                 certificate = IdentityCertificate(certificate)
                 self._certificateCache.insertCertificate(certificate)
-                self.checkVerificationPolicy(dataOrInterest, stepCount+1, 
+                self.checkVerificationPolicy(dataOrInterest, stepCount+1,
                         onVerified, onVerifyFailed)
 
-            nextStep = ValidationRequest(certificateInterest, 
-                    onCertificateDownloadComplete, onVerifyFailed, 
+            nextStep = ValidationRequest(certificateInterest,
+                    onCertificateDownloadComplete, onVerifyFailed,
                     2, stepCount+1)
-           
+
             return nextStep
-        
+
         # for interests, we must check that the timestamp is fresh enough
-        # I do this after (possibly) downloading the certificate to avoid 
+        # I do this after (possibly) downloading the certificate to avoid
         # filling the cache with bad keys
         if isinstance(dataOrInterest, Interest):
             keyName = foundCert.getPublicKeyName()
@@ -640,7 +640,7 @@ class TrustAnchorRefreshManager(object):
                 # delete the certificates associated with this directory if possible
                 # then re-import
                 # IdentityStorage subclasses may not support deletion
-                # should we be deleting 
+                # should we be deleting
                 for c in certificateList:
                     try:
                         self._certificateCache.deleteCertificate(Name(c))

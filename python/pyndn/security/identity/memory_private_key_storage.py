@@ -123,7 +123,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
             del self._publicKeyStore[keyUri]
         except KeyError:
             pass
-        
+
         try:
             del self._privateKeyStore[keyUri]
         except KeyError:

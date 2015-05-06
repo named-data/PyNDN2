@@ -60,7 +60,7 @@ class Chat(object):
           self._getRandomString())
         session = int(round(self.getNowMilliseconds() / 1000.0))
         self._userName = self._screenName + str(session)
-        
+
         self._sync = ChronoSync2013(
            self._sendInterest, self._initial, self._chatPrefix,
            Name("/ndn/broadcast/ChronoChat-0.3").append(self._chatRoom), session,
@@ -306,7 +306,7 @@ class Chat(object):
             n = self._roster.index(nameAndSession)
         except ValueError:
             n = -1
-            
+
         if sequenceNo != -1 and n >= 0:
             if tempSequenceNo == sequenceNo:
                 self._roster.pop(n)
@@ -353,7 +353,7 @@ class Chat(object):
             self.messageType = messageType
             self.message = message
             self.time = time
-    
+
 
 DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
     0x30, 0x82, 0x01, 0x22, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
@@ -516,7 +516,7 @@ def main():
             if input == "leave" or input == "exit":
                 # We will send the leave message below.
                 break
-        
+
             chat.sendMessage(input)
 
         face.processEvents()

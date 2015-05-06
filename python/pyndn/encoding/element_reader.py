@@ -148,7 +148,7 @@ class ElementReader(object):
 
                     raise ValueError(
                       "The incoming packet exceeds the maximum limit Face.getMaxNdnPacketSize()")
-                    
+
                 self._partialData.copy(data, self._partialDataLength)
                 self._partialDataLength += len(data)
 

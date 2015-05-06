@@ -200,7 +200,7 @@ class DerNode (object):
         """
         Check that index is in bounds for the children list, and return
         children[index].
-        
+
         :param children: The list of DerNode, usually returned by another
           call to getChildren.
         :type children: array of DerNode

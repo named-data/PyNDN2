@@ -52,7 +52,7 @@ def main():
     def onComplete(content):
         enabled[0] = False
         printRibEntries(content)
-        
+
     def onError(errorCode, message):
         enabled[0] = False
         dump(message)

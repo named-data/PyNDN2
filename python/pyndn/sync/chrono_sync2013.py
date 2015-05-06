@@ -262,7 +262,7 @@ class ChronoSync2013(object):
             :rtype: array of sync_state_pb2.SyncState.
             """
             return self._data
-                    
+
     def _broadcastSyncState(self, digest, syncMessage):
         """
         Make a data packet with the syncMessage and with name

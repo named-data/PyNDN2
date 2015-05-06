@@ -100,7 +100,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
             os.remove(self.nameTransform(keyUri, ".pub"))
         if self.doesKeyExist(keyName, KeyClass.PRIVATE):
             os.remove(self.nameTransform(keyUri, ".pri"))
-        
+
     def getPublicKey(self, keyName):
         """
         Get the public key with the keyName.

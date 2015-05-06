@@ -402,13 +402,13 @@ class Face(object):
         Shut down and disconnect this Face.
         """
         self._node.shutdown()
-        
+
     @staticmethod
     def getMaxNdnPacketSize():
         """
         Get the practical limit of the size of a network-layer packet. If a packet
         is larger than this, the library or application MAY drop it.
-        
+
         :return: The maximum NDN packet size.
         :rtype: int
         """

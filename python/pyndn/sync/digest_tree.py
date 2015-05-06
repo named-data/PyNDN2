@@ -47,7 +47,7 @@ class DigestTree(object):
             self._sessionNo = sessionNo
             self._sequenceNo = sequenceNo
             self._digest = None
-            
+
             self._recomputeDigest()
 
         def getDataPrefix(self):
@@ -149,7 +149,7 @@ class DigestTree(object):
         combination of dataPrefix and sessionNo already exists in the tree then
         update its sequenceNo (only if the given sequenceNo is newer), otherwise
         add a new node.
-        
+
         :param str dataPrefix: The data prefix. In Python3, this is encoded
           as UTF-8 to digest.
         :param int sequenceNo: The sequence number.

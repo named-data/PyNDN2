@@ -284,4 +284,3 @@ class IdentityStorage(object):
 
     # A static value to make each timestamp unique among calls.
     _lastTimestamp = math.floor(Common.getNowMilliseconds() / 1000.0)
-    

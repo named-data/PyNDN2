@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2014-2015 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -46,9 +46,9 @@ class CertificateCache(object):
             pass
 
     def getCertificate(self, certificateName):
-        """ 
+        """
         Fetch a certificate from the cache.
-        
+
         :param Name certificateName: The name of the certificate to remove.
             Assumes there is no timestamp in the name.
         """

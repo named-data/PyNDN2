@@ -53,5 +53,5 @@ class OID(object):
         for i in range(len(self._oid)):
             if self._oid[i] != other._oid[i]:
                 return False
-        
+
         return True

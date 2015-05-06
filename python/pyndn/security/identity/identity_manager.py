@@ -99,7 +99,7 @@ class IdentityManager(object):
         except SecurityException:
             # There is no default identity to check.
             pass
-        
+
         keysToDelete = []
         self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, True)
         self._identityStorage.getAllKeyNamesOfIdentity(identityName, keysToDelete, False)

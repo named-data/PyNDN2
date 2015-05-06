@@ -32,7 +32,7 @@ class KeyParams(object):
     """
     def __init__(self, keyType):
         self._keyType = keyType
-        
+
     def getKeyType(self):
         return self._keyType
 
@@ -41,7 +41,7 @@ class RsaKeyParams(KeyParams):
         super(RsaKeyParams, self).__init__(RsaKeyParams._getType())
 
         if size == None:
-            size = RsaKeyParams._getDefaultSize()            
+            size = RsaKeyParams._getDefaultSize()
         self._size = size
 
     def getKeySize(self):
@@ -60,7 +60,7 @@ class EcdsaKeyParams(KeyParams):
         super(EcdsaKeyParams, self).__init__(EcdsaKeyParams._getType())
 
         if size == None:
-            size = EcdsaKeyParams._getDefaultSize()            
+            size = EcdsaKeyParams._getDefaultSize()
         self._size = size
 
     def getKeySize(self):

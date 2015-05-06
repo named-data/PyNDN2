@@ -75,7 +75,7 @@ def printChannelStatuses(encodedMessage):
     """
     channelStatusMessage = channel_status_pb2.ChannelStatusMessage()
     ProtobufTlv.decode(channelStatusMessage, encodedMessage)
-    
+
     dump("Channels:");
     for channelStatus in channelStatusMessage.channel_status:
         # Format to look the same as "nfd-status -c".

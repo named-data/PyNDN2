@@ -99,7 +99,7 @@ class BasicIdentityStorage(IdentityStorage):
                 os.makedirs(identityDirectory)
 
             databaseFilePath = os.path.join(identityDirectory, "ndnsec-public-info.db")
-            
+
         self._database = sqlite3.connect(databaseFilePath)
 
         # Check if the ID table exists.
@@ -366,7 +366,7 @@ class BasicIdentityStorage(IdentityStorage):
         """
         if not self.doesCertificateExist(certificateName):
             return None
-        
+
         if not allowAny:
             raise RuntimeError(
               "BasicIdentityStorage.getCertificate for not allowAny is not implemented")

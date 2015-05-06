@@ -71,7 +71,7 @@ Example:
 
     def onError(errorCode, message):
         ...
-        
+
     interest = Interest(Name("/data/prefix"))
     interest.setInterestLifetimeMilliseconds(1000)
 
