@@ -34,23 +34,34 @@ class ControlParameters(object):
             # Make a deep copy.
             self._name = None if value._name == None else Name(value._name)
             self._faceId = value._faceId
-            # TODO: Add "Uri" string.
+            self._uri = value._uri
             self._localControlFeature = value._localControlFeature
             self._origin = value._origin
             self._cost = value._cost
             self._forwardingFlags = ForwardingFlags(value._forwardingFlags)
-            # TODO: Add "Strategy" name.
+            self._strategy = Name(value._strategy)
             self._expirationPeriod = value._expirationPeriod
         else:
             self._name = None
             self._faceId = None
-            # TODO: Add "Uri" string.
+            self._uri = ""
             self._localControlFeature = None
             self._origin = None
             self._cost = None
             self._forwardingFlags = ForwardingFlags()
-            # TODO: Add "Strategy" name.
+            self._strategy = Name()
             self._expirationPeriod = None
+
+    def clear(self):
+        self._name = None
+        self._faceId = None
+        self._uri = ""
+        self._localControlFeature = None
+        self._origin = None
+        self._cost = None
+        self._forwardingFlags = ForwardingFlags()
+        self._strategy = Name()
+        self._expirationPeriod = None
 
     def wireEncode(self, wireFormat = None):
         """
@@ -105,6 +116,15 @@ class ControlParameters(object):
         """
         return self._faceId
 
+    def getUri(self):
+        """
+        Get the URI.
+
+        :return: The face URI, or an empty string if not specified.
+        :rtype: str
+        """
+        return self._uri
+
     def getLocalControlFeature(self):
         """
         Get the local control feature value.
@@ -141,6 +161,15 @@ class ControlParameters(object):
         """
         return self._forwardingFlags
 
+    def getStrategy(self):
+        """
+        Get the strategy.
+
+        :return: The strategy or an empty Name.
+        :rtype: Name
+        """
+        return self._strategy
+
     def getExpirationPeriod(self):
         """
         Get the expiration period.
@@ -166,6 +195,14 @@ class ControlParameters(object):
         :param int faceId: The new face ID, or None for not specified.
         """
         self._faceId = faceId
+
+    def setUri(self, uri):
+        """
+        Set the URI.
+
+        :param str uri: The new uri, or an empty string for not specified.
+        """
+        self._uri = uri if type(uri) is str else ""
 
     def setLocalControlFeature(self, localControlFeature):
         """
@@ -204,6 +241,14 @@ class ControlParameters(object):
                                  if type(forwardingFlags) is ForwardingFlags
                                  else ForwardingFlags())
 
+    def setStrategy(self, strategy):
+        """
+        Set the strategy to a copy of the given Name.
+
+        :param Name strategy: The Name to copy, or an empty Name if not specified.
+        """
+        self._strategy = Name(strategy) if type(strategy) is Name else Name()
+
     def setExpirationPeriod(self, expirationPeriod):
         """
         Set the expiration period.
@@ -218,24 +263,24 @@ class ControlParameters(object):
     def equals(self, other):
         if  (self._name == other._name
         and self._faceId == other._faceId
+        and self._uri == other._uri
         and self._localControlFeature == other._localControlFeature
         and self._origin == other._origin
         and self._cost == other._cost
         and self._forwardingFlags == other._forwardingFlags
+        and self._strategy == other._strategy
         and self._expirationPeriod == other._expirationPerion):
             return True
         else:
             return False
 
-        # TODO: Add "Uri" string.
-        # TODO: Add "Strategy" name.
-
-
     # Create managed properties for read/write properties of the class for more pythonic syntax.
     name = property(getName, setName)
     faceId = property(getFaceId, setFaceId)
+    uri = property(getUri, setUri)
     localControlFeature = property(getLocalControlFeature, setLocalControlFeature)
     origin = property(getOrigin, setOrigin)
     cost = property(getCost, setCost)
     forwardingFlags = property(getForwardingFlags, setForwardingFlags)
+    strategy = property(getStrategy, setStrategy)
     expirationPeriod = property(getExpirationPeriod, setExpirationPeriod)
