@@ -24,6 +24,7 @@ the latest version of segmented data.
 
 SegmentFetcher assumes that the data is named /<prefix>/<version>/<segment>,
 where:
+
 - <prefix> is the specified name prefix,
 - <version> is an unknown version that needs to be discovered, and
 - <segment> is a segment number. (The number of segments is unknown and is
