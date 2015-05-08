@@ -23,6 +23,7 @@
 import unittest as ut
 from pyndn import Name
 from pyndn import Interest
+from pyndn import Exclude
 from pyndn import KeyLocatorType
 from pyndn import InterestFilter
 from pyndn.util import Blob
@@ -186,6 +187,22 @@ class TestInterestMethods(ut.TestCase):
         # Change a child object.
         interest.getExclude().clear()
         self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
+
+    def test_exclude_matches(self):
+        exclude = Exclude()
+        exclude.appendComponent(Name("%00%02").get(0))
+        exclude.appendAny()
+        exclude.appendComponent(Name("%00%20").get(0))
+
+        component = Name("%00%01").get(0)
+        self.assertFalse(exclude.matches(component),
+          component.toEscapedString() + " should not match " + exclude.toUri())
+        component = Name("%00%0F").get(0)
+        self.assertTrue(exclude.matches(component),
+          component.toEscapedString() + " should match " + exclude.toUri())
+        component = Name("%00%21").get(0)
+        self.assertFalse(exclude.matches(component),
+          component.toEscapedString() + " should not match " + exclude.toUri())
 
     def test_verify_digest_sha256(self):
         # Create a KeyChain but we don't need to add keys.

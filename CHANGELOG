@@ -41,6 +41,7 @@ Changes
   show interaction with the repo-ng repository.
 * examples: Removed test_encode_decode_forwarding_entry and
   test_publish_async_ndnx because NDNx support is deprecated.
+* Unit tests: In test_interest_methods, added test_exclude_matches.
 
 Deprecated
 * Deprecated support for NDNx and binary XML. See WireFormat.ENABLE_NDNX above.
