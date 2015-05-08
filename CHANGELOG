@@ -32,6 +32,8 @@ Changes
   check if the added Data packet satisfies any pending interest. You can use
   getStorePendingInterest() for onDataNotFound in registerPrefix().
 * Make Blob.__str__ return "" instead of None if the blob isNull().
+* In ControlParameters, added support for Uri and Strategy.
+* In the default WireFormat, implemented decodeControlParameters.
 * Moved tests which need NFD from tests/unit_tests to tests/integration_tests.
 * examples: Added test_list_channels, test_list_faces, test_list_rib and
   test_register_route to query NFD.
