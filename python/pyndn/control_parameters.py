@@ -256,7 +256,8 @@ class ControlParameters(object):
         :param float expirationPeriod: The expiration period in milliseconds, or
           None for not specified.
         """
-        self._expirationPeriod = float(expirationPeriod)
+        self._expirationPeriod = (None if expirationPeriod == None else
+                                  float(expirationPeriod))
 
     # Support property-based equivalence check
     # TODO: Desired syntax?
