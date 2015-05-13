@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.0beta3 (2015-05-06)
---------------------------------------------------
+PyNDN v2.0beta4 (2015-05-13)
+----------------------------
 
 Changes
 * http://redmine.named-data.net/issues/2624 By default, throw an exception when
