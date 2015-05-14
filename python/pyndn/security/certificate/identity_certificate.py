@@ -40,27 +40,33 @@ class IdentityCertificate(Certificate):
         if self.getName().size() > 0:
             self._setPublicKeyName()
 
-    @classmethod
-    def _isCorrectName(cls, name):
+    @staticmethod
+    def _isCorrectName(name):
         """
         Checks that the important name components are present
         """
-        if cls._idxOfNameComponent(name, "ID-CERT") < 0 or cls._idxOfNameComponent(name, "KEY") < 0:
+        i = name.size() - 1
+
+        idString = "ID-CERT"
+        while i >= 0:
+            if name.get(i).toEscapedString() == idString:
+                break
+            i -= 1
+
+        if i < 0:
+            return False
+
+        keyIdx = 0
+        keyString = "KEY"
+        while keyIdx < name.size():
+            if name.get(keyIdx).toEscapedString() == keyString:
+                break
+            keyIdx += 1
+
+        if keyIdx >= name.size():
             return False
 
         return True
-
-    @staticmethod
-    def _idxOfNameComponent(name, string):
-        """
-        A helper method to locate name components
-        """
-        loc = -1
-        for i in range(name.size()-1,0, -1):
-            if name.get(i).toEscapedString() == string:
-                loc = i
-                break
-        return loc
 
     def wireDecode(self, buf, wireFormat = None):
         """
