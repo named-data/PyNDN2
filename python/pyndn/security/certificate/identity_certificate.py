@@ -37,10 +37,8 @@ class IdentityCertificate(Certificate):
         """
         super(IdentityCertificate,self).__init__(value)
 
-        if isinstance(value, Name):
-            if not self._isCorrectName(self.getName()):
-                raise SecurityException("Bad format for identity certificate name: " + self.getName().toUri())
-        self._setPublicKeyName()
+        if self.getName().size() > 0:
+            self._setPublicKeyName()
 
     @classmethod
     def _isCorrectName(cls, name):
