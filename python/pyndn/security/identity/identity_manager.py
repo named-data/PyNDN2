@@ -323,7 +323,7 @@ class IdentityManager(object):
 
             data.getSignature().setSignature(self._privateKeyStorage.sign
               (encoding.toSignedBuffer(),
-               self.certificateNameToPublicKeyName(certificateName),
+               IdentityCertificate.certificateNameToPublicKeyName(certificateName),
                digestAlgorithm[0]))
 
             # Encode again to include the signature.
@@ -335,7 +335,8 @@ class IdentityManager(object):
 
             signature.setSignature(
               self._privateKeyStorage.sign(
-                target, self.certificateNameToPublicKeyName(certificateName),
+                target,
+                IdentityCertificate.certificateNameToPublicKeyName(certificateName),
                 digestAlgorithm[0]))
 
             return signature
@@ -370,7 +371,7 @@ class IdentityManager(object):
         encoding = interest.wireEncode(wireFormat)
         signature.setSignature(self._privateKeyStorage.sign
           (encoding.toSignedBuffer(),
-           self.certificateNameToPublicKeyName(certificateName),
+           IdentityCertificate.certificateNameToPublicKeyName(certificateName),
            digestAlgorithm[0]))
 
         # Remove the empty signature and append the real one.
@@ -459,34 +460,6 @@ class IdentityManager(object):
 
         return certificate
 
-    # TODO: Move this to IdentityCertificate
-    @staticmethod
-    def certificateNameToPublicKeyName(certificateName):
-        """
-        Get the public key name from the full certificate name.
-
-        :param Name certificateName: The full certificate name.
-        :return: The related public key name.
-        :rtype: Name
-        """
-        i = certificateName.size() - 1
-        idString = "ID-CERT"
-        while i >= 0:
-            if certificateName[i].toEscapedString() == idString:
-                break
-            i -= 1
-
-        tmpName = certificateName.getSubName(0, i)
-        keyString = "KEY"
-        i = 0
-        while i < tmpName.size():
-            if tmpName[i].toEscapedString() == keyString:
-                break
-            i += 1
-
-        return tmpName.getSubName(0, i).append(tmpName.getSubName(
-                 i + 1, tmpName.size() - i - 1))
-
     def _generateCertificateForKey(self, keyName):
         # Let any raised SecurityExceptions bubble up.
         publicKeyBits = self._identityStorage.getKey(keyName)
@@ -502,7 +475,8 @@ class IdentityManager(object):
         certificateName.append("ID-CERT").append(
           Name.Component.fromNumber(int(timestamp)))
 
-        certificate = IdentityCertificate(certificateName)
+        certificate = IdentityCertificate()
+        certificate.setName(certificateName)
 
         certificate.setNotBefore(timestamp)
         certificate.setNotAfter((timestamp + 2*365*24*3600*1000)) # about 2 years.
@@ -528,7 +502,7 @@ class IdentityManager(object):
         :return: The related public key name.
         :rtype: Signature
         """
-        keyName = self.certificateNameToPublicKeyName(certificateName)
+        keyName = IdentityCertificate.certificateNameToPublicKeyName(certificateName)
         publicKey = self._privateKeyStorage.getPublicKey(keyName)
         keyType = publicKey.getKeyType()
 
