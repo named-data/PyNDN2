@@ -97,27 +97,42 @@ class IdentityCertificate(Certificate):
         """
         self._publicKeyName = self.certificateNameToPublicKeyName(self.getName())
 
-    @classmethod
-    def certificateNameToPublicKeyName(cls, certName):
+    @staticmethod
+    def certificateNameToPublicKeyName(certificateName):
         """
         Extract the name of a public key from the name of an identity certificate.
-        :param certName: The certificate name
-        :type certName: Name
+        :param Name certificateName: The certificate name.
         """
-        if certName.size() == 0:
-            return Name()
+        idString = "ID-CERT"
+        foundIdString = False
+        idCertComponentIndex = certificateName.size() - 1
+        while idCertComponentIndex + 1 > 0:
+            if certificateName.get(idCertComponentIndex).toEscapedString() == idString:
+                foundIdString = True
+                break
 
-        certComponentIdx = cls._idxOfNameComponent(certName, "ID-CERT")
+            idCertComponentIndex -= 1
 
-        if certComponentIdx < 0:
-            raise SecurityException("Bad format for identity certificate name")
-        tempName = certName.getSubName(0,certComponentIdx)
+        if not foundIdString:
+            raise RuntimeError(
+              "Incorrect identity certificate name " + certificateName.toUri())
 
-        keyComponentIdx = cls._idxOfNameComponent(tempName, "KEY")
+        tempName = certificateName.getSubName(0, idCertComponentIndex)
+        keyString = "KEY"
+        foundKeyString = False
+        keyComponentIndex = 0
+        while keyComponentIndex < tempName.size():
+            if tempName.get(keyComponentIndex).toEscapedString() == keyString:
+                foundKeyString = True
+                break
 
-        if keyComponentIdx < 0:
-            raise SecurityException("Bad format for identity certificate name")
-        # skip the /KEY/ component
-        return tempName.getSubName(0, keyComponentIdx).append(
-          tempName.getSubName(keyComponentIdx + 1))
+            keyComponentIndex += 1
 
+        if not foundKeyString:
+            raise RuntimeError(
+              "Incorrect identity certificate name " + certificateName.toUri())
+
+        return (tempName
+          .getSubName(0, keyComponentIndex)
+          .append(tempName.getSubName
+                  (keyComponentIndex + 1, tempName.size() - keyComponentIndex - 1)))
