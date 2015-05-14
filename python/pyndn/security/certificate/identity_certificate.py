@@ -27,7 +27,7 @@ for getting the public key name from the certificate name.
 """
 
 class IdentityCertificate(Certificate):
-    def __init__(self, value=None):
+    def __init__(self, data = None):
         """
         Create a new identity certificate.
         :param data: (optional) A Data object to copy the contents of
@@ -35,9 +35,15 @@ class IdentityCertificate(Certificate):
         :throws: SecurityException if the name of this Data object is
         not a valid identity certificate name.
         """
-        super(IdentityCertificate,self).__init__(value)
+        super(IdentityCertificate,self).__init__(data)
 
-        if self.getName().size() > 0:
+        if isinstance(data, IdentityCertificate):
+            # The copy constructor.
+            self._publicKeyName = Name(data._publicKeyName)
+        elif isinstance(data, Data):
+            if not self._isCorrectName(data.getName()):
+                raise SecurityException("Wrong Identity Certificate Name!")
+            
             self._setPublicKeyName()
 
     @staticmethod
