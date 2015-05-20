@@ -32,6 +32,7 @@ from pyndn.security.security_exception import SecurityException
 from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
+from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.encoding.wire_format import WireFormat
 
 class KeyChain(object):
@@ -55,7 +56,7 @@ class KeyChain(object):
         self._face = None
         self._maxSteps = 100
 
-    def createIdentity(self, identityName, params = None):
+    def createIdentityAndCertificate(self, identityName, params = None):
         """
         Create an identity by creating a pair of Key-Signing-Key (KSK) for this
         identity and a self-signed certificate of the KSK.
@@ -63,12 +64,32 @@ class KeyChain(object):
         :param Name identityName: The name of the identity.
         :param KeyParams params: (optional) The key parameters if a key needs to
           be generated for the identity. If omitted, use DEFAULT_KEY_PARAMS.
-        :return: The key name of the auto-generated KSK of the identity.
+        :return: The name of the certificate for the auto-generated KSK of the
+          identity.
         :rtype: Name
         """
         if params == None:
             params = KeyChain.DEFAULT_KEY_PARAMS
-        return self._identityManager.createIdentity(identityName, params)
+        return self._identityManager.createIdentityAndCertificate(
+          identityName, params)
+
+    def createIdentity(self, identityName, params = None):
+        """
+        Create an identity by creating a pair of Key-Signing-Key (KSK) for this
+        identity and a self-signed certificate of the KSK.
+
+        :deprecated: Use createIdentityAndCertificate which returns the
+          certificate name instead of the key name. You can use
+          IdentityCertificate.certificateNameToPublicKeyName to convert the
+          certificate name to the key name.
+        :param Name identityName: The name of the identity.
+        :param KeyParams params: (optional) The key parameters if a key needs to
+          be generated for the identity. If omitted, use DEFAULT_KEY_PARAMS.
+        :return: The key name of the auto-generated KSK of the identity.
+        :rtype: Name
+        """
+        return IdentityCertificate.certificateNameToPublicKeyName(
+          self.createIdentityAndCertificate(identityName, params))
 
     def deleteIdentity(self, identityName):
         """

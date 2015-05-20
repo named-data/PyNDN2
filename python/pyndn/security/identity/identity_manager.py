@@ -67,7 +67,7 @@ class IdentityManager(object):
         self._identityStorage = identityStorage
         self._privateKeyStorage = privateKeyStorage
 
-    def createIdentity(self, identityName, params):
+    def createIdentityAndCertificate(self, identityName, params):
         """
         Create an identity by creating a pair of Key-Signing-Key (KSK) for this
         identity and a self-signed certificate of the KSK.
@@ -75,7 +75,8 @@ class IdentityManager(object):
         :param Name identityName: The name of the identity.
         :param KeyParams params: The key parameters if a key needs to be
           generated for the identity.
-        :return: The key name of the auto-generated KSK of the identity.
+        :return: The name of the certificate for the auto-generated KSK of the
+          identity.
         :rtype: Name
         """
         self._identityStorage.addIdentity(identityName)
@@ -84,7 +85,25 @@ class IdentityManager(object):
         newCert = self.selfSign(keyName)
         self.addCertificateAsDefault(newCert)
 
-        return keyName
+        return newCert.getName()
+
+    def createIdentity(self, identityName, params):
+        """
+        Create an identity by creating a pair of Key-Signing-Key (KSK) for this
+        identity and a self-signed certificate of the KSK.
+
+        :deprecated: Use createIdentityAndCertificate which returns the
+          certificate name instead of the key name. You can use
+          IdentityCertificate.certificateNameToPublicKeyName to convert the
+          certificate name to the key name.
+        :param Name identityName: The name of the identity.
+        :param KeyParams params: The key parameters if a key needs to be
+          generated for the identity.
+        :return: The key name of the auto-generated KSK of the identity.
+        :rtype: Name
+        """
+        return IdentityCertificate.certificateNameToPublicKeyName(
+          self.createIdentityAndCertificate(identityName, params))
 
     def deleteIdentity(self, identityName):
         """
