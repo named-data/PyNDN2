@@ -219,7 +219,7 @@ class TestConfigPolicyManager(ut.TestCase):
         identityName = Name('TestValidator/Null').appendVersion(int(time.time()))
 
         keyChain = KeyChain(self.identityManager, policyManager)
-        keyChain.createIdentity(identityName)
+        keyChain.createIdentityAndCertificate(identityName)
         data = Data(Name(identityName).append('data'))
         keyChain.signByIdentity(data, identityName)
 
@@ -239,7 +239,7 @@ class TestConfigPolicyManager(ut.TestCase):
         keyChain = KeyChain(self.identityManager, policyManager)
 
         identityName  = Name('TestValidator/RsaSignatureVerification')
-        keyChain.createIdentity(identityName)
+        keyChain.createIdentityAndCertificate(identityName)
 
         data = Data(Name('/TestData/1'))
         keyChain.signByIdentity(data, identityName)

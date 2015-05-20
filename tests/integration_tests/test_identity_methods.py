@@ -32,6 +32,7 @@ from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity import FilePrivateKeyStorage
 from pyndn.security.identity import BasicIdentityStorage
+from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn import Name
 from pyndn.util import Blob
 from pyndn.security.policy import SelfVerifyPolicyManager
@@ -72,15 +73,14 @@ class TestSqlIdentityStorage(ut.TestCase):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
 
-        keyName = self.keyChain.createIdentity(identityName)
+        certificateName = self.keyChain.createIdentityAndCertificate(identityName)
+        keyName = IdentityCertificate.certificateNameToPublicKeyName(certificateName)
 
         self.assertTrue(self.identityStorage.doesIdentityExist(identityName),
             "Identity was not added to IdentityStorage")
         self.assertIsNotNone(keyName, "New identity has no key")
         self.assertTrue(self.identityStorage.doesKeyExist(keyName),
             "Key was not added to IdentityStorage")
-        certificateName = self.identityManager.getDefaultCertificateNameForIdentity(
-            identityName)
         self.assertIsNotNone(certificateName,
             "Certificate was not added to IdentityStorage")
 
@@ -159,7 +159,8 @@ class TestSqlIdentityStorage(ut.TestCase):
         identityName = Name('/TestIdentityStorage/Identity').appendVersion(
             int(time.time()))
 
-        self.identityManager.createIdentity(identityName, KeyChain.DEFAULT_KEY_PARAMS)
+        self.identityManager.createIdentityAndCertificate(
+          identityName, KeyChain.DEFAULT_KEY_PARAMS)
         keyName1 = self.identityManager.getDefaultKeyNameForIdentity(identityName)
         cert2 = self.identityManager.selfSign(keyName1)
         self.identityStorage.addCertificate(cert2)
@@ -182,8 +183,8 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         # ndn-cxx returns the cert name, but the IndentityManager docstring
         # specifies a key
-        keyName1 = self.keyChain.createIdentity(identityName)
-        certName1 = self.identityStorage.getDefaultCertificateNameForKey(keyName1)
+        certName1 = self.keyChain.createIdentityAndCertificate(identityName)
+        keyName1 = IdentityCertificate.certificateNameToPublicKeyName(certName1)
         keyName2 = self.keyChain.generateRSAKeyPairAsDefault(identityName)
 
         cert2 = self.identityManager.selfSign(keyName2)
