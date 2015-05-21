@@ -367,9 +367,9 @@ class Node(object):
         # the timed-out entries at the front, then quit.
         while (len(self._delayedCallTable) > 0 and
                self._delayedCallTable[0].getCallTime() <= now):
-            timeout = self._delayedCallTable[0]
+            delayedCall = self._delayedCallTable[0]
             del self._delayedCallTable[0]
-            timeout.callCallback()
+            delayedCall.callCallback()
 
     def getTransport(self):
         """
@@ -645,7 +645,7 @@ class Node(object):
         :type callback: function object
         """
         delayedCall = Node._DelayedCall(delayMilliseconds, callback)
-        # Insert into _delayedCallTable, sorted on timeout.getCallTime().
+        # Insert into _delayedCallTable, sorted on delayedCall.getCallTime().
         # Search from the back since we expect it to go there.
         i = len(self._delayedCallTable) - 1
         while i >= 0:
@@ -654,7 +654,7 @@ class Node(object):
             i -= 1
 
         # Element i is the greatest less than or equal to
-        # timeout.getCallTime(), so insert after it.
+        # delayedCall.getCallTime(), so insert after it.
         self._delayedCallTable.insert(i + 1, delayedCall)
 
     def _processInterestTimeout(self, pendingInterest):
