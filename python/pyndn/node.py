@@ -56,7 +56,7 @@ class Node(object):
     def __init__(self, transport, connectionInfo):
         self._transport = transport
         self._connectionInfo = connectionInfo
-        # An array of _PendintInterest
+        # An array of _PendingInterest
         self._pendingInterestTable = []
         # An array of _RegisteredPrefix
         self._registeredPrefixTable = []
@@ -95,9 +95,15 @@ class Node(object):
             self._transport.connect(self._connectionInfo, self)
 
         pendingInterestId = Node._PendingInterest.getNextPendingInterestId()
-        self._pendingInterestTable.append(
-          Node._PendingInterest(pendingInterestId, interest, onData,
-                          onTimeout))
+        pendingInterest = Node._PendingInterest(
+          pendingInterestId, interest, onData, onTimeout)
+        self._pendingInterestTable.append(pendingInterest)
+        if (interest.getInterestLifetimeMilliseconds() != None and
+            interest.getInterestLifetimeMilliseconds() >= 0.0):
+            # Set up the timeout.
+            def callback():
+                self._processInterestTimeout(pendingInterest)
+            self.callLater(interest.getInterestLifetimeMilliseconds(), callback)
 
         # Special case: For _timeoutPrefix we don't actually send the interest.
         if not self._timeoutPrefix.match(interest.getName()):
@@ -127,6 +133,9 @@ class Node(object):
             if (self._pendingInterestTable[i].getPendingInterestId() ==
                   pendingInterestId):
                 count += 1
+                # For efficiency, mark this as removed so that
+                # _processInterestTimeout doesn't look for it.
+                self._pendingInterestTable[i].setIsRemoved()
                 self._pendingInterestTable.pop(i)
             i -= 1
 
@@ -345,23 +354,6 @@ class Node(object):
         """
         self._transport.processEvents()
 
-        # Check for PIT entry timeouts. Go backwards through the list so we can
-        #   erase entries.
-        nowMilliseconds = Common.getNowMilliseconds()
-        i = len(self._pendingInterestTable) - 1
-        while i >= 0:
-            if self._pendingInterestTable[i].isTimedOut(nowMilliseconds):
-                # Save the PendingInterest and remove it from the PIT.  Then
-                #   call the callback.
-                pendingInterest = self._pendingInterestTable[i]
-                self._pendingInterestTable.pop(i)
-                pendingInterest.callTimeout()
-
-                # Refresh now since the timeout callback might have delayed.
-                nowMilliseconds = Common.getNowMilliseconds()
-
-            i -= 1
-
         # Check for delayed calls. Since callLater does a sorted insert into
         # _delayedCallTable, the check for timeouts is quick and does not
         # require searching the entire table. If callLater is overridden to use
@@ -503,9 +495,15 @@ class Node(object):
         # Go backwards through the list so we can erase entries.
         i = len(self._pendingInterestTable) - 1
         while i >= 0:
-            if self._pendingInterestTable[i].getInterest().matchesName(name):
-                result.append(self._pendingInterestTable[i])
+            pendingInterest = self._pendingInterestTable[i]
+
+            if pendingInterest.getInterest().matchesName(name):
+                result.append(pendingInterest)
+                # We let the callback from callLater call _processInterestTimeout,
+                # but for efficiency, mark this as removed so that it returns
+                # right away.
                 self._pendingInterestTable.pop(i)
+                pendingInterest.setIsRemoved()
             i -= 1
 
         return result
@@ -656,6 +654,27 @@ class Node(object):
         # timeout.getCallTime(), so insert after it.
         self._delayedCallTable.insert(i + 1, timeout)
 
+    def _processInterestTimeout(self, pendingInterest):
+        """
+        This is used in callLater for when the pending interest expires. If
+        the pendingInterest is still in the _pendingInterestTable, remove it and
+        call its onTimeout callback.
+        """
+        if pendingInterest.getIsRemoved():
+            # _extractEntriesForExpressedInterest or removePendingInterest has
+            # removed pendingInterest from _pendingInterestTable, so we don't
+            # need to look for it. Do nothing.
+            return
+
+        try:
+            index = self._pendingInterestTable.index(pendingInterest)
+        except ValueError:
+            # The pending interest has been removed. Do nothing.
+            return
+
+        del self._pendingInterestTable[index]
+        pendingInterest.callTimeout()
+
     class _DelayedCall(object):
         """
         _DelayedCall is a private class for the members of the _delayedCallTable.
@@ -690,8 +709,7 @@ class Node(object):
     class _PendingInterest(object):
         """
         _PendingInterest is a private class for the members of the
-        _pendingInterestTable.  Create a new PendingInterest and set the
-        _timeoutTime based on the current time and the interest lifetime.
+        _pendingInterestTable.
 
         :param int pendingInterestId: A unique ID for this entry, which you
           should get with getNextPendingInteresId().
@@ -708,15 +726,7 @@ class Node(object):
             self._interest = interest
             self._onData = onData
             self._onTimeout = onTimeout
-
-            # Set up _timeoutTimeMilliseconds.
-            if (self._interest.getInterestLifetimeMilliseconds() != None and
-                  self._interest.getInterestLifetimeMilliseconds() >= 0.0):
-                self._timeoutTimeMilliseconds = (Common.getNowMilliseconds() +
-                  self._interest.getInterestLifetimeMilliseconds())
-            else:
-                # No timeout.
-                self._timeoutTimeMilliseconds = None
+            self._isRemoved = False
 
         _lastPendingInterestId = 0
 
@@ -758,18 +768,6 @@ class Node(object):
             """
             return self._onData
 
-        def isTimedOut(self, nowMilliseconds):
-            """
-            Check if this interest is timed out.
-
-            :param float nowMilliseconds: The current time in milliseconds from
-              Common.getNowMilliseconds().
-            :return: True if this interest timed out, otherwise False.
-            :rtype: bool
-            """
-            return (self._timeoutTimeMilliseconds != None and
-                    nowMilliseconds >= self._timeoutTimeMilliseconds)
-
         def callTimeout(self):
             """
             Call _onTimeout (if defined).  This ignores exceptions from
@@ -781,6 +779,21 @@ class Node(object):
                     self._onTimeout(self._interest)
                 except:
                     pass
+
+        def setIsRemoved(self):
+            """
+            Set the isRemoved flag which is returned by getIsRemoved().
+            """
+            self._isRemoved = True
+
+        def getIsRemoved(self):
+            """
+            Check if setIsRemoved() was called.
+
+            :return: True if setIsRemoved() was called.
+            :rtype: bool
+            """
+            return self._isRemoved
 
     class _RegisteredPrefix(object):
         """
