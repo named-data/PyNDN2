@@ -644,18 +644,18 @@ class Node(object):
         :param callback: This calls callback() after the delay.
         :type callback: function object
         """
-        timeout = Node._DelayedCall(delayMilliseconds, callback)
+        delayedCall = Node._DelayedCall(delayMilliseconds, callback)
         # Insert into _delayedCallTable, sorted on timeout.getCallTime().
         # Search from the back since we expect it to go there.
         i = len(self._delayedCallTable) - 1
         while i >= 0:
-            if (self._delayedCallTable[i].getCallTime() <= timeout.getCallTime()):
+            if (self._delayedCallTable[i].getCallTime() <= delayedCall.getCallTime()):
                 break
             i -= 1
 
         # Element i is the greatest less than or equal to
         # timeout.getCallTime(), so insert after it.
-        self._delayedCallTable.insert(i + 1, timeout)
+        self._delayedCallTable.insert(i + 1, delayedCall)
 
     def _processInterestTimeout(self, pendingInterest):
         """
