@@ -93,20 +93,8 @@ class TcpTransport(Transport):
         """
         if (self._connectionInfo == None or
             self._connectionInfo.getHost() != connectionInfo.getHost()):
-            # Only look at the first result.
-            family, _, _, _, sockaddr = socket.getaddrinfo(
-              connectionInfo.getHost(), None, socket.AF_UNSPEC,
-              socket.SOCK_STREAM)[0]
-            if family == socket.AF_INET:
-                # IPv4
-                address, _ = sockaddr
-                self._isLocal = address.startswith("127.")
-            else:
-                # IPv6
-                address, _, _, _ = sockaddr
-                self._isLocal = (address == "::1")
-
             # Cache the result in _isLocal and save _connectionInfo for next time.
+            self._isLocal = self.getIsLocal(connectionInfo.getHost())
             self._connectionInfo = connectionInfo
 
         return self._isLocal
@@ -203,3 +191,31 @@ class TcpTransport(Transport):
         if self._socket != None:
             self._socket.close()
             self._socket = None
+
+    @staticmethod
+    def getIsLocal(host):
+        """
+        A static method to determine whether the host is on the current machine.
+        Results are not cached.
+        http://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face,
+        TCP transports with a loopback address are local. If connectionInfo
+        contains a host name, this will do a blocking DNS lookup; otherwise
+        this will parse the IP address and examine the first octet to determine
+        if it is a loopback address (e.g. the first IPv4 octet is 127 or IPv6 is
+        "::1").
+
+        :param str host: The host to check.
+        :return: True if the host is local, False if not.
+        :rtype bool:
+        """
+        # Only look at the first result.
+        family, _, _, _, sockaddr = socket.getaddrinfo(
+          host, None, socket.AF_UNSPEC, socket.SOCK_STREAM)[0]
+        if family == socket.AF_INET:
+            # IPv4
+            address, _ = sockaddr
+            return address.startswith("127.")
+        else:
+            # IPv6
+            address, _, _, _ = sockaddr
+            return (address == "::1")
