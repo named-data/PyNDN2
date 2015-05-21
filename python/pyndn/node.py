@@ -56,12 +56,14 @@ class Node(object):
     def __init__(self, transport, connectionInfo):
         self._transport = transport
         self._connectionInfo = connectionInfo
-        # An array of PendintInterest
+        # An array of _PendintInterest
         self._pendingInterestTable = []
-        # An array of RegisteredPrefix
+        # An array of _RegisteredPrefix
         self._registeredPrefixTable = []
-        # An array of InterestFilterEntry
+        # An array of _InterestFilterEntry
         self._interestFilterTable = []
+        # An array of _DelayedCall
+        self._delayedCallTable = []
         self._ndndIdFetcherInterest = Interest(
           Name("/%C1.M.S.localhost/%C1.M.SRV/ndnd/KEY"))
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
@@ -360,6 +362,20 @@ class Node(object):
 
             i -= 1
 
+        # Check for delayed calls. Since callLater does a sorted insert into
+        # _delayedCallTable, the check for timeouts is quick and does not
+        # require searching the entire table. If callLater is overridden to use
+        # a different mechanism, then processEvents is not needed to check for
+        # delayed calls.
+        now = Common.getNowMilliseconds()
+        # _delayedCallTable is sorted on _callTime, so we only need to process
+        # the timed-out entries at the front, then quit.
+        while (len(self._delayedCallTable) > 0 and
+               self._delayedCallTable[0].getCallTime() <= now):
+            timeout = self._delayedCallTable[0]
+            del self._delayedCallTable[0]
+            timeout.callCallback()
+
     def getTransport(self):
         """
         Get the transport object given to the constructor.
@@ -617,6 +633,59 @@ class Node(object):
         self.expressInterest(
           commandInterest, response.onData, response.onTimeout,
           TlvWireFormat.get())
+
+    def callLater(self, delayMilliseconds, callback):
+        """
+        Call callback() after the given delay. This adds to
+        self._delayedCallTable which is used by processEvents().
+
+        :param float delayMilliseconds: The delay in milliseconds.
+        :param callback: This calls callback() after the delay.
+        :type callback: function object
+        """
+        timeout = Node._DelayedCall(delayMilliseconds, callback)
+        # Insert into _delayedCallTable, sorted on timeout.getCallTime().
+        # Search from the back since we expect it to go there.
+        i = len(self._delayedCallTable) - 1
+        while i >= 0:
+            if (self._delayedCallTable[i].getCallTime() <= timeout.getCallTime()):
+                break
+            i -= 1
+
+        # Element i is the greatest less than or equal to
+        # timeout.getCallTime(), so insert after it.
+        self._delayedCallTable.insert(i + 1, timeout)
+
+    class _DelayedCall(object):
+        """
+        _DelayedCall is a private class for the members of the _delayedCallTable.
+        Create a new _DelayedCall and set the call time based on the current
+        time and the delayMilliseconds.
+
+        :param callback: This calls callback() after the delay.
+        :type callback: function object
+        :param float delayMilliseconds: The delay in milliseconds.
+        """
+        def __init__(self, delayMilliseconds, callback):
+            self._callback = callback
+            self._callTime = Common.getNowMilliseconds() + delayMilliseconds
+
+        def getCallTime(self):
+            """
+            Get the time at which the callback should be called.
+
+            :return: The call time in milliseconds, similar to
+              Common.getNowMilliseconds().
+            :rtype: float
+            """
+            return self._callTime
+
+        def callCallback(self):
+            """
+            Call the callback given to the constructor. This does not catch
+            exceptions.
+            """
+            self._callback()
 
     class _PendingInterest(object):
         """
