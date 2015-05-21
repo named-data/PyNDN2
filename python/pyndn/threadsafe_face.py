@@ -149,6 +149,19 @@ class ThreadsafeFace(Face):
         #   change) the test.
         self._stopWhenTest = test
 
+    def callLater(self, delayMilliseconds, callback):
+        """
+        Override to call callback() after the given delay, using
+        self._loop.call_later. This means that processEvents() is not needed to
+        handle interest timeouts.
+
+        :param float delayMilliseconds: The delay in milliseconds.
+        :param callback: This calls callback() after the delay.
+        :type callback: function object
+        """
+        # Convert milliseconds to seconds.
+        self._loop.call_later(delayMilliseconds / 1000.0, callback)
+
     def _stopWhenCallback(self):
         """
         Repeatedly call self._stopWhenTest() (if not None) and when it returns
