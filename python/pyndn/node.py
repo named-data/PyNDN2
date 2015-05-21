@@ -684,9 +684,9 @@ class Node(object):
         Create a new _DelayedCall and set the call time based on the current
         time and the delayMilliseconds.
 
+        :param float delayMilliseconds: The delay in milliseconds.
         :param callback: This calls callback() after the delay.
         :type callback: function object
-        :param float delayMilliseconds: The delay in milliseconds.
         """
         def __init__(self, delayMilliseconds, callback):
             self._callback = callback
