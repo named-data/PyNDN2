@@ -71,7 +71,7 @@ class Node(object):
         self._commandInterestGenerator = CommandInterestGenerator()
         self._timeoutPrefix = Name("/local/timeout")
 
-    def expressInterest(self, interest, onData, onTimeout, wireFormat):
+    def expressInterest(self, interest, onData, onTimeout, wireFormat, face):
         """
         Send the Interest through the transport, read the entire response and
         call onData(interest, data).
@@ -87,6 +87,9 @@ class Node(object):
         :type onTimeout: function object
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
+        :param Face face: The face which has the callLater method, used for
+          interest timeouts. The callLater method may be overridden in a
+          subclass of Face.
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
@@ -103,7 +106,7 @@ class Node(object):
             # Set up the timeout.
             def callback():
                 self._processInterestTimeout(pendingInterest)
-            self.callLater(interest.getInterestLifetimeMilliseconds(), callback)
+            face.callLater(interest.getInterestLifetimeMilliseconds(), callback)
 
         # Special case: For _timeoutPrefix we don't actually send the interest.
         if not self._timeoutPrefix.match(interest.getName()):
@@ -212,7 +215,7 @@ class Node(object):
                 # receives (and sends) in the application's desired wire format.
                 self.expressInterest(
                   self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout,
-                  wireFormat)
+                  wireFormat, face)
             else:
                 self._registerPrefixHelper(
                   registeredPrefixId, Name(prefix), onInterest, onRegisterFailed,
@@ -575,7 +578,7 @@ class Node(object):
           self, prefix, onInterest, onRegisterFailed, flags, wireFormat, False,
           face)
         self.expressInterest(
-          interest, response.onData, response.onTimeout, wireFormat)
+          interest, response.onData, response.onTimeout, wireFormat, face)
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
@@ -630,7 +633,7 @@ class Node(object):
           TlvWireFormat.get(), True, face)
         self.expressInterest(
           commandInterest, response.onData, response.onTimeout,
-          TlvWireFormat.get())
+          TlvWireFormat.get(), face)
 
     def callLater(self, delayMilliseconds, callback):
         """
@@ -1055,7 +1058,7 @@ class Node(object):
                     # receives (and sends) in the application's desired wire format.
                     self._node.expressInterest(
                       self._node._ndndIdFetcherInterest, fetcher.onData,
-                      fetcher.onTimeout, self._wireFormat)
+                      fetcher.onTimeout, self._wireFormat, self._face)
                 else:
                     # Pass 0 for registeredPrefixId since the entry was already
                     #   added to _registeredPrefixTable on the first try.

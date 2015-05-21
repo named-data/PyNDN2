@@ -177,7 +177,7 @@ class Face(object):
             wireFormat = WireFormat.getDefaultWireFormat()
 
         return self._node.expressInterest(
-          interest, onData, onTimeout, wireFormat)
+          interest, onData, onTimeout, wireFormat, self)
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -402,6 +402,17 @@ class Face(object):
         Shut down and disconnect this Face.
         """
         self._node.shutdown()
+
+    def callLater(self, delayMilliseconds, callback):
+        """
+        Call callback() after the given delay. This default implementation just
+        calls Node.callLater, but a subclass can override.
+
+        :param float delayMilliseconds: The delay in milliseconds.
+        :param callback: This calls callback() after the delay.
+        :type callback: function object
+        """
+        self._node.callLater(delayMilliseconds, callback)
 
     @staticmethod
     def getMaxNdnPacketSize():
