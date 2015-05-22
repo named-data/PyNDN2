@@ -403,17 +403,6 @@ class Face(object):
         """
         self._node.shutdown()
 
-    def callLater(self, delayMilliseconds, callback):
-        """
-        Call callback() after the given delay. This default implementation just
-        calls Node.callLater, but a subclass can override.
-
-        :param float delayMilliseconds: The delay in milliseconds.
-        :param callback: This calls callback() after the delay.
-        :type callback: function object
-        """
-        self._node.callLater(delayMilliseconds, callback)
-
     @staticmethod
     def getMaxNdnPacketSize():
         """
@@ -424,3 +413,15 @@ class Face(object):
         :rtype: int
         """
         return Common.MAX_NDN_PACKET_SIZE
+
+    def callLater(self, delayMilliseconds, callback):
+        """
+        Call callback() after the given delay. Even though this is public, it is
+        not part of the public API of Face.This default implementation just
+        calls Node.callLater, but a subclass can override.
+
+        :param float delayMilliseconds: The delay in milliseconds.
+        :param callback: This calls callback() after the delay.
+        :type callback: function object
+        """
+        self._node.callLater(delayMilliseconds, callback)
