@@ -75,7 +75,7 @@ class ElementReader(object):
                     #   conflict with the first byte of a binary XML packet, so we can
                     #   just look at the first byte.
                     if (data[0] == Tlv.Interest or data[0] == Tlv.Data or
-                        data[0] == 80):
+                        data[0] == 80 or data[0] == 100):
                         self._useTlv = True
                     else:
                         # Binary XML.
