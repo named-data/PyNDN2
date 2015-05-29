@@ -70,27 +70,53 @@ class IdentityManager(object):
     def createIdentityAndCertificate(self, identityName, params):
         """
         Create an identity by creating a pair of Key-Signing-Key (KSK) for this
-        identity and a self-signed certificate of the KSK.
+        identity and a self-signed certificate of the KSK. If a key pair or
+        certificate for the identity already exists, use it.
 
         :param Name identityName: The name of the identity.
         :param KeyParams params: The key parameters if a key needs to be
           generated for the identity.
-        :return: The name of the certificate for the auto-generated KSK of the
-          identity.
+        :return: The name of the default certificate of the identity.
         :rtype: Name
         """
         self._identityStorage.addIdentity(identityName)
-        keyName = self._generateKeyPair(identityName, True, params)
-        self._identityStorage.setDefaultKeyNameForIdentity(keyName, identityName)
-        newCert = self.selfSign(keyName)
-        self.addCertificateAsDefault(newCert)
+        
+        generateKey = True
+        try:
+            keyName = self._identityStorage.getDefaultKeyNameForIdentity(
+              identityName)
+            key = PublicKey(self._identityStorage.getKey(keyName))
+            if key.getKeyType() == params.getKeyType():
+                # The key exists and has the same type, so don't need to generate one.
+                generateKey = False
+        except SecurityException:
+            pass
 
-        return newCert.getName()
+        if generateKey:
+            keyName = self._generateKeyPair(identityName, True, params)
+            self._identityStorage.setDefaultKeyNameForIdentity(
+              keyName, identityName)
+
+        makeCert = True
+        try:
+            certName = self._identityStorage.getDefaultCertificateNameForKey(keyName)
+            # The cert exists, so don't need to make it.
+            makeCert = False
+        except SecurityException:
+            pass
+
+        if makeCert:
+            selfCert = self.selfSign(keyName)
+            self.addCertificateAsIdentityDefault(selfCert)
+            certName = selfCert.getName()
+
+        return certName
 
     def createIdentity(self, identityName, params):
         """
         Create an identity by creating a pair of Key-Signing-Key (KSK) for this
-        identity and a self-signed certificate of the KSK.
+        identity and a self-signed certificate of the KSK. If a key pair or
+        certificate for the identity already exists, use it.
 
         :deprecated: Use createIdentityAndCertificate which returns the
           certificate name instead of the key name. You can use
