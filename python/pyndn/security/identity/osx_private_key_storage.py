@@ -280,7 +280,33 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         :return: True if the key exists, otherwise false.
         :rtype: bool
         """
-        raise RuntimeError("doesKeyExist is not implemented")
+        keyLabel = None
+        attrDict = None
+
+        try:
+            keyNameUri = self._toInternalKeyName(keyName, keyClass)
+
+            keyLabel = CFSTR(keyNameUri)
+
+            attrDict = c_void_p(cf.CFDictionaryCreateMutable(
+              None, 4, cf.kCFTypeDictionaryKeyCallBacks, None))
+
+            cf.CFDictionaryAddValue(
+              attrDict, self._kSecClass, self._kSecClassKey)
+            cf.CFDictionaryAddValue(
+              attrDict, self._kSecAttrLabel, keyLabel)
+            cf.CFDictionaryAddValue(
+              attrDict, self._kSecReturnRef, self._kCFBooleanTrue)
+
+            itemRef = c_void_p()
+            res = self._security.SecItemCopyMatching(attrDict, pointer(itemRef))
+
+            return res == None
+        finally:
+            if keyLabel != None:
+                cf.CFRelease(keyLabel)
+            if attrDict != None:
+                cf.CFRelease(attrDict)
 
     @staticmethod
     def _toInternalKeyName(keyName, keyClass):
