@@ -517,8 +517,7 @@ class IdentityManager(object):
         # to delegate responsibility for cert delivery.
         # cf: http://redmine.named-data.net/issues/1659
         certificateName = keyName.getPrefix(-1).append('KEY').append(keyName.get(-1))
-        certificateName.append("ID-CERT").append(
-          Name.Component.fromNumber(int(timestamp)))
+        certificateName.append("ID-CERT").appendVersion(int(timestamp))
 
         certificate = IdentityCertificate()
         certificate.setName(certificateName)
