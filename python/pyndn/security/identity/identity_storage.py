@@ -74,9 +74,9 @@ class IdentityStorage(object):
 
         nowString = repr(timestamp).replace(".0", "")
         if useKsk:
-            keyIdStr = "KSK-" + nowString
+            keyIdStr = "ksk-" + nowString
         else:
-            keyIdStr = "DSK-" + nowString
+            keyIdStr = "dsk-" + nowString
 
         keyName = Name(identityName).append(keyIdStr)
 
