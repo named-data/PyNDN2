@@ -45,7 +45,7 @@ class Transport(object):
         """
         raise RuntimeError("isLocal is not implemented")
 
-    def connect(self, connectionInfo, elementListener):
+    def connect(self, connectionInfo, elementListener, onConnected):
         """
         Connect according to the info in ConnectionInfo, and use
         elementListener.
@@ -55,6 +55,9 @@ class Transport(object):
         :param elementListener: The elementListener must remain valid during the
           life of this object.
         :type elementListener: An object with onReceivedData
+        :param onConnected: This calls onConnected() when the connection is
+          established.
+        :type onConnected: function object
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """

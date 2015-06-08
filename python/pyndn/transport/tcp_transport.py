@@ -99,7 +99,7 @@ class TcpTransport(Transport):
 
         return self._isLocal
 
-    def connect(self, connectionInfo, elementListener):
+    def connect(self, connectionInfo, elementListener, onConnected):
         """
         Connect according to the info in connectionInfo, and use
         elementListener.
@@ -109,6 +109,9 @@ class TcpTransport(Transport):
         :param elementListener: The elementListener must remain valid during the
           life of this object.
         :type elementListener: An object with onReceivedElement
+        :param onConnected: This calls onConnected() when the connection is
+          established.
+        :type onConnected: function object
         """
         self.close()
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -117,6 +120,8 @@ class TcpTransport(Transport):
 
         self._socketPoller = SocketPoller(self._socket)
         self._elementReader = ElementReader(elementListener)
+
+        onConnected()
 
     # This will be set True if send gets a TypeError.
     _sendNeedsStr = False

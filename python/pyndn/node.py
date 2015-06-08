@@ -94,8 +94,10 @@ class Node(object):
           getMaxNdnPacketSize().
         """
         # TODO: Properly check if we are already connected to the expected host.
+        def onConnected():
+            pass
         if not self._transport.getIsConnected():
-            self._transport.connect(self._connectionInfo, self)
+            self._transport.connect(self._connectionInfo, self, onConnected)
 
         pendingInterestId = Node._PendingInterest.getNextPendingInterestId()
         pendingInterest = Node._PendingInterest(
