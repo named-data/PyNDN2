@@ -54,9 +54,13 @@ class ThreadsafeFace(Face):
         to be called in a threadsafe manner. See Face.expressInterest for
         calling details.
         """
+        pendingInterestId = self._node.getNextEntryId()
+
         self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).expressInterest, interestOrName, arg2,
+            self._expressInterestHelper, pendingInterestId, interestOrName, arg2,
             arg3, arg4, arg5)
+
+        return pendingInterestId
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -76,9 +80,13 @@ class ThreadsafeFace(Face):
         to be called in a threadsafe manner. See Face.registerPrefix for
         calling details.
         """
+        registeredPrefixId = self._node.getNextEntryId()
+
         self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).registerPrefix, prefix, onInterest,
+            self._registerPrefixHelper, registeredPrefixId, prefix, onInterest,
             onRegisterFailed, flags, wireFormat)
+
+        return registeredPrefixId
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -96,9 +104,13 @@ class ThreadsafeFace(Face):
         setInterestFilter to be called in a threadsafe manner. See
         Face.setInterestFilter for calling details.
         """
+        interestFilterId = self._node.getNextEntryId()
+
         self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).setInterestFilter, filterOrPrefix,
+            self._setInterestFilterHelper, interestFilterId, filterOrPrefix,
             onInterest)
+
+        return interestFilterId
 
     def unsetInterestFilter(self, interestFilterId):
         """
