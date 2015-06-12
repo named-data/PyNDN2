@@ -121,6 +121,20 @@ class Face(object):
         :throws: RuntimeError If the encoded interest size exceeds
           Face.getMaxNdnPacketSize().
         """
+        pendingInterestId = self._node.getNextEntryId()
+
+        self._expressInterestHelper(
+          pendingInterestId, interestOrName, arg2, arg3, arg4, arg5)
+
+        return pendingInterestId
+
+    def _expressInterestHelper(
+      self, pendingInterestId, interestOrName, arg2, arg3, arg4, arg5):
+        """
+        This is a protected helper method to do the work of expressInterest to
+        resolve the different overloaded forms. The pendingInterestId is from
+        getNextEntryId(). This has no return value and can be used in a callback.
+        """
         # expressInterest(interest, onData)
         # expressInterest(interest, onData, wireFormat)
         # expressInterest(interest, onData, onTimeout)
@@ -176,12 +190,8 @@ class Face(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        pendingInterestId = self._node.getNextEntryId()
-
         self._node.expressInterest(
           pendingInterestId, interest, onData, onTimeout, wireFormat, self)
-
-        return pendingInterestId
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -278,20 +288,32 @@ class Face(object):
         :raises: This raises an exception if setCommandSigningInfo has not been
           called to set the KeyChain, etc. for signing the command interest.
         """
+        registeredPrefixId = self._node.getNextEntryId()
+
+        self._registerPrefixHelper(
+          registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
+          wireFormat)
+
+        return registeredPrefixId
+
+    def _registerPrefixHelper(
+      self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
+      flags = None, wireFormat = None):
+        """
+        This is a protected helper method to do the work of registerPrefix to
+        resolve the different overloaded forms. The registeredPrefixId is from
+        getNextEntryId(). This has no return value and can be used in a callback.
+        """
         if flags == None:
             flags = ForwardingFlags()
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        registeredPrefixId = self._node.getNextEntryId()
-
         # Node.expressInterest requires a copy of the prefix.
         return self._node.registerPrefix(
           registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
           wireFormat, self._commandKeyChain, self._commandCertificateName, self)
-
-        return registeredPrefixId
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -329,6 +351,18 @@ class Face(object):
         """
         interestFilterId = self._node.getNextEntryId()
 
+        self._setInterestFilterHelper(
+          interestFilterId, filterOrPrefix, onInterest)
+
+        return interestFilterId
+
+    def _setInterestFilterHelper(
+      self, interestFilterId, filterOrPrefix, onInterest):
+        """
+        This is a protected helper method to do the work of setInterestFilter to
+        resolve the different overloaded forms. The interestFilterId is from
+        getNextEntryId(). This has no return value and can be used in a callback.
+        """
         if type(filterOrPrefix) is InterestFilter:
           return self._node.setInterestFilter(
             interestFilterId, filterOrPrefix, onInterest, self)
@@ -336,8 +370,6 @@ class Face(object):
           # Assume it is a prefix Name.
           return self._node.setInterestFilter(
             interestFilterId, InterestFilter(filterOrPrefix), onInterest, self)
-
-        return interestFilterId
 
     def unsetInterestFilter(self, interestFilterId):
         """
