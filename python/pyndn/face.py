@@ -176,8 +176,12 @@ class Face(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        return self._node.expressInterest(
-          interest, onData, onTimeout, wireFormat, self)
+        pendingInterestId = self._node.getNextEntryId()
+
+        self._node.expressInterest(
+          pendingInterestId, interest, onData, onTimeout, wireFormat, self)
+
+        return pendingInterestId
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -280,10 +284,14 @@ class Face(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
+        registeredPrefixId = self._node.getNextEntryId()
+
         # Node.expressInterest requires a copy of the prefix.
         return self._node.registerPrefix(
-          prefix, onInterest, onRegisterFailed, flags, wireFormat,
-          self._commandKeyChain, self._commandCertificateName, self)
+          registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
+          wireFormat, self._commandKeyChain, self._commandCertificateName, self)
+
+        return registeredPrefixId
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -319,12 +327,17 @@ class Face(object):
         :return: The interest filter ID which can be used with unsetInterestFilter.
         :rtype: int
         """
+        interestFilterId = self._node.getNextEntryId()
+
         if type(filterOrPrefix) is InterestFilter:
-          return self._node.setInterestFilter(filterOrPrefix, onInterest, self)
+          return self._node.setInterestFilter(
+            interestFilterId, filterOrPrefix, onInterest, self)
         else:
           # Assume it is a prefix Name.
           return self._node.setInterestFilter(
-            InterestFilter(filterOrPrefix), onInterest, self)
+            interestFilterId, InterestFilter(filterOrPrefix), onInterest, self)
+
+        return interestFilterId
 
     def unsetInterestFilter(self, interestFilterId):
         """

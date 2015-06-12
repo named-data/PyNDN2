@@ -74,11 +74,14 @@ class Node(object):
         self._lastEntryId = 0
         self._lastEntryIdLock = threading.Lock()
 
-    def expressInterest(self, interest, onData, onTimeout, wireFormat, face):
+    def expressInterest(
+      self, pendingInterestId, interest, onData, onTimeout, wireFormat, face):
         """
         Send the Interest through the transport, read the entire response and
         call onData(interest, data).
 
+        :param int pendingInterestId: The getNextEntryId() for the pending
+          interest ID which Face got so it could return it to the caller.
         :param Interest interest: The Interest which is NOT copied for this
           internal Node method.  The Face expressInterest is reponsible for
           making a copy for Node to use.
@@ -102,7 +105,6 @@ class Node(object):
         if not self._transport.getIsConnected():
             self._transport.connect(self._connectionInfo, self, onConnected)
 
-        pendingInterestId = self.getNextEntryId()
         pendingInterest = Node._PendingInterest(
           pendingInterestId, interest, onData, onTimeout)
         self._pendingInterestTable.append(pendingInterest)
@@ -121,8 +123,6 @@ class Node(object):
                   "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
 
             self._transport.send(encoding.toBuffer())
-
-        return pendingInterestId
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -170,12 +170,14 @@ class Node(object):
           interest, keyChain, certificateName, wireFormat)
 
     def registerPrefix(
-      self, prefix, onInterest, onRegisterFailed, flags, wireFormat,
-      commandKeyChain, commandCertificateName, face):
+      self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
+      wireFormat, commandKeyChain, commandCertificateName, face):
         """
         Register prefix with the connected NDN hub and call onInterest when a
         matching interest is received.
 
+        :param int registeredPrefixId: The getNextEntryId() for the registered
+          prefix ID which Face got so it could return it to the caller.
         :param Name prefix: The Name for the prefix to register which is NOT
           copied for this internal Node method. The Face registerPrefix is
           reponsible for making a copy for Node to use.
@@ -201,9 +203,6 @@ class Node(object):
         :param Face face: The face which is passed to the onInterest callback.
           If onInterest is None, this is ignored.
         """
-        # Get the registeredPrefixId now so we can return it to the caller.
-        registeredPrefixId = self.getNextEntryId()
-
         # If we have an _ndndId, we know we already connected to NDNx.
         if self._ndndId != None or commandKeyChain == None:
             # Assume we are connected to a legacy NDNx server.
@@ -219,8 +218,8 @@ class Node(object):
                 # We send the interest using the given wire format so that the hub
                 # receives (and sends) in the application's desired wire format.
                 self.expressInterest(
-                  self._ndndIdFetcherInterest, fetcher.onData, fetcher.onTimeout,
-                  wireFormat, face)
+                  self.getNextEntryId(), self._ndndIdFetcherInterest,
+                  fetcher.onData, fetcher.onTimeout, wireFormat, face)
             else:
                 self._registerPrefixHelper(
                   registeredPrefixId, Name(prefix), onInterest, onRegisterFailed,
@@ -231,8 +230,6 @@ class Node(object):
               registeredPrefixId, Name(prefix), onInterest,
               onRegisterFailed, flags, commandKeyChain, commandCertificateName,
               face)
-
-        return registeredPrefixId
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -265,7 +262,7 @@ class Node(object):
             logging.getLogger(__name__).debug(
               "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
 
-    def setInterestFilter(self, filter, onInterest, face):
+    def setInterestFilter(self, interestFilterId, filter, onInterest, face):
         """
         Add an entry to the local interest filter table to call the onInterest
         callback for a matching incoming Interest. This method only modifies the
@@ -273,6 +270,8 @@ class Node(object):
         forwarder. It will always succeed. To register a prefix with the
         forwarder, use registerPrefix.
 
+        :param int interestFilterId: The getNextEntryId() for the interest
+          filter ID which Face got so it could return it to the caller.
         :param InterestFilter filter: The InterestFilter with a prefix and
           optional regex filter used to match the name of an incoming Interest.
           This makes a copy of filter.
@@ -280,14 +279,9 @@ class Node(object):
           this calls onInterest(prefix, interest, face, interestFilterId, filter).
         :type onInterest: function object
         :param Face face: The face which is passed to the onInterest callback.
-        :return: The interest filter ID which can be used with unsetInterestFilter.
-        :rtype: int
         """
-        interestFilterId = self.getNextEntryId()
         self._interestFilterTable.append(Node._InterestFilterEntry
           (interestFilterId, InterestFilter(filter), onInterest, face))
-
-        return interestFilterId
 
     def unsetInterestFilter(self, interestFilterId):
         """
@@ -571,8 +565,9 @@ class Node(object):
             if onInterest != None:
                 # registerPrefix was called with the "combined" form that includes
                 # the callback, so add an InterestFilterEntry.
-                interestFilterId = self.setInterestFilter(
-                  InterestFilter(prefix), onInterest, face)
+                interestFilterId = self.getNextEntryId()
+                self.setInterestFilter(
+                  interestFilterId, InterestFilter(prefix), onInterest, face)
 
             self._registeredPrefixTable.append(Node._RegisteredPrefix(
               registeredPrefixId, prefix, interestFilterId))
@@ -582,7 +577,8 @@ class Node(object):
           self, prefix, onInterest, onRegisterFailed, flags, wireFormat, False,
           face)
         self.expressInterest(
-          interest, response.onData, response.onTimeout, wireFormat, face)
+          self.getNextEntryId(), interest, response.onData, response.onTimeout,
+          wireFormat, face)
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
@@ -624,8 +620,9 @@ class Node(object):
             if onInterest != None:
                 # registerPrefix was called with the "combined" form that includes
                 # the callback, so add an InterestFilterEntry.
-                interestFilterId = self.setInterestFilter(
-                  InterestFilter(prefix), onInterest, face)
+                interestFilterId = self.getNextEntryId()
+                self.setInterestFilter(
+                  interestFilterId, InterestFilter(prefix), onInterest, face)
 
             self._registeredPrefixTable.append(Node._RegisteredPrefix(
               registeredPrefixId, prefix, interestFilterId))
@@ -635,8 +632,8 @@ class Node(object):
           self, prefix, onInterest, onRegisterFailed, flags,
           TlvWireFormat.get(), True, face)
         self.expressInterest(
-          commandInterest, response.onData, response.onTimeout,
-          TlvWireFormat.get(), face)
+          self.getNextEntryId(), commandInterest, response.onData,
+          response.onTimeout, TlvWireFormat.get(), face)
 
     def callLater(self, delayMilliseconds, callback):
         """
@@ -1036,8 +1033,9 @@ class Node(object):
                     # We send the interest using the given wire format so that the hub
                     # receives (and sends) in the application's desired wire format.
                     self._node.expressInterest(
-                      self._node._ndndIdFetcherInterest, fetcher.onData,
-                      fetcher.onTimeout, self._wireFormat, self._face)
+                      self._node.getNextEntryId(), self._node._ndndIdFetcherInterest,
+                      fetcher.onData, fetcher.onTimeout, self._wireFormat,
+                      self._face)
                 else:
                     # Pass 0 for registeredPrefixId since the entry was already
                     #   added to _registeredPrefixTable on the first try.
