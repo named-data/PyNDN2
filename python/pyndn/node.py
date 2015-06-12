@@ -25,6 +25,7 @@ class.
 import hashlib
 import inspect
 import logging
+import threading
 from random import SystemRandom
 from pyndn.name import Name
 from pyndn.interest import Interest
@@ -70,6 +71,8 @@ class Node(object):
         self._ndndId = None
         self._commandInterestGenerator = CommandInterestGenerator()
         self._timeoutPrefix = Name("/local/timeout")
+        self._lastEntryId = 0
+        self._lastEntryIdLock = threading.Lock()
 
     def expressInterest(self, interest, onData, onTimeout, wireFormat, face):
         """
@@ -99,7 +102,7 @@ class Node(object):
         if not self._transport.getIsConnected():
             self._transport.connect(self._connectionInfo, self, onConnected)
 
-        pendingInterestId = Node._PendingInterest.getNextPendingInterestId()
+        pendingInterestId = self.getNextEntryId()
         pendingInterest = Node._PendingInterest(
           pendingInterestId, interest, onData, onTimeout)
         self._pendingInterestTable.append(pendingInterest)
@@ -199,7 +202,7 @@ class Node(object):
           If onInterest is None, this is ignored.
         """
         # Get the registeredPrefixId now so we can return it to the caller.
-        registeredPrefixId = Node._RegisteredPrefix.getNextRegisteredPrefixId()
+        registeredPrefixId = self.getNextEntryId()
 
         # If we have an _ndndId, we know we already connected to NDNx.
         if self._ndndId != None or commandKeyChain == None:
@@ -280,7 +283,7 @@ class Node(object):
         :return: The interest filter ID which can be used with unsetInterestFilter.
         :rtype: int
         """
-        interestFilterId = Node._InterestFilterEntry.getNextInterestFilterId()
+        interestFilterId = self.getNextEntryId()
         self._interestFilterTable.append(Node._InterestFilterEntry
           (interestFilterId, InterestFilter(filter), onInterest, face))
 
@@ -520,10 +523,9 @@ class Node(object):
         Do the work of registerPrefix to register with NDNx once we have an
         _ndndId.
 
-        :param int registeredPrefixId: The
-          _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
-          so it could return it to the caller. If this is 0, then don't add to
-          _registeredPrefixTable (assuming it has already been done).
+        :param int registeredPrefixId: The getNextEntryId() which registerPrefix
+          got so it could return it to the caller. If this is 0, then don't add
+          to _registeredPrefixTable (assuming it has already been done).
         """
         if not WireFormat.ENABLE_NDNX:
             # We can get here if the command signing info is set, but running NDNx.
@@ -588,10 +590,9 @@ class Node(object):
         """
         Do the work of registerPrefix to register with NFD.
 
-        :param int registeredPrefixId: The
-          _RegisteredPrefix.getNextRegisteredPrefixId() which registerPrefix got
-          so it could return it to the caller. If this is 0, then don't add to
-          _registeredPrefixTable (assuming it has already been done).
+        :param int registeredPrefixId: The getNextEntryId() which registerPrefix
+          got so it could return it to the caller. If this is 0, then don't add
+          to _registeredPrefixTable (assuming it has already been done).
         """
         if commandKeyChain == None:
             raise RuntimeError(
@@ -680,6 +681,21 @@ class Node(object):
         del self._pendingInterestTable[index]
         pendingInterest.callTimeout()
 
+    def getNextEntryId(self):
+        """
+        Get the next unique entry ID for the pending interest table, interest
+        filter table, etc. This uses a threading.Lock() to be thread safe. Most
+        entry IDs are for the pending interest table (there usually are not many
+        interest filter table entries) so we use a common pool to only have to
+        do the thread safe lock in one method which is called by Face.
+
+        :return: The next entry ID.
+        :rtype: int
+        """
+        with self._lastEntryIdLock:
+            self._lastEntryId += 1
+            return self._lastEntryId
+
     class _DelayedCall(object):
         """
         _DelayedCall is a private class for the members of the _delayedCallTable.
@@ -717,7 +733,7 @@ class Node(object):
         _pendingInterestTable.
 
         :param int pendingInterestId: A unique ID for this entry, which you
-          should get with getNextPendingInteresId().
+          should get with getNextEntryId().
         :param Interest interest: The interest.
         :param onData: A function object to call when a matching data packet is
           received.
@@ -732,19 +748,6 @@ class Node(object):
             self._onData = onData
             self._onTimeout = onTimeout
             self._isRemoved = False
-
-        _lastPendingInterestId = 0
-
-        @staticmethod
-        def getNextPendingInterestId():
-            """
-            Get the next unique pending interest ID.
-
-            :return: The next pending interest ID.
-            :rtype: int
-            """
-            Node._PendingInterest._lastPendingInterestId += 1
-            return Node._PendingInterest._lastPendingInterestId
 
         def getPendingInterestId(self):
             """
@@ -808,7 +811,7 @@ class Node(object):
         registerPrefix operation.
 
         :param int registeredPrefixId: A unique ID for this entry, which you
-          should get with getNextRegisteredPrefixId().
+          should get with getNextEntryId().
         :param Name prefix: The name prefix.
         :param int relatedInterestFilterId: (optional) The related
           interestFilterId for the filter set in the same registerPrefix
@@ -818,19 +821,6 @@ class Node(object):
             self._registeredPrefixId = registeredPrefixId
             self._prefix = prefix
             self._relatedInterestFilterId = relatedInterestFilterId
-
-        _lastRegisteredPrefixId = 0
-
-        @staticmethod
-        def getNextRegisteredPrefixId():
-            """
-            Get the next unique registered prefix ID.
-
-            :return: The next registered prefix ID.
-            :rtype: int
-            """
-            Node._RegisteredPrefix._lastRegisteredPrefixId += 1
-            return Node._RegisteredPrefix._lastRegisteredPrefixId
 
         def getRegisteredPrefixId(self):
             """
@@ -865,7 +855,7 @@ class Node(object):
         and the OnInterestCallback with its related Face.
         Create a new InterestFilterEntry with the given values.
 
-        :param int interestFilterId: The ID from getNextInterestFilterId().
+        :param int interestFilterId: The ID from getNextEntryId().
         :param InterestFilter filter: The InterestFilter for this entry.
         :param onInterest: The callback to call.
         :type onInterest: function object
@@ -877,19 +867,6 @@ class Node(object):
             self._filter = filter
             self._onInterest = onInterest
             self._face = face
-
-        @staticmethod
-        def getNextInterestFilterId():
-            """
-            Get the next interest filter ID. This just calls
-            RegisteredPrefix.getNextRegisteredPrefixId() so that IDs come from
-            the same pool and won't be confused when removing entries from the
-            two tables.
-
-            :return: The next ID.
-            :rtype: int
-            """
-            return Node._RegisteredPrefix.getNextRegisteredPrefixId()
 
         def getInterestFilterId(self):
             """
