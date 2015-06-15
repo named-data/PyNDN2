@@ -42,7 +42,7 @@ except ImportError:
     from mock import Mock
 
 codedInterest = Blob(bytearray([
-0x05, 0x53, # Interest
+0x05, 0x50, # Interest
   0x07, 0x0A, 0x08, 0x03, 0x6E, 0x64, 0x6E, 0x08, 0x03, 0x61, 0x62, 0x63, # Name
   0x09, 0x38, # Selectors
     0x0D, 0x01, 0x04, # MinSuffixComponents
@@ -57,7 +57,6 @@ codedInterest = Blob(bytearray([
     0x11, 0x01, 0x01, # ChildSelector
     0x12, 0x00, # MustBeFesh
   0x0A, 0x04, 0x61, 0x62, 0x61, 0x62,   # Nonce
-  0x0B, 0x01, 0x02, # Scope
   0x0C, 0x02, 0x75, 0x30, # InterestLifetime
 1
   ]))
@@ -70,7 +69,6 @@ initialDump = ['name: /ndn/abc',
         'childSelector: 1',
         'mustBeFresh: True',
         'nonce: 61626162',
-        'scope: 2',
         'lifetimeMilliseconds: 30000.0']
 
 
@@ -104,8 +102,6 @@ def dumpInterest(interest):
     result.append(dump("mustBeFresh:", interest.getMustBeFresh()))
     result.append(dump("nonce:", "<none>" if len(interest.getNonce()) == 0
                             else interest.getNonce().toHex()))
-    result.append(dump("scope:", "<none>" if interest.getScope() is None
-                            else interest.getScope()))
     result.append(dump("lifetimeMilliseconds:",
          "<none>" if interest.getInterestLifetimeMilliseconds() is None
                   else interest.getInterestLifetimeMilliseconds()))
@@ -126,8 +122,7 @@ def createFreshInterest():
       .setMaxSuffixComponents(6)
       .setInterestLifetimeMilliseconds(30000)
       .setChildSelector(1)
-      .setMustBeFresh(True)
-      .setScope(2))
+      .setMustBeFresh(True))
     freshInterest.getKeyLocator().setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
     freshInterest.getKeyLocator().setKeyData(bytearray(
       [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
