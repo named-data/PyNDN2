@@ -599,6 +599,7 @@ class Node(object):
 
         controlParameters = ControlParameters()
         controlParameters.setName(prefix)
+        controlParameters.setForwardingFlags(flags)
 
         commandInterest = Interest()
         if self.isLocal():
