@@ -96,7 +96,7 @@ from pyndn.name import Name
 from pyndn.key_locator import KeyLocator
 from pyndn.exclude import Exclude
 from pyndn.interest import Interest
-for p in [("name", Name("yes"), Name("another")), ("minSuffixComponents", 4, None), ("maxSuffixComponents", 1, None), ("keyLocator", KeyLocator(), KeyLocator()),("childSelector", 1, 0), ("mustBeFresh", 0, 1), ("nonce", Blob(), Blob()), ("scope", None, 47), ("interestLifetimeMilliseconds", 49, None)]:
+for p in [("name", Name("yes"), Name("another")), ("minSuffixComponents", 4, None), ("maxSuffixComponents", 1, None), ("keyLocator", KeyLocator(), KeyLocator()),("childSelector", 1, 0), ("mustBeFresh", 0, 1), ("nonce", Blob(), Blob()), ("interestLifetimeMilliseconds", 49, None)]:
     res = testPropertyRW( Interest(), p[0], [p[1],p[2]])
     if not res[0]: print(res)
 
