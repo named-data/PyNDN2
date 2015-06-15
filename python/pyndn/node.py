@@ -105,24 +105,8 @@ class Node(object):
         if not self._transport.getIsConnected():
             self._transport.connect(self._connectionInfo, self, onConnected)
 
-        pendingInterest = Node._PendingInterest(
-          pendingInterestId, interest, onData, onTimeout)
-        self._pendingInterestTable.append(pendingInterest)
-        if (interest.getInterestLifetimeMilliseconds() != None and
-            interest.getInterestLifetimeMilliseconds() >= 0.0):
-            # Set up the timeout.
-            def callback():
-                self._processInterestTimeout(pendingInterest)
-            face.callLater(interest.getInterestLifetimeMilliseconds(), callback)
-
-        # Special case: For _timeoutPrefix we don't actually send the interest.
-        if not self._timeoutPrefix.match(interest.getName()):
-            encoding = interest.wireEncode(wireFormat)
-            if encoding.size() > self.getMaxNdnPacketSize():
-                raise RuntimeError(
-                  "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
-
-            self._transport.send(encoding.toBuffer())
+        self._expressInterestHelper(
+          pendingInterestId, interest, onData, onTimeout, wireFormat, face)
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -479,6 +463,49 @@ class Node(object):
         :rtype: int
         """
         return Common.MAX_NDN_PACKET_SIZE
+
+    def _expressInterestHelper(
+      self, pendingInterestId, interestCopy, onData, onTimeout, wireFormat, face):
+        """
+        Do the work of expressInterest once we know we are connected. Add the
+        entry to the PIT, encode and send the interest.
+
+        :param int pendingInterestId: The getNextEntryId() for the pending
+          interest ID which Face got so it could return it to the caller.
+        :param Interest interestCopy: The Interest to send, which has already
+          been copied.
+        :param onData: A function object to call when a matching data packet is
+          received.
+        :type onData: function object
+        :param onTimeout: A function object to call if the interest times out.
+          If onTimeout is None, this does not use it.
+        :type onTimeout: function object
+        :param wireFormat: A WireFormat object used to encode the message.
+        :type wireFormat: a subclass of WireFormat
+        :param Face face: The face which has the callLater method, used for
+          interest timeouts. The callLater method may be overridden in a
+          subclass of Face.
+        :throws: RuntimeError If the encoded interest size exceeds
+          getMaxNdnPacketSize().
+        """
+        pendingInterest = Node._PendingInterest(
+          pendingInterestId, interestCopy, onData, onTimeout)
+        self._pendingInterestTable.append(pendingInterest)
+        if (interestCopy.getInterestLifetimeMilliseconds() != None and
+            interestCopy.getInterestLifetimeMilliseconds() >= 0.0):
+            # Set up the timeout.
+            def callback():
+                self._processInterestTimeout(pendingInterest)
+            face.callLater(interestCopy.getInterestLifetimeMilliseconds(), callback)
+
+        # Special case: For _timeoutPrefix we don't actually send the interest.
+        if not self._timeoutPrefix.match(interestCopy.getName()):
+            encoding = interestCopy.wireEncode(wireFormat)
+            if encoding.size() > self.getMaxNdnPacketSize():
+                raise RuntimeError(
+                  "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
+
+            self._transport.send(encoding.toBuffer())
 
     def _extractEntriesForExpressedInterest(self, name):
         """
