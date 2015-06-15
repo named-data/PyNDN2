@@ -71,15 +71,6 @@ for p in [("name",Name("yes"),Name("another")), ("metaInfo", MetaInfo(), MetaInf
     res = testPropertyRW( Data(), p[0], [p[1],p[2]])
     if not res[0]: print(res)
 
-# Forwarding Entry
-#
-from pyndn.name import Name
-from pyndn.forwarding_flags import ForwardingFlags
-from pyndn.forwarding_entry import ForwardingEntry
-for p in [("action","engage", "warp"), ("prefix", Name("yes"), Name("another")),  ("faceId", 4, 9), ("forwardingFlags", ForwardingFlags(), ForwardingFlags()), ("freshnessPeriod", 39202, 100)]:
-    res = testPropertyRW( ForwardingEntry(), p[0], [p[1],p[2]])
-    if not res[0]: print(res)
-
 # ForwardingFlags
 # All boolean, so use shortcut below
 #
