@@ -150,11 +150,12 @@ class Interest(object):
 
     def getScope(self):
         """
-        Get the interest scope.
-
-        :return: The scope, or None if not specified.
-        :rtype: int
+        :deprecated: Scope is not used by NFD.
         """
+        if not WireFormat.ENABLE_NDNX:
+            raise RuntimeError(
+              "getScope is for NDNx and is deprecated. To enable while you upgrade your code to not use Scope, set WireFormat.ENABLE_NDNX = True")
+
         return self._scope
 
     def getInterestLifetimeMilliseconds(self):
@@ -277,12 +278,12 @@ class Interest(object):
 
     def setScope(self, scope):
         """
-        Set the interest scope.
-
-        :param int scope: The interest scope. If not specified, set to None.
-        :return: This Interest so that you can chain calls to update values.
-        :rtype: Interest
+        :deprecated: Scope is not used by NFD.
         """
+        if not WireFormat.ENABLE_NDNX:
+            raise RuntimeError(
+              "setScope is for NDNx and is deprecated. To enable while you upgrade your code to not use Scope, set WireFormat.ENABLE_NDNX = True")
+
         self._scope = scope
         self._changeCount += 1
         return self
