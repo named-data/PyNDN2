@@ -19,7 +19,7 @@
 
 """
 This module defines the ThreadsafeFace class which extends Face to provide the
-main methods for NDN communication in a threadsafe manner.
+main methods for NDN communication in a thread-safe manner.
 """
 
 from pyndn.face import Face
@@ -32,7 +32,7 @@ class ThreadsafeFace(Face):
     you want the library to call communication callbacks such as onData and
     onInterest.
     In Python <= 3.2, you must have the prerequisite Trollius library. See the
-    INSTALL file for installation details. For usage, see the sample
+    INSTALL file for installation details. For usage, see the example
     test_get_async_threadsafe.py.
     """
     def __init__(self, loop, arg1, arg2 = None):
@@ -50,9 +50,9 @@ class ThreadsafeFace(Face):
     def expressInterest(
       self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None):
         """
-        Use the event loop given to the constructor to schedule expressInterest
-        to be called in a threadsafe manner. See Face.expressInterest for
-        calling details.
+        Override to use the event loop given to the constructor to schedule
+        expressInterest to be called in a thread-safe manner. See
+        Face.expressInterest for calling details.
         """
         pendingInterestId = self._node.getNextEntryId()
 
@@ -64,8 +64,8 @@ class ThreadsafeFace(Face):
 
     def removePendingInterest(self, pendingInterestId):
         """
-        Use the event loop given to the constructor to schedule
-        removePendingInterest to be called in a threadsafe manner. See
+        Override to use the event loop given to the constructor to schedule
+        removePendingInterest to be called in a thread-safe manner. See
         Face.removePendingInterest for calling details.
         """
         self._loop.call_soon_threadsafe(
@@ -76,9 +76,9 @@ class ThreadsafeFace(Face):
       self, prefix, onInterest, onRegisterFailed, flags = None,
       wireFormat = None):
         """
-        Use the event loop given to the constructor to schedule registerPrefix
-        to be called in a threadsafe manner. See Face.registerPrefix for
-        calling details.
+        Override to use the event loop given to the constructor to schedule
+        registerPrefix to be called in a thread-safe manner. See
+        Face.registerPrefix for calling details.
         """
         registeredPrefixId = self._node.getNextEntryId()
 
@@ -90,8 +90,8 @@ class ThreadsafeFace(Face):
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
-        Use the event loop given to the constructor to schedule
-        removeRegisteredPrefix to be called in a threadsafe manner. See
+        Override to use the event loop given to the constructor to schedule
+        removeRegisteredPrefix to be called in a thread-safe manner. See
         Face.removeRegisteredPrefix for calling details.
         """
         self._loop.call_soon_threadsafe(
@@ -100,8 +100,8 @@ class ThreadsafeFace(Face):
 
     def setInterestFilter(self, filterOrPrefix, onInterest):
         """
-        Use the event loop given to the constructor to schedule
-        setInterestFilter to be called in a threadsafe manner. See
+        Override to use the event loop given to the constructor to schedule
+        setInterestFilter to be called in a thread-safe manner. See
         Face.setInterestFilter for calling details.
         """
         interestFilterId = self._node.getNextEntryId()
@@ -114,8 +114,8 @@ class ThreadsafeFace(Face):
 
     def unsetInterestFilter(self, interestFilterId):
         """
-        Use the event loop given to the constructor to schedule
-        unsetInterestFilter to be called in a threadsafe manner. See
+        Override to use the event loop given to the constructor to schedule
+        unsetInterestFilter to be called in a thread-safe manner. See
         Face.unsetInterestFilter for calling details.
         """
         self._loop.call_soon_threadsafe(
@@ -123,8 +123,8 @@ class ThreadsafeFace(Face):
 
     def putData(self, data, wireFormat = None):
         """
-        Use the event loop given to the constructor to schedule
-        putData to be called in a threadsafe manner. See
+        Override to use the event loop given to the constructor to schedule
+        putData to be called in a thread-safe manner. See
         Face.putData for calling details.
         """
         self._loop.call_soon_threadsafe(
@@ -132,8 +132,8 @@ class ThreadsafeFace(Face):
 
     def send(self, encoding):
         """
-        Use the event loop given to the constructor to schedule
-        send to be called in a threadsafe manner. See
+        Override to use the event loop given to the constructor to schedule
+        send to be called in a  manner. See
         Face.send for calling details.
         """
         self._loop.call_soon_threadsafe(
@@ -165,7 +165,8 @@ class ThreadsafeFace(Face):
         """
         Override to call callback() after the given delay, using
         self._loop.call_later. This means that processEvents() is not needed to
-        handle interest timeouts.
+        handle interest timeouts. Even though this is public, it is not part of
+        the public API of Face.
 
         :param float delayMilliseconds: The delay in milliseconds.
         :param callback: This calls callback() after the delay.
