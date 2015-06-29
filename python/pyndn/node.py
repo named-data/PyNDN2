@@ -142,7 +142,7 @@ class Node(object):
         else:
             # Don't expect this to happen.
             raise RuntimeError(
-              "Node: Unrecognized _connectStatus " + str(_connectStatus))
+              "Node: Unrecognized _connectStatus " + str(self._connectStatus))
 
     def removePendingInterest(self, pendingInterestId):
         """
