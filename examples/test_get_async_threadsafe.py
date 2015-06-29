@@ -51,12 +51,22 @@ def main():
     face = ThreadsafeFace(loop, "aleph.ndn.ucla.edu")
 
     counter = Counter()
-    face.stopWhen(lambda: counter._callbackCount >= 1)
+    face.stopWhen(lambda: counter._callbackCount >= 3)
 
-    name1 = Name("/")
+    name1 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
     dump("Express name ", name1.toUri())
-    # This call to exressIinterest is thread safe because face is a ThreadsafeFace.
+    # These call to exressIinterest is thread safe because face is a ThreadsafeFace.
     face.expressInterest(name1, counter.onData, counter.onTimeout)
+
+    # Try to get anything.
+    name2 = Name("/")
+    dump("Express name ", name2.toUri())
+    face.expressInterest(name2, counter.onData, counter.onTimeout)
+
+    # Expect this to time out.
+    name3 = Name("/test/timeout")
+    dump("Express name ", name3.toUri())
+    face.expressInterest(name3, counter.onData, counter.onTimeout)
 
     # Run until stopWhen stops the loop.
     loop.run_forever()
