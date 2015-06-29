@@ -8,6 +8,7 @@ Changes
 * In ThreadsafeFace, remove support for stopWhen() since this requires a
   processEvents loop which we want to avoid when using asyncio. The application
   must stop the asyncio loop - see examples/test_get_async_threadsafe.py .
+* Added AsyncTcpTransport which does not need you to call processEvents.
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which
