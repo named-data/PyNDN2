@@ -5,6 +5,9 @@ Changes
 * In security, added KeyChain.createIdentityAndCertificate which returns the
   certificate name, instead of the deprecated createIdentity which returns the
   key name.
+* In ThreadsafeFace, remove support for stopWhen() since this requires a
+  processEvents loop which we want to avoid when using asyncio. The application
+  must stop the asyncio loop - see examples/test_get_async_threadsafe.py .
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which

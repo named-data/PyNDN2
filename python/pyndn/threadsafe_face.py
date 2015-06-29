@@ -38,11 +38,6 @@ class ThreadsafeFace(Face):
     def __init__(self, loop, arg1, arg2 = None):
         super(ThreadsafeFace, self).__init__(arg1, arg2)
         self._loop = loop
-        self._stopWhenTest = None
-
-        # Schedule the _stopWhenCallback service, but _stopWhenTest is None so
-        #   it won't do anything yet.
-        self._loop.call_soon(self._stopWhenCallback)
 
         # Schedule the main processEvents service.
         self._loop.call_soon(self._processEventsCallback)
@@ -148,19 +143,6 @@ class ThreadsafeFace(Face):
         self._loop == None
         super(ThreadsafeFace, self).shutdown()
 
-    def stopWhen(self, test):
-        """
-        This is a utility to repeatedly call test and when it returns true, call
-        loop.stop() on the event loop given to the constructor.
-
-        :param test: This calls test() which returns true to stop the event
-          loop. If test is None, then don't call test().
-        :type test: function object
-        """
-        # The _stopWhenCallback service is already running, so just set (or
-        #   change) the test.
-        self._stopWhenTest = test
-
     def callLater(self, delayMilliseconds, callback):
         """
         Override to call callback() after the given delay, using
@@ -174,23 +156,6 @@ class ThreadsafeFace(Face):
         """
         # Convert milliseconds to seconds.
         self._loop.call_later(delayMilliseconds / 1000.0, callback)
-
-    def _stopWhenCallback(self):
-        """
-        Repeatedly call self._stopWhenTest() (if not None) and when it returns
-        true, call self._loop.stop(). However, if self._loop is None (because of
-        shutdown), don't repeatedly call anymore.
-        """
-        if self._loop != None:
-            stop = False
-            try:
-                if self._stopWhenTest != None and self._stopWhenTest():
-                    stop = True
-                    self._loop.stop()
-            finally:
-                if not stop:
-                    # Call again, even if _stopWhenTest raised an exception.
-                    self._loop.call_later(0.5, self._stopWhenCallback)
 
     def _processEventsCallback(self):
         """
