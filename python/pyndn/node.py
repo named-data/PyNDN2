@@ -65,6 +65,8 @@ class Node(object):
         self._interestFilterTable = []
         # An array of _DelayedCall
         self._delayedCallTable = []
+        # An array of function objects
+        self._onConnectedCallbacks = []
         self._ndndIdFetcherInterest = Interest(
           Name("/%C1.M.S.localhost/%C1.M.SRV/ndnd/KEY"))
         self._ndndIdFetcherInterest.setInterestLifetimeMilliseconds(4000.0)
@@ -73,16 +75,17 @@ class Node(object):
         self._timeoutPrefix = Name("/local/timeout")
         self._lastEntryId = 0
         self._lastEntryIdLock = threading.Lock()
+        self._connectStatus = Node._ConnectStatus.UNCONNECTED
 
     def expressInterest(
-      self, pendingInterestId, interest, onData, onTimeout, wireFormat, face):
+      self, pendingInterestId, interestCopy, onData, onTimeout, wireFormat, face):
         """
         Send the Interest through the transport, read the entire response and
         call onData(interest, data).
 
         :param int pendingInterestId: The getNextEntryId() for the pending
           interest ID which Face got so it could return it to the caller.
-        :param Interest interest: The Interest which is NOT copied for this
+        :param Interest interestCopy: The Interest which is NOT copied for this
           internal Node method.  The Face expressInterest is reponsible for
           making a copy for Node to use.
         :param onData: A function object to call when a matching data packet is
@@ -100,13 +103,46 @@ class Node(object):
           getMaxNdnPacketSize().
         """
         # TODO: Properly check if we are already connected to the expected host.
-        def onConnected():
-            pass
-        if not self._transport.getIsConnected():
-            self._transport.connect(self._connectionInfo, self, onConnected)
+        if self._connectStatus == self._ConnectStatus.CONNECT_COMPLETE:
+            # We are connected. Simply send the interest.
+            self._expressInterestHelper(
+              pendingInterestId, interestCopy, onData, onTimeout, wireFormat,
+              face)
+            return
 
-        self._expressInterestHelper(
-          pendingInterestId, interest, onData, onTimeout, wireFormat, face)
+        if self._connectStatus == Node._ConnectStatus.UNCONNECTED:
+            self._connectStatus = Node._ConnectStatus.CONNECT_REQUESTED
+
+            # expressInterestHelper will be called by onConnected.
+            self._onConnectedCallbacks.append(
+              lambda: self._expressInterestHelper
+                (pendingInterestId, interestCopy, onData, onTimeout, wireFormat,
+                 face))
+
+            def onConnected():
+                # Assume that further calls to expressInterest dispatched to the
+                # event loop are queued and won't enter expressInterest until
+                # this method completes and sets CONNECT_COMPLETE.
+                # Call each callback added while the connection was opening.
+                for onConnectedCallback in self._onConnectedCallbacks:
+                    onConnectedCallback()
+                self._onConnectedCallbacks = []
+
+                # Make future calls to expressInterest send directly to the
+                # Transport.
+                self._connectStatus = Node._ConnectStatus.CONNECT_COMPLETE
+                    
+            self._transport.connect(self._connectionInfo, self, onConnected)
+        elif self._connectStatus == self._ConnectStatus.CONNECT_REQUESTED:
+            # Still connecting. add to the interests to express by onConnected.
+            self._onConnectedCallbacks.append(
+              lambda: self._expressInterestHelper
+                (pendingInterestId, interestCopy, onData, onTimeout, wireFormat,
+                 face))
+        else:
+            # Don't expect this to happen.
+            raise RuntimeError(
+              "Node: Unrecognized _connectStatus " + str(_connectStatus))
 
     def removePendingInterest(self, pendingInterestId):
         """
@@ -494,9 +530,8 @@ class Node(object):
         if (interestCopy.getInterestLifetimeMilliseconds() != None and
             interestCopy.getInterestLifetimeMilliseconds() >= 0.0):
             # Set up the timeout.
-            def callback():
-                self._processInterestTimeout(pendingInterest)
-            face.callLater(interestCopy.getInterestLifetimeMilliseconds(), callback)
+            face.callLater(interestCopy.getInterestLifetimeMilliseconds(),
+                           lambda: self._processInterestTimeout(pendingInterest))
 
         # Special case: For _timeoutPrefix we don't actually send the interest.
         if not self._timeoutPrefix.match(interestCopy.getName()):
@@ -720,6 +755,11 @@ class Node(object):
         with self._lastEntryIdLock:
             self._lastEntryId += 1
             return self._lastEntryId
+
+    class _ConnectStatus(object):
+        UNCONNECTED = 1
+        CONNECT_REQUESTED = 2
+        CONNECT_COMPLETE = 3
 
     class _DelayedCall(object):
         """
