@@ -33,25 +33,38 @@ def dump(*list):
     print(result)
 
 class Counter(object):
-    def __init__(self):
+    """
+    Counter counts the number of calls to the onData or onTimeout callbacks.
+    Create a Counter to call loop.stop() after maxCallbackCount calls to
+    onData or onTimeout.
+    """
+    def __init__(self, loop, maxCallbackCount):
+        self._loop = loop
+        self._maxCallbackCount = maxCallbackCount
         self._callbackCount = 0
 
     def onData(self, interest, data):
-        self._callbackCount += 1
         dump("Got data packet with name", data.getName().toUri())
         # Use join to convert each byte to chr.
         dump(data.getContent().toRawStr())
 
-    def onTimeout(self, interest):
         self._callbackCount += 1
+        if self._callbackCount >= self._maxCallbackCount:
+            self._loop.stop()
+
+    def onTimeout(self, interest):
         dump("Time out for interest", interest.getName().toUri())
+
+        self._callbackCount += 1
+        if self._callbackCount >= self._maxCallbackCount:
+            self._loop.stop()
 
 def main():
     loop = asyncio.get_event_loop()
     face = ThreadsafeFace(loop, "aleph.ndn.ucla.edu")
 
-    counter = Counter()
-    face.stopWhen(lambda: counter._callbackCount >= 3)
+    # Counter will stop the ioService after callbacks for all expressInterest.
+    counter = Counter(loop, 3)
 
     name1 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
     dump("Express name ", name1.toUri())
@@ -68,7 +81,7 @@ def main():
     dump("Express name ", name3.toUri())
     face.expressInterest(name3, counter.onData, counter.onTimeout)
 
-    # Run until stopWhen stops the loop.
+    # Run until until the Counter calls stop().
     loop.run_forever()
     face.shutdown()
 
