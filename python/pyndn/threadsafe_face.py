@@ -116,15 +116,6 @@ class ThreadsafeFace(Face):
         self._loop.call_soon_threadsafe(
             super(ThreadsafeFace, self).unsetInterestFilter, interestFilterId)
 
-    def putData(self, data, wireFormat = None):
-        """
-        Override to use the event loop given to the constructor to schedule
-        putData to be called in a thread-safe manner. See
-        Face.putData for calling details.
-        """
-        self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).putData, data, wireFormat)
-
     def send(self, encoding):
         """
         Override to use the event loop given to the constructor to schedule
