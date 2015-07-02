@@ -56,16 +56,7 @@ class Face(object):
             filePath = ""
             if arg1 == None and arg2 == None:
                 # Check if we can connect using UnixSocket.
-                tryFilePath = "/var/run/nfd.sock"
-                # Use listdir because isfile doesn't see socket file types.
-                if  (os.path.basename(tryFilePath) in
-                     os.listdir(os.path.dirname(tryFilePath))):
-                    filePath = tryFilePath
-                else:
-                    tryFilePath = "/tmp/.ndnd.sock"
-                    if  (os.path.basename(tryFilePath) in
-                         os.listdir(os.path.dirname(tryFilePath))):
-                        filePath = tryFilePath
+                filePath = self._getUnixSocketFilePathForLocalhost()
 
             if filePath == "":
                 transport = TcpTransport()
@@ -477,3 +468,25 @@ class Face(object):
         :type callback: function object
         """
         self._node.callLater(delayMilliseconds, callback)
+
+    @staticmethod
+    def _getUnixSocketFilePathForLocalhost():
+        """
+        If the forwarder's Unix socket file path exists, then return the file
+        path. Otherwise return an empty string.
+
+        :return: The Unix socket file path to use, or an empty string.
+        :rtype: str
+        """
+        filePath = "/var/run/nfd.sock"
+        # Use listdir because isfile doesn't see socket file types.
+        if  (os.path.basename(filePath) in
+             os.listdir(os.path.dirname(filePath))):
+            return filePath
+        else:
+            filePath = "/tmp/.ndnd.sock"
+            if  (os.path.basename(filePath) in
+                 os.listdir(os.path.dirname(filePath))):
+                return filePath
+            else:
+                return ""
