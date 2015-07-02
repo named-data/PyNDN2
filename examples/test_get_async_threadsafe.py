@@ -17,6 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+"""
+This uses ThreadsafeFace to call expressInterest and show the content of the
+fetched data packets. Because it uses ThreadsafeFace, the application doesn't
+need to call processEvents.
+"""
+
 try:
     # Use builtin asyncio on Python 3.4+, or Tulip on Python 3.3
     import asyncio
@@ -66,13 +72,14 @@ def main():
     # Counter will stop the ioService after callbacks for all expressInterest.
     counter = Counter(loop, 3)
 
-    name1 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
+    # Try to fetch anything.
+    name1 = Name("/")
     dump("Express name ", name1.toUri())
     # These call to exressIinterest is thread safe because face is a ThreadsafeFace.
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 
-    # Try to get anything.
-    name2 = Name("/")
+    # Try to fetch using a known name.
+    name2 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
     dump("Express name ", name2.toUri())
     face.expressInterest(name2, counter.onData, counter.onTimeout)
 
