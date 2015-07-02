@@ -18,24 +18,19 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the AsyncTcpTransport class which extends Transport for
-async communication over TCP using Python's asyncio. This only uses asyncio for
-communication. To make this thread-safe, you must dispatch calls to send(), etc.
-to the asyncio loop using, e.g., call_soon_threadsafe, as is done by
-ThreadsafeFace. To use this, you do not need to call processEvents.
+This module defines the AsyncTcpTransport class which extends
+AsyncSocketTransport for async communication over TCP using Python's asyncio.
+This only uses asyncio for communication. To make this thread-safe, you must
+dispatch calls to send(), etc. to the asyncio loop using, e.g.,
+call_soon_threadsafe, as is done by ThreadsafeFace. To use this, you do not need
+to call processEvents.
 """
 
-try:
-    # Use builtin asyncio on Python 3.4+, or Tulip on Python 3.3
-    import asyncio
-except ImportError:
-    # Use Trollius on Python <= 3.2
-    import trollius as asyncio
 from pyndn.transport.transport import Transport
 from pyndn.transport.tcp_transport import TcpTransport
-from pyndn.encoding.element_reader import ElementReader
+from pyndn.transport.async_socket_transport import AsyncSocketTransport
 
-class AsyncTcpTransport(Transport):
+class AsyncTcpTransport(AsyncSocketTransport):
     """
     Create a new AsyncTcpTransport in the unconnected state. This will use the
     asyncio loop to create the connection and communicate asynchronously.
@@ -44,10 +39,9 @@ class AsyncTcpTransport(Transport):
       is the responsibility of the application to start and stop the loop.
     """
     def __init__(self, loop):
-        self._loop = loop
+        super(AsyncTcpTransport, self).__init__(loop)
 
-        self._transport = None
-        self._elementReader = None
+        self._loop = loop
         self._connectionInfo = None
         self._isLocal = False
 
@@ -123,71 +117,7 @@ class AsyncTcpTransport(Transport):
           established.
         :type onConnected: function object
         """
-        self.close()
-
-        connectCoroutine = self._loop.create_connection(
-          lambda: AsyncTcpTransport._ReceiveProtocol(self, onConnected),
-          connectionInfo.getHost(), connectionInfo.getPort())
-        asyncio.async(connectCoroutine, loop = self._loop)
-
-        self._elementReader = ElementReader(elementListener)
-
-    class _ReceiveProtocol(asyncio.Protocol):
-        def __init__(self, parent, onConnected):
-            self._parent = parent
-            self._onConnected = onConnected
-
-        def connection_made(self, transport):
-            self._parent._transport = transport
-            self._onConnected()
-            
-        def data_received(self, data):
-            self._parent._elementReader.onReceivedData(data)
-
-    # This will be set True if send gets a TypeError.
-    _sendNeedsStr = False
-    def send(self, data):
-        """
-        Set data to the host. To be thread-safe, this must be called from a
-        dispatch to the loop which was given to the constructor, as is done by
-        ThreadsafeFace.
-
-        :param data: The buffer of data to send.
-        :type data: An array type accepted by Transport.write.
-        """
-        if AsyncTcpTransport._sendNeedsStr:
-            # This version of write can't use a memoryview, etc., so convert.
-            self._transport.write(str(bytearray(data)))
-        else:
-            try:
-                self._transport.write(data)
-            except TypeError:
-                # Assume we need to convert to a str.
-                AsyncTcpTransport._sendNeedsStr = True
-                self.send(data)
-
-    def processEvents(self):
-        """
-        Do nothing since the async loop reads the socket.
-        """
-        pass
-
-    def getIsConnected(self):
-        """
-        Check if the transport is connected.
-
-        :return: True if connected.
-        :rtype: bool
-        :raises RuntimeError: for unimplemented if the derived class does not
-          override.
-        """
-        if self._transport == None:
-            return False
-
-        # Assume we are still connected.  TODO: Do a test receive?
-        return True
-
-    def close(self):
-        if self._transport != None:
-            self._transport.close()
-            self._transport = None
+        self._connectHelper(
+          elementListener, self._loop.create_connection(
+          lambda: AsyncSocketTransport._ReceiveProtocol(self, onConnected),
+          connectionInfo.getHost(), connectionInfo.getPort()))
