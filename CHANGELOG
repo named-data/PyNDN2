@@ -5,14 +5,17 @@ Changes
 * In security, added KeyChain.createIdentityAndCertificate which returns the
   certificate name, instead of the deprecated createIdentity which returns the
   key name.
+* Added AsyncTcpTransport and AsyncUnixTransport which use asyncio and do not
+  require the application to call processEvents.
+* In ThreadsafeFace, for the constructors ThreadsafeFace(loop) and
+  ThreadsafeFace(loop, host, port) use AsyncTcpTransport or AsyncUnixTransport
+  which do not require the application to call processEvents.
 * In ThreadsafeFace, remove support for stopWhen() since this requires a
   processEvents loop which we want to avoid when using asyncio. The application
   must stop the asyncio loop - see examples/test_get_async_threadsafe.py .
 * In ThreadsafeFace, don't automatically import it into the pyndn module since
   asyncio is optional. To explicitly import it, use:
   from pyndn.threadsafe_face import ThreadsafeFace
-* Added AsyncTcpTransport and AsyncUnixTransport which use asyncio and do not
-  need you to call processEvents.
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which
