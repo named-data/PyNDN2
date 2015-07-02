@@ -11,7 +11,8 @@ Changes
 * In ThreadsafeFace, don't automatically import it into the pyndn module since
   asyncio is optional. To explicitly import it, use:
   from pyndn.threadsafe_face import ThreadsafeFace
-* Added AsyncTcpTransport which does not need you to call processEvents.
+* Added AsyncTcpTransport and AsyncUnixTransport which use asyncio and do not
+  need you to call processEvents.
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which
