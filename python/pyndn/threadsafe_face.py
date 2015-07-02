@@ -43,8 +43,8 @@ class ThreadsafeFace(Face):
     AsyncUnixTransport, otherwise connect to "localhost" on port 6363 using
     AsyncTcpTransport. You do not need to call processEvents since the
     asyncio loop does all processing. (Exception: If you pass a transport that
-    is not an async transport like AsyncTcpTransport, then you application
-    need to call processEvents.)
+    is not an async transport like AsyncTcpTransport, then your application
+    needs to call processEvents.)
 
     :param loop: The event loop, for example from asyncio.get_event_loop(). It
       is the responsibility of the application to start and stop the loop.
@@ -81,9 +81,6 @@ class ThreadsafeFace(Face):
             transport = arg1
             connectionInfo = arg2
         super(ThreadsafeFace, self).__init__(transport, connectionInfo)
-
-        # Schedule the main processEvents service.
-        self._loop.call_soon(self._processEventsCallback)
 
     def expressInterest(
       self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None):
@@ -168,15 +165,6 @@ class ThreadsafeFace(Face):
         self._loop.call_soon_threadsafe(
             super(ThreadsafeFace, self).send, encoding)
 
-    def shutdown(self):
-        """
-        Unschedule the process events from being called in the event loop,
-        then call Face.shutdown.
-        """
-        # This will shut down _processEventsCallback.
-        self._loop == None
-        super(ThreadsafeFace, self).shutdown()
-
     def callLater(self, delayMilliseconds, callback):
         """
         Override to call callback() after the given delay, using
@@ -190,16 +178,3 @@ class ThreadsafeFace(Face):
         """
         # Convert milliseconds to seconds.
         self._loop.call_later(delayMilliseconds / 1000.0, callback)
-
-    def _processEventsCallback(self):
-        """
-        Repeatedly call self.processEvents() using self._loop. However, if
-        self._loop is None (because of shutdown), don't repeatedly call
-        anymore.
-        """
-        if self._loop != None:
-            try:
-                self.processEvents()
-            finally:
-                # Call again, even if processEvents raised an exception.
-                self._loop.call_later(0.01, self._processEventsCallback)

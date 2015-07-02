@@ -13,6 +13,10 @@ Changes
 * In ThreadsafeFace, remove support for stopWhen() since this requires a
   processEvents loop which we want to avoid when using asyncio. The application
   must stop the asyncio loop - see examples/test_get_async_threadsafe.py .
+* In ThreadsafeFace, do not automatically run a processEvents loop since the
+  default AsyncTcpTransport and AsyncUnixTransport don't need it. (If your
+  application uses a different transport which does not use the asyncio loop,
+  then it needs to run a processEvents loop.)
 * In ThreadsafeFace, don't automatically import it into the pyndn module since
   asyncio is optional. To explicitly import it, use:
   from pyndn.threadsafe_face import ThreadsafeFace
