@@ -30,7 +30,9 @@ except ImportError:
     # Use Trollius on Python <= 3.2
     import trollius as asyncio
 from pyndn import Name
-from pyndn import ThreadsafeFace
+# We must explicitly import from threadsafe_face. The pyndn module doesn't
+# automatically load it since asyncio is optional.
+from pyndn.threadsafe_face import ThreadsafeFace
 
 def dump(*list):
     result = ""
