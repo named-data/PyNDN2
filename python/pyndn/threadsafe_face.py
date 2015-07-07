@@ -25,6 +25,7 @@ main methods for NDN communication in a thread-safe manner.
 from pyndn.util.common import Common
 from pyndn.transport.async_tcp_transport import AsyncTcpTransport
 from pyndn.transport.async_unix_transport import AsyncUnixTransport
+from pyndn.name import Name
 from pyndn.interest_filter import InterestFilter
 from pyndn.face import Face
 
@@ -117,9 +118,12 @@ class ThreadsafeFace(Face):
         """
         registeredPrefixId = self._node.getNextEntryId()
 
+        # Node.registerPrefix requires a copy of the prefix.
+        # We make a copy so that the caller can change the original object while
+        # call_soon_threadsafe is waiting to process.
         self._loop.call_soon_threadsafe(
-            self._registerPrefixHelper, registeredPrefixId, prefix, onInterest,
-            onRegisterFailed, flags, wireFormat)
+          self._registerPrefixHelper, registeredPrefixId, Name(prefix),
+          onInterest, onRegisterFailed, flags, wireFormat)
 
         return registeredPrefixId
 

@@ -281,14 +281,15 @@ class Face(object):
         """
         registeredPrefixId = self._node.getNextEntryId()
 
+        # Node.registerPrefix requires a copy of the prefix.
         self._registerPrefixHelper(
-          registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
+          registeredPrefixId, Name(prefix), onInterest, onRegisterFailed, flags,
           wireFormat)
 
         return registeredPrefixId
 
     def _registerPrefixHelper(
-      self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
+      self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
       flags = None, wireFormat = None):
         """
         This is a protected helper method to do the work of registerPrefix to
@@ -301,9 +302,8 @@ class Face(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # Node.expressInterest requires a copy of the prefix.
         return self._node.registerPrefix(
-          registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
+          registeredPrefixId, prefixCopy, onInterest, onRegisterFailed, flags,
           wireFormat, self._commandKeyChain, self._commandCertificateName, self)
 
     def removeRegisteredPrefix(self, registeredPrefixId):
