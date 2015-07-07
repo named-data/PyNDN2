@@ -190,7 +190,7 @@ class Node(object):
           interest, keyChain, certificateName, wireFormat)
 
     def registerPrefix(
-      self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
+      self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed, flags,
       wireFormat, commandKeyChain, commandCertificateName, face):
         """
         Register prefix with the connected NDN hub and call onInterest when a
@@ -198,11 +198,11 @@ class Node(object):
 
         :param int registeredPrefixId: The getNextEntryId() for the registered
           prefix ID which Face got so it could return it to the caller.
-        :param Name prefix: The Name for the prefix to register which is NOT
+        :param Name prefixCopy: The Name for the prefix to register which is NOT
           copied for this internal Node method. The Face registerPrefix is
           reponsible for making a copy for Node to use.
         :param onInterest: (optional) If not None, this creates an interest
-          filter from prefix so that when an Interest is received which matches
+          filter from prefixCopy so that when an Interest is received which matches
           the filter, this calls
           onInterest(prefix, interest, face, interestFilterId, filter).
           NOTE: You must not change the prefix or filter objects - if you need to
@@ -233,7 +233,7 @@ class Node(object):
             if self._ndndId == None:
                 # First fetch the ndndId of the connected hub.
                 fetcher = Node._NdndIdFetcher(
-                  self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
+                  self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
                   flags, wireFormat, face)
                 # We send the interest using the given wire format so that the hub
                 # receives (and sends) in the application's desired wire format.
@@ -242,12 +242,12 @@ class Node(object):
                   fetcher.onData, fetcher.onTimeout, wireFormat, face)
             else:
                 self._registerPrefixHelper(
-                  registeredPrefixId, Name(prefix), onInterest, onRegisterFailed,
+                  registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
                   flags, wireFormat, face)
         else:
             # The application set the KeyChain for signing NFD interests.
             self._nfdRegisterPrefix(
-              registeredPrefixId, Name(prefix), onInterest,
+              registeredPrefixId, prefixCopy, onInterest,
               onRegisterFailed, flags, commandKeyChain, commandCertificateName,
               face)
 
@@ -282,7 +282,7 @@ class Node(object):
             logging.getLogger(__name__).debug(
               "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
 
-    def setInterestFilter(self, interestFilterId, filter, onInterest, face):
+    def setInterestFilter(self, interestFilterId, filterCopy, onInterest, face):
         """
         Add an entry to the local interest filter table to call the onInterest
         callback for a matching incoming Interest. This method only modifies the
@@ -292,16 +292,17 @@ class Node(object):
 
         :param int interestFilterId: The getNextEntryId() for the interest
           filter ID which Face got so it could return it to the caller.
-        :param InterestFilter filter: The InterestFilter with a prefix and
-          optional regex filter used to match the name of an incoming Interest.
-          This makes a copy of filter.
+        :param InterestFilter filterCopy: The InterestFilter with a prefix and
+          optional regex filter used to match the name of an incoming Interest,
+          which is NOT copied for this internal Node method. The Face
+          setInterestFilter is reponsible for making a copy for Node to use.
         :param onInterest: When an Interest is received which matches the filter,
           this calls onInterest(prefix, interest, face, interestFilterId, filter).
         :type onInterest: function object
         :param Face face: The face which is passed to the onInterest callback.
         """
         self._interestFilterTable.append(Node._InterestFilterEntry
-          (interestFilterId, InterestFilter(filter), onInterest, face))
+          (interestFilterId, filterCopy, onInterest, face))
 
     def unsetInterestFilter(self, interestFilterId):
         """
