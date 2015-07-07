@@ -25,6 +25,7 @@ main methods for NDN communication in a thread-safe manner.
 from pyndn.util.common import Common
 from pyndn.transport.async_tcp_transport import AsyncTcpTransport
 from pyndn.transport.async_unix_transport import AsyncUnixTransport
+from pyndn.interest_filter import InterestFilter
 from pyndn.face import Face
 
 class ThreadsafeFace(Face):
@@ -104,8 +105,7 @@ class ThreadsafeFace(Face):
         Face.removePendingInterest for calling details.
         """
         self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).removePendingInterest,
-            pendingInterestId)
+          self._node.removePendingInterest, pendingInterestId)
 
     def registerPrefix(
       self, prefix, onInterest, onRegisterFailed, flags = None,
@@ -130,8 +130,7 @@ class ThreadsafeFace(Face):
         Face.removeRegisteredPrefix for calling details.
         """
         self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).removeRegisteredPrefix,
-            registeredPrefixId)
+          self._node.removeRegisteredPrefix, registeredPrefixId)
 
     def setInterestFilter(self, filterOrPrefix, onInterest):
         """
@@ -141,9 +140,15 @@ class ThreadsafeFace(Face):
         """
         interestFilterId = self._node.getNextEntryId()
 
+        # If filterOrPrefix is already an InterestFilter, the InterestFilter
+        # constructor will make a copy as required by Node.setInterestFilter.
+        # We make a copy so that the caller can change the original object while
+        # call_soon_threadsafe is waiting to process.
+        filterCopy = InterestFilter(filterOrPrefix)
+
         self._loop.call_soon_threadsafe(
-            self._setInterestFilterHelper, interestFilterId, filterOrPrefix,
-            onInterest)
+          self._node.setInterestFilter, interestFilterId, filterCopy,
+          onInterest, self)
 
         return interestFilterId
 
@@ -154,7 +159,7 @@ class ThreadsafeFace(Face):
         Face.unsetInterestFilter for calling details.
         """
         self._loop.call_soon_threadsafe(
-            super(ThreadsafeFace, self).unsetInterestFilter, interestFilterId)
+          self._node.unsetInterestFilter, interestFilterId)
 
     def send(self, encoding):
         """

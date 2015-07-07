@@ -342,25 +342,14 @@ class Face(object):
         """
         interestFilterId = self._node.getNextEntryId()
 
-        self._setInterestFilterHelper(
-          interestFilterId, filterOrPrefix, onInterest)
+        # If filterOrPrefix is already an InterestFilter, the InterestFilter
+        # constructor will make a copy as required by Node.setInterestFilter.
+        filterCopy = InterestFilter(filterOrPrefix)
+
+        self._node.setInterestFilter(
+          interestFilterId, filterCopy, onInterest, self)
 
         return interestFilterId
-
-    def _setInterestFilterHelper(
-      self, interestFilterId, filterOrPrefix, onInterest):
-        """
-        This is a protected helper method to do the work of setInterestFilter to
-        resolve the different overloaded forms. The interestFilterId is from
-        getNextEntryId(). This has no return value and can be used in a callback.
-        """
-        if type(filterOrPrefix) is InterestFilter:
-          return self._node.setInterestFilter(
-            interestFilterId, filterOrPrefix, onInterest, self)
-        else:
-          # Assume it is a prefix Name.
-          return self._node.setInterestFilter(
-            interestFilterId, InterestFilter(filterOrPrefix), onInterest, self)
 
     def unsetInterestFilter(self, interestFilterId):
         """
