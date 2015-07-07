@@ -46,12 +46,13 @@ def main():
 
     counter = Counter()
 
-    name1 = Name("/ndn/edu/ucla/remap/ndn-js-test/howdy.txt/%FD%052%A1%DF%5E%A4")
+    # Try to fetch anything.
+    name1 = Name("/")
     dump("Express name ", name1.toUri())
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 
-    # Try to get anything.
-    name2 = Name("/")
+    # Try to fetch using a known name.
+    name2 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
     dump("Express name ", name2.toUri())
     face.expressInterest(name2, counter.onData, counter.onTimeout)
 
