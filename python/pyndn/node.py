@@ -86,7 +86,7 @@ class Node(object):
         :param int pendingInterestId: The getNextEntryId() for the pending
           interest ID which Face got so it could return it to the caller.
         :param Interest interestCopy: The Interest which is NOT copied for this
-          internal Node method.  The Face expressInterest is reponsible for
+          internal Node method.  The Face expressInterest is responsible for
           making a copy for Node to use.
         :param onData: A function object to call when a matching data packet is
           received.
@@ -200,7 +200,7 @@ class Node(object):
           prefix ID which Face got so it could return it to the caller.
         :param Name prefixCopy: The Name for the prefix to register which is NOT
           copied for this internal Node method. The Face registerPrefix is
-          reponsible for making a copy for Node to use.
+          responsible for making a copy for Node to use.
         :param onInterest: (optional) If not None, this creates an interest
           filter from prefixCopy so that when an Interest is received which matches
           the filter, this calls
@@ -295,7 +295,7 @@ class Node(object):
         :param InterestFilter filterCopy: The InterestFilter with a prefix and
           optional regex filter used to match the name of an incoming Interest,
           which is NOT copied for this internal Node method. The Face
-          setInterestFilter is reponsible for making a copy for Node to use.
+          setInterestFilter is responsible for making a copy for Node to use.
         :param onInterest: When an Interest is received which matches the filter,
           this calls onInterest(prefix, interest, face, interestFilterId, filter).
         :type onInterest: function object
