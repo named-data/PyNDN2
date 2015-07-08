@@ -112,19 +112,24 @@ class Face(object):
         :throws: RuntimeError If the encoded interest size exceeds
           Face.getMaxNdnPacketSize().
         """
-        pendingInterestId = self._node.getNextEntryId()
+        args = self._getExpressInterestArgs(
+          interestOrName, arg2, arg3, arg4, arg5)
+        self._node.expressInterest(
+          args['pendingInterestId'], args['interestCopy'], args['onData'],
+          args['onTimeout'], args['wireFormat'], self)
 
-        self._expressInterestHelper(
-          pendingInterestId, interestOrName, arg2, arg3, arg4, arg5)
+        return args['pendingInterestId']
 
-        return pendingInterestId
-
-    def _expressInterestHelper(
-      self, pendingInterestId, interestOrName, arg2, arg3, arg4, arg5):
+    def _getExpressInterestArgs(self, interestOrName, arg2, arg3, arg4, arg5):
         """
-        This is a protected helper method to do the work of expressInterest to
-        resolve the different overloaded forms. The pendingInterestId is from
-        getNextEntryId(). This has no return value and can be used in a callback.
+        This is a protected helper method to resolve the different overloaded
+        forms of Face.expressInterest and return the arguments to pass to
+        Node.expressInterest. This is necessary to prepare arguments such as
+        interestCopy before dispatching to Node.expressInterest.
+
+        :return: A dictionary with the following keys: 'pendingInterestId',
+          'interestCopy', 'onData', 'onTimeout' and 'wireFormat'.
+        :rtype: dict
         """
         # expressInterest(interest, onData)
         # expressInterest(interest, onData, wireFormat)
@@ -132,7 +137,7 @@ class Face(object):
         # expressInterest(interest, onData, onTimeout, wireFormat)
         if type(interestOrName) is Interest:
             # Node.expressInterest requires a copy of the interest.
-            interest = Interest(interestOrName)
+            interestCopy = Interest(interestOrName)
             onData = arg2
             if isinstance(arg3, WireFormat):
                 onTimeout = None
@@ -151,8 +156,8 @@ class Face(object):
             if type(arg2) is Interest:
                 template = arg2
                 # Copy the template.
-                interest = Interest(template)
-                interest.setName(interestOrName)
+                interestCopy = Interest(template)
+                interestCopy.setName(interestOrName)
 
                 onData = arg3
                 if isinstance(arg4, WireFormat):
@@ -166,9 +171,9 @@ class Face(object):
             # expressInterest(name, onData, onTimeout)
             # expressInterest(name, onData, onTimeout, wireFormat)
             else:
-                interest = Interest(interestOrName)
+                interestCopy = Interest(interestOrName)
                 # Set a default interest lifetime.
-                interest.setInterestLifetimeMilliseconds(4000.0)
+                interestCopy.setInterestLifetimeMilliseconds(4000.0)
                 onData = arg2
                 if isinstance(arg3, WireFormat):
                     onTimeout = None
@@ -181,8 +186,9 @@ class Face(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        self._node.expressInterest(
-          pendingInterestId, interest, onData, onTimeout, wireFormat, self)
+        return { 'pendingInterestId': self._node.getNextEntryId(),
+          'interestCopy': interestCopy, 'onData': onData, 'onTimeout': onTimeout,
+          'wireFormat': wireFormat }
 
     def removePendingInterest(self, pendingInterestId):
         """

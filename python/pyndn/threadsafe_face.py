@@ -91,13 +91,14 @@ class ThreadsafeFace(Face):
         expressInterest to be called in a thread-safe manner. See
         Face.expressInterest for calling details.
         """
-        pendingInterestId = self._node.getNextEntryId()
-
+        args = self._getExpressInterestArgs(
+          interestOrName, arg2, arg3, arg4, arg5)
         self._loop.call_soon_threadsafe(
-            self._expressInterestHelper, pendingInterestId, interestOrName, arg2,
-            arg3, arg4, arg5)
+          self._node.expressInterest, args['pendingInterestId'],
+          args['interestCopy'], args['onData'], args['onTimeout'],
+          args['wireFormat'], self)
 
-        return pendingInterestId
+        return args['pendingInterestId']
 
     def removePendingInterest(self, pendingInterestId):
         """
