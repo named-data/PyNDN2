@@ -22,15 +22,11 @@ This module defines constants used by the security library.
 """
 
 # The KeyType integer is used by the Sqlite key storage, so don't change them.
-# Make these the same as ndn-cpp in case the Sqlite file is shared.
+# Make these the same as ndn-cxx in case the storage file is shared.
 class KeyType(object):
     RSA = 0
-    AES = 1
-    # DSA
-    # DES
-    # RC4
-    # RC2
-    ECDSA = 2
+    ECDSA = 1
+    AES = 128
 
 class KeyClass(object):
     PUBLIC = 1
