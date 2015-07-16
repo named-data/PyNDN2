@@ -185,6 +185,14 @@ class DerNode (object):
         """
         return self.encode()
 
+    def getPayload(self):
+        """
+        Get a copy of the payload bytes.
+        :return: A copy of the payload.
+        :rtype: Blob
+        """
+        return Blob(self._payload, True)
+
     def getChildren(self):
         """
         If this object is a DerSequence, get the children of this node. Otherwise,
