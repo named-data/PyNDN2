@@ -144,8 +144,6 @@ class PolicyManager(object):
             return PolicyManager._verifySha256WithRsaSignature(
               signature.getSignature(), signedBlob, publicKeyDer)
         elif isinstance(signature, DigestSha256Signature):
-            if publicKeyDer.isNull():
-                return False
             return PolicyManager._verifyDigestSha256Signature(
               signature.getSignature(), signedBlob)
         else:
