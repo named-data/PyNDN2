@@ -90,7 +90,7 @@ def main():
     dump("Express name ", name3.toUri())
     face.expressInterest(name3, counter.onData, counter.onTimeout)
 
-    # Run until until the Counter calls stop().
+    # Run until the Counter calls stop().
     loop.run_forever()
     face.shutdown()
 
