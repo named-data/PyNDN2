@@ -30,7 +30,6 @@ from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.key_locator import KeyLocatorType
-from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
 
 from pyndn.util.boost_info_parser import BoostInfoParser
@@ -54,8 +53,8 @@ verification to succeed.
 
 class ConfigPolicyManager(PolicyManager):
     """
-    Create a new ConfigPolicyManager which acts on the rules specified
-    in the configuration file and downloads unknown certificates when necessary.
+    Create a new ConfigPolicyManager which will act on the rules specified
+    in the configuration and download unknown certificates when necessary.
 
     :param string configFileName: The path to the configuration file containing
       verification rules.
@@ -86,6 +85,17 @@ class ConfigPolicyManager(PolicyManager):
         self._keyTimestampTtl = keyTimestampTtl
         self._maxTrackedKeys = maxTrackedKeys
 
+        self.reset()
+
+        self.config.read(configFileName)
+        self._loadTrustAnchorCertificates()
+
+    def reset(self):
+        """
+        Reset the certificate cache and other fields to the constructor state.
+        """
+        self._certificateCache.reset()
+
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
         self._fixedCertificateCache = {}
@@ -95,13 +105,10 @@ class ConfigPolicyManager(PolicyManager):
         # key is public key name, value is last timestamp
         self._keyTimestamps = {}
 
-        self.config = BoostInfoParser()
-        self.config.read(configFileName)
-
         self.requiresVerification = True
 
+        self.config = BoostInfoParser()
         self._refreshManager = TrustAnchorRefreshManager()
-        self._loadTrustAnchorCertificates()
 
     def requireVerify(self, dataOrInterest):
         """
