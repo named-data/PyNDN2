@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from collections import OrderedDict
-
+from pyndn.util.common import Common
 
 def shlex_split(s):
     """
@@ -197,13 +197,31 @@ class BoostInfoParser(object):
     def __init__(self):
         self._root = BoostInfoTree()
 
-    def read(self, filename):
+    def read(self, fileNameOrInput, inputName = None):
         """
-        Add the contents of the file to the root BoostInfoTree.
-        :param str filename: The path to the INFO file.
+        Add the contents of the file or input string to the root BoostInfoTree. 
+        There are two forms:
+        read(fileName) reads fileName from the file system.
+        read(input, inputName) reads from the input, in which case inputName is
+        used only for log messages, etc.
+        :param str fileName: The path to the INFO file.
+        :param str input: The contents of the INFO file, with lines separated by
+          "\n" or "\r\n".
+        :param str inputName: Use with input for log messages, etc.
         """
-        self._read(filename, self._root)
-        return self._root
+        if Common.typeIsString(inputName):
+            input = fileNameOrInput
+        else:
+            # No inputName, so assume the first arg is the file name.
+            fileName = fileNameOrInput
+            inputName = fileName
+            f = open(fileName, 'r')
+            input = f.read()
+            f.close()
+
+        ctx = self._root
+        for line in input.splitlines():
+            ctx = self._parseLine(line.strip(), ctx)
 
     def readPropertyList(self, fromDict):
         """
@@ -215,17 +233,6 @@ class BoostInfoParser(object):
             raise TypeError('BoostInfoTree must be initialized from dictionary')
         self._readDict(fromDict, self._root)
         return self._root
-
-    def _read(self, filename, ctx):
-        """
-        Internal import method.
-        :param str filename: The INFO file.
-        :param BoostInfoTree ctx: The node currently being populated.
-        """
-        with open(filename, 'r') as stream:
-            for line in stream:
-                ctx = self._parseLine(line.strip(), ctx)
-        return ctx
 
     def _readList(self, fromList, intoNode, keyName):
         """
