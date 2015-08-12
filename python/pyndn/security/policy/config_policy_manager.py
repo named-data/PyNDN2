@@ -56,8 +56,9 @@ class ConfigPolicyManager(PolicyManager):
     Create a new ConfigPolicyManager which will act on the rules specified
     in the configuration and download unknown certificates when necessary.
 
-    :param string configFileName: The path to the configuration file containing
-      verification rules.
+    :param str configFileName: (optional) If not null or empty, the path to the
+      configuration file containing verification rules. Otherwise, you should
+      separately call load().
     :param CertificateCache certificateCache: (optional) A CertificateCache to
         hold known certificates.
     :param int searchDepth: (optional) The maximum number of links to follow
@@ -72,7 +73,7 @@ class ConfigPolicyManager(PolicyManager):
     :param int maxTrackedKeys: (optional) The maximum number of public key use
         timestamps to track.
     """
-    def __init__(self, configFileName, certificateCache=None,
+    def __init__(self, configFileName = None, certificateCache = None,
             searchDepth=5, graceInterval=3000, keyTimestampTtl=3600000,
             maxTrackedKeys=1000):
         super(ConfigPolicyManager, self).__init__()
@@ -87,8 +88,8 @@ class ConfigPolicyManager(PolicyManager):
 
         self.reset()
 
-        self.config.read(configFileName)
-        self._loadTrustAnchorCertificates()
+        if configFileName != None and configFileName != "":
+            self.load(configFileName)
 
     def reset(self):
         """
@@ -109,6 +110,23 @@ class ConfigPolicyManager(PolicyManager):
 
         self.config = BoostInfoParser()
         self._refreshManager = TrustAnchorRefreshManager()
+
+    def load(self, configFileNameOrInput, inputName = None):
+        """
+        Call reset() and load the configuration rules from the file name or the
+        input string. There are two forms:
+        load(configFileName) reads configFileName from the file system.
+        load(input, inputName) reads from the input, in which case inputName is
+        used only for log messages, etc.
+        :param str configFileName: The path to the file containing configuration
+          rules.
+        :param str input: The contents of the configuration rules, with lines
+          separated by "\n" or "\r\n".
+        :param str inputName: Use with input for log messages, etc.
+        """
+        self.reset()
+        self.config.read(configFileNameOrInput, inputName)
+        self._loadTrustAnchorCertificates()
 
     def requireVerify(self, dataOrInterest):
         """
@@ -475,7 +493,7 @@ class ConfigPolicyManager(PolicyManager):
 
         keyLocator = None
         try:
-            keyLocator = KeyLocator.getFromSignature(signature);
+            keyLocator = KeyLocator.getFromSignature(signature)
         except:
             # No key locator -> fail.
             onVerifyFailed(dataOrInterest)

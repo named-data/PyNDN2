@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0beta4 (2015-07-02)
+Interim changes since PyNDN v2.0beta4 (2015-08-12)
 --------------------------------------------------
 
 Changes
@@ -20,6 +20,8 @@ Changes
 * In ThreadsafeFace, don't automatically import it into the pyndn module since
   asyncio is optional. To explicitly import it, use:
   from pyndn.threadsafe_face import ThreadsafeFace
+* In security ConfigPolicyManager, added load(input, inputName) to read
+  configuration rules from a string.
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which
