@@ -219,9 +219,7 @@ class BoostInfoParser(object):
             input = f.read()
             f.close()
 
-        ctx = self._root
-        for line in input.splitlines():
-            ctx = self._parseLine(line.strip(), ctx)
+        self._read(input, self._root)
 
     def readPropertyList(self, fromDict):
         """
@@ -233,6 +231,20 @@ class BoostInfoParser(object):
             raise TypeError('BoostInfoTree must be initialized from dictionary')
         self._readDict(fromDict, self._root)
         return self._root
+
+    def _read(self, input, ctx):
+        """
+        Internal import method with an explicit context node.
+        :param str input: The contents of the INFO file, with lines separated by
+          "\n" or "\r\n".
+        :param BoostInfoTree ctx: The node currently being populated.
+        :return: The ctx.
+        :rtype: BoostInfoTree
+        """
+        for line in input.splitlines():
+            ctx = self._parseLine(line.strip(), ctx)
+
+        return ctx
 
     def _readList(self, fromList, intoNode, keyName):
         """
@@ -300,7 +312,10 @@ class BoostInfoParser(object):
                 val = None
             #if it is an "#include", load the new file instead of inserting keys
             if key == "#include":
-                context = self._read(val, context)
+                f = open(val, 'r')
+                input = f.read()
+                f.close()
+                context = self._read(input, context)
             else:
                 newTree = context.createSubtree(key, val)
 
