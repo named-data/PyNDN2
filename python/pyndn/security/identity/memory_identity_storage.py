@@ -34,8 +34,8 @@ from pyndn.security.certificate import IdentityCertificate
 class MemoryIdentityStorage(IdentityStorage):
     def __init__(self):
         super(MemoryIdentityStorage, self).__init__()
-        # A list of name URI.
-        self._identityStore = []
+        # The key is the identityName.toUri(). The value is an _IdentityRecord.
+        self._identityStore = {}
         # The default identity in identityStore_, or "" if not defined.
         self._defaultIdentity = ""
         # The key is the keyName.toUri(). The value is the tuple
@@ -65,7 +65,7 @@ class MemoryIdentityStorage(IdentityStorage):
         if identityUri in self._identityStore:
             return
 
-        self._identityStore.append(identityUri)
+        self._identityStore[identityUri] = self._IdentityRecord()
 
     def revokeIdentity(self):
         """
@@ -294,3 +294,16 @@ class MemoryIdentityStorage(IdentityStorage):
             # Replace the third element.
             self._keyStore[keyNameUri] = (
               self._keyStore[keyNameUri][0:2] + (Name(certificateName),) )
+
+    class _IdentityRecord:
+        def __init__(self):
+            self._defaultKey = None
+
+        def setDefaultKey(self, key):
+            self._defaultKey = key
+
+        def hasDefaultKey(self):
+            return self._defaultKey != None
+
+        def getDefaultKey(self):
+            return self._defaultKey
