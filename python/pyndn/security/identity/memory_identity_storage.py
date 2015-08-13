@@ -39,7 +39,7 @@ class MemoryIdentityStorage(IdentityStorage):
         # The default identity in identityStore_, or "" if not defined.
         self._defaultIdentity = ""
         # The key is the keyName.toUri(). The value is the tuple
-        #  (KeyType keyType, Blob keyDer).
+        #  (KeyType keyType, Blob keyDer, Name defaultCertificate).
         self._keyStore = {}
         # The key is the key is the certificateName.toUri(). The value is the
         #   encoded certificate.
@@ -104,7 +104,7 @@ class MemoryIdentityStorage(IdentityStorage):
         if self.doesKeyExist(keyName):
             raise SecurityException("A key with the same name already exists!")
 
-        self._keyStore[keyName.toUri()] = (keyType, Blob(publicKeyDer))
+        self._keyStore[keyName.toUri()] = (keyType, Blob(publicKeyDer), None)
 
     def getKey(self, keyName):
         """
@@ -119,7 +119,7 @@ class MemoryIdentityStorage(IdentityStorage):
             # Not found.  Silently return a null Blob.
             return Blob()
 
-        (_, publicKeyDer) = self._keyStore[keyNameUri]
+        (_, publicKeyDer, _) = self._keyStore[keyNameUri]
         return publicKeyDer
 
     def activateKey(self, keyName):
@@ -246,8 +246,15 @@ class MemoryIdentityStorage(IdentityStorage):
         :raises SecurityException: if the default certificate name for the key
           name is not set.
         """
-        raise RuntimeError(
-          "MemoryIdentityStorage.getDefaultCertificateNameForKey is not implemented")
+        keyNameUri = keyName.toUri()
+        if keyNameUri in self._keyStore:
+            (_, _, defaultCertificate) = self._keyStore[keyNameUri]
+            if defaultCertificate != None:
+                return defaultCertificate
+            else:
+                raise SecurityException("No default certificate set.")
+        else:
+            raise SecurityException("Key not found.")
 
     def setDefaultIdentity(self, identityName):
         """
@@ -282,5 +289,8 @@ class MemoryIdentityStorage(IdentityStorage):
         :param Name keyName: The key name.
         :param Name certificateName: The certificate name.
         """
-        raise RuntimeError(
-          "MemoryIdentityStorage.setDefaultCertificateNameForKey is not implemented")
+        keyNameUri = keyName.toUri()
+        if keyNameUri in self._keyStore:
+            # Replace the third element.
+            self._keyStore[keyNameUri] = (
+              self._keyStore[keyNameUri][0:2] + (Name(certificateName),) )
