@@ -21,7 +21,7 @@ from pyndn.security import KeyChain, IdentityManager
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.security_types import KeyType
 from pyndn.security.identity import MemoryPrivateKeyStorage
-from pyndn.security.identity import BasicIdentityStorage
+from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.util import Blob
 from pyndn import Name, Data, Interest, Face
 from pyndn.security.policy import NoVerifyPolicyManager, SelfVerifyPolicyManager, ConfigPolicyManager
@@ -171,15 +171,7 @@ class TestConfigPolicyManager(ut.TestCase):
         testCertDirectory = 'policy_config/certs'
         self.testCertFile = os.path.join(testCertDirectory, 'test.cert')
 
-        # Reuse the policy_config subdirectory for the temporary SQLite file.
-        self.databaseFilePath = "policy_config/test-public-info.db"
-        try:
-            os.remove(self.databaseFilePath)
-        except OSError:
-            # no such file
-            pass
-
-        self.identityStorage = BasicIdentityStorage(self.databaseFilePath)
+        self.identityStorage = MemoryIdentityStorage()
         self.privateKeyStorage = MemoryPrivateKeyStorage()
         self.identityManager = IdentityManager(self.identityStorage,
                 self.privateKeyStorage)
@@ -203,10 +195,6 @@ class TestConfigPolicyManager(ut.TestCase):
         self.face = Face()
 
     def tearDown(self):
-        try:
-            os.remove(self.databaseFilePath)
-        except OSError:
-            pass
         self.privateKeyStorage.deleteKeyPair(self.keyName)
         self.face.shutdown()
         try:
