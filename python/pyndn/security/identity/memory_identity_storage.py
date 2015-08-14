@@ -41,8 +41,8 @@ class MemoryIdentityStorage(IdentityStorage):
         # The key is the keyName.toUri(). The value is the tuple
         #  (KeyType keyType, Blob keyDer, Name defaultCertificate).
         self._keyStore = {}
-        # The key is the key is the certificateName.toUri(). The value is the
-        #   encoded certificate.
+        # The key is the certificateName.toUri(). The value is the encoded
+        # certificate.
         self._certificateStore = {}
 
     def doesIdentityExist(self, identityName):
@@ -233,8 +233,14 @@ class MemoryIdentityStorage(IdentityStorage):
         :raises SecurityException: if the default key name for the identity is
           not set.
         """
-        raise RuntimeError(
-          "MemoryIdentityStorage.getDefaultKeyNameForIdentity is not implemented")
+        identityUri = identityName.toUri()
+        if identityUri in self._identityStore:
+            if self._identityStore[identityUri].hasDefaultKey():
+                return self._identityStore[identityUri].getDefaultKey()
+            else:
+                raise SecurityException("No default key set.")
+        else:
+            raise SecurityException("Identity not found.")
 
     def getDefaultCertificateNameForKey(self, keyName):
         """
@@ -279,8 +285,16 @@ class MemoryIdentityStorage(IdentityStorage):
         :param Name identityNameCheck: (optional) The identity name to check the
           keyName.
         """
-        raise RuntimeError(
-          "MemoryIdentityStorage.setDefaultKeyNameForIdentity is not implemented")
+        identityName = keyName.getPrefix(-1)
+
+        if (identityNameCheck != None and identityNameCheck.size() > 0 and
+              not identityNameCheck.equals(identityName)):
+            raise SecurityException(
+              "The specified identity name does not match the key name")
+
+        identityUri = identityName.toUri()
+        if identityUri in self._identityStore:
+          self._identityStore[identityUri].setDefaultKey(Name(keyName))
 
     def setDefaultCertificateNameForKey(self, keyName, certificateName):
         """
