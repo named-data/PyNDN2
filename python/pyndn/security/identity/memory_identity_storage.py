@@ -196,6 +196,10 @@ class MemoryIdentityStorage(IdentityStorage):
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
         """
+        if not allowAny:
+            raise RuntimeError(
+              "MemoryIdentityStorage.getCertificate for !allowAny is not implemented")
+
         certificateNameUri = certificateName.toUri()
         if not (certificateNameUri in self._certificateStore):
             # Not found.  Silently return None.
