@@ -96,6 +96,7 @@ class MemoryIdentityStorage(IdentityStorage):
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
+        :raises SecurityException: If a key with the keyName already exists.
         """
         identityName = keyName.getSubName(0, keyName.size() - 1)
 
@@ -158,6 +159,7 @@ class MemoryIdentityStorage(IdentityStorage):
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
+        :raises SecurityException: If the certificate is already installed.
         """
         certificateName = certificate.getName()
         keyName = certificate.getPublicKeyName()

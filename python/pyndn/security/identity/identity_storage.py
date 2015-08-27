@@ -104,6 +104,7 @@ class IdentityStorage(object):
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
+        :raises SecurityException: If a key with the keyName already exists.
         """
         raise RuntimeError("addKey is not implemented")
 
@@ -159,6 +160,7 @@ class IdentityStorage(object):
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
+        :raises SecurityException: If the certificate is already installed.
         """
         raise RuntimeError("addCertificate is not implemented")
 
