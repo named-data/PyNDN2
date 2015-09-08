@@ -296,15 +296,27 @@ class Face(object):
 
     def _registerPrefixHelper(
       self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
-      flags = None, wireFormat = None):
+      arg5 = None, arg6 = None):
         """
         This is a protected helper method to do the work of registerPrefix to
         resolve the different overloaded forms. The registeredPrefixId is from
         getNextEntryId(). This has no return value and can be used in a callback.
         """
-        if flags == None:
+        # arg5 and arg 6 may be:
+        # ForwardingFlags, WireFormat
+        # ForwardingFlags, None
+        # WireFormat, None
+        # None, None
+        if isinstance(arg5, ForwardingFlags):
+            flags = arg5
+        else:
             flags = ForwardingFlags()
-        if wireFormat == None:
+
+        if isinstance(arg5, WireFormat):
+            wireFormat = arg5
+        elif isinstance(arg6, WireFormat):
+            wireFormat = arg6
+        else:
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
