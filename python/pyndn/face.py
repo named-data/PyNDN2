@@ -277,8 +277,8 @@ class Face(object):
         :param onRegisterFailed: If register prefix fails for any reason, this
           calls onRegisterFailed(prefix).
         :type onRegisterFailed: function object
-        :param ForwardingFlags flags: The flags for finer control of which
-          interests are forwardedto the application.
+        :param ForwardingFlags flags: (optional) The flags for finer control of
+          which interests are forwardedto the application.
         :param wireFormat: (optional) A WireFormat object used to encode this
            ControlParameters. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
