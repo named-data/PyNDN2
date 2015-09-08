@@ -185,7 +185,8 @@ class TestFaceRegisterMethods(ut.TestCase):
         timeoutCallback = Mock()
 
         # now express an interest on this new face, and see if onInterest is called
-        interestName = prefixName.append("hello")
+        # Add the timestamp so it is unique and we don't get a cached response.
+        interestName = prefixName.append("hello" + repr(time.time()))
         self.face_out.expressInterest(interestName, dataCallback, timeoutCallback)
 
         client = gevent.spawn(self.face_process_events, self.face_out, [dataCallback, timeoutCallback], 'c')
