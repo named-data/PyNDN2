@@ -24,6 +24,7 @@ Changes
   from pyndn.threadsafe_face import ThreadsafeFace
 * In security ConfigPolicyManager, added load(input, inputName) to read
   configuration rules from a string.
+* In integration_tests, added test_registration_callbacks.
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which
