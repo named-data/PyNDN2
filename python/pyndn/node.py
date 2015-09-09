@@ -190,8 +190,9 @@ class Node(object):
           interest, keyChain, certificateName, wireFormat)
 
     def registerPrefix(
-      self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed, flags,
-      wireFormat, commandKeyChain, commandCertificateName, face):
+      self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
+      onRegisterSuccess, flags, wireFormat, commandKeyChain,
+      commandCertificateName, face):
         """
         Register prefix with the connected NDN hub and call onInterest when a
         matching interest is received.
@@ -212,6 +213,11 @@ class Node(object):
         :param onRegisterFailed: A function object to call if failed to retrieve
           the connected hub's ID or failed to register the prefix.
         :type onRegisterFailed: function object
+        :param onRegisterSuccess: This calls
+          onRegisterSuccess(prefix, registeredPrefixId) when this receives a
+          success message from the forwarder. If onRegisterSuccess is None, this
+          does not use it.
+        :type onRegisterSuccess: function object
         :param ForwardingFlags flags: The flags for finer control of which
           interests are forwardedto the application.
         :param wireFormat: A WireFormat object used to encode the message.
@@ -234,7 +240,7 @@ class Node(object):
                 # First fetch the ndndId of the connected hub.
                 fetcher = Node._NdndIdFetcher(
                   self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
-                  flags, wireFormat, face)
+                  onRegisterSuccess, flags, wireFormat, face)
                 # We send the interest using the given wire format so that the hub
                 # receives (and sends) in the application's desired wire format.
                 self.expressInterest(
@@ -243,13 +249,13 @@ class Node(object):
             else:
                 self._registerPrefixHelper(
                   registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
-                  flags, wireFormat, face)
+                  onRegisterSuccess, flags, wireFormat, face)
         else:
             # The application set the KeyChain for signing NFD interests.
             self._nfdRegisterPrefix(
               registeredPrefixId, prefixCopy, onInterest,
-              onRegisterFailed, flags, commandKeyChain, commandCertificateName,
-              face)
+              onRegisterFailed, onRegisterSuccess, flags, commandKeyChain,
+              commandCertificateName, face)
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -556,8 +562,8 @@ class Node(object):
         return result
 
     def _registerPrefixHelper(
-      self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
-      wireFormat, face):
+      self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
+      onRegisterSuccess, flags, wireFormat, face):
         """
         Do the work of registerPrefix to register with NDNx once we have an
         _ndndId.
@@ -619,15 +625,15 @@ class Node(object):
 
         # Send the registration interest.
         response = Node._RegisterResponse(
-          self, prefix, onInterest, onRegisterFailed, flags, wireFormat, False,
-          face)
+          self, prefix, onInterest, onRegisterFailed, onRegisterSuccess, flags,
+          wireFormat, False, face, registeredPrefixId)
         self.expressInterest(
           self.getNextEntryId(), interest, response.onData, response.onTimeout,
           wireFormat, face)
 
     def _nfdRegisterPrefix(
-      self, registeredPrefixId, prefix, onInterest, onRegisterFailed, flags,
-      commandKeyChain, commandCertificateName, face):
+      self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
+      onRegisterSuccess, flags, commandKeyChain, commandCertificateName, face):
         """
         Do the work of registerPrefix to register with NFD.
 
@@ -675,8 +681,8 @@ class Node(object):
 
         # Send the registration interest.
         response = Node._RegisterResponse(
-          self, prefix, onInterest, onRegisterFailed, flags,
-          TlvWireFormat.get(), True, face)
+          self, prefix, onInterest, onRegisterFailed, onRegisterSuccess, flags,
+          TlvWireFormat.get(), True, face, registeredPrefixId)
         self.expressInterest(
           self.getNextEntryId(), commandInterest, response.onData,
           response.onTimeout, TlvWireFormat.get(), face)
@@ -958,12 +964,13 @@ class Node(object):
         digest for the connected NDN hub.
         """
         def __init__(self, node, registeredPrefixId, prefix, onInterest,
-                     onRegisterFailed, flags, wireFormat, face):
+                 onRegisterFailed, onRegisterSuccess, flags, wireFormat, face):
             self._node = node
             self._registeredPrefixId = registeredPrefixId
             self._prefix = prefix
             self._onInterest = onInterest
             self._onRegisterFailed = onRegisterFailed
+            self._onRegisterSuccess = onRegisterSuccess
             self._flags = flags
             self._wireFormat = wireFormat
             self._face = face
@@ -991,7 +998,8 @@ class Node(object):
             self._node._ndndId = Blob(digest, False)
             self._node._registerPrefixHelper(
               self._registeredPrefixId, self._prefix, self._onInterest,
-              self._onRegisterFailed, self._flags, self._wireFormat, self._face)
+              self._onRegisterFailed, self._onRegisterSuccess, self._flags,
+              self._wireFormat, self._face)
 
         def onTimeout(self, interest):
             """
@@ -1007,16 +1015,19 @@ class Node(object):
         prefix interest sent to the connected NDN hub. If this gets a bad
         response or a timeout, call onRegisterFailed.
         """
-        def __init__(self, node, prefix, onInterest, onRegisterFailed, flags,
-                     wireFormat, isNfdCommand, face):
+        def __init__(self, node, prefix, onInterest, onRegisterFailed,
+                onRegisterSuccess, flags, wireFormat, isNfdCommand, face,
+                registeredPrefixId):
             self._node = node
             self._prefix = prefix
             self._onInterest = onInterest
             self._onRegisterFailed = onRegisterFailed
+            self._onRegisterSuccess = onRegisterSuccess
             self._flags = flags
             self._wireFormat = wireFormat
             self._isNfdCommand = isNfdCommand
             self._face = face
+            self._registeredPrefixId = registeredPrefixId
 
         def onData(self, interest, responseData):
             """
@@ -1049,6 +1060,8 @@ class Node(object):
                 logging.getLogger(__name__).info(
                   "Register prefix succeeded with the NFD forwarder for prefix %s",
                   self._prefix.toUri())
+                if self._onRegisterSuccess != None:
+                    self._onRegisterSuccess(self._prefix, self._registeredPrefixId)
             else:
                 expectedName = Name("/ndnx/.../selfreg")
                 if (responseData.getName().size() < 4 or
@@ -1063,6 +1076,8 @@ class Node(object):
                 logging.getLogger(__name__).info(
                   "Register prefix succeeded with the NDNx forwarder for prefix %s",
                   self._prefix.toUri())
+                if self._onRegisterSuccess != None:
+                    self._onRegisterSuccess(self._prefix, self._registeredPrefixId)
 
         def onTimeout(self, interest):
             """
@@ -1079,8 +1094,8 @@ class Node(object):
                     #   _registeredPrefixTable on the first try.
                     fetcher = Node._NdndIdFetcher(
                       self._node, 0, self._prefix, self._onInterest,
-                      self._onRegisterFailed, self._flags, self._wireFormat,
-                      self._face)
+                      self._onRegisterFailed, self._onRegisterSuccess,
+                      self._flags, self._wireFormat, self._face)
                     # We send the interest using the given wire format so that the hub
                     # receives (and sends) in the application's desired wire format.
                     self._node.expressInterest(
