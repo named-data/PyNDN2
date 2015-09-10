@@ -3,6 +3,7 @@
 # Copyright (C) 2014-2015 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
+# From ndn-cxx security by Yingdi Yu <yingdi@cs.ucla.edu>.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by

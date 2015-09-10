@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2014-2015 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# From ndn-cxx security by Yingdi Yu <yingdi@cs.ucla.edu>.
 # This uses cocoapy in pyglet http://www.pyglet.org/. See contrib/cocoapy/LICENSE
 #
 # This program is free software: you can redistribute it and/or modify
