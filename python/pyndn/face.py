@@ -23,6 +23,7 @@ communication.
 """
 
 import os
+import collections
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.forwarding_flags import ForwardingFlags
@@ -253,22 +254,22 @@ class Face(object):
           wireFormat)
 
     def registerPrefix(
-      self, prefix, onInterest, onRegisterFailed, flags = None,
-      wireFormat = None):
+      self, prefix, onInterest, onRegisterFailed, onRegisterSuccess = None,
+      flags = None, wireFormat = None):
         """
         Register prefix with the connected NDN hub and call onInterest when a
         matching interest is received. If you have not called
         setCommandSigningInfo, this assumes you are connecting to NDNx. If you
         have called setCommandSigningInfo, this first sends an NFD registration
         request, and if that times out then this sends an NDNx registration
-        request. If need to register a prefix with NFD, you must first call
+        request. If you need to register a prefix with NFD, you must first call
         setCommandSigningInfo.
 
         :param Name prefix: The Name for the prefix to register. This copies the
           Name.
-        :param onInterest: (optional) If not None, this creates an interest
-          filter from prefix so that when an Interest is received which matches
-          the filter, this calls
+        :param onInterest: If not None, this creates an interest filter from
+          prefix so that when an Interest is received which matches the filter,
+          this calls
           onInterest(prefix, interest, face, interestFilterId, filter).
           NOTE: You must not change the prefix or filter objects - if you need to
           change them then make a copy. If onInterest is None, it is ignored and
@@ -277,6 +278,13 @@ class Face(object):
         :param onRegisterFailed: If register prefix fails for any reason, this
           calls onRegisterFailed(prefix).
         :type onRegisterFailed: function object
+        :param onRegisterSuccess: (optional) This calls
+          onRegisterSuccess.onRegisterSuccess(prefix, registeredPrefixId) when
+          this receives a success message from the forwarder. If
+          onRegisterSuccess is None or omitted, this does not use it. (The
+          onRegisterSuccess parameter comes after onRegisterFailed because it
+          can be None or omitted, unlike onRegisterFailed.)
+        :type onRegisterSuccess: function object
         :param ForwardingFlags flags: (optional) The flags for finer control of
           which interests are forwardedto the application.
         :param wireFormat: (optional) A WireFormat object used to encode this
@@ -289,26 +297,37 @@ class Face(object):
 
         # Node.registerPrefix requires a copy of the prefix.
         self._registerPrefixHelper(
-          registeredPrefixId, Name(prefix), onInterest, onRegisterFailed, flags,
-          wireFormat)
+          registeredPrefixId, Name(prefix), onInterest, onRegisterFailed,
+          onRegisterSuccess, flags, wireFormat)
 
         return registeredPrefixId
 
     def _registerPrefixHelper(
       self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
-      arg5 = None, arg6 = None):
+      arg5 = None, arg6 = None, arg7 = None):
         """
         This is a protected helper method to do the work of registerPrefix to
         resolve the different overloaded forms. The registeredPrefixId is from
         getNextEntryId(). This has no return value and can be used in a callback.
         """
-        # arg5 and arg 6 may be:
-        # ForwardingFlags, WireFormat
-        # ForwardingFlags, None
-        # WireFormat, None
-        # None, None
+        # arg5, arg6, arg7 may be:
+        # OnRegisterSuccess, ForwardingFlags, WireFormat
+        # OnRegisterSuccess, ForwardingFlags, None
+        # OnRegisterSuccess, WireFormat,      None
+        # OnRegisterSuccess, None,            None
+        # ForwardingFlags,   WireFormat,      None
+        # ForwardingFlags,   None,            None
+        # WireFormat,        None,            None
+        # None,              None,            None
+        if isinstance(arg5, collections.Callable):
+            onRegisterSuccess = arg5
+        else:
+            onRegisterSuccess = None
+
         if isinstance(arg5, ForwardingFlags):
             flags = arg5
+        elif isinstance(arg6, ForwardingFlags):
+            flags = arg6
         else:
             flags = ForwardingFlags()
 
@@ -316,13 +335,16 @@ class Face(object):
             wireFormat = arg5
         elif isinstance(arg6, WireFormat):
             wireFormat = arg6
+        elif isinstance(arg7, WireFormat):
+            wireFormat = arg7
         else:
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
         return self._node.registerPrefix(
-          registeredPrefixId, prefixCopy, onInterest, onRegisterFailed, flags,
-          wireFormat, self._commandKeyChain, self._commandCertificateName, self)
+          registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
+          onRegisterSuccess, flags, wireFormat, self._commandKeyChain,
+          self._commandCertificateName, self)
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
