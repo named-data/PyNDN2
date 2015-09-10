@@ -140,18 +140,20 @@ class KeyChain(object):
         return self._identityManager.generateRSAKeyPair(
           identityName, isKsk, keySize)
 
-    def setDefaultKeyForIdentity(self, keyName, identityName = None):
+    def setDefaultKeyForIdentity(self, keyName, identityNameCheck = None):
         """
-        Set a key as the default key of an identity.
+        Set a key as the default key of an identity. The identity name is
+        inferred from keyName.
 
         :param Name keyName: The name of the key.
-        :param Name identityName: (optional) the name of the identity. If not
-          specified, the identity name is inferred from the keyName.
+        :param Name identityNameCheck: (optional) The identity name to check
+          that the keyName contains the same identity name. If an empty name, it
+          is ignored.
         """
-        if identityName == None:
-            identityName = Name()
+        if identityNameCheck == None:
+            identityNameCheck = Name()
         return self._identityManager.setDefaultKeyForIdentity(
-          keyName, identityName)
+          keyName, identityNameCheck)
 
     def generateRSAKeyPairAsDefault(
           self, identityName, isKsk = False, keySize = 2048):

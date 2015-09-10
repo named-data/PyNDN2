@@ -190,17 +190,19 @@ class IdentityManager(object):
         keyName = self._generateKeyPair(identityName, isKsk, RsaKeyParams(keySize))
         return keyName
 
-    def setDefaultKeyForIdentity(self, keyName, identityName = None):
+    def setDefaultKeyForIdentity(self, keyName, identityNameCheck = None):
         """
-        Set a key as the default key of an identity.
+        Set a key as the default key of an identity. The identity name is
+        inferred from keyName.
 
         :param Name keyName: The name of the key.
-        :param Name identityName: (optional) the name of the identity. If not
-          specified, the identity name is inferred from the keyName.
+        :param Name identityNameCheck: (optional) The identity name to check
+          that the keyName contains the same identity name. If an empty name, it
+          is ignored.
         """
-        if identityName == None:
-            identityName = Name()
-        self._identityStorage.setDefaultKeyNameForIdentity(keyName, identityName)
+        if identityNameCheck == None:
+            identityNameCheck = Name()
+        self._identityStorage.setDefaultKeyNameForIdentity(keyName, identityNameCheck)
 
     def getDefaultKeyNameForIdentity(self,identityName = None):
         """

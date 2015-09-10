@@ -285,12 +285,13 @@ class MemoryIdentityStorage(IdentityStorage):
 
     def setDefaultKeyNameForIdentity(self, keyName, identityNameCheck = None):
         """
-        Set the default key name for the specified identity.
+        Set a key as the default key of an identity. The identity name is
+        inferred from keyName.
 
-
-        :param Name keyName: The key name.
-        :param Name identityNameCheck: (optional) The identity name to check the
-          keyName.
+        :param Name keyName: The name of the key.
+        :param Name identityNameCheck: (optional) The identity name to check
+          that the keyName contains the same identity name. If an empty name, it
+          is ignored.
         """
         identityName = keyName.getPrefix(-1)
 
