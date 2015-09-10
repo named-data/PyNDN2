@@ -95,8 +95,7 @@ class IdentityManager(object):
 
         if generateKey:
             keyName = self._generateKeyPair(identityName, True, params)
-            self._identityStorage.setDefaultKeyNameForIdentity(
-              keyName, identityName)
+            self._identityStorage.setDefaultKeyNameForIdentity(keyName)
 
         makeCert = True
         try:
@@ -230,7 +229,7 @@ class IdentityManager(object):
         :rtype: Name
         """
         newKeyName = self.generateRSAKeyPair(identityName, isKsk, keySize)
-        self._identityStorage.setDefaultKeyNameForIdentity(newKeyName, identityName)
+        self._identityStorage.setDefaultKeyNameForIdentity(newKeyName)
         return newKeyName
 
     def getPublicKey(self, keyName):
