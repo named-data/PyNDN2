@@ -30,98 +30,24 @@ class ForwardingFlags(object):
     object.
 
     :param ForwardingFlags value: (optional) If value is a ForwardingFlags, copy
-      its values.  If value is omitted, the type is the default with "active"
-      and "childInherit" True and other flags False.
+      its values.  If value is omitted, the type is the default with
+      "childInherit" True and other flags False.
     """
     def __init__(self, value = None):
         if value == None:
-            self._active = True
             self._childInherit = True
-            self._advertise = False
-            self._last = False
             self._capture = False
-            self._local = False
-            self._tap = False
-            self._captureOk = False
         elif type(value) is ForwardingFlags:
             # Copy its values.
-            self._active = value._active
             self._childInherit = value._childInherit
-            self._advertise = value._advertise
-            self._last = value._last
             self._capture = value._capture
-            self._local = value._local
-            self._tap = value._tap
-            self._captureOk = value._captureOk
         else:
             raise RuntimeError(
               "Unrecognized type for ForwardingFlags constructor: " +
               str(type(value)))
 
-    ForwardingEntryFlags_ACTIVE         = 1
-    ForwardingEntryFlags_CHILD_INHERIT  = 2
-    ForwardingEntryFlags_ADVERTISE      = 4
-    ForwardingEntryFlags_LAST           = 8
-    ForwardingEntryFlags_CAPTURE       = 16
-    ForwardingEntryFlags_LOCAL         = 32
-    ForwardingEntryFlags_TAP           = 64
-    ForwardingEntryFlags_CAPTURE_OK   = 128
-
     NfdForwardingFlags_CHILD_INHERIT = 1
     NfdForwardingFlags_CAPTURE       = 2
-
-    def getForwardingEntryFlags(self):
-        """
-        Get an integer with the bits set according to the flags as used by the
-        ForwardingEntry message.
-
-        :return: An integer with the bits set.
-        :rtype: int
-        """
-        result = 0
-
-        if self._active :
-            result |= ForwardingFlags.ForwardingEntryFlags_ACTIVE
-        if self._childInherit:
-            result |= ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT
-        if self._advertise:
-            result |= ForwardingFlags.ForwardingEntryFlags_ADVERTISE
-        if self._last:
-            result |= ForwardingFlags.ForwardingEntryFlags_LAST
-        if self._capture:
-            result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE
-        if self._local:
-            result |= ForwardingFlags.ForwardingEntryFlags_LOCAL
-        if self._tap:
-            result |= ForwardingFlags.ForwardingEntryFlags_TAP
-        if self._captureOk:
-            result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK
-
-        return result
-
-    def setForwardingEntryFlags(self, forwardingEntryFlags):
-        """
-        Set the flags according to the bits in forwardingEntryFlags as used by
-        the ForwardingEntry message.
-
-        :param int forwardingEntryFlags: An integer with the bits set.
-        """
-        self._active = True if (forwardingEntryFlags &
-                                ForwardingFlags.ForwardingEntryFlags_ACTIVE) else False
-        self._childInherit = True if (forwardingEntryFlags &
-                                      ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT) else False
-        self._advertise = True if (forwardingEntryFlags &
-                                   ForwardingFlags.ForwardingEntryFlags_ADVERTISE) else False
-        self._last = True if (forwardingEntryFlags &
-                              ForwardingFlags.ForwardingEntryFlags_LAST) else False
-        self._capture = True if (forwardingEntryFlags &
-                                 ForwardingFlags.ForwardingEntryFlags_CAPTURE) else False
-        self._local = True if (forwardingEntryFlags &
-                               ForwardingFlags.ForwardingEntryFlags_LOCAL) else False
-        self._tap = True if (forwardingEntryFlags &
-                             ForwardingFlags.ForwardingEntryFlags_TAP) else False
-        self._captureOk = True if (forwardingEntryFlags &
-                                   ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK) else False
 
     def getNfdForwardingFlags(self):
         """
@@ -152,77 +78,28 @@ class ForwardingFlags(object):
         self._capture = True if (nfdForwardingFlags &
                                  ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
 
-    def getActive(self):
-        return self._active
-
     def getChildInherit(self):
         return self._childInherit
-
-    def getAdvertise(self):
-        return self._advertise
-
-    def getLast(self):
-        return self._last
 
     def getCapture(self):
         return self._capture
 
-    def getLocal(self):
-        return self._local
-
-    def getTap(self):
-        return self._tap
-
-    def getCaptureOk(self):
-        return self._captureOk
-
-
-    def setActive(self, value):
-        self._active = value
-
     def setChildInherit(self, value):
         self._childInherit = value
-
-    def setAdvertise(self, value):
-        self._advertise = value
-
-    def setLast(self, value):
-        self._last = value
 
     def setCapture(self, value):
         self._capture = value
 
-    def setLocal(self, value):
-        self._local = value
-
-    def setTap(self, value):
-        self._tap = value
-
-    def setCaptureOk(self, value):
-        self._captureOk = value
-
     # Support property-based equivalence check
     # TODO: Desired syntax?
     def equals(self, other):
-        if  (self._active == other._active
-        and self._childInherit == other._childInherit
-        and self._advertise == other._advertise
-        and self._last == other._last
-        and self._capture == other._capture
-        and self._local == other._local
-        and self._tap == other._tap
-        and self._captureOk == other._captureOk):
+        if (self._childInherit == other._childInherit
+        and self._capture == other._capture):
             return True
         else:
             return False
 
 
     # Create managed properties for read/write properties of the class for more pythonic syntax.
-    active = property(getActive, setActive)
     childInherit = property(getChildInherit, setChildInherit)
-    advertise = property(getAdvertise, setAdvertise)
-    last = property(getLast, setLast)
     capture = property(getCapture, setCapture)
-    local = property(getLocal, setLocal)
-    tap = property(getTap, setTap)
-    captureOk = property(getCaptureOk, setCaptureOk)

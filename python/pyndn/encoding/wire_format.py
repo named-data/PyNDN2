@@ -24,12 +24,6 @@ You should use a derived class such as TlvWireFormat.
 """
 
 class WireFormat(object):
-    # NDNx support and binary XML (ccnb or ndnb) encoding is deprecated and code
-    # with throw an exception. To enable support while you upgrade your code to
-    # use NFD, set WireFormat.ENABLE_NDNX = True . NDNx support will be
-    # completely removed in an upcoming release.
-    ENABLE_NDNX = False
-
     _defaultWireFormat = None
 
     def encodeName(self, name):
@@ -133,34 +127,6 @@ class WireFormat(object):
           override.
         """
         raise RuntimeError("decodeData is not implemented")
-
-    def encodeForwardingEntry(self, forwardingEntry):
-        """
-        Encode forwardingEntry and return the encoding.  Your derived class
-        should override.
-
-        :param ForwardingEntry forwardingEntry: The ForwardingEntry object to
-          encode.
-        :return: A Blob containing the encoding.
-        :rtype: Blob
-        :raises RuntimeError: for unimplemented if the derived class does not
-          override.
-        """
-        raise RuntimeError("encodeForwardingEntry is not implemented")
-
-    def decodeForwardingEntry(self, forwardingEntry, input):
-        """
-        Decode input as an forwardingEntry and set the fields of the
-        forwardingEntry object. Your derived class should override.
-
-        :param ForwardingEntry forwardingEntry: The ForwardingEntry object whose
-          fields are updated.
-        :param input: The array with the bytes to decode.
-        :type input: An array type with int elements
-        :raises RuntimeError: for unimplemented if the derived class does not
-          override.
-        """
-        raise RuntimeError("decodeForwardingEntry is not implemented")
 
     def encodeControlParameters(self, controlParameters):
         """

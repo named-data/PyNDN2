@@ -87,7 +87,7 @@ class ControlParameters(object):
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         :param wireFormat: (optional) A WireFormat object used to decode this
-           ForwardingEntry. If omitted, use WireFormat.getDefaultWireFormat().
+           ControlParameters. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         """
         if wireFormat == None:
