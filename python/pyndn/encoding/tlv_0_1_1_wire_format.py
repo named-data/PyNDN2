@@ -91,8 +91,6 @@ class Tlv0_1_1WireFormat(WireFormat):
         # Encode backwards.
         encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
           Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
-        # Access _scope directly so that we don't raise the deprecated exception.
-        encoder.writeOptionalNonNegativeIntegerTlv(Tlv.Scope, interest._scope)
 
         # Encode the Nonce as 4 bytes.
         if interest.getNonce().size() == 0:
@@ -160,9 +158,6 @@ class Tlv0_1_1WireFormat(WireFormat):
             self._decodeSelectors(interest, decoder)
         # Require a Nonce, but don't force it to be 4 bytes.
         nonce = Blob(decoder.readBlobTlv(Tlv.Nonce))
-        # Access _scope directly so that we don't raise the deprecated exception.
-        interest._scope = decoder.readOptionalNonNegativeIntegerTlv(
-          Tlv.Scope, endOffset)
         interest.setInterestLifetimeMilliseconds(
            decoder.readOptionalNonNegativeIntegerTlvAsFloat
            (Tlv.InterestLifetime, endOffset))
