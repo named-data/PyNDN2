@@ -204,9 +204,10 @@ class BoostInfoParser(object):
         read(fileName) reads fileName from the file system.
         read(input, inputName) reads from the input, in which case inputName is
         used only for log messages, etc.
+        
         :param str fileName: The path to the INFO file.
         :param str input: The contents of the INFO file, with lines separated by
-          "\n" or "\r\n".
+          NL or CR/NL.
         :param str inputName: Use with input for log messages, etc.
         """
         if Common.typeIsString(inputName):
