@@ -42,7 +42,6 @@ class Interest(object):
             self._mustBeFresh = value._mustBeFresh
 
             self._nonce = value.getNonce()
-            self._scope = value._scope
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
             self._defaultWireEncoding = value.getDefaultWireEncoding()
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
@@ -57,7 +56,6 @@ class Interest(object):
             self._mustBeFresh = True
 
             self._nonce = Blob()
-            self._scope = None
             self._interestLifetimeMilliseconds = None
             self._defaultWireEncoding = SignedBlob()
             self._defaultWireEncodingFormat = None
@@ -147,16 +145,6 @@ class Interest(object):
             self._getNonceChangeCount = self.getChangeCount()
 
         return self._nonce
-
-    def getScope(self):
-        """
-        :deprecated: Scope is not used by NFD.
-        """
-        if not WireFormat.ENABLE_NDNX:
-            raise RuntimeError(
-              "getScope is for NDNx and is deprecated. To enable while you upgrade your code to not use Scope, set WireFormat.ENABLE_NDNX = True")
-
-        return self._scope
 
     def getInterestLifetimeMilliseconds(self):
         """
@@ -276,18 +264,6 @@ class Interest(object):
         self._getNonceChangeCount = self.getChangeCount()
         return self
 
-    def setScope(self, scope):
-        """
-        :deprecated: Scope is not used by NFD.
-        """
-        if not WireFormat.ENABLE_NDNX:
-            raise RuntimeError(
-              "setScope is for NDNx and is deprecated. To enable while you upgrade your code to not use Scope, set WireFormat.ENABLE_NDNX = True")
-
-        self._scope = scope
-        self._changeCount += 1
-        return self
-
     def setInterestLifetimeMilliseconds(self, interestLifetimeMilliseconds):
         """
         Set the interest lifetime.
@@ -390,8 +366,6 @@ class Interest(object):
             selectors += "&ndn.ChildSelector=" + repr(self._childSelector)
         if self._mustBeFresh:
             selectors += "&ndn.MustBeFresh=true"
-        if self._scope != None:
-            selectors += "&ndn.Scope=" + repr(self._scope)
         if self._interestLifetimeMilliseconds != None:
             selectors += "&ndn.InterestLifetime=" + repr(
               int(round(self._interestLifetimeMilliseconds)))
@@ -501,7 +475,6 @@ class Interest(object):
     childSelector = property(getChildSelector, setChildSelector)
     mustBeFresh = property(getMustBeFresh, setMustBeFresh)
     nonce = property(getNonce, setNonce)
-    scope = property(getScope, setScope)
     interestLifetimeMilliseconds = property(getInterestLifetimeMilliseconds, setInterestLifetimeMilliseconds)
 
 
