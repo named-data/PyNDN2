@@ -158,3 +158,4 @@ class ContentType(object):
     BLOB = 0
     LINK = 1
     KEY =  2
+    NACK = 3
