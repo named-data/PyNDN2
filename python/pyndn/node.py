@@ -22,7 +22,6 @@ This module defines the Node class which provides functionality for the Face
 class.
 """
 
-import hashlib
 import inspect
 import logging
 import threading
@@ -30,11 +29,8 @@ from random import SystemRandom
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
-from pyndn.key_locator import KeyLocatorType
-from pyndn.forwarding_entry import ForwardingEntry
 from pyndn.control_parameters import ControlParameters
 from pyndn.interest_filter import InterestFilter
-from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
@@ -586,7 +582,7 @@ class Node(object):
         # Send the registration interest.
         response = Node._RegisterResponse(
           self, prefix, onInterest, onRegisterFailed, onRegisterSuccess, flags,
-          TlvWireFormat.get(), True, face, registeredPrefixId)
+          TlvWireFormat.get(), face, registeredPrefixId)
         self.expressInterest(
           self.getNextEntryId(), commandInterest, response.onData,
           response.onTimeout, TlvWireFormat.get(), face)
@@ -869,8 +865,7 @@ class Node(object):
         response or a timeout, call onRegisterFailed.
         """
         def __init__(self, node, prefix, onInterest, onRegisterFailed,
-                onRegisterSuccess, flags, wireFormat, isNfdCommand, face,
-                registeredPrefixId):
+                onRegisterSuccess, flags, wireFormat, face, registeredPrefixId):
             self._node = node
             self._prefix = prefix
             self._onInterest = onInterest
@@ -878,7 +873,6 @@ class Node(object):
             self._onRegisterSuccess = onRegisterSuccess
             self._flags = flags
             self._wireFormat = wireFormat
-            self._isNfdCommand = isNfdCommand
             self._face = face
             self._registeredPrefixId = registeredPrefixId
 
