@@ -134,34 +134,6 @@ class WireFormat(object):
         """
         raise RuntimeError("decodeData is not implemented")
 
-    def encodeForwardingEntry(self, forwardingEntry):
-        """
-        Encode forwardingEntry and return the encoding.  Your derived class
-        should override.
-
-        :param ForwardingEntry forwardingEntry: The ForwardingEntry object to
-          encode.
-        :return: A Blob containing the encoding.
-        :rtype: Blob
-        :raises RuntimeError: for unimplemented if the derived class does not
-          override.
-        """
-        raise RuntimeError("encodeForwardingEntry is not implemented")
-
-    def decodeForwardingEntry(self, forwardingEntry, input):
-        """
-        Decode input as an forwardingEntry and set the fields of the
-        forwardingEntry object. Your derived class should override.
-
-        :param ForwardingEntry forwardingEntry: The ForwardingEntry object whose
-          fields are updated.
-        :param input: The array with the bytes to decode.
-        :type input: An array type with int elements
-        :raises RuntimeError: for unimplemented if the derived class does not
-          override.
-        """
-        raise RuntimeError("decodeForwardingEntry is not implemented")
-
     def encodeControlParameters(self, controlParameters):
         """
         Encode controlParameters and return the encoding.  Your derived class

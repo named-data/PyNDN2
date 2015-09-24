@@ -19,14 +19,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn import control_parameters, data, exclude, face, forwarding_entry
+from pyndn import control_parameters, data, exclude, face
 from pyndn import forwarding_flags, interest, interest_filter, key_locator
 from pyndn import meta_info, name, digest_sha256_signature
 from pyndn import sha256_with_rsa_signature, signature
-__all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_entry',
-           'forwarding_flags', 'interest', 'interest_filter', 'key_locator',
-           'meta_info', 'name', 'digest_sha256_signature',
-           'sha256_with_rsa_signature', 'signature']
+__all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_flags', 
+           'interest', 'interest_filter', 'key_locator', 'meta_info', 'name',
+           'digest_sha256_signature', 'sha256_with_rsa_signature', 'signature']
 
 import sys as _sys
 
@@ -35,7 +34,6 @@ try:
     from pyndn.data import *
     from pyndn.exclude import *
     from pyndn.face import *
-    from pyndn.forwarding_entry import *
     from pyndn.forwarding_flags import *
     from pyndn.interest import *
     from pyndn.interest_filter import *

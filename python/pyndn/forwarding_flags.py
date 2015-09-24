@@ -58,70 +58,8 @@ class ForwardingFlags(object):
               "Unrecognized type for ForwardingFlags constructor: " +
               str(type(value)))
 
-    ForwardingEntryFlags_ACTIVE         = 1
-    ForwardingEntryFlags_CHILD_INHERIT  = 2
-    ForwardingEntryFlags_ADVERTISE      = 4
-    ForwardingEntryFlags_LAST           = 8
-    ForwardingEntryFlags_CAPTURE       = 16
-    ForwardingEntryFlags_LOCAL         = 32
-    ForwardingEntryFlags_TAP           = 64
-    ForwardingEntryFlags_CAPTURE_OK   = 128
-
     NfdForwardingFlags_CHILD_INHERIT = 1
     NfdForwardingFlags_CAPTURE       = 2
-
-    def getForwardingEntryFlags(self):
-        """
-        Get an integer with the bits set according to the flags as used by the
-        ForwardingEntry message.
-
-        :return: An integer with the bits set.
-        :rtype: int
-        """
-        result = 0
-
-        if self._active :
-            result |= ForwardingFlags.ForwardingEntryFlags_ACTIVE
-        if self._childInherit:
-            result |= ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT
-        if self._advertise:
-            result |= ForwardingFlags.ForwardingEntryFlags_ADVERTISE
-        if self._last:
-            result |= ForwardingFlags.ForwardingEntryFlags_LAST
-        if self._capture:
-            result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE
-        if self._local:
-            result |= ForwardingFlags.ForwardingEntryFlags_LOCAL
-        if self._tap:
-            result |= ForwardingFlags.ForwardingEntryFlags_TAP
-        if self._captureOk:
-            result |= ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK
-
-        return result
-
-    def setForwardingEntryFlags(self, forwardingEntryFlags):
-        """
-        Set the flags according to the bits in forwardingEntryFlags as used by
-        the ForwardingEntry message.
-
-        :param int forwardingEntryFlags: An integer with the bits set.
-        """
-        self._active = True if (forwardingEntryFlags &
-                                ForwardingFlags.ForwardingEntryFlags_ACTIVE) else False
-        self._childInherit = True if (forwardingEntryFlags &
-                                      ForwardingFlags.ForwardingEntryFlags_CHILD_INHERIT) else False
-        self._advertise = True if (forwardingEntryFlags &
-                                   ForwardingFlags.ForwardingEntryFlags_ADVERTISE) else False
-        self._last = True if (forwardingEntryFlags &
-                              ForwardingFlags.ForwardingEntryFlags_LAST) else False
-        self._capture = True if (forwardingEntryFlags &
-                                 ForwardingFlags.ForwardingEntryFlags_CAPTURE) else False
-        self._local = True if (forwardingEntryFlags &
-                               ForwardingFlags.ForwardingEntryFlags_LOCAL) else False
-        self._tap = True if (forwardingEntryFlags &
-                             ForwardingFlags.ForwardingEntryFlags_TAP) else False
-        self._captureOk = True if (forwardingEntryFlags &
-                                   ForwardingFlags.ForwardingEntryFlags_CAPTURE_OK) else False
 
     def getNfdForwardingFlags(self):
         """
