@@ -35,7 +35,6 @@ from pyndn.util.common import Common
 from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
-from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
 
 _systemRandom = SystemRandom()
@@ -375,18 +374,6 @@ class Node(object):
         :param element: The bytes of the incoming element.
         :type element: An array type with int elements
         """
-        # The type codes for TLV Interest and Data packets are chosen to not
-        #   conflict with the first byte of a binary XML packet, so we canjust
-        #   look at the first byte.
-        if not (element[0] == Tlv.Interest or element[0] == Tlv.Data):
-            # Ignore non-TLV elements.
-            # Assume it is Binary XML.
-            if not WireFormat.ENABLE_NDNX:
-                raise RuntimeError(
-                  "BinaryXmlWireFormat (NDNx) is deprecated. To enable while you upgrade your network to use NDN-TLV, set WireFormat.ENABLE_NDNX = True")
-
-            return
-
         # First, decode as Interest or Data.
         interest = None
         data = None
