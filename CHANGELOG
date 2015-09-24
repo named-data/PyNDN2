@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.0beta4 (2015-09-24)
---------------------------------------------------
+PyNDN v2.1beta1 (2015-09-24)
+----------------------------
 
 Changes
 * In security, added KeyChain.createIdentityAndCertificate which returns the
