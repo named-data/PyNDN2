@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.0beta4 (2015-09-09)
+Interim changes since PyNDN v2.0beta4 (2015-09-24)
 --------------------------------------------------
 
 Changes
@@ -25,6 +25,13 @@ Changes
 * In security ConfigPolicyManager, added load(input, inputName) to read
   configuration rules from a string.
 * In integration_tests, added test_registration_callbacks.
+* In Face.registerPrefix, removed deprecated support to register with NDNx.
+* In Interest, removed deprecated NDNx get/setScope.
+* In ForwardingFlags, removed deprecated NDNx flags active, advertise, last,
+  local, tap and captureOK.
+* Removed deprecated NDNx ForwardingEntry.
+* Removed deprecated NDNx support for binary XML packets.
+* In WireFormat, removed ENABLE_NDNX since all NDNx support is now removed.
 
 Deprecated
 * Deprecated KeyChain.createIdentity. Use createIdentityAndCertificate which
