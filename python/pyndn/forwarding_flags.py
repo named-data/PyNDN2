@@ -30,29 +30,17 @@ class ForwardingFlags(object):
     object.
 
     :param ForwardingFlags value: (optional) If value is a ForwardingFlags, copy
-      its values.  If value is omitted, the type is the default with "active"
-      and "childInherit" True and other flags False.
+      its values.  If value is omitted, the type is the default with
+      "childInherit" True and other flags False.
     """
     def __init__(self, value = None):
         if value == None:
-            self._active = True
             self._childInherit = True
-            self._advertise = False
-            self._last = False
             self._capture = False
-            self._local = False
-            self._tap = False
-            self._captureOk = False
         elif type(value) is ForwardingFlags:
             # Copy its values.
-            self._active = value._active
             self._childInherit = value._childInherit
-            self._advertise = value._advertise
-            self._last = value._last
             self._capture = value._capture
-            self._local = value._local
-            self._tap = value._tap
-            self._captureOk = value._captureOk
         else:
             raise RuntimeError(
               "Unrecognized type for ForwardingFlags constructor: " +
@@ -90,77 +78,28 @@ class ForwardingFlags(object):
         self._capture = True if (nfdForwardingFlags &
                                  ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
 
-    def getActive(self):
-        return self._active
-
     def getChildInherit(self):
         return self._childInherit
-
-    def getAdvertise(self):
-        return self._advertise
-
-    def getLast(self):
-        return self._last
 
     def getCapture(self):
         return self._capture
 
-    def getLocal(self):
-        return self._local
-
-    def getTap(self):
-        return self._tap
-
-    def getCaptureOk(self):
-        return self._captureOk
-
-
-    def setActive(self, value):
-        self._active = value
-
     def setChildInherit(self, value):
         self._childInherit = value
-
-    def setAdvertise(self, value):
-        self._advertise = value
-
-    def setLast(self, value):
-        self._last = value
 
     def setCapture(self, value):
         self._capture = value
 
-    def setLocal(self, value):
-        self._local = value
-
-    def setTap(self, value):
-        self._tap = value
-
-    def setCaptureOk(self, value):
-        self._captureOk = value
-
     # Support property-based equivalence check
     # TODO: Desired syntax?
     def equals(self, other):
-        if  (self._active == other._active
-        and self._childInherit == other._childInherit
-        and self._advertise == other._advertise
-        and self._last == other._last
-        and self._capture == other._capture
-        and self._local == other._local
-        and self._tap == other._tap
-        and self._captureOk == other._captureOk):
+        if (self._childInherit == other._childInherit
+        and self._capture == other._capture):
             return True
         else:
             return False
 
 
     # Create managed properties for read/write properties of the class for more pythonic syntax.
-    active = property(getActive, setActive)
     childInherit = property(getChildInherit, setChildInherit)
-    advertise = property(getAdvertise, setAdvertise)
-    last = property(getLast, setLast)
     capture = property(getCapture, setCapture)
-    local = property(getLocal, setLocal)
-    tap = property(getTap, setTap)
-    captureOk = property(getCaptureOk, setCaptureOk)
