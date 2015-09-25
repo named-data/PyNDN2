@@ -376,7 +376,7 @@ class BasicIdentityStorage(IdentityStorage):
 
         cursor = self._database.cursor()
         cursor.execute("SELECT certificate_data FROM Certificate WHERE cert_name=?",
-            (certificateName.toUri()))
+            (certificateName.toUri(), ))
         (certData, ) = cursor.fetchone()
         cursor.close()
 
