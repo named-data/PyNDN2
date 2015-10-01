@@ -31,8 +31,13 @@ class TestNameComponentMethods(ut.TestCase):
         expected = "entr%C3%A9e"
         self.assertEqual(comp1.toEscapedString(), expected)
 
-    def test_bytearray(self):
-        pass
+    def test_compare(self):
+        c7f = Name("/%7F").get(0)
+        c80 = Name("/%80").get(0)
+        c81 = Name("/%81").get(0)
+
+        self.assertTrue(c81.compare(c80) > 0, "%81 should be greater than %80")
+        self.assertTrue(c80.compare(c7f) > 0, "%80 should be greater than %7f")
 
     ## many more component methods to be tested!
 
