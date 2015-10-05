@@ -468,6 +468,11 @@ class ChronoSync2013(object):
 #pylint: enable=E1103
                 data = Data(interest.getName())
                 data.setContent(Blob(array))
+                if interest.getName().get(-1).toEscapedString() == "00":
+                    # Limit the lifetime of replies to interest for "00" since
+                    # they can be different.
+                    data.getMetaInfo().setFreshnessPeriod(1000)
+
                 self._keyChain.sign(data, self._certificateName)
                 try:
                     face.putData(data)
