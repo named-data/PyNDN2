@@ -52,7 +52,7 @@ Optional: To install pytest, mock and gevent, in a terminal enter:
 
     sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
 
-## OS X 10.9.5, OS X 10.10.2
+## OS X 10.9.5, OS X 10.10.2, OS X 10.11
 Install Xcode.  (Xcode seems to already have the Command Line Tools.)  
 In a terminal, enter:
 
