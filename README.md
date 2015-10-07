@@ -2,7 +2,7 @@ PyNDN: A Named Data Networking client library with TLV wire format support in na
 ===========================================================================================
 
 PyNDN 2.0 is a new implementation of a Named Data Networking client library written in pure Python.
-It is wire format compatible with the new NDN-TLV encoding, with ndnd-tlv and NFD.
+It is wire format compatible with the NDN-TLV encoding.
 
 ---
 
@@ -27,8 +27,7 @@ http://redmine.named-data.net/projects/pyndn/issues
 
 ---
 	
-The library currently requires a remote NDN daemon, and has been tested with ndnd-tlv, from
-the NDN-TLV package: https://github.com/named-data/ndnd-tlv and with NFD from the package
+The library currently requires a remote NDN daemon, and has been tested with NFD from the package
 https://github.com/named-data/NFD .
 
 The API follows the NDN Common Client Library API also used by ndn-cpp (C++) and ndn-js (JavaScript).
