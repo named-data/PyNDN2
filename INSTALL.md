@@ -107,7 +107,7 @@ Optional: To install pytest, mock and gevent, in a terminal enter:
 
 (Protobuf is already installed.)
 
-## Ubuntu 14.04 (64 bit and 32 bit)
+## Ubuntu 14.04 (64 bit and 32 bit) and 15.04 (64 bit)
 (PyCrypto is already installed.)
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
