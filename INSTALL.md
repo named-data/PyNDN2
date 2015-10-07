@@ -24,34 +24,6 @@ To use easy_install, change directory to the PyNDN root and enter:
 
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
-## OS X 10.8.5
-Install Xcode.  
-In Xcode Preferences > Downloads, install "Command Line Tools".  
-In a terminal, enter:  
-
-    sudo easy_install pip
-    sudo CFLAGS=-Qunused-arguments pip install pycrypto
-
-Optional: To install trollius (Python <= 3.2), in a terminal enter:
-
-    sudo pip install trollius
-
-Optional: To install Protobuf in Python 2, in a terminal enter:
-
-    sudo pip install protobuf
-
-Optional: To install Protobuf in Python 3, in a terminal enter:
-
-    sudo pip install protobuf-py3
-
-Optional: To install Sphinx, in a terminal enter:
-
-    sudo pip install sphinx
-
-Optional: To install pytest, mock and gevent, in a terminal enter:
-
-    sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
-
 ## OS X 10.9.5, OS X 10.10.2, OS X 10.11
 Install Xcode.  (Xcode seems to already have the Command Line Tools.)  
 In a terminal, enter:
