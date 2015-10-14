@@ -27,15 +27,15 @@ The target object must have a method getChangeCount.
 
 class ChangeCounter(object):
     """
-    Create a new ChangeCounter to track the given target.  This sets the local
-    change counter to target.getChangeCount().
+    Create a new ChangeCounter to track the given target. If target is not None,
+    this sets the local change counter to target.getChangeCount().
 
     :param target: The target to track.
     :type target: An type with method getChangeCount()
     """
     def __init__(self, target):
         self._target = target
-        self._changeCount = target.getChangeCount()
+        self._changeCount = (0 if target == None else target.getChangeCount())
 
     def get(self):
         """
@@ -49,26 +49,29 @@ class ChangeCounter(object):
 
     def set(self, target):
         """
-        Set the target to the given target.  This sets the local change counter
-        to target.getChangeCount().
+        Set the target to the given target. If target is not None, this sets the
+        local change counter to target.getChangeCount().
 
         :param target: The target to track.
         :type target: An type with method getChangeCount()
         """
         self._target = target
-        self._changeCount = target.getChangeCount()
+        self._changeCount = (0 if target == None else target.getChangeCount())
 
     def checkChanged(self):
         """
         If the target's change count is different than the local change count,
         then update the local change count and return True.  Otherwise return
-        False, meaning that the target has not changed.  This is useful since
-        the target (or one of the target's targets) may be changed and you need
-        to find out.
+        False, meaning that the target has not changed. Also, if the target is
+        None, simply return false. This is useful since the target (or one of
+        the target's targets) may be changed and you need to find out.
 
         :return: True if the change count has been updated, false if not.
         :rtype: bool
         """
+        if self._target == None:
+            return False
+        
         targetChangeCount = self._target.getChangeCount()
         if self._changeCount != targetChangeCount:
             self._changeCount = targetChangeCount
