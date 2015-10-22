@@ -568,8 +568,7 @@ class Node(object):
 
         # Send the registration interest.
         response = Node._RegisterResponse(
-          self, prefix, onInterest, onRegisterFailed, onRegisterSuccess, flags,
-          TlvWireFormat.get(), face, registeredPrefixId)
+          prefix, onRegisterFailed, onRegisterSuccess, registeredPrefixId)
         self.expressInterest(
           self.getNextEntryId(), commandInterest, response.onData,
           response.onTimeout, TlvWireFormat.get(), face)
@@ -851,16 +850,11 @@ class Node(object):
         prefix interest sent to the connected NDN hub. If this gets a bad
         response or a timeout, call onRegisterFailed.
         """
-        def __init__(self, node, prefix, onInterest, onRegisterFailed,
-                onRegisterSuccess, flags, wireFormat, face, registeredPrefixId):
-            self._node = node
+        def __init__(self, prefix, onRegisterFailed, onRegisterSuccess,
+              registeredPrefixId):
             self._prefix = prefix
-            self._onInterest = onInterest
             self._onRegisterFailed = onRegisterFailed
             self._onRegisterSuccess = onRegisterSuccess
-            self._flags = flags
-            self._wireFormat = wireFormat
-            self._face = face
             self._registeredPrefixId = registeredPrefixId
 
         def onData(self, interest, responseData):
