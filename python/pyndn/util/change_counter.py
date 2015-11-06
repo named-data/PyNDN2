@@ -71,7 +71,7 @@ class ChangeCounter(object):
         """
         if self._target == None:
             return False
-        
+
         targetChangeCount = self._target.getChangeCount()
         if self._changeCount != targetChangeCount:
             self._changeCount = targetChangeCount

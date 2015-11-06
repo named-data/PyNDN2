@@ -81,7 +81,7 @@ class IdentityManager(object):
         :rtype: Name
         """
         self._identityStorage.addIdentity(identityName)
-        
+
         generateKey = True
         try:
             keyName = self._identityStorage.getDefaultKeyNameForIdentity(

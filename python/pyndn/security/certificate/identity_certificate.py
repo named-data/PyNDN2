@@ -44,7 +44,7 @@ class IdentityCertificate(Certificate):
         elif isinstance(data, Data):
             if not self._isCorrectName(data.getName()):
                 raise SecurityException("Wrong Identity Certificate Name!")
-            
+
             self._setPublicKeyName()
 
     @staticmethod

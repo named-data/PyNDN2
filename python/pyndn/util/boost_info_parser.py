@@ -199,12 +199,12 @@ class BoostInfoParser(object):
 
     def read(self, fileNameOrInput, inputName = None):
         """
-        Add the contents of the file or input string to the root BoostInfoTree. 
+        Add the contents of the file or input string to the root BoostInfoTree.
         There are two forms:
         read(fileName) reads fileName from the file system.
         read(input, inputName) reads from the input, in which case inputName is
         used only for log messages, etc.
-        
+
         :param str fileName: The path to the INFO file.
         :param str input: The contents of the INFO file, with lines separated by
           NL or CR/NL.

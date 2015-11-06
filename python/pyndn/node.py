@@ -122,7 +122,7 @@ class Node(object):
                 # Make future calls to expressInterest send directly to the
                 # Transport.
                 self._connectStatus = Node._ConnectStatus.CONNECT_COMPLETE
-                    
+
             self._transport.connect(self._connectionInfo, self, onConnected)
         elif self._connectStatus == self._ConnectStatus.CONNECT_REQUESTED:
             # Still connecting. add to the interests to express by onConnected.

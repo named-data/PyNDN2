@@ -216,7 +216,7 @@ class TcpTransport(Transport):
         if host == "":
             # Special case: For Python, "" means INADDR_ANY which is local.
             return True
-        
+
         # Only look at the first result.
         family, _, _, _, sockaddr = socket.getaddrinfo(
           host, None, socket.AF_UNSPEC, socket.SOCK_STREAM)[0]

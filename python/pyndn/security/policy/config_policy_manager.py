@@ -119,7 +119,7 @@ class ConfigPolicyManager(PolicyManager):
         load(configFileName) reads configFileName from the file system.
         load(input, inputName) reads from the input, in which case inputName is
         used only for log messages, etc.
-        
+
         :param str configFileName: The path to the file containing configuration
           rules.
         :param str input: The contents of the configuration rules, with lines

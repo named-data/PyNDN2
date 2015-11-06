@@ -35,7 +35,7 @@ class AsyncTcpTransport(AsyncSocketTransport):
     Create a new AsyncTcpTransport in the unconnected state. This will use the
     asyncio loop to create the connection and communicate asynchronously.
 
-    :param loop: The event loop, for example from asyncio.get_event_loop(). It 
+    :param loop: The event loop, for example from asyncio.get_event_loop(). It
       is the responsibility of the application to start and stop the loop.
     """
     def __init__(self, loop):
