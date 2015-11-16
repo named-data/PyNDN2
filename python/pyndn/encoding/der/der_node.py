@@ -386,6 +386,10 @@ class DerInteger(DerNode):
         """
         super(DerInteger, self).__init__(Der.Integer)
         if integer is not None:
+            if integer < 0:
+              raise DerEncodingException(
+                "DerInteger: Negative integers are not currently supported");
+
             # convert the integer to bytes the easy/slow way
             temp = bytearray()
             while True:
@@ -396,10 +400,18 @@ class DerInteger(DerNode):
                   # We check for 0 at the end so we encode one byte if it is 0.
                   break
 
+            if temp[0] >= 0x80:
+                # Make it a non-negative integer.
+                temp.insert(0, 0)
+
             self._payload.extend(temp)
             self._encodeHeader(len(self._payload))
 
     def toVal(self):
+        if len(self._payload) > 0 and self._payload[0] >= 0x80:
+            raise DerDecodingException(
+              "DerInteger: Negative integers are not currently supported")
+
         result = 0
         for i in range(len(self._payload)):
             result *= 256
