@@ -1,4 +1,4 @@
-Interim changes after PyNDN v2.1beta1 (2015-10-07)
+Interim changes after PyNDN v2.1beta1 (2015-11-18)
 --------------------------------------------------
 
 Changes
@@ -7,6 +7,7 @@ Changes
 
 Bug fixes
 * Fix bug in BasicIdentityStorage.getCertificate (Thanks Zhehao)
+* http://redmine.named-data.net/issues/3342 In expressInterest, call onTimeout when there is no interest lifetime.
 
 PyNDN v2.1beta1 (2015-09-24)
 ----------------------------

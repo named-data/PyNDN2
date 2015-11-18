@@ -473,10 +473,16 @@ class Node(object):
         pendingInterest = Node._PendingInterest(
           pendingInterestId, interestCopy, onData, onTimeout)
         self._pendingInterestTable.append(pendingInterest)
-        if (interestCopy.getInterestLifetimeMilliseconds() != None and
+        if (onTimeout or
+            interestCopy.getInterestLifetimeMilliseconds() != None and
             interestCopy.getInterestLifetimeMilliseconds() >= 0.0):
             # Set up the timeout.
-            face.callLater(interestCopy.getInterestLifetimeMilliseconds(),
+            delayMilliseconds = interestCopy.getInterestLifetimeMilliseconds()
+            if delayMilliseconds < 0.0:
+                # Use a default timeout delay.
+                delayMilliseconds = 4000.0
+
+            face.callLater(delayMilliseconds,
                            lambda: self._processInterestTimeout(pendingInterest))
 
         # Special case: For _timeoutPrefix we don't actually send the interest.
