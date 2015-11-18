@@ -86,11 +86,11 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         self.keyChain.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesIdentityExist(identityName),
-            "Identity still in IdentityStorage after revoking")
+            "Identity still in IdentityStorage after identity was deleted")
         self.assertFalse(self.identityStorage.doesKeyExist(keyName),
-            "Key still in IdentityStorage after identity was deletedInfo")
+            "Key still in IdentityStorage after identity was deleted")
         self.assertFalse(self.identityStorage.doesCertificateExist(certificateName),
-            "Certificate still in IdentityStorage after identity was deletedInfo")
+            "Certificate still in IdentityStorage after identity was deleted")
 
         with self.assertRaises(SecurityException):
             self.identityManager.getDefaultCertificateNameForIdentity(identityName)
