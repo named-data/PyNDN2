@@ -527,12 +527,12 @@ class BasicIdentityStorage(IdentityStorage):
 
         :param Name identityName: The default identity name.
         """
-        # Reset previous default identity.
+        # Reset the previous default identity.
         cursor = self._database.cursor()
         cursor.execute(
           "UPDATE Identity SET default_identity=0 WHERE default_identity=1")
 
-        # Set current default identity.
+        # Set the current default identity.
         cursor.execute(
           "UPDATE Identity SET default_identity=1 WHERE identity_name=?",
           (identityName.toUri(), ))
@@ -558,14 +558,14 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "Specified identity name does not match the key name")
 
-        # Reset previous default key.
+        # Reset the previous default key.
         identityUri = identityName.toUri()
         cursor = self._database.cursor()
         cursor.execute(
           "UPDATE Key SET default_key=0 WHERE default_key=1 and identity_name=?",
           (identityUri, ))
 
-        # Set current default Key.
+        # Set the current default Key.
         cursor.execute(
           "UPDATE Key SET default_key=1 WHERE identity_name=? AND key_identifier=?",
           (identityUri, keyId))
@@ -583,7 +583,7 @@ class BasicIdentityStorage(IdentityStorage):
         keyId = keyName[-1].toEscapedString()
         identityName = keyName[:-1]
 
-        # Reset previous default certificate.
+        # Reset the previous default certificate.
         identityUri = identityName.toUri()
         cursor = self._database.cursor()
         cursor.execute(
