@@ -1,5 +1,4 @@
-__author__="jefft0"
-__date_# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2015 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
@@ -18,14 +17,14 @@ __date_# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.encrypt import encrypt_params
-__all__ = ['encrypt_params']
+from pyndn.encrypt import decrypt_key, encrypt_key
+__all__ = ['decrypt_key', 'encrypt_key']
 
 import sys as _sys
 
 try:
-    from pyndn.encrypt.encrypt_params import *
+    from pyndn.encrypt.decrypt_key import *
+    from pyndn.encrypt.encrypt_key import *
 except ImportError:
     del _sys.modules[__name__]
     raise
-_ ="$Dec 4, 2015 1:30:52 PM$"
