@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2015 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# @author: From ndn-group-encrypt src/encrypt-params https://github.com/named-data/ndn-group-encrypt
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -33,10 +34,10 @@ _systemRandom = SystemRandom()
 
 class EncryptAlgorithmType(object):
     # These correspond to the TLV codes.
-    AesEcb = 0;
-    AesCbc = 1;
-    RsaPkcs = 2;
-    RsaOaep = 3;
+    AesEcb = 0
+    AesCbc = 1
+    RsaPkcs = 2
+    RsaOaep = 3
 
 class EncryptParams(object):
     """
