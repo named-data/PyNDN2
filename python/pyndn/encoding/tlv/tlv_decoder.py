@@ -45,13 +45,16 @@ class TlvDecoder(object):
         :return: The decoded VAR-NUMBER.
         :rtype: int
         """
-        # Assume array values are in the range 0 to 255.
-        firstOctet = self._input[self._offset]
-        self._offset += 1
-        if firstOctet < 253:
-            return firstOctet
-        else:
-            return self.readExtendedVarNumber(firstOctet)
+        try:
+            # Assume array values are in the range 0 to 255.
+            firstOctet = self._input[self._offset]
+            self._offset += 1
+            if firstOctet < 253:
+                return firstOctet
+            else:
+                return self.readExtendedVarNumber(firstOctet)
+        except IndexError:
+            raise ValueError("Read past the end of the input")
 
     def readExtendedVarNumber(self, firstOctet):
         """
@@ -193,30 +196,33 @@ class TlvDecoder(object):
         :raises ValueError: if length is an invalid length for a TLV
           non-negative integer.
         """
-        if length == 1:
-            result = self._input[self._offset]
-        elif length == 2:
-            result = ((self._input[self._offset] << 8) +
-                       self._input[self._offset + 1])
-        elif length == 4:
-            result = ((self._input[self._offset]     << 24) +
-                      (self._input[self._offset + 1] << 16) +
-                      (self._input[self._offset + 2] << 8) +
-                       self._input[self._offset + 3])
-        elif length == 8:
-            result = ((self._input[self._offset]     << 56) +
-                      (self._input[self._offset + 1] << 48) +
-                      (self._input[self._offset + 2] << 40) +
-                      (self._input[self._offset + 3] << 32) +
-                      (self._input[self._offset + 4] << 24) +
-                      (self._input[self._offset + 5] << 16) +
-                      (self._input[self._offset + 6] << 8) +
-                       self._input[self._offset + 7])
-        else:
-            raise ValueError("Invalid length for a TLV nonNegativeInteger")
+        try:
+            if length == 1:
+                result = self._input[self._offset]
+            elif length == 2:
+                result = ((self._input[self._offset] << 8) +
+                           self._input[self._offset + 1])
+            elif length == 4:
+                result = ((self._input[self._offset]     << 24) +
+                          (self._input[self._offset + 1] << 16) +
+                          (self._input[self._offset + 2] << 8) +
+                           self._input[self._offset + 3])
+            elif length == 8:
+                result = ((self._input[self._offset]     << 56) +
+                          (self._input[self._offset + 1] << 48) +
+                          (self._input[self._offset + 2] << 40) +
+                          (self._input[self._offset + 3] << 32) +
+                          (self._input[self._offset + 4] << 24) +
+                          (self._input[self._offset + 5] << 16) +
+                          (self._input[self._offset + 6] << 8) +
+                           self._input[self._offset + 7])
+            else:
+                raise ValueError("Invalid length for a TLV nonNegativeInteger")
 
-        self._offset += length
-        return result
+            self._offset += length
+            return result
+        except IndexError:
+            raise ValueError("Read past the end of the input")
 
     def readNonNegativeIntegerTlv(self, expectedType):
         """
