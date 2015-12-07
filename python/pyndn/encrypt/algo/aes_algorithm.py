@@ -77,7 +77,7 @@ class AesAlgorithm(object):
 
         :param Blob keyBits: The key value.
         :param Blob encryptedData: The data to decrypt.
-        :param EncryptParams params: TThis decrypts according to
+        :param EncryptParams params: This decrypts according to
           params.getAlgorithmType() and other params as needed such as
           params.getInitialVector().
         :return: The decrypted data.
