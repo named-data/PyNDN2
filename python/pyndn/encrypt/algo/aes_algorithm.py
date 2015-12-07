@@ -29,11 +29,11 @@ Note: This class is an experimental feature. The API may change.
 
 from random import SystemRandom
 from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
 from pyndn.util.blob import Blob
 from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.encrypt.decrypt_key import DecryptKey
 from pyndn.encrypt.encrypt_key import EncryptKey
+from pyndn.encrypt.algo.encryptor import Encryptor
 
 # The Python documentation says "Use SystemRandom if you require a
 #   cryptographically secure pseudo-random number generator."
@@ -84,17 +84,17 @@ class AesAlgorithm(object):
         :rtype: Blob
         """
         if params.getAlgorithmType() == EncryptAlgorithmType.AesEcb:
-            cipher = AES.new(_toPyCrypto(keyBits), AES.MODE_ECB)
+            cipher = AES.new(Encryptor.toPyCrypto(keyBits), AES.MODE_ECB)
         elif params.getAlgorithmType() == EncryptAlgorithmType.AesCbc:
             cipher = AES.new(
-              _toPyCrypto(keyBits), AES.MODE_CBC,
-              _toPyCrypto(params.getInitialVector()))
+              Encryptor.toPyCrypto(keyBits), AES.MODE_CBC,
+              Encryptor.toPyCrypto(params.getInitialVector()))
         else:
             raise RuntimeError("unsupported encryption mode")
 
         # For PyCrypto, we have to remove the padding.
-        resultWithPad = cipher.decrypt(_toPyCrypto(encryptedData))
-        if _PyCryptoUsesStr:
+        resultWithPad = cipher.decrypt(Encryptor.toPyCrypto(encryptedData))
+        if Encryptor.PyCryptoUsesStr:
             padLength = ord(resultWithPad[-1])
         else:
             padLength = resultWithPad[-1]
@@ -116,35 +116,20 @@ class AesAlgorithm(object):
         """
         # For PyCrypto, we have to do the padding.
         padLength = 16 - (plainData.size() % 16)
-        if _PyCryptoUsesStr:
+        if Encryptor.PyCryptoUsesStr:
             pad = chr(padLength) * padLength
         else:
             pad = bytes([padLength]) * padLength
 
         if params.getAlgorithmType() == EncryptAlgorithmType.AesEcb:
-            cipher = AES.new(_toPyCrypto(keyBits), AES.MODE_ECB)
+            cipher = AES.new(Encryptor.toPyCrypto(keyBits), AES.MODE_ECB)
         elif params.getAlgorithmType() == EncryptAlgorithmType.AesCbc:
             cipher = AES.new(
-              _toPyCrypto(keyBits), AES.MODE_CBC,
-              _toPyCrypto(params.getInitialVector()))
+              Encryptor.toPyCrypto(keyBits), AES.MODE_CBC,
+              Encryptor.toPyCrypto(params.getInitialVector()))
         else:
             raise RuntimeError("unsupported encryption mode")
                 
         return Blob(
-          cipher.encrypt(_toPyCrypto(plainData)) + cipher.encrypt(pad), False)
-
-def _toPyCrypto(blob):
-    """
-    Convert the blob to an input buffer for PyCrypto.
-
-    :param Blob blob: The blob to convert.
-    :return: The input buffer for PyCrypto
-    :rtype: raw string or bytearray
-    """
-    if _PyCryptoUsesStr:
-        return blob.toRawStr()
-    else:
-        return bytes(blob.toBuffer())
-
-# Depending on the Python version, PyCrypto uses str or bytes.
-_PyCryptoUsesStr = type(SHA256.new().digest()) is str
+          cipher.encrypt(Encryptor.toPyCrypto(plainData)) + cipher.encrypt(pad),
+          False)
