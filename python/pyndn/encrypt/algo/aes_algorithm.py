@@ -133,3 +133,5 @@ class AesAlgorithm(object):
         return Blob(
           cipher.encrypt(Encryptor.toPyCrypto(plainData)) + cipher.encrypt(pad),
           False)
+
+    BLOCK_SIZE = 16
