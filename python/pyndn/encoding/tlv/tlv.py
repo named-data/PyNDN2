@@ -88,3 +88,8 @@ class Tlv(object):
     LocalControlHeader_NextHopFaceId = 82
     LocalControlHeader_CachingPolicy = 83
     LocalControlHeader_NoCache = 96
+
+    Encrypt_EncryptedContent = 130
+    Encrypt_EncryptionAlgorithm = 131
+    Encrypt_EncryptedPayload = 132
+    Encrypt_InitialVector = 133
