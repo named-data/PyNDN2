@@ -17,8 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.encrypt import decrypt_key, encrypt_key, encrypted_content
-__all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content']
+from pyndn.encrypt import decrypt_key, encrypt_key, encrypted_content, interval
+__all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content', 'interval']
 
 import sys as _sys
 
@@ -26,6 +26,7 @@ try:
     from pyndn.encrypt.decrypt_key import *
     from pyndn.encrypt.encrypt_key import *
     from pyndn.encrypt.encrypted_content import *
+    from pyndn.encrypt.interval import *
 except ImportError:
     del _sys.modules[__name__]
     raise
