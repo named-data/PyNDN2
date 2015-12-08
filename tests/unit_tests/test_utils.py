@@ -163,7 +163,7 @@ def toIsoString(msSince1970):
     Convert a UNIX timestamp to ISO time representation with the "T" in the
     middle.
 
-    :param float msSince1970: Timestamp as milliseconds since Jan 1, 1970 GMT.
+    :param float msSince1970: Timestamp as milliseconds since Jan 1, 1970 UTC.
     :return: The string representation.
     :rtype: str
     """
@@ -177,7 +177,7 @@ def fromIsoString(timeString):
     timestamp.
 
     :param str timeString: The ISO time representation.
-    :return: The timestamp as milliseconds since Jan 1, 1970 GMT.
+    :return: The timestamp as milliseconds since Jan 1, 1970 UTC.
     :rtype: float
     """
     if len(timeString) != 15 or timeString[8:9] != 'T':

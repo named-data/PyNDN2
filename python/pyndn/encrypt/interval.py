@@ -35,10 +35,10 @@ class Interval(object):
 
     :param bool isValid: True to create a valid empty interval, false to create
       an invalid interval.
-    :param float startTime: The start time as milliseconds since Jan 1, 1970 GMT.
+    :param float startTime: The start time as milliseconds since Jan 1, 1970 UTC.
       The start time must be less than the end time. To create an empty interval
       (start time equals end time), use the constructor Interval(true).
-    :param float endTime: The end time as milliseconds since Jan 1, 1970 GMT.
+    :param float endTime: The end time as milliseconds since Jan 1, 1970 UTC.
     :param Interval interval: The other interval with values to copy.
     """
     def __init__(self, value = None, endTime = None):
@@ -69,7 +69,7 @@ class Interval(object):
         Check if the time point is in this interval.
 
         :param float timePoint: The time point to check as milliseconds since
-          Jan 1, 1970 GMT.
+          Jan 1, 1970 UTC.
         :return: True if timePoint is in this interval.
         :rtype: bool
         :raises: RuntimeError if this Interval is invalid.
@@ -165,7 +165,7 @@ class Interval(object):
         """
         Get the start time.
 
-        :return: The start time as milliseconds since Jan 1, 1970 GMT.
+        :return: The start time as milliseconds since Jan 1, 1970 UTC.
         :rtype: float
         :raises: RuntimeError if this Interval is invalid.
         """
@@ -177,7 +177,7 @@ class Interval(object):
         """
         Get the end time.
 
-        :return: The end time as milliseconds since Jan 1, 1970 GMT.
+        :return: The end time as milliseconds since Jan 1, 1970 UTC.
         :rtype: float
         :raises: RuntimeError if this Interval is invalid.
         """
