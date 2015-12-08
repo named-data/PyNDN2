@@ -17,14 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.encrypt.algo import aes_algorithm, encrypt_params, rsa_algorithm
-__all__ = ['aes_algorithm', 'encrypt_params', 'rsa_algorithm']
+from pyndn.encrypt.algo import aes_algorithm, encrypt_params, encryptor
+from pyndn.encrypt.algo import rsa_algorithm
+__all__ = ['aes_algorithm', 'encrypt_params', 'encryptor', 'rsa_algorithm']
 
 import sys as _sys
 
 try:
     from pyndn.encrypt.algo.aes_algorithm import *
     from pyndn.encrypt.algo.encrypt_params import *
+    from pyndn.encrypt.algo.encryptor import *
     from pyndn.encrypt.algo.rsa_algorithm import *
 except ImportError:
     del _sys.modules[__name__]
