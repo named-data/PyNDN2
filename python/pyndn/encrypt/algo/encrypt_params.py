@@ -49,7 +49,7 @@ class EncryptParams(object):
       if the initial vector is not specified. If ommitted, the initial vector is
       not specified.
     """
-    def __init__(self, algorithmType, initialVectorLength):
+    def __init__(self, algorithmType, initialVectorLength = None):
         self._algorithmType = algorithmType
 
         if initialVectorLength != None and initialVectorLength > 0:
