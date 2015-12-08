@@ -35,7 +35,6 @@ from pyndn.encoding.oid import OID
 from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.encrypt.decrypt_key import DecryptKey
 from pyndn.encrypt.encrypt_key import EncryptKey
-from pyndn.encrypt.algo.encryptor import Encryptor
 
 class RsaAlgorithm(object):
     @staticmethod
@@ -156,3 +155,6 @@ class RsaAlgorithm(object):
         return result.encode()
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
+
+# Import this at the end of the file to avoid circular references.
+from pyndn.encrypt.algo.encryptor import Encryptor
