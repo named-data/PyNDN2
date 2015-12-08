@@ -86,7 +86,7 @@ class Encryptor(object):
                 data.setContent(content.wireEncode(TlvWireFormat.get()))
                 return
             except ValueError as ex:
-                message = ex[0]
+                message = ex.args[0]
                 if not ("Plaintext is too long" in message):
                     raise ex
                 # Else the payload is larger than the maximum plaintext size. Continue.
