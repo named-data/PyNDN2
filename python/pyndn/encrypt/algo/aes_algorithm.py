@@ -33,7 +33,6 @@ from pyndn.util.blob import Blob
 from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.encrypt.decrypt_key import DecryptKey
 from pyndn.encrypt.encrypt_key import EncryptKey
-from pyndn.encrypt.algo.encryptor import Encryptor
 
 # The Python documentation says "Use SystemRandom if you require a
 #   cryptographically secure pseudo-random number generator."
@@ -131,7 +130,10 @@ class AesAlgorithm(object):
             raise RuntimeError("unsupported encryption mode")
                 
         return Blob(
-          cipher.encrypt(Encryptor.toPyCrypto(plainData)) + cipher.encrypt(pad),
+          cipher.encrypt(Encryptor.toPyCrypto(plainData) + pad),
           False)
 
     BLOCK_SIZE = 16
+
+# Import this at the end of the file to avoid circular references.
+from pyndn.encrypt.algo.encryptor import Encryptor
