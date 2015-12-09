@@ -17,10 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.encrypt import decrypt_key, encrypt_key, encrypted_content, interval
-from pyndn.encrypt import repetitive_interval, schedule
-__all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content', 'interval',
-           'repetitive_interval', 'schedule']
+from pyndn.encrypt import decrypt_key, encrypt_key, encrypted_content
+from pyndn.encrypt import group_manager_db, interval, repetitive_interval
+from pyndn.encrypt import schedule, sqlite3_group_manager_db
+__all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content', 'group_manager_db',
+           'interval', 'repetitive_interval', 'schedule',
+           'sqlite3_group_manager_db']
 
 import sys as _sys
 
@@ -28,9 +30,11 @@ try:
     from pyndn.encrypt.decrypt_key import *
     from pyndn.encrypt.encrypt_key import *
     from pyndn.encrypt.encrypted_content import *
+    from pyndn.encrypt.group_manager_db import *
     from pyndn.encrypt.interval import *
     from pyndn.encrypt.repetitive_interval import *
     from pyndn.encrypt.schedule import *
+    from pyndn.encrypt.sqlite3_group_manager_db import *
 except ImportError:
     del _sys.modules[__name__]
     raise
