@@ -72,7 +72,7 @@ class Interval(object):
           Jan 1, 1970 UTC.
         :return: True if timePoint is in this interval.
         :rtype: bool
-        :raises: RuntimeError if this Interval is invalid.
+        :raises RuntimeError: if this Interval is invalid.
         """
         if not self._isValid:
             raise RuntimeError("Interval.covers: This Interval is invalid")
@@ -90,7 +90,7 @@ class Interval(object):
         :param Interval interval: The other Interval to intersect with.
         :return: This Interval.
         :rtype: Interval
-        :raises: RuntimeError if this Interval or the other interval is invalid.
+        :raises RuntimeError: if this Interval or the other interval is invalid.
         """
         if not self._isValid:
             raise RuntimeError("Interval.intersectWith: This Interval is invalid")
@@ -128,7 +128,7 @@ class Interval(object):
         :param Interval interval: The other Interval to union with.
         :return: This Interval.
         :rtype: Interval
-        :raises: RuntimeError if this Interval or the other interval is invalid,
+        :raises RuntimeError: if this Interval or the other interval is invalid,
           or if the two intervals do not have an intersection.
         """
         if not self._isValid:
@@ -167,7 +167,7 @@ class Interval(object):
 
         :return: The start time as milliseconds since Jan 1, 1970 UTC.
         :rtype: float
-        :raises: RuntimeError if this Interval is invalid.
+        :raises RuntimeError: if this Interval is invalid.
         """
         if not self._isValid:
             raise RuntimeError("Interval.getStartTime: This Interval is invalid")
@@ -179,7 +179,7 @@ class Interval(object):
 
         :return: The end time as milliseconds since Jan 1, 1970 UTC.
         :rtype: float
-        :raises: RuntimeError if this Interval is invalid.
+        :raises RuntimeError: if this Interval is invalid.
         """
         if not self._isValid:
             raise RuntimeError("Interval.getEndTime: This Interval is invalid")
@@ -201,7 +201,7 @@ class Interval(object):
         :return: True if this Interval is empty (start time equals end time),
           False if not.
         :rtype: bool
-        :raises: RuntimeError if this Interval is invalid.
+        :raises RuntimeError: if this Interval is invalid.
         """
         if not self._isValid:
             raise RuntimeError("Interval.isEmpty: This Interval is invalid")
