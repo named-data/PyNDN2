@@ -99,10 +99,12 @@ class RsaAlgorithm(object):
         """
         privateKey = RSA.importKey(Encryptor.toPyCrypto(keyBits))
 
-        # TODO: Support EncryptAlgorithmType.RsaPkcs. (not really using it now.)
         if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
             cipher = PKCS1_OAEP.new(privateKey)
             result = cipher.decrypt(Encryptor.toPyCrypto(encryptedData))
+        elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
+            # TODO: Support EncryptAlgorithmType.RsaPkcs. (not really using it now.)
+            raise RuntimeError("RsaAlgorithm: EncryptAlgorithmType.RsaPkcs is not implemented")
         else:
             raise RuntimeError("unsupported encryption mode")
 
@@ -122,10 +124,12 @@ class RsaAlgorithm(object):
         """
         publicKey = RSA.importKey(Encryptor.toPyCrypto(keyBits))
 
-        # TODO: Support EncryptAlgorithmType.RsaPkcs. (not really using it now.)
         if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
             cipher = PKCS1_OAEP.new(publicKey)
             result = cipher.encrypt(Encryptor.toPyCrypto(plainData))
+        elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
+            # TODO: Support EncryptAlgorithmType.RsaPkcs. (not really using it now.)
+            raise RuntimeError("RsaAlgorithm: EncryptAlgorithmType.RsaPkcs is not implemented")
         else:
             raise RuntimeError("unsupported encryption mode")
 
