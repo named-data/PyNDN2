@@ -106,7 +106,7 @@ class RepetitiveInterval(object):
         MONTH = 2
         YEAR  = 3
 
-    class GetIntervalResult(object):
+    class Result(object):
         def __init__(self, isPositive, interval):
             self.isPositive = isPositive
             self.interval = interval
@@ -123,7 +123,7 @@ class RepetitiveInterval(object):
           isPositive is True if the returned interval is positive or False if
           negative, and interval is the Interval covering the time point or a
           negative interval if not found.
-        :rtype: RepetitiveInterval.GetIntervalResult
+        :rtype: RepetitiveInterval.Result
         """
         if not self._hasIntervalOnDate(timePoint):
             # There is no interval on the date of timePoint.
@@ -151,8 +151,7 @@ class RepetitiveInterval(object):
             else:
                 isPositive = True
 
-        return RepetitiveInterval.GetIntervalResult(
-          isPositive, Interval(startTime, endTime))
+        return RepetitiveInterval.Result(isPositive, Interval(startTime, endTime))
 
     def compare(self, other):
         """
