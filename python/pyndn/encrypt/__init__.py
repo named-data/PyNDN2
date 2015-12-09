@@ -18,9 +18,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn.encrypt import decrypt_key, encrypt_key, encrypted_content, interval
-from pyndn.encrypt import repetitive_interval
+from pyndn.encrypt import repetitive_interval, schedule
 __all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content', 'interval',
-           'repetitive_interval']
+           'repetitive_interval', 'schedule']
 
 import sys as _sys
 
@@ -30,6 +30,7 @@ try:
     from pyndn.encrypt.encrypted_content import *
     from pyndn.encrypt.interval import *
     from pyndn.encrypt.repetitive_interval import *
+    from pyndn.encrypt.schedule import *
 except ImportError:
     del _sys.modules[__name__]
     raise
