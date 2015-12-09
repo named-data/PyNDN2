@@ -45,6 +45,8 @@ class Blob(object):
       must treat the array as immutable and promise not to change it.
     """
     def __init__(self, array = None, copy = True):
+        self._hash = None
+
         if array == None:
             self._array = None
         elif isinstance(array, Blob):
@@ -193,6 +195,22 @@ class Blob(object):
             else:
                 # For Python 2, make a raw string.
                 return "".join(map(chr, self.buf()))
+
+    def __hash__(self):
+        """
+        If the hash code is already computed then return it, otherwise compute
+        and return the hash code.
+
+        :return: The hash code for the buffer, or 0 if the buffer is null.
+        :rtype: int
+        """
+        if self._hash == None:
+            if self._array == None:
+                self._hash = 0
+            else:
+                self._hash = hash(self.toBytes())
+
+        return self._hash
 
     @staticmethod
     def fromRawStr(rawStr):
