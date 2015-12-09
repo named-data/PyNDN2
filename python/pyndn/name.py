@@ -46,6 +46,8 @@ class Name(object):
             self._components = []
 
         self._changeCount = 0
+        self._hash = None
+        self._hashCodeChangeCount = 0
 
     class Component(object):
         """
@@ -280,6 +282,9 @@ class Name(object):
 
         def __str__(self):
             return self.toEscapedString()
+
+        def __hash__(self):
+            return hash(self._value)
 
     def set(self, uri):
         """
@@ -767,6 +772,22 @@ class Name(object):
 
     def __repr__(self):
         return self.toUri()
+
+    def __hash__(self):
+        if self._hashCodeChangeCount != self.getChangeCount():
+            # The values have changed, so the previous hash code is invalidated.
+            self._hash = None
+            self._hashCodeChangeCount = self.getChangeCount()
+
+        if self._hash == None:
+            hashCode = 0
+            # Use a similar hash code algorithm as String.
+            for component in self._components:
+                hashCode = 37 * hashCode + hash(component)
+
+            self._hash = hashCode
+
+        return self._hash
 
     @staticmethod
     def _unescape(escaped):
