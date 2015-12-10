@@ -73,3 +73,22 @@ class EcdsaKeyParams(KeyParams):
     @staticmethod
     def _getType():
         return KeyType.ECDSA
+
+class AesKeyParams(KeyParams):
+    def __init__(self, size = None):
+        super(AesKeyParams, self).__init__(AesKeyParams._getType())
+
+        if size == None:
+            size = AesKeyParams._getDefaultSize()
+        self._size = size
+
+    def getKeySize(self):
+        return self._size
+
+    @staticmethod
+    def _getDefaultSize():
+        return 64
+
+    @staticmethod
+    def _getType():
+        return KeyType.AES
