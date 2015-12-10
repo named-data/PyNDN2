@@ -185,7 +185,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
             for (keyNameEncoding, keyEncoding) in results:
                 keyName = Name()
                 keyName.wireDecode(bytearray(keyNameEncoding), TlvWireFormat.get())
-                dictionary[keyName] = Blob(bytearray(keyEncoding))
+                dictionary[keyName] = Blob(bytearray(keyEncoding), False)
             cursor.close()
 
             return dictionary
