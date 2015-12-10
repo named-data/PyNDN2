@@ -50,7 +50,7 @@ class AesAlgorithm(object):
         :rtype: DecryptKey
         """
         # Convert the key bit size to bytes.
-        nBytes = params.getKeySize() / 8
+        nBytes = int(round(params.getKeySize() / 8))
         key = bytearray(nBytes)
         for i in range(nBytes):
             key[i] = _systemRandom.randint(0, 0xff)
