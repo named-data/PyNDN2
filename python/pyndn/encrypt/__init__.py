@@ -18,10 +18,10 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn.encrypt import decrypt_key, encrypt_key, encrypted_content
-from pyndn.encrypt import group_manager_db, interval, repetitive_interval
-from pyndn.encrypt import schedule, sqlite3_group_manager_db
-__all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content', 'group_manager_db',
-           'interval', 'repetitive_interval', 'schedule',
+from pyndn.encrypt import group_manager, group_manager_db, interval
+from pyndn.encrypt import repetitive_interval, schedule, sqlite3_group_manager_db
+__all__ = ['decrypt_key', 'encrypt_key', 'encrypted_content', 'group_manager',
+           'group_manager_db', 'interval', 'repetitive_interval', 'schedule',
            'sqlite3_group_manager_db']
 
 import sys as _sys
@@ -30,6 +30,7 @@ try:
     from pyndn.encrypt.decrypt_key import *
     from pyndn.encrypt.encrypt_key import *
     from pyndn.encrypt.encrypted_content import *
+    from pyndn.encrypt.group_manager import *
     from pyndn.encrypt.group_manager_db import *
     from pyndn.encrypt.interval import *
     from pyndn.encrypt.repetitive_interval import *
