@@ -151,7 +151,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
                 schedule.wireDecode(bytearray(result[0]))
         except Exception as ex:
             raise GroupManagerDb.Error(
-              "Sqlite3GroupManagerDb._getScheduleId: SQLite error: " + str(ex))
+              "Sqlite3GroupManagerDb.getSchedule: SQLite error: " + str(ex))
 
         if schedule == None:
             raise GroupManagerDb.Error(
