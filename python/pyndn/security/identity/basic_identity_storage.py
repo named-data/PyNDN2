@@ -249,7 +249,7 @@ class BasicIdentityStorage(IdentityStorage):
             (identityUri, keyId))
         (keyData, ) = cursor.fetchone()
         cursor.close()
-        return Blob(bytearray(keyData))
+        return Blob(bytearray(keyData), False)
 
     def activateKey(self, keyName):
         """
