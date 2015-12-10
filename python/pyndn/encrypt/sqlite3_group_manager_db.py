@@ -169,6 +169,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
           public key and the value is the Blob of the public key DER. Note that
           the member's identity name is keyName.getPrefix(-1). If the schedule
           name is not found, the dictionary is empty.
+        :rtype: dictionary<Name, Blob>
         :raises GroupManagerDb.Error: For a database error.
         """
         dictionary = {}
