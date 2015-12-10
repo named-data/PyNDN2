@@ -105,7 +105,7 @@ class Exclude(object):
         :return: The entry at the index.
         :rtype: Exclude.Entry
         """
-        self._entries[i]
+        return self._entries[i]
 
     def appendAny(self):
         """
