@@ -80,7 +80,7 @@ class Sqlite3ConsumerDb(ConsumerDb):
 
             return key
         except Exception as ex:
-            raise ProducerDb.Error(
+            raise ConsumerDb.Error(
               "Sqlite3ConsumerDb.getKey: SQLite error: " + str(ex))
 
     def addKey(self, keyName, keyBlob):
