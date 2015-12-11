@@ -88,8 +88,8 @@ class Schedule(object):
     def getCoveringInterval(self, timePoint):
         """
         Get the interval that covers the time point. This iterates over the two
-        repetitive interval sets and find the shortest interval that allows a 
-        group member to access the data. If there is no interval covering the 
+        repetitive interval sets and find the shortest interval that allows a
+        group member to access the data. If there is no interval covering the
         time point, this returns False for isPositive and a negative interval.
 
         :param float timePoint: The time point as milliseconds since Jan 1,

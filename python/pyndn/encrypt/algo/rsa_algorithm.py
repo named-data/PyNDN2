@@ -52,7 +52,7 @@ class RsaAlgorithm(object):
           pkcs1PrivateKeyDer, OID(RsaAlgorithm.RSA_ENCRYPTION_OID),
           DerNull())
         return DecryptKey(privateKey)
-          
+
     @staticmethod
     def deriveEncryptKey(keyBits):
         """

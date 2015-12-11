@@ -61,8 +61,8 @@ class Sqlite3ProducerDb(ProducerDb):
     def hasContentKey(self, timeSlot):
         """
         Check if a content key exists for the hour covering timeSlot.
-        
-        :param float timeSlot: The time slot as milliseconds since Jan 1, 
+
+        :param float timeSlot: The time slot as milliseconds since Jan 1,
           1970 UTC.
         :return: True if there is a content key for timeSlot.
         :rtype: bool

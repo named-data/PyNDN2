@@ -247,7 +247,7 @@ class RepetitiveInterval(object):
         :rtype: int
         """
         return self._repeatUnit
-    
+
     def _hasIntervalOnDate(self, timePoint):
         """
         Check if the date of the time point is in any interval.

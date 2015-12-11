@@ -86,7 +86,7 @@ class TestAesAlgorithm(ut.TestCase):
         receivedBlob = AesAlgorithm.decrypt(
           decryptKey.getKeyBits(), cipherBlob, encryptParams)
         self.assertTrue(receivedBlob.equals(plainBlob))
-        
+
         # Encrypt data in AES_CBC with specified IV.
         initialVector = Blob(INITIAL_VECTOR, False)
         encryptParams.setInitialVector(initialVector)

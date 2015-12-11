@@ -227,7 +227,7 @@ class GroupManager(object):
                 if not negativeResult.isValid():
                     negativeResult = tempInterval
                 negativeResult.intersectWith(tempInterval)
-                
+
         if not positiveResult.isValid():
             # Return an invalid interval when there is no member which has an
             # interval covering the time slot.

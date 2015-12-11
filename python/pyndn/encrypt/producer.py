@@ -94,13 +94,13 @@ class Producer(object):
 
     def createContentKey(self, timeSlot, onEncryptedKeys):
         """
-        Create the content key. This first checks if the content key exists. For 
-        an existing content key, this returns the content key name directly. If 
+        Create the content key. This first checks if the content key exists. For
+        an existing content key, this returns the content key name directly. If
         the key does not exist, this creates one and encrypts it using the
         corresponding E-KEYs. The encrypted content keys are passed to the
         onEncryptedKeys callback.
-        
-        :param float timeSlot: The time slot as milliseconds since Jan 1, 
+
+        :param float timeSlot: The time slot as milliseconds since Jan 1,
           1970 UTC.
         :param onEncryptedKeys: If this creates a content key, then this calls
           onEncryptedKeys(keys) where keys is a list of encrypted content key

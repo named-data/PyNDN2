@@ -411,11 +411,11 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
     def updateMemberSchedule(self, identity, scheduleName):
         """
         Change the name of the schedule for the given member's identity name.
-        
+
         :param Name identity: The member's identity name.
         :param str scheduleName: The new schedule name.
-        :raises GroupManagerDb.Error: If there's no member with the given 
-          identity name in the database, or there's no schedule named 
+        :raises GroupManagerDb.Error: If there's no member with the given
+          identity name in the database, or there's no schedule named
           scheduleName, or other database error.
         """
         scheduleId = self._getScheduleId(scheduleName)

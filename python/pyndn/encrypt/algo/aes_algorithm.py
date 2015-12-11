@@ -128,7 +128,7 @@ class AesAlgorithm(object):
               Encryptor.toPyCrypto(params.getInitialVector()))
         else:
             raise RuntimeError("unsupported encryption mode")
-                
+
         return Blob(
           cipher.encrypt(Encryptor.toPyCrypto(plainData) + pad),
           False)
