@@ -175,9 +175,9 @@ class Producer(object):
 
     class _KeyInfo(object):
         def __init__(self):
-            self.beginTimeSlot = None # float
-            self.endTimeSlot = None   # float
-            self.keyBits = None       # Blob
+            self.beginTimeSlot = 0.0
+            self.endTimeSlot = 0.0
+            self.keyBits = None # Blob
 
     class _KeyRequest(object):
         def __init__(self, interests):
