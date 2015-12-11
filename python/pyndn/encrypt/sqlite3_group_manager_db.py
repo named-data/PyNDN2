@@ -149,6 +149,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
             if result != None:
                 schedule = Schedule()
                 schedule.wireDecode(bytearray(result[0]))
+            cursor.close()
         except Exception as ex:
             raise GroupManagerDb.Error(
               "Sqlite3GroupManagerDb.getSchedule: SQLite error: " + str(ex))
@@ -363,6 +364,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
             result = cursor.fetchone()
             if result != None:
                 scheduleName = result[0]
+            cursor.close()
         except Exception as ex:
             raise GroupManagerDb.Error(
               "Sqlite3GroupManagerDb.getMemberSchedule: SQLite error: " + str(ex))
@@ -466,10 +468,12 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
             cursor.execute(
               "SELECT schedule_id FROM schedules WHERE schedule_name=?", (name, ))
             result = cursor.fetchone()
+            id = -1
             if result != None:
                 return result[0]
-            else:
-                return -1
+            cursor.close()
+
+            return id
         except Exception as ex:
             raise GroupManagerDb.Error(
               "Sqlite3GroupManagerDb._getScheduleId: SQLite error: " + str(ex))

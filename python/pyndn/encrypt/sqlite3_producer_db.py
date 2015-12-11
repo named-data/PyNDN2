@@ -105,6 +105,7 @@ class Sqlite3ProducerDb(ProducerDb):
             result = cursor.fetchone()
             if result != None:
                 contentKey = Blob(bytearray(result[0]), False)
+            cursor.close()
         except Exception as ex:
             raise ProducerDb.Error(
               "Sqlite3ProducerDb.getContentKey: SQLite error: " + str(ex))
