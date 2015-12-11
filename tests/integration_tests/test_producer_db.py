@@ -3,7 +3,7 @@
 # Copyright (C) 2015 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # Author: From ndn-group-encrypt unit tests
-# https://github.com/named-data/ndn-group-encrypt/blob/master/tests/unit-tests/consumer-db.t.cpp
+# https://github.com/named-data/ndn-group-encrypt/blob/master/tests/unit-tests/producer-db.t.cpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
