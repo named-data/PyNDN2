@@ -72,7 +72,7 @@ class RsaAlgorithm(object):
         rsaPrivateKeyDer = pkcs8Children[2].getPayload()
 
         if oidString != RsaAlgorithm.RSA_ENCRYPTION_OID:
-          raise RuntimeException("The PKCS #8 private key is not RSA_ENCRYPTION")
+          raise RuntimeError("The PKCS #8 private key is not RSA_ENCRYPTION")
 
         # Decode the PKCS #1 RSAPrivateKey.
         parsedNode = DerNode.parse(rsaPrivateKeyDer.buf(), 0)
