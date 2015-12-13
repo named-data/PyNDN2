@@ -37,14 +37,7 @@ from pyndn import Name
 from pyndn.util import Blob
 from pyndn.security.policy import SelfVerifyPolicyManager
 import unittest as ut
-
 import base64
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
-
 import time
 
 class TestSqlIdentityStorage(ut.TestCase):
