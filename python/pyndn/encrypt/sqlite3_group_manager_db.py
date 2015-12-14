@@ -388,7 +388,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
         """
         scheduleId = self._getScheduleId(scheduleName)
         if scheduleId == -1:
-          raise GroupManagerDb.Error("The schedule dose not exist")
+          raise GroupManagerDb.Error("The schedule does not exist")
 
         # Needs to be changed in the future.
         memberName = keyName.getPrefix(-1)
@@ -421,7 +421,7 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
         scheduleId = self._getScheduleId(scheduleName)
         if scheduleId == -1:
             raise GroupManagerDb.Error(
-              "Sqlite3GroupManagerDb.updateMemberSchedule: The schedule dose not exist");
+              "Sqlite3GroupManagerDb.updateMemberSchedule: The schedule does not exist");
 
         try:
             cursor = self._database.cursor()
