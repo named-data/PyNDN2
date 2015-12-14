@@ -403,7 +403,7 @@ class Producer(object):
     @staticmethod
     def findEntryBeforeOrAt(entries, component):
         """
-        Get the latest entry in the array whose component_ is less than or equal
+        Get the latest entry in the array whose component is less than or equal
         to component.
 
         :param Array<ExcludeEntry> entries: The array of ExcludeEntry.
@@ -466,7 +466,7 @@ class Producer(object):
         Exclude all components in the range ending at "to".
 
         :param Exclude exclude: The Exclude object to update.
-        :param Name.Component to The last component in the exclude range.
+        :param Name.Component to: The last component in the exclude range.
         """
         Producer.excludeRange(exclude, Name.Component(), to)
 
