@@ -2,6 +2,8 @@ Interim changes after PyNDN v2.1beta1 (2015-12-14)
 --------------------------------------------------
 
 Changes
+* Added the pyndn.encrypt package for the Group-Based Encryption Protocol, ported from
+  https://github.com/named-data/ndn-group-encrypt
 * In Name, added support for hash(name). (A Name can be a dictionary key.)
 * INSTALL: Removed unsupported OS X 10.8.4.
 * INSTALL: Added OS X 10.11 and Ubuntu 15.04 (64 bit).
