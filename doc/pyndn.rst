@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pyndn.encoding
+    pyndn.encrypt
     pyndn.security
     pyndn.sync
     pyndn.transport
@@ -51,14 +52,6 @@ pyndn.face module
 -----------------
 
 .. automodule:: pyndn.face
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pyndn.forwarding_entry module
------------------------------
-
-.. automodule:: pyndn.forwarding_entry
     :members:
     :undoc-members:
     :show-inheritance:

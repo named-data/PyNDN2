@@ -12,22 +12,6 @@ Subpackages
 Submodules
 ----------
 
-pyndn.encoding.binary_xml_decoder module
-----------------------------------------
-
-.. automodule:: pyndn.encoding.binary_xml_decoder
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pyndn.encoding.binary_xml_structure_decoder module
---------------------------------------------------
-
-.. automodule:: pyndn.encoding.binary_xml_structure_decoder
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 pyndn.encoding.element_reader module
 ------------------------------------
 

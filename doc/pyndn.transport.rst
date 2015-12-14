@@ -4,10 +4,26 @@ pyndn.transport package
 Submodules
 ----------
 
+pyndn.transport.async_socket_transport module
+---------------------------------------------
+
+.. automodule:: pyndn.transport.async_socket_transport
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.transport.async_tcp_transport module
 ------------------------------------------
 
 .. automodule:: pyndn.transport.async_tcp_transport
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.transport.async_unix_transport module
+-------------------------------------------
+
+.. automodule:: pyndn.transport.async_unix_transport
     :members:
     :undoc-members:
     :show-inheritance:
