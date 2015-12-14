@@ -412,6 +412,59 @@ class Tlv0_1_1WireFormat(WireFormat):
 
         return Blob(encoder.getOutput(), False)
 
+    def encodeEncryptedContent(self, encryptedContent):
+        """
+        Encode the EncryptedContent in NDN-TLV and return the encoding.
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object to
+          encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        encoder.writeBlobTlv(
+          Tlv.Encrypt_EncryptedPayload, encryptedContent.getPayload().buf())
+        encoder.writeOptionalBlobTlv(
+          Tlv.Encrypt_InitialVector, encryptedContent.getInitialVector().buf())
+        # Assume the algorithmType value is the same as the TLV type.
+        encoder.writeNonNegativeIntegerTlv(
+          Tlv.Encrypt_EncryptionAlgorithm, encryptedContent.getAlgorithmType())
+        Tlv0_1_1WireFormat._encodeKeyLocator(
+          Tlv.KeyLocator, encryptedContent.getKeyLocator(), encoder)
+
+        encoder.writeTypeAndLength(
+          Tlv.Encrypt_EncryptedContent, len(encoder) - saveLength)
+
+        return Blob(encoder.getOutput(), False)
+
+    def decodeEncryptedContent(self, encryptedContent, input):
+        """
+        Decode input as an EncryptedContent in NDN-TLV and set the fields of the
+        encryptedContent object.
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        decoder = TlvDecoder(input)
+        endOffset = decoder.readNestedTlvsStart(Tlv.Encrypt_EncryptedContent)
+
+        Tlv0_1_1WireFormat._decodeKeyLocator(
+          Tlv.KeyLocator, encryptedContent.getKeyLocator(), decoder)
+        encryptedContent.setAlgorithmType(
+          decoder.readNonNegativeIntegerTlv(Tlv.Encrypt_EncryptionAlgorithm))
+        encryptedContent.setInitialVector(
+          Blob(decoder.readOptionalBlobTlv
+           (Tlv.Encrypt_InitialVector, endOffset), True))
+        encryptedContent.setPayload(
+          Blob(decoder.readBlobTlv(Tlv.Encrypt_EncryptedPayload), True))
+
+        decoder.finishNestedTlvs(endOffset)
+
     @classmethod
     def get(self):
         """

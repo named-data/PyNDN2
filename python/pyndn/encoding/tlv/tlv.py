@@ -88,3 +88,22 @@ class Tlv(object):
     LocalControlHeader_NextHopFaceId = 82
     LocalControlHeader_CachingPolicy = 83
     LocalControlHeader_NoCache = 96
+
+    Encrypt_EncryptedContent = 130
+    Encrypt_EncryptionAlgorithm = 131
+    Encrypt_EncryptedPayload = 132
+    Encrypt_InitialVector = 133
+
+    # For RepetitiveInterval.
+    Encrypt_StartDate = 134
+    Encrypt_EndDate = 135
+    Encrypt_IntervalStartHour = 136
+    Encrypt_IntervalEndHour = 137
+    Encrypt_NRepeats = 138
+    Encrypt_RepeatUnit = 139
+    Encrypt_RepetitiveInterval = 140
+
+    # For Schedule.
+    Encrypt_WhiteIntervalList = 141
+    Encrypt_BlackIntervalList = 142
+    Encrypt_Schedule = 143

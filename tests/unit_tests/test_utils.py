@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from datetime import datetime
 from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
 from pyndn.security.identity import MemoryIdentityStorage
@@ -157,3 +158,38 @@ class CredentialStorage:
     def verifyData(self, data, verifiedCallback, failedCallback):
         self.keyChain.verifyData(data, verifiedCallback, failedCallback)
 
+def toIsoString(msSince1970):
+    """
+    Convert a UNIX timestamp to ISO time representation with the "T" in the
+    middle.
+
+    :param float msSince1970: Timestamp as milliseconds since Jan 1, 1970 UTC.
+    :return: The string representation.
+    :rtype: str
+    """
+    dateFormat = "%Y%m%dT%H%M%S"
+    return datetime.utcfromtimestamp(
+      round(msSince1970 / 1000.0)).strftime(dateFormat)
+
+def fromIsoString(timeString):
+    """
+    Convert an ISO time representation with the "T" in the middle to a UNIX
+    timestamp.
+
+    :param str timeString: The ISO time representation.
+    :return: The timestamp as milliseconds since Jan 1, 1970 UTC.
+    :rtype: float
+    """
+    if len(timeString) != 15 or timeString[8:9] != 'T':
+        raise RuntimeError("fromIsoString: Format is not the expected yyyymmddThhmmss")
+
+    utc = datetime(
+      int(timeString[0:4]),
+      int(timeString[4:6]),
+      int(timeString[6:8]),
+      int(timeString[9:11]),
+      int(timeString[11:13]),
+      int(timeString[13:15]))
+    return (utc - _posixEpoch).total_seconds() * 1000.0
+
+_posixEpoch = datetime.utcfromtimestamp(0)

@@ -206,7 +206,7 @@ class Interest(object):
         :rtype: Interest
         """
         self._keyLocator.set(
-          keyLocator if type(keyLocator) is KeyLocator
+          KeyLocator(keyLocator) if type(keyLocator) is KeyLocator
                      else KeyLocator())
         self._changeCount += 1
         return self

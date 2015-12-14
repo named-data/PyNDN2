@@ -205,6 +205,35 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeSignatureInfo is not implemented")
 
+    def encodeEncryptedContent(self, encryptedContent):
+        """
+        Encode the EncryptedContent and return the encoding.
+        Your derived class should override.
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object to
+          encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("encodeEncryptedContent is not implemented")
+
+    def decodeEncryptedContent(self, encryptedContent, input):
+        """
+        Decode input as an EncryptedContent and set the fields of the
+        encryptedContent object.
+        Your derived class should override.
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeEncryptedContent is not implemented")
+
     @classmethod
     def setDefaultWireFormat(self, wireFormat):
         """
