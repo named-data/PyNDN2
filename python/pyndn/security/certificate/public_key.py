@@ -23,13 +23,14 @@ This module defines the PublicKey class which holds an encoded public key
 for use by the security library.
 """
 
+import sys
 from Crypto.PublicKey import RSA
 from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_node import DerNode
 from pyndn.encoding.der.der_exceptions import DerDecodingException
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
-from pyndn.security.security_exception import SecurityException, UnrecognizedKeyFormatException
+from pyndn.security.security_exception import UnrecognizedKeyFormatException
 
 from pyndn.encoding.der import DerNode
 
@@ -96,10 +97,16 @@ class PublicKey(object):
         :rtype: Blob
         """
         if digestAlgorithm == DigestAlgorithm.SHA256:
-            hashFunc  = SHA256.new()
-            hashFunc.update(self._keyDer.buf())
+            # Get the bytes to verify.
+            if sys.version_info[0] == 2:
+                # In Python 2.x, we need a str.
+                encoding = self._keyDer.toRawStr()
+            else:
+                encoding = self._keyDer.toBuffer()
 
-            return Blob(hashFunc.digest())
+            digest = SHA256.new(encoding).digest()
+
+            return Blob(bytearray(digest), False)
         else:
             raise RuntimeError("Unimplemented digest algorithm")
 
@@ -125,3 +132,5 @@ class PublicKey(object):
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
     EC_ENCRYPTION_OID = "1.2.840.10045.2.1"
 
+# Depending on the Python version, PyCrypto uses str or bytes.
+_PyCryptoUsesStr = type(SHA256.new().digest()) is str
