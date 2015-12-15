@@ -207,7 +207,6 @@ class PolicyManager(object):
         """
         # Get the bytes to verify.
         signedPortion = signedBlob.toSignedBuffer()
-        # Sign the hash of the data.
         if sys.version_info[0] == 2:
             # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
             signedPortion = Blob(signedPortion, False).toRawStr()
