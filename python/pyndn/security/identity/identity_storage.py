@@ -286,5 +286,21 @@ class IdentityStorage(object):
         """
         raise RuntimeError("setDefaultCertificateNameForKey is not implemented")
 
+    def getDefaultCertificate(self):
+        """
+        Get the certificate of the default identity.
+
+        :return: The requested certificate. If not found, return None.
+        :rtype: IdentityCertificate
+        """
+        try:
+            certName = self.getDefaultCertificateNameForIdentity(
+              self.getDefaultIdentity())
+        except:
+            # The default is not defined.
+            return None
+
+        return self.getCertificate(certName, True)
+
     # A static value to make each timestamp unique among calls.
     _lastTimestamp = math.floor(Common.getNowMilliseconds() / 1000.0)

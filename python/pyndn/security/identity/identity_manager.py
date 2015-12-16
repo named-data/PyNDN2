@@ -173,6 +173,15 @@ class IdentityManager(object):
         """
         return self._identityStorage.getDefaultIdentity()
 
+    def getDefaultCertificate(self):
+        """
+        Get the certificate of the default identity.
+
+        :return: The requested certificate. If not found, return None.
+        :rtype: IdentityCertificate
+        """
+        return self._identityStorage.getDefaultCertificate()
+
     def generateRSAKeyPair(self, identityName, isKsk = False, keySize = 2048):
         """
         Generate a pair of RSA keys for the specified identity.
