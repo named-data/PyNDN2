@@ -55,7 +55,6 @@ class KeyChain(object):
         self._identityManager = identityManager
         self._policyManager = policyManager
         self._face = None
-        self._maxSteps = 100
 
     def createIdentityAndCertificate(self, identityName, params = None):
         """
