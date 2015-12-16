@@ -26,9 +26,11 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
+from random import SystemRandom
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
+from pyndn.util.blob import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.identity.identity_manager import IdentityManager
@@ -283,10 +285,12 @@ class KeyChain(object):
     # Sign/Verify
     #
 
-    def sign(self, target, certificateName, wireFormat = None):
+    def sign(self, target, certificateNameOrWireFormat = None, wireFormat = None):
         """
         Sign the target. If it is a Data or Interest object, set its signature.
-        If it is an array, return a signature object.
+        If it is an array, return a signature object. There are two forms of sign:
+        sign(target, certificateName, wireFormat = None).
+        sign(target, wireFormat = None).
 
         :param target: If this is a Data object, wire encode for signing,
           update its signature and key locator field and wireEncoding. If this
@@ -296,14 +300,31 @@ class KeyChain(object):
           return a Signature object.
         :type target: Data, Interest or an array which implements the
           buffer protocol
-        :param Name certificateName: The certificate name of the key to use for
-          signing.
+        :param Name certificateName: (optional) The certificate name of the key
+          to use for signing. If omitted, use the default identity in the
+          identity storage.
         :param wireFormat: (optional) A WireFormat object used to encode the
            input. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         :return: The Signature object (only if the target is an array).
         :rtype: An object of a subclass of Signature
         """
+        if isinstance(certificateNameOrWireFormat, Name):
+            certificateName = certificateNameOrWireFormat
+        else:
+            certificateName = None
+
+        if isinstance(certificateNameOrWireFormat, WireFormat):
+            wireFormat = certificateNameOrWireFormat
+
+        if certificateName == None:
+            signingCertificate = self._identityManager.getDefaultCertificate()
+            if signingCertificate == None:
+              self._setDefaultCertificate()
+              signingCertificate = self._identityManager.getDefaultCertificate()
+
+            certificateName = signingCertificate.getName().getPrefix(-1)
+
         if isinstance(target, Interest):
             self._identityManager.signInterestByCertificate(
               target, certificateName, wireFormat)
@@ -494,6 +515,23 @@ class KeyChain(object):
                 onVerifyFailed(data)
         return onTimeout
 
+    def _setDefaultCertificate(self):
+        """
+        Set default certificate if it is not initialized, by creating a
+        tmp-identity.
+        """
+        if self._identityManager.getDefaultCertificate() == None:
+            try:
+                defaultIdentity = self._identityManager.getDefaultIdentity()
+            except:
+                # Create a default identity name.
+                randomComponent = bytearray(4)
+                for i in range(len(randomComponent)):
+                    randomComponent[i] = _systemRandom.randint(0, 0xff)
+                defaultIdentity = Name().append("tmp-identity").append(
+                  Blob(randomComponent, False))
 
+            self.createIdentityAndCertificate(defaultIdentity)
+            self._identityManager.setDefaultIdentity(defaultIdentity)
 
-
+_systemRandom = SystemRandom()
