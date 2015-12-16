@@ -168,10 +168,7 @@ class Producer(object):
         data.setName(dataName)
         params = EncryptParams(EncryptAlgorithmType.AesCbc, 16)
         Encryptor.encryptData(data, content, contentKeyName, contentKey, params)
-        # TODO: When implemented, use KeyChain.sign(data) which does the same thing.
-        certificateName = self._keyChain.getAnyCertificate(
-          self._keyChain.getDefaultCertificateName()).getName().getPrefix(-1)
-        self._keyChain.sign(data, certificateName)
+        self._keyChain.sign(data)
 
     class _KeyInfo(object):
         def __init__(self):
@@ -327,11 +324,7 @@ class Producer(object):
         params = EncryptParams(EncryptAlgorithmType.RsaOaep)
         Encryptor.encryptData(
           cKeyData, contentKey, eKeyName, encryptionKey, params)
-
-        # TODO: When implemented, use KeyChain.sign(data) which does the same thing.
-        certificateName = self._keyChain.getAnyCertificate(
-          self._keyChain.getDefaultCertificateName()).getName().getPrefix(-1)
-        self._keyChain.sign(cKeyData, certificateName)
+        self._keyChain.sign(cKeyData)
 
         keyRequest.encryptedKeys.append(cKeyData)
 

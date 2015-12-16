@@ -277,12 +277,7 @@ class GroupManager(object):
         data.getMetaInfo().setFreshnessPeriod(
           self._freshnessHours * GroupManager.MILLISECONDS_IN_HOUR)
         data.setContent(publicKeyBlob)
-
-        # TODO: When implemented, use KeyChain.sign(data) which does the same thing.
-        certificateName = self._keyChain.getAnyCertificate(
-          self._keyChain.getDefaultCertificateName()).getName().getPrefix(-1)
-        self._keyChain.sign(data, certificateName)
-
+        self._keyChain.sign(data)
         return data
 
     def _createDKeyData(self, startTimeStamp, endTimeStamp, keyName,
@@ -310,12 +305,7 @@ class GroupManager(object):
         encryptParams = EncryptParams(EncryptAlgorithmType.RsaOaep)
         Encryptor.encryptData(
           data, privateKeyBlob, keyName, certificateKey, encryptParams)
-
-        # TODO: When implemented, use KeyChain.sign(data) which does the same thing.
-        certificateName = self._keyChain.getAnyCertificate(
-          self._keyChain.getDefaultCertificateName()).getName().getPrefix(-1)
-        self._keyChain.sign(data, certificateName)
-
+        self._keyChain.sign(data)
         return data
 
     MILLISECONDS_IN_HOUR = 3600 * 1000
