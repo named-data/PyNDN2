@@ -26,7 +26,8 @@ manipulate keys, encrypt and decrypt using RSA.
 # (This is ported from ndn::gep::algo::Rsa, and named RsaAlgorithm because
 # "Rsa" is very short and not all the Common Client Libraries have namespaces.)
 
-from Crypto.Cipher import PKCS1_OAEP
+from random import SystemRandom
+from Crypto.Cipher import PKCS1_OAEP, PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto.Util.number import bytes_to_long
 from pyndn.util.blob import Blob
@@ -35,6 +36,8 @@ from pyndn.encoding.oid import OID
 from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.encrypt.decrypt_key import DecryptKey
 from pyndn.encrypt.encrypt_key import EncryptKey
+
+_systemRandom = SystemRandom()
 
 class RsaAlgorithm(object):
     @staticmethod
@@ -98,13 +101,21 @@ class RsaAlgorithm(object):
         :rtype: Blob
         """
         privateKey = RSA.importKey(Encryptor.toPyCrypto(keyBits))
+        pyCryptoEncryptedData = Encryptor.toPyCrypto(encryptedData)
 
         if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
             cipher = PKCS1_OAEP.new(privateKey)
-            result = cipher.decrypt(Encryptor.toPyCrypto(encryptedData))
+            result = cipher.decrypt(pyCryptoEncryptedData)
         elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
-            # TODO: Support EncryptAlgorithmType.RsaPkcs. (not really using it now.)
-            raise RuntimeError("RsaAlgorithm: EncryptAlgorithmType.RsaPkcs is not implemented")
+            # See https://www.dlitz.net/software/pycrypto/api/current/Crypto.Cipher.PKCS1_v1_5-module.html
+            cipher = PKCS1_v1_5.new(privateKey)
+            sentinel = bytearray(32)
+            for i in range(len(sentinel)):
+                sentinel[i] = _systemRandom.randint(0, 0xff)
+
+            result = cipher.decrypt(pyCryptoEncryptedData, sentinel)
+            if result == sentinel:
+                raise RuntimeError("Invalid RSA PKCS1_v1_5 decryption")
         else:
             raise RuntimeError("unsupported encryption mode")
 
@@ -123,13 +134,14 @@ class RsaAlgorithm(object):
         :rtype: Blob
         """
         publicKey = RSA.importKey(Encryptor.toPyCrypto(keyBits))
+        pyCryptoPlainData = Encryptor.toPyCrypto(plainData)
 
         if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
             cipher = PKCS1_OAEP.new(publicKey)
-            result = cipher.encrypt(Encryptor.toPyCrypto(plainData))
+            result = cipher.encrypt(pyCryptoPlainData)
         elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
-            # TODO: Support EncryptAlgorithmType.RsaPkcs. (not really using it now.)
-            raise RuntimeError("RsaAlgorithm: EncryptAlgorithmType.RsaPkcs is not implemented")
+            cipher = PKCS1_v1_5.new(publicKey)
+            result = cipher.encrypt(pyCryptoPlainData)
         else:
             raise RuntimeError("unsupported encryption mode")
 
