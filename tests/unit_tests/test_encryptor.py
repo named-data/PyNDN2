@@ -98,8 +98,7 @@ class TestDataRsaPkcs(object):
     testName = "TestDataRsaPkcs"
     type = EncryptAlgorithmType.RsaPkcs
 
-encryptorRsaTestInputs = [TestDataRsaOaep()]
-# TODO: Test TestDataRsaPkcs(). (not really using it now.)
+encryptorRsaTestInputs = [TestDataRsaOaep(), TestDataRsaPkcs()]
 
 class TestEncryptor(ut.TestCase):
     def test_content_symmetric_encrypt(self):
