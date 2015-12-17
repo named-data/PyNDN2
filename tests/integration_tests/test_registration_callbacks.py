@@ -24,7 +24,6 @@ from pyndn import Face
 from pyndn.security import KeyChain
 
 import unittest as ut
-import gevent
 import time
 
 # Use Python 3's mock library if it's available, else you'll have to
@@ -51,26 +50,17 @@ class TestRegistrationCallbacks(ut.TestCase):
         self.face.registerPrefix(
           Name("/test/register/callbacks"), None, onRegisterFailed,
           onRegisterSuccess)
-        server = gevent.spawn(
-          self.faceProcessEvents, self.face, [onRegisterFailed, onRegisterSuccess])
 
-        server.join(timeout = 10)
+        while True:
+            self.face.processEvents()
+            time.sleep(0.01)
+            if (onRegisterSuccess.call_count > 0 or onRegisterFailed.call_count > 0):
+                break
 
         self.assertEqual(
           onRegisterSuccess.call_count, 1,
           "Expected 1 onRegisterSuccess callback, got " +
             str(onRegisterSuccess.call_count))
-
-    def faceProcessEvents(self, face, callbacks):
-        # Implemented as a 'greenlet': something like a thread, but
-        # semi-synchronous. Callbacks should be a list.
-        done = False
-        while not done:
-            face.processEvents()
-            gevent.sleep()
-            for c in callbacks:
-                if c.call_count > 0:
-                    done = True
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
