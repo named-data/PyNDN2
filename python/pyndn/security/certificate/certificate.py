@@ -88,7 +88,7 @@ class Certificate(Data):
 
         s += "Public key bits:\n"
         keyDer = self._publicKey.getKeyDer()
-        encodedKey = base64.b64encode(keyDer.toBuffer())
+        encodedKey = base64.b64encode(keyDer.toBytes())
         for idx in range(0, len(encodedKey), 64):
             # Use Blob to convert to a str.
             s += Blob(encodedKey[idx:idx+64], False).toRawStr() + "\n"
