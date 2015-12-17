@@ -478,7 +478,7 @@ class Node(object):
             interestCopy.getInterestLifetimeMilliseconds() >= 0.0):
             # Set up the timeout.
             delayMilliseconds = interestCopy.getInterestLifetimeMilliseconds()
-            if delayMilliseconds < 0.0:
+            if delayMilliseconds == None or delayMilliseconds < 0.0:
                 # Use a default timeout delay.
                 delayMilliseconds = 4000.0
 
