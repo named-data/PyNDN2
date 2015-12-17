@@ -318,12 +318,7 @@ class KeyChain(object):
             wireFormat = certificateNameOrWireFormat
 
         if certificateName == None:
-            signingCertificate = self._identityManager.getDefaultCertificate()
-            if signingCertificate == None:
-              self._setDefaultCertificate()
-              signingCertificate = self._identityManager.getDefaultCertificate()
-
-            certificateName = signingCertificate.getName()
+            certificateName = self._prepareDefaultCertificateName()
 
         if isinstance(target, Interest):
             self._identityManager.signInterestByCertificate(
@@ -514,6 +509,21 @@ class KeyChain(object):
             else:
                 onVerifyFailed(data)
         return onTimeout
+
+    def _prepareDefaultCertificateName(self):
+        """
+        Get the default certificate from the identity storage and return its name.
+        If there is no default identity or default certificate, then create one.
+
+        :return: The default certificate name.
+        :rtype: Name
+        """
+        signingCertificate = self._identityManager.getDefaultCertificate()
+        if signingCertificate == None:
+          self._setDefaultCertificate()
+          signingCertificate = self._identityManager.getDefaultCertificate()
+
+        return signingCertificate.getName()
 
     def _setDefaultCertificate(self):
         """
