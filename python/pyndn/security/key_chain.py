@@ -323,7 +323,7 @@ class KeyChain(object):
               self._setDefaultCertificate()
               signingCertificate = self._identityManager.getDefaultCertificate()
 
-            certificateName = signingCertificate.getName().getPrefix(-1)
+            certificateName = signingCertificate.getName()
 
         if isinstance(target, Interest):
             self._identityManager.signInterestByCertificate(
