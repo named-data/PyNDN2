@@ -6,7 +6,7 @@ Changes
   https://github.com/named-data/ndn-group-encrypt
 * In Name, added support for hash(name). (A Name can be a dictionary key.)
 * INSTALL: Removed unsupported OS X 10.8.4.
-* INSTALL: Added OS X 10.11 and Ubuntu 15.04 (64 bit).
+* INSTALL: Added OS X 10.11, Ubuntu 15.04 (64 bit) and Raspbian Jessie.
 
 Bug fixes
 * Fix bug in BasicIdentityStorage.getCertificate (Thanks Zhehao)

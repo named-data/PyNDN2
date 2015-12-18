@@ -108,6 +108,29 @@ Optional: To install pytest, mock and gevent, in a terminal enter:
     sudo pip install pytest mock
     sudo apt-get install python-gevent
 
+## Raspbian Jessie (Raspberry Pi)
+(pip is already installed.) In a terminal, enter:
+
+    sudo apt-get install python-dev
+    sudo pip install pycrypto
+
+Optional: To install trollius (Python <= 3.2), in a terminal enter:
+
+    sudo pip install trollius
+
+Optional: To install Sphinx, in a terminal enter:
+
+    sudo pip install sphinx
+
+Optional: To install Protobuf in Python 2, in a terminal enter:
+
+    sudo pip install protobuf
+
+Optional: To install pytest, mock and gevent, in a terminal enter:
+
+    sudo pip install pytest mock
+    sudo apt-get install python-gevent
+
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
 
