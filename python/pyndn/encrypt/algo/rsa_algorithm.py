@@ -66,8 +66,7 @@ class RsaAlgorithm(object):
         :return: The new encrypt key (DER-encoded public key).
         :rtype: EncryptKey
         """
-        # Decode the PKCS #8 private key. (We don't use RSAPrivateCrtKey because
-        # the Android library doesn't have an easy way to decode into it.)
+        # Decode the PKCS #8 private key.
         parsedNode = DerNode.parse(keyBits.buf(), 0)
         pkcs8Children = parsedNode.getChildren()
         algorithmIdChildren = DerNode.getSequence(pkcs8Children, 1).getChildren()
