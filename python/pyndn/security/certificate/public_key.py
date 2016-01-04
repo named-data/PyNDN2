@@ -64,7 +64,7 @@ class PublicKey(object):
             oidString = algorithmIdChildren[0].toVal()
         except DerDecodingException as ex:
           raise UnrecognizedKeyFormatException(
-            "PublicKey.decodeKeyType: Error decoding the public key" + str(ex))
+            "PublicKey.decodeKeyType: Error decoding the public key: " + str(ex))
 
         # Verify that the we can decode.
         if oidString == self.RSA_ENCRYPTION_OID:
