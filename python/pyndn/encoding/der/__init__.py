@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2015 Regents of the University of California.
+# Copyright (C) 2014-2016 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
