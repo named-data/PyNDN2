@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # PyNDN documentation build configuration file, created by
-# sphinx-quickstart on Mon Dec 14 11:44:29 2015.
+# sphinx-quickstart on Wed Jan  6 11:43:48 2016.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNDN'
-copyright = u'2015, Regents of the University of California'
+copyright = u'2016, Regents of the University of California'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -267,7 +267,7 @@ texinfo_documents = [
 epub_title = u'PyNDN'
 epub_author = u'Regents of the University of California'
 epub_publisher = u'Regents of the University of California'
-epub_copyright = u'2015, Regents of the University of California'
+epub_copyright = u'2016, Regents of the University of California'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'PyNDN'
