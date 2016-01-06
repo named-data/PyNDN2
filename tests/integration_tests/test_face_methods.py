@@ -27,9 +27,6 @@ from pyndn.security import KeyChain
 
 import sys
 import unittest as ut
-if sys.version_info[0] != 3:
-    # TODO: Change to not rely on gevent which I can't install in Python 3.
-    import gevent
 import time
 
 # use Python 3's mock library if it's available
@@ -123,12 +120,12 @@ class TestFaceInterestMethods(ut.TestCase):
         timeout = 10000
         startTime = getNowMilliseconds()
         while True:
-            self.face.processEvents()
-            time.sleep(0.01)
             if getNowMilliseconds() - startTime >= timeout:
                 break
+            self.face.processEvents()
             if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
                 break
+            time.sleep(0.01)
 
         self.assertEqual(dataCallback.call_count, 0, 'Should not have called data callback after interest was removed')
         self.assertEqual(timeoutCallback.call_count, 0, 'Should not have called timeout callback after interest was removed')
@@ -162,31 +159,26 @@ class TestFaceRegisterMethods(ut.TestCase):
         self.face_in.shutdown()
         self.face_out.shutdown()
 
-    def onInterestEffect(self, prefix, interest, transport, prefixID):
-        data = Data(interest.getName())
-        data.setContent("SUCCESS")
-        self.keyChain.sign(data, self.keyChain.getDefaultCertificateName())
-        encodedData = data.wireEncode()
-        transport.send(encodedData.toBuffer())
-
     def test_register_prefix_response(self):
-        if sys.version_info[0] == 3:
-            # TODO: Change to not rely on gevent which I can't install in Python 3.
-            return
-
-        # gotta sign it (WAT)
         prefixName = Name("/test")
         self.face_in.setCommandSigningInfo(self.keyChain,
                 self.keyChain.getDefaultCertificateName())
 
+        interestCallbackCount = [0]
+        def onInterest(prefix, interest, transport, prefixID):
+            interestCallbackCount[0] += 1
+            data = Data(interest.getName())
+            data.setContent("SUCCESS")
+            self.keyChain.sign(data, self.keyChain.getDefaultCertificateName())
+            encodedData = data.wireEncode()
+            transport.send(encodedData.toBuffer())
+
         failedCallback = Mock()
-        interestCallback = Mock(side_effect=self.onInterestEffect)
 
-        self.face_in.registerPrefix(prefixName, interestCallback, failedCallback)
-        server = gevent.spawn(self.face_process_events, self.face_in, [interestCallback, failedCallback], 'h')
-
-        time.sleep(1) # give the 'server' time to register the interest
-
+        self.face_in.registerPrefix(prefixName, onInterest, failedCallback)
+        # Give the 'server' time to register the interest.
+        time.sleep(1) 
+        
         # express an interest on another face
         dataCallback = Mock()
         timeoutCallback = Mock()
@@ -196,33 +188,40 @@ class TestFaceRegisterMethods(ut.TestCase):
         interestName = prefixName.append("hello" + repr(time.time()))
         self.face_out.expressInterest(interestName, dataCallback, timeoutCallback)
 
-        client = gevent.spawn(self.face_process_events, self.face_out, [dataCallback, timeoutCallback], 'c')
+        # Process events for the in and out faces.
+        timeout = 10000
+        startTime = getNowMilliseconds()
+        while True:
+            if getNowMilliseconds() - startTime >= timeout:
+                break
+                
+            self.face_in.processEvents()
+            self.face_out.processEvents()
 
-        gevent.joinall([server, client], timeout=10)
+            done = True
+            if interestCallbackCount[0] == 0 and failedCallback.call_count == 0:
+                # Still processing face_in.
+                done = False
+            if dataCallback.call_count == 0 and timeoutCallback.call_count == 0:
+                # Still processing face_out.
+                done = False
+
+            if done:
+                break
+            time.sleep(0.01)
+
 
         self.assertEqual(failedCallback.call_count, 0, 'Failed to register prefix at all')
 
-        self.assertEqual(interestCallback.call_count, 1, 'Expected 1 onInterest callback, got '+str(interestCallback.call_count))
+        self.assertEqual(interestCallbackCount[0], 1, 'Expected 1 onInterest callback, got '+str(interestCallbackCount[0]))
 
         self.assertEqual(dataCallback.call_count, 1, 'Expected 1 onData callback, got '+str(dataCallback.call_count))
 
         onDataArgs = dataCallback.call_args[0]
         # check the message content
         data = onDataArgs[1]
-        expectedBlob = Blob(bytearray("SUCCESS"))
+        expectedBlob = Blob("SUCCESS")
         self.assertTrue(expectedBlob == data.getContent(), 'Data received on face does not match expected format')
-
-    def face_process_events(self, face, callbacks, name=None):
-        # implemented as a 'greenlet': something like a thread, but semi-synchronous
-        # callbacks should be a list
-        done = False
-        while not done:
-            face.processEvents()
-            gevent.sleep()
-            for c in callbacks:
-
-                if (c.call_count > 0):
-                    done = True
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

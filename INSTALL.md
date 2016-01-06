@@ -12,7 +12,7 @@ Prerequisites
 * Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
 * Optional: Sphinx (to make documentation)
-* Optional: pytest, mock and gevent (for running unit tests)
+* Optional: pytest and mock (for running unit tests)
 
 ### Option to use easy_install
 
@@ -47,9 +47,9 @@ Optional: To install Sphinx, in a terminal enter:
 
     sudo pip install sphinx
 
-Optional: To install pytest, mock and gevent, in a terminal enter:
+Optional: To install pytest and mock, in a terminal enter:
 
-    sudo CFLAGS=-Qunused-arguments pip install pytest mock gevent
+    sudo CFLAGS=-Qunused-arguments pip install pytest mock
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
 Need to build/install the latest PyCrypto. In a terminal, enter:
@@ -71,11 +71,10 @@ Optional: To install Sphinx, in a terminal enter:
     sudo apt-get install python-pip
     sudo pip install sphinx
 
-Optional: To install pytest, mock and gevent, in a terminal enter:
+Optional: To install pytest and mock, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install pytest mock
-    sudo apt-get install python-gevent
 
 (Protobuf is already installed.)
 
@@ -102,11 +101,10 @@ Optional: To install Protobuf in Python 3, in a terminal enter:
     sudo apt-get install python-pip
     sudo pip install protobuf-py3
 
-Optional: To install pytest, mock and gevent, in a terminal enter:
+Optional: To install pytest and mock, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install pytest mock
-    sudo apt-get install python-gevent
 
 ## Raspbian Jessie (Raspberry Pi)
 (pip is already installed.) In a terminal, enter:
@@ -126,10 +124,9 @@ Optional: To install Protobuf in Python 2, in a terminal enter:
 
     sudo pip install protobuf
 
-Optional: To install pytest, mock and gevent, in a terminal enter:
+Optional: To install pytest and mock, in a terminal enter:
 
     sudo pip install pytest mock
-    sudo apt-get install python-gevent
 
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
