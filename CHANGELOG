@@ -1,5 +1,5 @@
-Interim changes after PyNDN v2.1beta1 (2015-12-14)
---------------------------------------------------
+PyNDN v2.1beta2 (2016-01-07)
+----------------------------
 
 Changes
 * Added the pyndn.encrypt package for the Group-Based Encryption Protocol, ported from
