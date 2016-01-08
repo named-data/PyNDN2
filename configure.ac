@@ -20,7 +20,23 @@ AM_PROG_CC_C_O
 AC_PROG_OBJCXX
 AC_LANG([C++])
 
-# http://stackoverflow.com/questions/261500/how-to-build-python-c-extension-modules-with-autotools
+# Special case.
+case "$host" in
+  *-darwin* | *-macos10*)
+     if test -d /opt/local ; then
+       CFLAGS="$CFLAGS -I/opt/local/include"
+       CXXFLAGS="$CXXFLAGS -I/opt/local/include"
+       CPPFLAGS="$CPPFLAGS -I/opt/local/include"
+       LDFLAGS="$LDFLAGS -L/opt/local/lib"
+     elif test -d /sw ; then
+       CFLAGS="$CFLAGS -I/sw/include"
+       CXXFLAGS="$CXXFLAGS -I/sw/include"
+       CPPFLAGS="$CPPFLAGS -I/sw/include"
+       LDFLAGS="$LDFLAGS -L/sw/lib"
+     fi
+  ;;
+esac
+
 AM_PATH_PYTHON(2.7.0)
 PY_PREFIX=`$PYTHON -c 'import sys ; print sys.prefix'`
 PYTHON_LIBS="-lpython$PYTHON_VERSION"
@@ -64,6 +80,10 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
     AC_MSG_RESULT([no])
     AC_DEFINE_UNQUOTED([HAVE_GMTIME_SUPPORT], 0, [1 if have sys/time gmtime support including timegm.])
 ])
+
+# Require libcrypto.
+AC_CHECK_LIB([crypto], [EVP_EncryptInit], [],
+             [AC_MSG_FAILURE([can't find openssl crypto lib])])
 
 AC_MSG_CHECKING([for __attribute__((deprecated))])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
