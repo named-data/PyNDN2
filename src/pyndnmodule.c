@@ -1,25 +1,26 @@
 #include <Python.h>
+#include <ndn-cpp/c/errors.h>
 
 static PyObject *
-_pyndn_system(PyObject *self, PyObject *args)
+_pyndn_getErrorString(PyObject *self, PyObject *args)
 {
-    const char *command;
-    int sts;
+  int error;
+  const char *result;
 
-    if (!PyArg_ParseTuple(args, "s", &command))
-        return NULL;
-    sts = system(command);
-    return Py_BuildValue("i", sts);
+  if (!PyArg_ParseTuple(args, "i", &error))
+    return NULL;
+  result = ndn_getErrorString(error);
+  return Py_BuildValue("s", result);
 }
 
 static PyMethodDef PyndnMethods[] = {
-    {"system",  _pyndn_system, METH_VARARGS,
-     "Execute a shell command."},
-    {NULL, NULL, 0, NULL}        /* Sentinel */
+  {"getErrorString",  _pyndn_getErrorString, METH_VARARGS,
+   "Convert the error code to its string."},
+  {NULL, NULL, 0, NULL} // sentinel
 };
 
 PyMODINIT_FUNC
 init_pyndn(void)
 {
-    (void) Py_InitModule("_pyndn", PyndnMethods);
+  (void)Py_InitModule("_pyndn", PyndnMethods);
 }
