@@ -23,3 +23,45 @@ doc/_build
 
 # integration_test temporary files
 tests/integration_tests/policy_config/test-public-info.db
+
+# Compiled files
+*.slo
+*.lo
+*.o
+*.so
+*.dylib
+*.lai
+*.la
+*.a
+bin/*
+libs/*
+.libs/*
+
+# Autoconf files
+/Makefile
+/include/Makefile
+/autom4te.cache
+config.log
+/config.status
+/include/config.h
+/_configs.sed
+/stamp-h1
+/include/ndn-cpp/ndn-cpp-config.h
+/include/stamp-h1
+/aclocal.m4
+/libtool
+/condefs.h
+/conftest.cpp
+/conftest.err
+/test-suite.log
+*.Po
+.deps
+.dirstamp
+*.tar.gz
+/*.pc
+# Let autoconf automatically copy these files
+/m4/libtool.m4
+/m4/ltoptions.m4
+/m4/ltsugar.m4
+/m4/ltversion.m4
+/m4/lt~obsolete.m4
