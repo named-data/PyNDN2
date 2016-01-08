@@ -7,8 +7,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 ## to provide a way for the user to supply additional arguments.
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
-lib_LTLIBRARIES = libndn-c.la
-
 # Public C headers.
 # NOTE: If a new directory is added, then add it to ndn_cpp_c_headers in include/Makefile.am.
 ndn_cpp_c_headers = \
@@ -26,7 +24,7 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/util/dynamic-uint8-array-types.h
 
 # Just the C code.
-libndn_c_la_SOURCES = ${ndn_cpp_c_headers} \
+ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/data.h \
   src/c/errors.c src/c/errors.h \
   src/c/forwarding-flags.c src/c/forwarding-flags-impl.h \
@@ -48,6 +46,7 @@ libndn_c_la_SOURCES = ${ndn_cpp_c_headers} \
   src/c/encoding/tlv/tlv-structure-decoder.c src/c/encoding/tlv/tlv-structure-decoder.h \
   src/c/encoding/tlv/tlv.h \
   src/c/util/blob.h \
+  src/c/util/crypto.c src/c/util/crypto.h \
   src/c/util/dynamic-uint8-array.c src/c/util/dynamic-uint8-array.h \
   src/c/util/ndn_memory.c src/c/util/ndn_memory.h \
   src/c/util/ndn_realloc.c src/c/util/ndn_realloc.h \
@@ -56,5 +55,6 @@ libndn_c_la_SOURCES = ${ndn_cpp_c_headers} \
 pyexec_LTLIBRARIES = _pyndn.la
 _pyndn_la_CFLAGS = $(PYTHON_CFLAGS) $(PYTHON_CPPFLAGS)
 #_pyndn_la_LIBADD = ../src/pyndn.la
-nodist__pyndn_la_SOURCES = src/pyndnmodule.c
+nodist__pyndn_la_SOURCES = ${ndn_cpp_c_sources} \
+  src/pyndnmodule.c
 _pyndn_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
