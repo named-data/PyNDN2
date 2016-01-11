@@ -163,9 +163,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-_pyndn_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(_pyndn_la_CFLAGS) \
-	$(CFLAGS) $(_pyndn_la_LDFLAGS) $(LDFLAGS) -o $@
+_pyndn_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(_pyndn_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -200,6 +200,24 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+AM_V_CXX = $(am__v_CXX_@AM_V@)
+am__v_CXX_ = $(am__v_CXX_@AM_DEFAULT_V@)
+am__v_CXX_0 = @echo "  CXX     " $@;
+am__v_CXX_1 = 
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
+am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
+am__v_CXXLD_0 = @echo "  CXXLD   " $@;
+am__v_CXXLD_1 = 
 SOURCES = $(nodist__pyndn_la_SOURCES)
 DIST_SOURCES =
 am__can_run_installinfo = \
@@ -438,16 +456,16 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/util/time.c src/c/util/time.h
 
 pyexec_LTLIBRARIES = _pyndn.la
-_pyndn_la_CFLAGS = $(PYTHON_CFLAGS) $(PYTHON_CPPFLAGS)
-#_pyndn_la_LIBADD = ../src/pyndn.la
+_pyndn_la_CFLAGS = $(PYTHON_CFLAGS)
+_pyndn_la_CPPFLAGS = $(PYTHON_CPPFLAGS)
 nodist__pyndn_la_SOURCES = ${ndn_cpp_c_sources} \
-  src/pyndnmodule.c
+  src/pyndnmodule.cpp
 
 _pyndn_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 am--refresh: Makefile
 	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -617,7 +635,7 @@ src/_pyndn_la-pyndnmodule.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 
 _pyndn.la: $(_pyndn_la_OBJECTS) $(_pyndn_la_DEPENDENCIES) $(EXTRA__pyndn_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(_pyndn_la_LINK) -rpath $(pyexecdir) $(_pyndn_la_OBJECTS) $(_pyndn_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(_pyndn_la_LINK) -rpath $(pyexecdir) $(_pyndn_la_OBJECTS) $(_pyndn_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -682,151 +700,175 @@ distclean-compile:
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
 src/c/_pyndn_la-errors.lo: src/c/errors.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-errors.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-errors.Tpo -c -o src/c/_pyndn_la-errors.lo `test -f 'src/c/errors.c' || echo '$(srcdir)/'`src/c/errors.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-errors.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-errors.Tpo -c -o src/c/_pyndn_la-errors.lo `test -f 'src/c/errors.c' || echo '$(srcdir)/'`src/c/errors.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-errors.Tpo src/c/$(DEPDIR)/_pyndn_la-errors.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/errors.c' object='src/c/_pyndn_la-errors.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-errors.lo `test -f 'src/c/errors.c' || echo '$(srcdir)/'`src/c/errors.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-errors.lo `test -f 'src/c/errors.c' || echo '$(srcdir)/'`src/c/errors.c
 
 src/c/_pyndn_la-forwarding-flags.lo: src/c/forwarding-flags.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-forwarding-flags.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Tpo -c -o src/c/_pyndn_la-forwarding-flags.lo `test -f 'src/c/forwarding-flags.c' || echo '$(srcdir)/'`src/c/forwarding-flags.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-forwarding-flags.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Tpo -c -o src/c/_pyndn_la-forwarding-flags.lo `test -f 'src/c/forwarding-flags.c' || echo '$(srcdir)/'`src/c/forwarding-flags.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Tpo src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/forwarding-flags.c' object='src/c/_pyndn_la-forwarding-flags.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-forwarding-flags.lo `test -f 'src/c/forwarding-flags.c' || echo '$(srcdir)/'`src/c/forwarding-flags.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-forwarding-flags.lo `test -f 'src/c/forwarding-flags.c' || echo '$(srcdir)/'`src/c/forwarding-flags.c
 
 src/c/_pyndn_la-interest.lo: src/c/interest.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-interest.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-interest.Tpo -c -o src/c/_pyndn_la-interest.lo `test -f 'src/c/interest.c' || echo '$(srcdir)/'`src/c/interest.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-interest.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-interest.Tpo -c -o src/c/_pyndn_la-interest.lo `test -f 'src/c/interest.c' || echo '$(srcdir)/'`src/c/interest.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-interest.Tpo src/c/$(DEPDIR)/_pyndn_la-interest.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/interest.c' object='src/c/_pyndn_la-interest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-interest.lo `test -f 'src/c/interest.c' || echo '$(srcdir)/'`src/c/interest.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-interest.lo `test -f 'src/c/interest.c' || echo '$(srcdir)/'`src/c/interest.c
 
 src/c/_pyndn_la-name.lo: src/c/name.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-name.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-name.Tpo -c -o src/c/_pyndn_la-name.lo `test -f 'src/c/name.c' || echo '$(srcdir)/'`src/c/name.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-name.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-name.Tpo -c -o src/c/_pyndn_la-name.lo `test -f 'src/c/name.c' || echo '$(srcdir)/'`src/c/name.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-name.Tpo src/c/$(DEPDIR)/_pyndn_la-name.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/name.c' object='src/c/_pyndn_la-name.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-name.lo `test -f 'src/c/name.c' || echo '$(srcdir)/'`src/c/name.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-name.lo `test -f 'src/c/name.c' || echo '$(srcdir)/'`src/c/name.c
 
 src/c/encoding/_pyndn_la-element-reader.lo: src/c/encoding/element-reader.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-element-reader.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Tpo -c -o src/c/encoding/_pyndn_la-element-reader.lo `test -f 'src/c/encoding/element-reader.c' || echo '$(srcdir)/'`src/c/encoding/element-reader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-element-reader.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Tpo -c -o src/c/encoding/_pyndn_la-element-reader.lo `test -f 'src/c/encoding/element-reader.c' || echo '$(srcdir)/'`src/c/encoding/element-reader.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Tpo src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/element-reader.c' object='src/c/encoding/_pyndn_la-element-reader.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-element-reader.lo `test -f 'src/c/encoding/element-reader.c' || echo '$(srcdir)/'`src/c/encoding/element-reader.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-element-reader.lo `test -f 'src/c/encoding/element-reader.c' || echo '$(srcdir)/'`src/c/encoding/element-reader.c
 
 src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo: src/c/encoding/tlv-0_1_1-wire-format.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format.Tpo -c -o src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo `test -f 'src/c/encoding/tlv-0_1_1-wire-format.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_1_1-wire-format.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format.Tpo -c -o src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo `test -f 'src/c/encoding/tlv-0_1_1-wire-format.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_1_1-wire-format.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format.Tpo src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv-0_1_1-wire-format.c' object='src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo `test -f 'src/c/encoding/tlv-0_1_1-wire-format.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_1_1-wire-format.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format.lo `test -f 'src/c/encoding/tlv-0_1_1-wire-format.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_1_1-wire-format.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-data.lo: src/c/encoding/tlv/tlv-data.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-data.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-data.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-data.lo `test -f 'src/c/encoding/tlv/tlv-data.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-data.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-data.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-data.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-data.lo `test -f 'src/c/encoding/tlv/tlv-data.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-data.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-data.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-data.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-data.c' object='src/c/encoding/tlv/_pyndn_la-tlv-data.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-data.lo `test -f 'src/c/encoding/tlv/tlv-data.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-data.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-data.lo `test -f 'src/c/encoding/tlv/tlv-data.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-data.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo: src/c/encoding/tlv/tlv-decoder.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-decoder.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo `test -f 'src/c/encoding/tlv/tlv-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-decoder.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-decoder.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo `test -f 'src/c/encoding/tlv/tlv-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-decoder.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-decoder.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-decoder.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-decoder.c' object='src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo `test -f 'src/c/encoding/tlv/tlv-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-decoder.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-decoder.lo `test -f 'src/c/encoding/tlv/tlv-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-decoder.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo: src/c/encoding/tlv/tlv-encoder.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-encoder.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo `test -f 'src/c/encoding/tlv/tlv-encoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-encoder.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-encoder.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo `test -f 'src/c/encoding/tlv/tlv-encoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-encoder.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-encoder.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-encoder.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-encoder.c' object='src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo `test -f 'src/c/encoding/tlv/tlv-encoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-encoder.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-encoder.lo `test -f 'src/c/encoding/tlv/tlv-encoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-encoder.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-interest.lo: src/c/encoding/tlv/tlv-interest.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-interest.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-interest.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-interest.lo `test -f 'src/c/encoding/tlv/tlv-interest.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-interest.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-interest.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-interest.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-interest.lo `test -f 'src/c/encoding/tlv/tlv-interest.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-interest.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-interest.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-interest.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-interest.c' object='src/c/encoding/tlv/_pyndn_la-tlv-interest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-interest.lo `test -f 'src/c/encoding/tlv/tlv-interest.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-interest.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-interest.lo `test -f 'src/c/encoding/tlv/tlv-interest.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-interest.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo: src/c/encoding/tlv/tlv-key-locator.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-key-locator.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo `test -f 'src/c/encoding/tlv/tlv-key-locator.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-key-locator.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-key-locator.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo `test -f 'src/c/encoding/tlv/tlv-key-locator.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-key-locator.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-key-locator.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-key-locator.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-key-locator.c' object='src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo `test -f 'src/c/encoding/tlv/tlv-key-locator.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-key-locator.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-key-locator.lo `test -f 'src/c/encoding/tlv/tlv-key-locator.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-key-locator.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-name.lo: src/c/encoding/tlv/tlv-name.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-name.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-name.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-name.lo `test -f 'src/c/encoding/tlv/tlv-name.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-name.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-name.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-name.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-name.lo `test -f 'src/c/encoding/tlv/tlv-name.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-name.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-name.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-name.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-name.c' object='src/c/encoding/tlv/_pyndn_la-tlv-name.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-name.lo `test -f 'src/c/encoding/tlv/tlv-name.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-name.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-name.lo `test -f 'src/c/encoding/tlv/tlv-name.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-name.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo: src/c/encoding/tlv/tlv-control-parameters.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo `test -f 'src/c/encoding/tlv/tlv-control-parameters.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-control-parameters.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo `test -f 'src/c/encoding/tlv/tlv-control-parameters.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-control-parameters.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-control-parameters.c' object='src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo `test -f 'src/c/encoding/tlv/tlv-control-parameters.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-control-parameters.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo `test -f 'src/c/encoding/tlv/tlv-control-parameters.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-control-parameters.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo: src/c/encoding/tlv/tlv-signature-info.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo `test -f 'src/c/encoding/tlv/tlv-signature-info.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-signature-info.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo `test -f 'src/c/encoding/tlv/tlv-signature-info.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-signature-info.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-signature-info.c' object='src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo `test -f 'src/c/encoding/tlv/tlv-signature-info.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-signature-info.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo `test -f 'src/c/encoding/tlv/tlv-signature-info.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-signature-info.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo: src/c/encoding/tlv/tlv-structure-decoder.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo `test -f 'src/c/encoding/tlv/tlv-structure-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-structure-decoder.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo `test -f 'src/c/encoding/tlv/tlv-structure-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-structure-decoder.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Tpo src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv/tlv-structure-decoder.c' object='src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo `test -f 'src/c/encoding/tlv/tlv-structure-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-structure-decoder.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo `test -f 'src/c/encoding/tlv/tlv-structure-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-structure-decoder.c
 
 src/c/util/_pyndn_la-crypto.lo: src/c/util/crypto.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-crypto.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-crypto.Tpo -c -o src/c/util/_pyndn_la-crypto.lo `test -f 'src/c/util/crypto.c' || echo '$(srcdir)/'`src/c/util/crypto.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-crypto.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-crypto.Tpo -c -o src/c/util/_pyndn_la-crypto.lo `test -f 'src/c/util/crypto.c' || echo '$(srcdir)/'`src/c/util/crypto.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-crypto.Tpo src/c/util/$(DEPDIR)/_pyndn_la-crypto.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/crypto.c' object='src/c/util/_pyndn_la-crypto.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-crypto.lo `test -f 'src/c/util/crypto.c' || echo '$(srcdir)/'`src/c/util/crypto.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-crypto.lo `test -f 'src/c/util/crypto.c' || echo '$(srcdir)/'`src/c/util/crypto.c
 
 src/c/util/_pyndn_la-dynamic-uint8-array.lo: src/c/util/dynamic-uint8-array.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-dynamic-uint8-array.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array.Tpo -c -o src/c/util/_pyndn_la-dynamic-uint8-array.lo `test -f 'src/c/util/dynamic-uint8-array.c' || echo '$(srcdir)/'`src/c/util/dynamic-uint8-array.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-dynamic-uint8-array.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array.Tpo -c -o src/c/util/_pyndn_la-dynamic-uint8-array.lo `test -f 'src/c/util/dynamic-uint8-array.c' || echo '$(srcdir)/'`src/c/util/dynamic-uint8-array.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array.Tpo src/c/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/dynamic-uint8-array.c' object='src/c/util/_pyndn_la-dynamic-uint8-array.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-dynamic-uint8-array.lo `test -f 'src/c/util/dynamic-uint8-array.c' || echo '$(srcdir)/'`src/c/util/dynamic-uint8-array.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-dynamic-uint8-array.lo `test -f 'src/c/util/dynamic-uint8-array.c' || echo '$(srcdir)/'`src/c/util/dynamic-uint8-array.c
 
 src/c/util/_pyndn_la-ndn_memory.lo: src/c/util/ndn_memory.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-ndn_memory.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Tpo -c -o src/c/util/_pyndn_la-ndn_memory.lo `test -f 'src/c/util/ndn_memory.c' || echo '$(srcdir)/'`src/c/util/ndn_memory.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-ndn_memory.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Tpo -c -o src/c/util/_pyndn_la-ndn_memory.lo `test -f 'src/c/util/ndn_memory.c' || echo '$(srcdir)/'`src/c/util/ndn_memory.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Tpo src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/ndn_memory.c' object='src/c/util/_pyndn_la-ndn_memory.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-ndn_memory.lo `test -f 'src/c/util/ndn_memory.c' || echo '$(srcdir)/'`src/c/util/ndn_memory.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-ndn_memory.lo `test -f 'src/c/util/ndn_memory.c' || echo '$(srcdir)/'`src/c/util/ndn_memory.c
 
 src/c/util/_pyndn_la-ndn_realloc.lo: src/c/util/ndn_realloc.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-ndn_realloc.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-ndn_realloc.Tpo -c -o src/c/util/_pyndn_la-ndn_realloc.lo `test -f 'src/c/util/ndn_realloc.c' || echo '$(srcdir)/'`src/c/util/ndn_realloc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-ndn_realloc.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-ndn_realloc.Tpo -c -o src/c/util/_pyndn_la-ndn_realloc.lo `test -f 'src/c/util/ndn_realloc.c' || echo '$(srcdir)/'`src/c/util/ndn_realloc.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-ndn_realloc.Tpo src/c/util/$(DEPDIR)/_pyndn_la-ndn_realloc.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/ndn_realloc.c' object='src/c/util/_pyndn_la-ndn_realloc.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-ndn_realloc.lo `test -f 'src/c/util/ndn_realloc.c' || echo '$(srcdir)/'`src/c/util/ndn_realloc.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-ndn_realloc.lo `test -f 'src/c/util/ndn_realloc.c' || echo '$(srcdir)/'`src/c/util/ndn_realloc.c
 
 src/c/util/_pyndn_la-time.lo: src/c/util/time.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-time.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-time.Tpo -c -o src/c/util/_pyndn_la-time.lo `test -f 'src/c/util/time.c' || echo '$(srcdir)/'`src/c/util/time.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-time.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-time.Tpo -c -o src/c/util/_pyndn_la-time.lo `test -f 'src/c/util/time.c' || echo '$(srcdir)/'`src/c/util/time.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-time.Tpo src/c/util/$(DEPDIR)/_pyndn_la-time.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/time.c' object='src/c/util/_pyndn_la-time.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-time.lo `test -f 'src/c/util/time.c' || echo '$(srcdir)/'`src/c/util/time.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-time.lo `test -f 'src/c/util/time.c' || echo '$(srcdir)/'`src/c/util/time.c
 
-src/_pyndn_la-pyndnmodule.lo: src/pyndnmodule.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/_pyndn_la-pyndnmodule.lo -MD -MP -MF src/$(DEPDIR)/_pyndn_la-pyndnmodule.Tpo -c -o src/_pyndn_la-pyndnmodule.lo `test -f 'src/pyndnmodule.c' || echo '$(srcdir)/'`src/pyndnmodule.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/_pyndn_la-pyndnmodule.Tpo src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/pyndnmodule.c' object='src/_pyndn_la-pyndnmodule.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/_pyndn_la-pyndnmodule.lo `test -f 'src/pyndnmodule.c' || echo '$(srcdir)/'`src/pyndnmodule.c
+.cpp.o:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
+
+src/_pyndn_la-pyndnmodule.lo: src/pyndnmodule.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/_pyndn_la-pyndnmodule.lo -MD -MP -MF src/$(DEPDIR)/_pyndn_la-pyndnmodule.Tpo -c -o src/_pyndn_la-pyndnmodule.lo `test -f 'src/pyndnmodule.cpp' || echo '$(srcdir)/'`src/pyndnmodule.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/_pyndn_la-pyndnmodule.Tpo src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/pyndnmodule.cpp' object='src/_pyndn_la-pyndnmodule.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/_pyndn_la-pyndnmodule.lo `test -f 'src/pyndnmodule.cpp' || echo '$(srcdir)/'`src/pyndnmodule.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

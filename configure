@@ -16953,6 +16953,8 @@ $as_echo "$am_cv_python_pyexecdir" >&6; }
 PY_PREFIX=`$PYTHON -c 'import sys ; print sys.prefix'`
 PYTHON_LIBS="-lpython$PYTHON_VERSION"
 PYTHON_CFLAGS="-I$PY_PREFIX/include/python$PYTHON_VERSION"
+PYTHON_CPPFLAGS="-I$PY_PREFIX/include/python$PYTHON_VERSION"
+
 
 
 

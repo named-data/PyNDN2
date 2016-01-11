@@ -53,8 +53,8 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/util/time.c src/c/util/time.h
 
 pyexec_LTLIBRARIES = _pyndn.la
-_pyndn_la_CFLAGS = $(PYTHON_CFLAGS) $(PYTHON_CPPFLAGS)
-#_pyndn_la_LIBADD = ../src/pyndn.la
+_pyndn_la_CFLAGS = $(PYTHON_CFLAGS)
+_pyndn_la_CPPFLAGS = $(PYTHON_CPPFLAGS)
 nodist__pyndn_la_SOURCES = ${ndn_cpp_c_sources} \
-  src/pyndnmodule.c
+  src/pyndnmodule.cpp
 _pyndn_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
