@@ -8,7 +8,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
 # Public C headers.
-# NOTE: If a new directory is added, then add it to ndn_cpp_c_headers in include/Makefile.am.
 ndn_cpp_c_headers = \
   include/ndn-cpp/ndn-cpp-config.h \
   include/ndn-cpp/c/common.h \
@@ -22,6 +21,23 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/encoding/element-reader-types.h \
   include/ndn-cpp/c/util/blob-types.h \
   include/ndn-cpp/c/util/dynamic-uint8-array-types.h
+
+# Public C++ headers.
+ndn_cpp_cpp_headers = \
+  include/ndn-cpp/lite/common-lite.hpp \
+  include/ndn-cpp/lite/data-lite.hpp \
+  include/ndn-cpp/lite/control-parameters-lite.hpp \
+  include/ndn-cpp/lite/exclude-lite.hpp \
+  include/ndn-cpp/lite/forwarding-flags-lite.hpp \
+  include/ndn-cpp/lite/interest-lite.hpp \
+  include/ndn-cpp/lite/key-locator-lite.hpp \
+  include/ndn-cpp/lite/meta-info-lite.hpp \
+  include/ndn-cpp/lite/name-lite.hpp \
+  include/ndn-cpp/lite/signature-lite.hpp \
+  include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
+  include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
+  include/ndn-cpp/lite/util/blob-lite.hpp \
+  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp
 
 # Just the C code.
 ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
@@ -52,9 +68,25 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/util/ndn_realloc.c src/c/util/ndn_realloc.h \
   src/c/util/time.c src/c/util/time.h
 
+# C++ code and also the C code.
+ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
+  src/lite/control-parameters-lite.cpp \
+  src/lite/data-lite.cpp \
+  src/lite/exclude-lite.cpp \
+  src/lite/forwarding-flags-lite.cpp \
+  src/lite/interest-lite.cpp \
+  src/lite/key-locator-lite.cpp \
+  src/lite/meta-info-lite.cpp \
+  src/lite/name-lite.cpp \
+  src/lite/signature-lite.cpp \
+  src/lite/encoding/element-listener-lite.cpp \
+  src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp \
+  src/lite/util/blob-lite.cpp \
+  src/lite/util/dynamic-uint8-array-lite.cpp
+
 pyexec_LTLIBRARIES = _pyndn.la
 _pyndn_la_CFLAGS = $(PYTHON_CFLAGS)
 _pyndn_la_CPPFLAGS = $(PYTHON_CPPFLAGS)
-nodist__pyndn_la_SOURCES = ${ndn_cpp_c_sources} \
+nodist__pyndn_la_SOURCES = ${ndn_cpp_cpp_sources} \
   src/pyndnmodule.cpp
 _pyndn_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
