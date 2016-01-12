@@ -31,6 +31,11 @@ from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv.tlv import Tlv
+haveModule_pyndn = True
+try:
+    import _pyndn
+except ImportError:
+    haveModule_pyndn = False
 
 # The Python documentation says "Use SystemRandom if you require a
 #   cryptographically secure pseudo-random number generator."
@@ -180,6 +185,11 @@ class Tlv0_1_1WireFormat(WireFormat):
           the offset in the encoding of the end of the signed portion.
         :rtype: (Blob, int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeData(data)
+            return (Blob(result[0], False), result[1], result[2])
+
         encoder = TlvEncoder(1500)
         saveLength = len(encoder)
 
