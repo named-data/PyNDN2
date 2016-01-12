@@ -13,6 +13,7 @@ Prerequisites
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
 * Optional: Sphinx (to make documentation)
 * Optional: pytest and mock (for running unit tests)
+* Optional: python-dev, libcrypto (for the _pyndn C module)
 
 ### Option to use easy_install
 
@@ -76,6 +77,10 @@ Optional: To install pytest and mock, in a terminal enter:
     sudo apt-get install python-pip
     sudo pip install pytest mock
 
+Optional: To install libcrypto, in a terminal enter:
+
+    sudo apt-get install build-essential libssl-dev
+
 (Protobuf is already installed.)
 
 ## Ubuntu 14.04 (64 bit and 32 bit) and 15.04 (64 bit)
@@ -105,6 +110,10 @@ Optional: To install pytest and mock, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install pytest mock
+
+Optional: To install python-dev and libcrypto, in a terminal enter:
+
+    sudo apt-get install build-essential python-dev libssl-dev
 
 ## Raspbian Jessie (Raspberry Pi)
 (pip is already installed.) In a terminal, enter:
@@ -206,6 +215,13 @@ To make the Sphinx documentation, in a terminal change to the doc subdirectory. 
     make html
 
 The documentation output is in `doc/_build/html/index.html`.
+
+To install the optional _pyndn C module, you need the prerequisites python-dev
+and libcrypto. To build in a terminal, change directory to the PyNDN2 root.  Enter:
+
+    ./configure
+    make
+    sudo make install
 
 Files
 =====
