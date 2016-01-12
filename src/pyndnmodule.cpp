@@ -15,7 +15,7 @@ extern "C" {
 class PyObjectRef {
 public:
   PyObjectRef(PyObject* obj) : obj(obj) {}
-  ~PyObjectRef() { Py_DECREF(obj); }
+  ~PyObjectRef() { if (obj) Py_DECREF(obj); }
   operator PyObject*() { return obj; }
   PyObject* obj;
 };
@@ -35,32 +35,49 @@ toDoubleByMethod(PyObject* obj, const char* methodName)
 }
 
 /**
- * Get a Blob by calling obj.methodName() and use Blob.toBytes to return a BlobLite.
+ * Get a Blob by calling obj.methodName() and imitate Blob.toBuffer to get
+ * the array in a BlobLite.
  * @param obj The object with the Blob.
  * @param methodName The method name that returns a Blob.
- * @param objectPool A PyList to which is appended the object with the raw bytes.
  * @return A BlobLite which points into the raw bytes, or an empty BlobLite if
- * if Blob.toBytes returns None.
+ * if the Blob isNull.
  */
 static BlobLite
-toBlobLiteByMethod(PyObject* obj, const char* methodName, PyObject* objectPool)
+toBlobLiteByMethod(PyObject* obj, const char* methodName)
 {
   PyObjectRef blob(PyObject_CallMethod(obj, (char*)methodName, (char*)""));
-  // TODO: Check blob for isNull?
-  PyObjectRef bytes(PyObject_CallMethod(blob, (char*)"toBytes", (char*)""));
-  if (bytes.obj == Py_None)
+
+  // Imitate Blob.toBuffer to be bufferObj.
+  PyObjectRef blobArray(PyObject_GetAttrString(blob, "_array"));
+  if (blobArray.obj == Py_None)
     return BlobLite();
-  
-  PyList_Append(objectPool, bytes);
-  // TODO: Can use PyString_AS_STRING and PyString_GET_SIZE?
-  // TODO: Does the work on a Python 3 bytes object?
-  return BlobLite
-    ((const uint8_t*)PyString_AsString(bytes), PyString_Size(bytes));
+
+  PyObject* bufferObj;
+  PyObjectRef blobArrayView(0);
+  if (PyObject_HasAttrString(blobArray, "_view")) {
+    // Assume _array is a _memoryviewWrapper.
+    blobArrayView.obj = PyObject_GetAttrString(blobArray, "_view");
+    bufferObj = blobArrayView.obj;
+  }
+  else
+    bufferObj = blobArray.obj;
+
+  Py_buffer bufferView;
+  if (PyObject_GetBuffer(bufferObj, &bufferView, PyBUF_SIMPLE) != 0)
+    // Error. Don't expect this to happen, so just return an empty blob.
+    return BlobLite();
+  // TODO: Check if it is a byte buffer?
+  uint8_t* buf = (uint8_t*)bufferView.buf;
+  size_t size = bufferView.len;
+  // TODO: Do we have to put this in a pool to be freed later?
+  PyBuffer_Release(&bufferView);
+
+  return BlobLite(buf, size);
 }
 
 // Imitate Name::get(NameLite& nameLite).
 static void
-toNameLite(PyObject* name, NameLite& nameLite, PyObject* objectPool)
+toNameLite(PyObject* name, NameLite& nameLite)
 {
   nameLite.clear();
   PyObjectRef components(PyObject_GetAttrString(name, "_components"));
@@ -68,7 +85,7 @@ toNameLite(PyObject* name, NameLite& nameLite, PyObject* objectPool)
     ndn_Error error;
     if ((error = nameLite.append
          (toBlobLiteByMethod
-          (PyList_GET_ITEM(components.obj, i), "getValue", objectPool))))
+          (PyList_GET_ITEM(components.obj, i), "getValue"))))
       // TODO: Handle the error!
       return;
   }
@@ -76,58 +93,56 @@ toNameLite(PyObject* name, NameLite& nameLite, PyObject* objectPool)
 
 // Imitate KeyLocator::get(KeyLocatorLite& keyLocatorLite).
 static void
-toKeyLocatorLite
-  (PyObject* keyLocator, KeyLocatorLite& keyLocatorLite, PyObject* objectPool)
+toKeyLocatorLite(PyObject* keyLocator, KeyLocatorLite& keyLocatorLite)
 {
   keyLocatorLite.setType
     ((ndn_KeyLocatorType)(int)toLongByMethod(keyLocator, "getType"));
   keyLocatorLite.setKeyData
-    (toBlobLiteByMethod(keyLocator, "getKeyData", objectPool));
+    (toBlobLiteByMethod(keyLocator, "getKeyData"));
 
   PyObjectRef keyName(PyObject_CallMethod(keyLocator, (char*)"getKeyName", (char*)""));
-  toNameLite(keyName, keyLocatorLite.getKeyName(), objectPool);
+  toNameLite(keyName, keyLocatorLite.getKeyName());
 }
 
 // Imitate Sha256WithRsaSignature::get(SignatureLite& signatureLite).
 static void
-toSha256WithRsaSignatureLite
-  (PyObject* signature, SignatureLite& signatureLite, PyObject* objectPool)
+toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
 {
   signatureLite.setType(ndn_SignatureType_Sha256WithRsaSignature);
-  signatureLite.setSignature(toBlobLiteByMethod(signature, "getSignature", objectPool));
+  signatureLite.setSignature(toBlobLiteByMethod(signature, "getSignature"));
 
   PyObjectRef keyLocator
     (PyObject_CallMethod(signature, (char*)"getKeyLocator", (char*)""));
-  toKeyLocatorLite(keyLocator, signatureLite.getKeyLocator(), objectPool);
+  toKeyLocatorLite(keyLocator, signatureLite.getKeyLocator());
 }
 
 // Imitate MetaInfo::get(MetaInfoLite& metaInfoLite).
 static void
-toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite, PyObject* objectPool)
+toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
 {
   metaInfoLite.setType((ndn_ContentType)(int)toLongByMethod(metaInfo, "getType"));
   metaInfoLite.setFreshnessPeriod(toDoubleByMethod(metaInfo, "getFreshnessPeriod"));
   PyObjectRef finalBlockId(PyObject_CallMethod
     (metaInfo, (char*)"getFinalBlockId", (char*)""));
   metaInfoLite.setFinalBlockId(NameLite::Component
-    (toBlobLiteByMethod(finalBlockId, "getValue", objectPool)));
+    (toBlobLiteByMethod(finalBlockId, "getValue")));
 }
 
 // Imitate Data::get(DataLite& dataLite).
 static void
-toDataLite(PyObject* data, DataLite& dataLite, PyObject* objectPool)
+toDataLite(PyObject* data, DataLite& dataLite)
 {
   // TODO: Handle types other than Sha256WithRsaSignature
   PyObjectRef signature(PyObject_CallMethod(data, (char*)"getSignature", (char*)""));
-  toSha256WithRsaSignatureLite(signature, dataLite.getSignature(), objectPool);
+  toSha256WithRsaSignatureLite(signature, dataLite.getSignature());
 
   PyObjectRef name(PyObject_CallMethod(data, (char*)"getName", (char*)""));
-  toNameLite(name, dataLite.getName(), objectPool);
+  toNameLite(name, dataLite.getName());
 
   PyObjectRef metaInfo(PyObject_CallMethod(data, (char*)"getMetaInfo", (char*)""));
-  toMetaInfoLite(metaInfo, dataLite.getMetaInfo(), objectPool);
+  toMetaInfoLite(metaInfo, dataLite.getMetaInfo());
 
-  dataLite.setContent(toBlobLiteByMethod(data, "getContent", objectPool));
+  dataLite.setContent(toBlobLiteByMethod(data, "getContent"));
 }
 
 static PyObject *
@@ -137,17 +152,15 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "O", &data))
     return NULL;
 
-  PyObjectRef objectPool(PyList_New(0));
-
   struct ndn_NameComponent nameComponents[100];
   struct ndn_NameComponent keyNameComponents[100];
   DataLite dataLite
     (nameComponents, sizeof(nameComponents) / sizeof(nameComponents[0]),
      keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
 
-  toDataLite(data, dataLite, objectPool);
+  toDataLite(data, dataLite);
 
-  // TODO: Make this a dynamic buffer (possible of a native Python buffer).
+  // TODO: Make this a dynamic buffer.
   uint8_t debugEncoding[2000];
   DynamicUInt8ArrayLite output(debugEncoding, sizeof(debugEncoding), 0);
   size_t signedPortionBeginOffset, signedPortionEndOffset, encodingLength;
@@ -160,7 +173,6 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
     return 0;
   }
 
-  // TODO: Can we return a Blob without copying?
   // TODO: Does returning a str work in Python 3 (where this is Unicode)?
   return Py_BuildValue
     ("(s#,i,i)", debugEncoding, encodingLength, (int)signedPortionBeginOffset,
@@ -177,7 +189,8 @@ extern "C" {
   signedPortionEndOffset) where encoding is a raw str (not Blob) containing the\n\
   encoding, signedPortionBeginOffset is the offset in the encoding of\n\
   the beginning of the signed portion, and signedPortionEndOffset is\n\
-  the offset in the encoding of the end of the signed portion.\n\
+  the offset in the encoding of the end of the signed portion. If r is the\n\
+  result Tuple, the encoding Blob is Blob(r[0], False).\n\
 :rtype: (str, int, int)"},
     {NULL, NULL, 0, NULL} // sentinel
   };
