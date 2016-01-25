@@ -131,10 +131,10 @@ Optional: To install pytest and mock, in a terminal enter:
 Cygwin is tested on Windows 7 64-bit. 
 
 In the Cygwin installer, select and install the "Devel" packages at the top level of the installer.  
-In a Cygwin terminal, enter:
+To install the cryptography package, in a Cygwin terminal, enter:
 
     easy_install pip
-    pip install pycrypto
+    pip install cryptography
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
 
@@ -168,9 +168,9 @@ Visual Studio 2013
 
     SET VS90COMNTOOLS=%VS120COMNTOOLS%
 
-To install pycrypto, in a command prompt enter:
+To install the cryptography package, in a command prompt enter:
 
-    c:\Python27\Scripts\pip.exe install pycrypto
+    c:\Python27\Scripts\pip.exe install cryptography
 
 Optional: To run trollius in Python 2.7, it apparently needs some DLLs from
 Python 3. So, to run trollius in Python 2.7, install Python 3.  
