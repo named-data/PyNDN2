@@ -208,7 +208,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
 
     class PrivateKey:
         """
-        PrivateKey is a simple class to hold a PyCrypto key object along
+        PrivateKey is a simple class to hold a cryptography key object along
         with a KeyType.
         """
         def __init__(self, keyType, keyDer):
