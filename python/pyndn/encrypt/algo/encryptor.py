@@ -77,7 +77,7 @@ class Encryptor(object):
             data.setContent(content.wireEncode(TlvWireFormat.get()))
         elif (algorithmType == EncryptAlgorithmType.RsaPkcs or
               algorithmType == EncryptAlgorithmType.RsaOaep):
-            # PyCrypto doesn't have a direct way to get the maximum plain text
+            # Cryptography doesn't have a direct way to get the maximum plain text
             # size, so try to encrypt the payload first and catch the error if
             # it is too big.
             try:
