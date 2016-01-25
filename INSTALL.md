@@ -25,11 +25,11 @@ To use easy_install, change directory to the PyNDN root and enter:
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
 ## OS X 10.9.5, OS X 10.10.2, OS X 10.11
-Install Xcode.  (Xcode seems to already have the Command Line Tools.)  
-In a terminal, enter:
+Install Xcode.  (Xcode seems to already have the Command Line Tools.)
+To install the cryptography package, in a terminal enter:
 
     sudo easy_install pip
-    sudo CFLAGS=-Qunused-arguments pip install pycrypto
+    sudo CFLAGS=-Qunused-arguments pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -52,7 +52,7 @@ Optional: To install pytest and mock, in a terminal enter:
     sudo CFLAGS=-Qunused-arguments pip install pytest mock
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
-To install the cryptography package, in a termanl enter:
+To install the cryptography package, in a terminal enter:
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
     sudo pip install cryptography
@@ -75,7 +75,7 @@ Optional: To install pytest and mock, in a terminal enter:
 (Protobuf is already installed.)
 
 ## Ubuntu 14.04 (64 bit and 32 bit) and 15.04 (64 bit)
-To install the cryptography package, in a termanl enter:
+To install the cryptography package, in a terminal enter:
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
     sudo pip install cryptography
