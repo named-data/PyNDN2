@@ -24,7 +24,8 @@ ChronoSync.
 """
 
 import logging
-from Crypto.Hash import SHA256
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
 
 class DigestTree(object):
@@ -115,27 +116,27 @@ class DigestTree(object):
             """
             Digest the fields and set self._digest to the hex digest.
             """
-            sha256 = SHA256.new()
+            sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
             number = bytearray(4)
             # Debug: sync-state.proto defines seq and session as uint64, but
             #   the original ChronoChat-js only digests 32 bits.
             self._int32ToLittleEndian(self._sessionNo, number)
-            sha256.update(number)
+            sha256.update(Blob(number, False).toBytes())
             self._int32ToLittleEndian(self._sequenceNo, number)
-            sha256.update(number)
-            sequenceDigest = sha256.digest()
+            sha256.update(Blob(number, False).toBytes())
+            sequenceDigest = sha256.finalize()
 
-            sha256 = SHA256.new()
+            sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
             # Use Blob to convert a string to UTF-8 if needed.
-            sha256.update(Blob(self._dataPrefix).toBuffer());
-            nameDigest = sha256.digest()
+            sha256.update(Blob(self._dataPrefix, False).toBytes());
+            nameDigest = sha256.finalize()
 
-            sha256 = SHA256.new()
+            sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
             sha256.update(nameDigest)
             sha256.update(sequenceDigest)
-            nodeDigest = sha256.digest()
+            nodeDigest = sha256.finalize()
             # Use Blob to convert a str (Python 2) or bytes (Python 3) to hex.
-            self._digest = Blob(nodeDigest).toHex()
+            self._digest = Blob(nodeDigest, False).toHex()
 
         @staticmethod
         def _int32ToLittleEndian(value, result):
@@ -214,22 +215,22 @@ class DigestTree(object):
         """
         Convert the hex string to bytes and call messageDigest.update.
 
-        :param messageDigest: The MessageDigest to update.
-        :type messageDigest: A MessageDigest object, for example from
-          SHA256.new().
+        :param messageDigest: The digest to update.
+        :type messageDigest: A HashContext object, for example from
+          hashes.Hash(hashes.SHA256(), backend=default_backend()).
         :param str hex: The hex string.
         """
-        messageDigest.update(bytearray.fromhex(hex))
+        messageDigest.update(Blob(bytearray.fromhex(hex), False).toBytes())
 
     def _recomputeRoot(self):
         """
         Set _root to the digest of all digests in _digestnode. This sets
         _root to the hex value of the digest.
         """
-        sha256 = SHA256.new()
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
         for i in range(len(self._digestNode)):
             self._updateHex(sha256, self._digestNode[i].getDigest())
-        digestRoot = sha256.digest()
+        digestRoot = sha256.finalize()
         # Use Blob to convert a str (Python 2) or bytes (Python 3) to hex.
-        self._root = Blob(digestRoot).toHex()
+        self._root = Blob(digestRoot, False).toHex()
         logging.getLogger(__name__).info("update root to: %s", self._root)
