@@ -24,7 +24,6 @@ methods for encryption, such as encryptData.
 Note: This class is an experimental feature. The API may change.
 """
 
-from Crypto.Hash import SHA256
 from random import SystemRandom
 from pyndn.name import Name
 from pyndn.util.blob import Blob
@@ -87,7 +86,7 @@ class Encryptor(object):
                 return
             except ValueError as ex:
                 message = ex.args[0]
-                if not ("Plaintext is too long" in message):
+                if not ("Data too long for key size" in message):
                     raise ex
                 # Else the payload is larger than the maximum plaintext size. Continue.
 
@@ -186,23 +185,6 @@ class Encryptor(object):
             return result
         else:
             raise RuntimeError("Unsupported encryption method")
-
-    @staticmethod
-    def toPyCrypto(blob):
-        """
-        Convert the blob to an input buffer for PyCrypto.
-
-        :param Blob blob: The blob to convert.
-        :return: The input buffer for PyCrypto
-        :rtype: raw string or bytearray
-        """
-        if Encryptor.PyCryptoUsesStr:
-            return blob.toRawStr()
-        else:
-            return bytes(blob.toBuffer())
-
-    # Depending on the Python version, PyCrypto uses str or bytes.
-    PyCryptoUsesStr = type(SHA256.new().digest()) is str
 
 # Import these at the end of the file to avoid circular references.
 from pyndn.encrypt.algo.aes_algorithm import AesAlgorithm
