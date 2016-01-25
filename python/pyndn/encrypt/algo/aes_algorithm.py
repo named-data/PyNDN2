@@ -27,8 +27,10 @@ Note: This class is an experimental feature. The API may change.
 # (This is ported from ndn::gep::algo::Aes, and named AesAlgorithm because
 # "Aes" is very short and not all the Common Client Libraries have namespaces.)
 
+import sys
 from random import SystemRandom
-from Crypto.Cipher import AES
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 from pyndn.util.blob import Blob
 from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.encrypt.decrypt_key import DecryptKey
@@ -83,17 +85,19 @@ class AesAlgorithm(object):
         :rtype: Blob
         """
         if params.getAlgorithmType() == EncryptAlgorithmType.AesEcb:
-            cipher = AES.new(Encryptor.toPyCrypto(keyBits), AES.MODE_ECB)
+            cipher = Cipher(algorithms.AES(
+              keyBits.toBytes()), modes.ECB(), backend = default_backend())
         elif params.getAlgorithmType() == EncryptAlgorithmType.AesCbc:
-            cipher = AES.new(
-              Encryptor.toPyCrypto(keyBits), AES.MODE_CBC,
-              Encryptor.toPyCrypto(params.getInitialVector()))
+            cipher = Cipher(algorithms.AES(
+              keyBits.toBytes()), modes.CBC(params.getInitialVector().toBytes()), 
+              backend = default_backend())
         else:
             raise RuntimeError("unsupported encryption mode")
 
-        # For PyCrypto, we have to remove the padding.
-        resultWithPad = cipher.decrypt(Encryptor.toPyCrypto(encryptedData))
-        if Encryptor.PyCryptoUsesStr:
+        # For the cryptography package, we have to remove the padding.
+        decryptor = cipher.decryptor()
+        resultWithPad = decryptor.update(encryptedData.toBytes()) + decryptor.finalize()
+        if sys.version_info[0] <= 2:
             padLength = ord(resultWithPad[-1])
         else:
             padLength = resultWithPad[-1]
@@ -113,24 +117,26 @@ class AesAlgorithm(object):
         :return: The encrypted data.
         :rtype: Blob
         """
-        # For PyCrypto, we have to do the padding.
+        # For the cryptography package, we have to do the padding.
         padLength = 16 - (plainData.size() % 16)
-        if Encryptor.PyCryptoUsesStr:
+        if sys.version_info[0] <= 2:
             pad = chr(padLength) * padLength
         else:
             pad = bytes([padLength]) * padLength
 
         if params.getAlgorithmType() == EncryptAlgorithmType.AesEcb:
-            cipher = AES.new(Encryptor.toPyCrypto(keyBits), AES.MODE_ECB)
+            cipher = Cipher(algorithms.AES(
+              keyBits.toBytes()), modes.ECB(), backend = default_backend())
         elif params.getAlgorithmType() == EncryptAlgorithmType.AesCbc:
-            cipher = AES.new(
-              Encryptor.toPyCrypto(keyBits), AES.MODE_CBC,
-              Encryptor.toPyCrypto(params.getInitialVector()))
+            cipher = Cipher(algorithms.AES(
+              keyBits.toBytes()), modes.CBC(params.getInitialVector().toBytes()),
+              backend = default_backend())
         else:
             raise RuntimeError("unsupported encryption mode")
 
+        encryptor = cipher.encryptor()
         return Blob(
-          cipher.encrypt(Encryptor.toPyCrypto(plainData) + pad),
+          encryptor.update(plainData.toBytes() + pad) + encryptor.finalize(),
           False)
 
     BLOCK_SIZE = 16
