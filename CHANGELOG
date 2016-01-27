@@ -1,3 +1,9 @@
+Interim changes since PyNDN v2.1beta2 (2016-01-27)
+--------------------------------------------------
+
+Changes
+* In OSXPrivateKeyStorage, implemented generateKeyPair.
+
 PyNDN v2.1beta2 (2016-01-07)
 ----------------------------
 
