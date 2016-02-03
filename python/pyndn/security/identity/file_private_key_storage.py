@@ -24,12 +24,12 @@ PrivateKeyStorage to implement private key storage using files.
 """
 
 import os
-import sys
 import stat
 import base64
-from Crypto.Hash import SHA256
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
@@ -71,9 +71,16 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         privateKeyDer = None
 
         if params.getKeyType() == KeyType.RSA:
-            key = RSA.generate(params.getKeySize())
-            publicKeyDer = key.publickey().exportKey(format = 'DER')
-            privateKeyDer = key.exportKey(format = 'DER', pkcs = 8)
+            privateKey = rsa.generate_private_key(
+              public_exponent = 65537, key_size = params.getKeySize(),
+              backend = default_backend())
+            publicKeyDer = privateKey.public_key().public_bytes(
+              encoding = serialization.Encoding.DER,
+              format = serialization.PublicFormat.SubjectPublicKeyInfo)
+            privateKeyDer = privateKey.private_bytes(
+              encoding = serialization.Encoding.DER,
+              format = serialization.PrivateFormat.PKCS8,
+              encryption_algorithm = serialization.NoEncryption())
         else:
             raise SecurityException("Unsupported key type")
 
@@ -152,17 +159,15 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         with open(self.nameTransform(keyURI, ".pri")) as keyFile:
             base64Content = keyFile.read()
         der = base64.b64decode(base64Content)
-        if not type(der) is str:
-            der = "".join(map(chr, der))
 
-        privateKey = RSA.importKey(der)
+        privateKey = serialization.load_der_private_key(
+          Blob(der, False).toBytes(), password = None, backend = default_backend())
 
-        # Sign the hash of the data.
-        if sys.version_info[0] == 2:
-            # In Python 2.x, we need a str.  Use Blob to convert data.
-            data = Blob(data, False).toRawStr()
-        signature = PKCS1_v1_5.new(privateKey).sign(SHA256.new(data))
-        # Convert the string to a Blob.
+        # Sign the data.
+        data = Blob(data, False).toBytes()
+        signer = privateKey.signer(padding.PKCS1v15(), hashes.SHA256())
+        signer.update(data)
+        signature = signer.finalize()
         return Blob(bytearray(signature), False)
 
     def decrypt(self, keyName, data, isSymmetric = False):
@@ -235,11 +240,9 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         :return: The file path.
         :rtype: str
         """
-        hashInput = keyName
-        if sys.version_info[0] > 2:
-            # In Python 2.x, hash uses a str. Otherwise use Blob to convert.
-            hashInput = Blob(keyName, False).toBuffer()
-        hash = SHA256.new(hashInput).digest()
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(Blob(keyName, False).toBytes())
+        hash = sha256.finalize()
 
         digest = base64.b64encode(hash)
         if type(digest) != str:

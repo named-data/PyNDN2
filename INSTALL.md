@@ -8,7 +8,7 @@ from the [README.md](https://github.com/named-data/PyNDN2/blob/master/README.md)
 Prerequisites
 =============
 * Required: Python 2.7 or later
-* Required: PyCrypto
+* Required: The cryptography package
 * Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
 * Optional: Sphinx (to make documentation)
@@ -17,19 +17,33 @@ Prerequisites
 ### Option to use easy_install
 
 If you use easy_install to install the pyndn module, it automatically installs
-the prerequisites for PyCrypto, trollius/asyncio and Protobuf needed to run PyNDN.
-To use easy_install, change directory to the PyNDN root and enter:
+the prerequisites for trollius/asyncio and Protobuf needed to run PyNDN.
 
-    sudo CFLAGS=-Qunused-arguments python ./setup.py install
+To use easy_install in OS X, change directory to the PyNDN root and enter:
+
+    sudo easy_install pip
+    sudo CFLAGS=-Qunused-arguments pip install cryptography
+    sudo python setup.py install
+
+To use easy_install in Ubuntu or Raspbian (Raspberry Pi), change directory to the PyNDN root and enter:
+
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
+    sudo python setup.py install
+
+To use easy_install in Windows Cygwin, in the Cygwin installer, select and
+install the "Devel" packages at the top level of the installer. Change directory
+to the PyNDN root and enter:
+
+    python setup.py install
 
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
 ## OS X 10.9.5, OS X 10.10.2, OS X 10.11
-Install Xcode.  (Xcode seems to already have the Command Line Tools.)  
-In a terminal, enter:
+Install Xcode.  (Xcode seems to already have the Command Line Tools.)
+To install the cryptography package, in a terminal enter:
 
     sudo easy_install pip
-    sudo CFLAGS=-Qunused-arguments pip install pycrypto
+    sudo CFLAGS=-Qunused-arguments pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -52,14 +66,10 @@ Optional: To install pytest and mock, in a terminal enter:
     sudo CFLAGS=-Qunused-arguments pip install pytest mock
 
 ## Ubuntu 12.04 (64 bit and 32 bit)
-Need to build/install the latest PyCrypto. In a terminal, enter:
+To install the cryptography package, in a terminal enter:
 
-    cd ~
-    sudo apt-get install git python-dev
-    git clone https://github.com/dlitz/pycrypto.git
-    cd pycrypto
-    python setup.py build
-    sudo python setup.py install
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
+    sudo pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -79,7 +89,10 @@ Optional: To install pytest and mock, in a terminal enter:
 (Protobuf is already installed.)
 
 ## Ubuntu 14.04 (64 bit and 32 bit) and 15.04 (64 bit)
-(PyCrypto is already installed.)
+To install the cryptography package, in a terminal enter:
+
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
+    sudo pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -107,10 +120,10 @@ Optional: To install pytest and mock, in a terminal enter:
     sudo pip install pytest mock
 
 ## Raspbian Jessie (Raspberry Pi)
-(pip is already installed.) In a terminal, enter:
+(pip is already installed.) To install the cryptography package, in a terminal, enter:
 
-    sudo apt-get install python-dev
-    sudo pip install pycrypto
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+    sudo pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
@@ -132,10 +145,10 @@ Optional: To install pytest and mock, in a terminal enter:
 Cygwin is tested on Windows 7 64-bit. 
 
 In the Cygwin installer, select and install the "Devel" packages at the top level of the installer.  
-In a Cygwin terminal, enter:
+To install the cryptography package, in a Cygwin terminal, enter:
 
     easy_install pip
-    pip install pycrypto
+    pip install cryptography
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
 
@@ -169,9 +182,9 @@ Visual Studio 2013
 
     SET VS90COMNTOOLS=%VS120COMNTOOLS%
 
-To install pycrypto, in a command prompt enter:
+To install the cryptography package, in a command prompt enter:
 
-    c:\Python27\Scripts\pip.exe install pycrypto
+    c:\Python27\Scripts\pip.exe install cryptography
 
 Optional: To run trollius in Python 2.7, it apparently needs some DLLs from
 Python 3. So, to run trollius in Python 2.7, install Python 3.  

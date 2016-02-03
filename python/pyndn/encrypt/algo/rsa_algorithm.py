@@ -27,12 +27,12 @@ manipulate keys, encrypt and decrypt using RSA.
 # "Rsa" is very short and not all the Common Client Libraries have namespaces.)
 
 from random import SystemRandom
-from Crypto.Cipher import PKCS1_OAEP, PKCS1_v1_5
-from Crypto.PublicKey import RSA
-from Crypto.Util.number import bytes_to_long
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_node import *
-from pyndn.encoding.oid import OID
 from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.encrypt.decrypt_key import DecryptKey
 from pyndn.encrypt.encrypt_key import EncryptKey
@@ -49,12 +49,14 @@ class RsaAlgorithm(object):
         :return: The new decrypt key (PKCS8-encoded private key).
         :rtype: DecryptKey
         """
-        key = RSA.generate(params.getKeySize())
-        pkcs1PrivateKeyDer = Blob(key.exportKey('DER'), False)
-        privateKey = RsaAlgorithm._encodePkcs8PrivateKey(
-          pkcs1PrivateKeyDer, OID(RsaAlgorithm.RSA_ENCRYPTION_OID),
-          DerNull())
-        return DecryptKey(privateKey)
+        privateKey = rsa.generate_private_key(
+          public_exponent = 65537, key_size = params.getKeySize(),
+          backend = default_backend())
+        privateKeyDer = privateKey.private_bytes(
+          encoding = serialization.Encoding.DER,
+          format = serialization.PrivateFormat.PKCS8,
+          encryption_algorithm = serialization.NoEncryption())
+        return DecryptKey(Blob(privateKeyDer, False))
 
     @staticmethod
     def deriveEncryptKey(keyBits):
@@ -71,21 +73,16 @@ class RsaAlgorithm(object):
         pkcs8Children = parsedNode.getChildren()
         algorithmIdChildren = DerNode.getSequence(pkcs8Children, 1).getChildren()
         oidString = algorithmIdChildren[0].toVal()
-        rsaPrivateKeyDer = pkcs8Children[2].getPayload()
 
         if oidString != RsaAlgorithm.RSA_ENCRYPTION_OID:
           raise RuntimeError("The PKCS #8 private key is not RSA_ENCRYPTION")
 
-        # Decode the PKCS #1 RSAPrivateKey.
-        parsedNode = DerNode.parse(rsaPrivateKeyDer.buf(), 0)
-        rsaPrivateKeyChildren = parsedNode.getChildren()
-        modulus = rsaPrivateKeyChildren[1].getPayload()
-        publicExponent = rsaPrivateKeyChildren[2].getPayload()
-
-        publicKey = RSA.construct((
-          bytes_to_long(Encryptor.toPyCrypto(modulus)),
-          bytes_to_long(Encryptor.toPyCrypto(publicExponent))))
-        return EncryptKey(Blob(publicKey.exportKey(format = 'DER'), False))
+        privateKey = serialization.load_der_private_key(
+          keyBits.toBytes(), password = None, backend = default_backend())
+        publicKeyDer = privateKey.public_key().public_bytes(
+          encoding = serialization.Encoding.DER,
+          format = serialization.PublicFormat.SubjectPublicKeyInfo)
+        return EncryptKey(Blob(publicKeyDer, False))
 
     @staticmethod
     def decrypt(keyBits, encryptedData, params):
@@ -99,22 +96,17 @@ class RsaAlgorithm(object):
         :return: The decrypted data.
         :rtype: Blob
         """
-        privateKey = RSA.importKey(Encryptor.toPyCrypto(keyBits))
-        pyCryptoEncryptedData = Encryptor.toPyCrypto(encryptedData)
+        privateKey = serialization.load_der_private_key(
+          keyBits.toBytes(), password = None, backend = default_backend())
 
         if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
-            cipher = PKCS1_OAEP.new(privateKey)
-            result = cipher.decrypt(pyCryptoEncryptedData)
+            paddingObject = padding.OAEP(
+              mgf = padding.MGF1(algorithm = hashes.SHA1()),
+              algorithm = hashes.SHA1(), label = None)
+            result = privateKey.decrypt(encryptedData.toBytes(), paddingObject)
         elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
-            # See https://www.dlitz.net/software/pycrypto/api/current/Crypto.Cipher.PKCS1_v1_5-module.html
-            cipher = PKCS1_v1_5.new(privateKey)
-            sentinel = bytearray(32)
-            for i in range(len(sentinel)):
-                sentinel[i] = _systemRandom.randint(0, 0xff)
-
-            result = cipher.decrypt(pyCryptoEncryptedData, sentinel)
-            if result == sentinel:
-                raise RuntimeError("Invalid RSA PKCS1_v1_5 decryption")
+            paddingObject = padding.PKCS1v15()
+            result = privateKey.decrypt(encryptedData.toBytes(), paddingObject)
         else:
             raise RuntimeError("unsupported encryption mode")
 
@@ -132,42 +124,20 @@ class RsaAlgorithm(object):
         :return: The encrypted data.
         :rtype: Blob
         """
-        publicKey = RSA.importKey(Encryptor.toPyCrypto(keyBits))
-        pyCryptoPlainData = Encryptor.toPyCrypto(plainData)
+        publicKey = serialization.load_der_public_key(
+          keyBits.toBytes(), backend = default_backend())
 
         if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
-            cipher = PKCS1_OAEP.new(publicKey)
-            result = cipher.encrypt(pyCryptoPlainData)
+            paddingObject = padding.OAEP(
+              mgf = padding.MGF1(algorithm = hashes.SHA1()),
+              algorithm = hashes.SHA1(), label = None)
         elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
-            cipher = PKCS1_v1_5.new(publicKey)
-            result = cipher.encrypt(pyCryptoPlainData)
+            paddingObject = padding.PKCS1v15()
         else:
             raise RuntimeError("unsupported encryption mode")
 
+        result = publicKey.encrypt(plainData.toBytes(), paddingObject)
         return Blob(result, False)
-
-    @staticmethod
-    def _encodePkcs8PrivateKey(privateKeyDer, oid, parameters):
-        """
-        Encode the private key to a PKCS #8 private key.
-
-        :param privateKeyDer: The input private key DER.
-        :type privateKeyDer: Blob or bytearray
-        :param OID oid: The OID of the privateKey.
-        :param DerNode parameters: The DerNode of the parameters for the OID.
-        :return: The PKCS #8 private key DER.
-        :rtype: Blob
-        """
-        algorithmIdentifier = DerSequence()
-        algorithmIdentifier.addChild(DerOid(oid))
-        algorithmIdentifier.addChild(parameters)
-
-        result = DerSequence()
-        result.addChild(DerInteger(0))
-        result.addChild(algorithmIdentifier)
-        result.addChild(DerOctetString(privateKeyDer))
-
-        return result.encode()
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
 

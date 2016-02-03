@@ -12,7 +12,7 @@
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
 import sys
 
-requirements = ['pycrypto']
+requirements = ['cryptography']
 if sys.version_info[0] == 2:
     requirements.append('trollius')
     requirements.append('protobuf')

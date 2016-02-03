@@ -23,8 +23,9 @@ This module defines the PublicKey class which holds an encoded public key
 for use by the security library.
 """
 
-import sys
-from Crypto.PublicKey import RSA
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_node import DerNode
 from pyndn.encoding.der.der_exceptions import DerDecodingException
@@ -33,8 +34,6 @@ from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import UnrecognizedKeyFormatException
 
 from pyndn.encoding.der import DerNode
-
-from Crypto.Hash import SHA256
 
 class PublicKey(object):
     """
@@ -69,7 +68,8 @@ class PublicKey(object):
         # Verify that the we can decode.
         if oidString == self.RSA_ENCRYPTION_OID:
             self._keyType = KeyType.RSA
-            RSA.importKey(keyDer.toRawStr())
+            serialization.load_der_public_key(
+              keyDer.toBytes(), backend = default_backend())
         elif oidString == self.EC_ENCRYPTION_OID:
             self._keyType = KeyType.ECDSA
             # TODO: Check EC decoding.
@@ -97,14 +97,9 @@ class PublicKey(object):
         :rtype: Blob
         """
         if digestAlgorithm == DigestAlgorithm.SHA256:
-            # Get the bytes to verify.
-            if sys.version_info[0] == 2:
-                # In Python 2.x, we need a str.
-                encoding = self._keyDer.toRawStr()
-            else:
-                encoding = self._keyDer.toBuffer()
-
-            digest = SHA256.new(encoding).digest()
+            sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+            sha256.update(self._keyDer.toBytes())
+            digest = sha256.finalize()
 
             return Blob(bytearray(digest), False)
         else:
@@ -131,6 +126,3 @@ class PublicKey(object):
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
     EC_ENCRYPTION_OID = "1.2.840.10045.2.1"
-
-# Depending on the Python version, PyCrypto uses str or bytes.
-_PyCryptoUsesStr = type(SHA256.new().digest()) is str
