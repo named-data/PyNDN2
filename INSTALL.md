@@ -17,10 +17,24 @@ Prerequisites
 ### Option to use easy_install
 
 If you use easy_install to install the pyndn module, it automatically installs
-the prerequisites for cryptography, trollius/asyncio and Protobuf needed to run PyNDN.
-To use easy_install, change directory to the PyNDN root and enter:
+the prerequisites for trollius/asyncio and Protobuf needed to run PyNDN.
 
-    sudo CFLAGS=-Qunused-arguments python ./setup.py install
+To use easy_install in OS X, change directory to the PyNDN root and enter:
+
+    sudo easy_install pip
+    sudo CFLAGS=-Qunused-arguments pip install cryptography
+    sudo python setup.py install
+
+To use easy_install in Ubuntu or Raspbian (Raspberry Pi), change directory to the PyNDN root and enter:
+
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
+    sudo python setup.py install
+
+To use easy_install in Windows Cygwin, in the Cygwin installer, select and
+install the "Devel" packages at the top level of the installer. Change directory
+to the PyNDN root and enter:
+
+    python setup.py install
 
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
