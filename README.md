@@ -12,9 +12,22 @@ for instructions to build and run from the full distribution.
 If you only need to install the pyndn Python module, you can use easy_install.
 (If you don't have easy_install, see the instructions at
 https://pypi.python.org/pypi/setuptools#installation-instructions .)
-In a terminal, enter:
 
-    sudo CFLAGS=-Qunused-arguments easy_install pyndn
+For OS X, in a terminal, enter:
+
+    sudo easy_install pip
+    sudo CFLAGS=-Qunused-arguments pip install cryptography
+    sudo easy_install pyndn
+
+For Ubuntu or Raspbian (Raspberry Pi), in a terminal, enter:
+
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
+    sudo easy_install pyndn
+
+For Windows Cygwin, in the Cygwin installer, select and install the "Devel"
+packages at the top level of the installer. In a terminal, enter:
+
+    easy_install pyndn
 
 This installs the pyndn module on the Python search path so that applications
 which depend on it can use it, but does not install the sample tests or documentation
