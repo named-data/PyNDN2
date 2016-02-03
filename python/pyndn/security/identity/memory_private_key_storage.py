@@ -181,10 +181,14 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
 
         # Sign the data.
         data = Blob(data, False).toBytes()
-        signer = privateKey.getPrivateKey().signer(padding.PKCS1v15(), hashes.SHA256())
-        signer.update(data)
-        signature = signer.finalize()
-        return Blob(bytearray(signature), False)
+        if privateKey.getKeyType() == KeyType.RSA:
+            signer = privateKey.getPrivateKey().signer(
+              padding.PKCS1v15(), hashes.SHA256())
+            signer.update(data)
+            return Blob(bytearray(signer.finalize()), False)
+        else:
+            raise SecurityException(
+              "MemoryPrivateKeyStorage.sign: Unrecognized private key type")
 
     def doesKeyExist(self, keyName, keyClass):
         """
