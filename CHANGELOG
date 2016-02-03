@@ -1,7 +1,8 @@
-Interim changes since PyNDN v2.1beta2 (2016-01-27)
---------------------------------------------------
+PyNDN v2.2beta1 (2016-02-03)
+----------------------------
 
 Changes
+* Use the cryptography package instead of pycrypto. See INSTALL.md to update.
 * In OSXPrivateKeyStorage, implemented generateKeyPair.
 
 PyNDN v2.1beta2 (2016-01-07)
