@@ -22,6 +22,7 @@ This module defines the SignedBlob class which extends Blob to keep the offsets
 of a signed portion (e.g., the bytes of Data packet).
 """
 
+import sys
 from pyndn.util.blob import Blob
 from pyndn.util.blob import _memoryviewWrapper
 
@@ -106,6 +107,26 @@ class SignedBlob(Blob):
                 return self._signedArray._view
             else:
                 return self._signedArray
+
+    def toSignedBytes(self):
+        """
+        Return an object which is the same as the bytes() operator of the signed
+        portion. In Python 2, this makes a raw string because bytes is the same
+        as str. In Python 3, this converts the byte array to a bytes type. This
+        method is necessary because the bytes type is different in Python 2 and
+        3. This does not do any character encoding such as UTF-8.
+
+        :return: The array as a bytes type, or None if isNull().
+        :rtype: bytes (str in Python 2)
+        """
+        if self._array == None:
+            return None
+        else:
+            if sys.version_info[0] > 2:
+                return bytes(self._signedArray)
+            else:
+                # For Python 2, make a raw string.
+                return "".join(map(chr, self._signedArray))
 
 # Set this up once at the module level for the constructor to use.
 # Expect that this is True for Python version 3.3 or later.

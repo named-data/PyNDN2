@@ -18,11 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-import sys
-from Crypto.Hash import SHA256
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
-from pyndn.util.blob import Blob
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.serialization import load_der_public_key
+from cryptography.hazmat.primitives import hashes
+from cryptography.exceptions import InvalidSignature
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.security.security_exception import SecurityException
@@ -165,33 +165,22 @@ class PolicyManager(object):
         :rtype: bool
         """
         # Get the public key.
-        if _PyCryptoUsesStr:
-            # PyCrypto in Python 2 requires a str.
-            publicKeyDerBytes = publicKeyDer.toRawStr()
-        else:
-            publicKeyDerBytes = publicKeyDer.toBuffer()
-        publicKey = None
+        publicKeyDerBytes = publicKeyDer.toBytes()
         try:
-            publicKey = RSA.importKey(publicKeyDerBytes)
+            publicKey = load_der_public_key(
+              publicKeyDerBytes, backend = default_backend())
         except:
             raise SecurityException("Cannot decode RSA public key")
 
-        # Get the bytes to verify.
-        signedPortion = signedBlob.toSignedBuffer()
-        # Sign the hash of the data.
-        if sys.version_info[0] == 2:
-            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
-            signedPortion = Blob(signedPortion, False).toRawStr()
-
-        # Convert the signature bits to a raw string or bytes as required.
-        if _PyCryptoUsesStr:
-            signatureBits = signature.toRawStr()
-        else:
-            signatureBits = bytes(signature.buf())
-
-        # Hash and verify.
-        return PKCS1_v1_5.new(publicKey).verify(SHA256.new(signedPortion),
-                                                signatureBits)
+        # Verify.
+        verifier = publicKey.verifier(
+          signature.toBytes(), padding.PKCS1v15(), hashes.SHA256())
+        verifier.update(signedBlob.toSignedBytes())
+        try:
+            verifier.verify()
+            return True
+        except InvalidSignature:
+            return False
 
     @staticmethod
     def _verifyDigestSha256Signature(signature, signedBlob):
@@ -205,21 +194,9 @@ class PolicyManager(object):
         :return: True if the signature verifies, False if not.
         :rtype: bool
         """
-        # Get the bytes to verify.
-        signedPortion = signedBlob.toSignedBuffer()
-        if sys.version_info[0] == 2:
-            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
-            signedPortion = Blob(signedPortion, False).toRawStr()
+        # Get the hash of the bytes to verify.
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(signedBlob.toSignedBytes())
+        signedPortionDigest = sha256.finalize()
 
-        signedPortionDigest = SHA256.new(signedPortion).digest()
-
-        # Convert the signature bits to a raw string or bytes as required.
-        if _PyCryptoUsesStr:
-            signatureBits = signature.toRawStr()
-        else:
-            signatureBits = bytes(signature.buf())
-
-        return signatureBits == signedPortionDigest
-
-# Depending on the Python version, PyCrypto uses str or bytes.
-_PyCryptoUsesStr = type(SHA256.new().digest()) is str
+        return signature.toBytes() == signedPortionDigest

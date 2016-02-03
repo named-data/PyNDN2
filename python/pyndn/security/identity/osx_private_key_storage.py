@@ -62,6 +62,8 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
 
         self._kSecClass = c_void_p.in_dll(self._security, "kSecClass")
         self._kSecClassKey = c_void_p.in_dll(self._security, "kSecClassKey")
+        self._kSecAttrKeyType = c_void_p.in_dll(self._security, "kSecAttrKeyType")
+        self._kSecAttrKeySizeInBits = c_void_p.in_dll(self._security, "kSecAttrKeySizeInBits")
         self._kSecAttrLabel = c_void_p.in_dll(self._security, "kSecAttrLabel")
         self._kSecAttrKeyClass = c_void_p.in_dll(self._security, "kSecAttrKeyClass")
         self._kSecReturnRef = c_void_p.in_dll(self._security, "kSecReturnRef")
@@ -91,7 +93,59 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         :param Name keyName: The name of the key pair.
         :param KeyParams params: The parameters of the key.
         """
-        raise RuntimeError("generateKeyPair is not implemented")
+        if self.doesKeyExist(keyName, KeyClass.PUBLIC):
+            raise SecurityException("keyName already exists")
+
+        keyLabel = None
+        attrDict = None
+        cfKeySize = None
+        publicKey = None
+        privateKey = None
+
+        try:
+            keyNameUri = self._toInternalKeyName(keyName, KeyClass.PUBLIC)
+
+            keyLabel = CFSTR(keyNameUri)
+
+            attrDict = c_void_p(cf.CFDictionaryCreateMutable(
+              None, 3, cf.kCFTypeDictionaryKeyCallBacks, None))
+
+            if params.getKeyType() == KeyType.RSA:
+                keySize = params.getKeySize()
+            elif params.getKeyType() == KeyType.ECDSA:
+                keySize = params.getKeySize()
+            else:
+                raise SecurityException("generateKeyPair: Unsupported key type ")
+
+            cfKeySize = c_void_p(cf.CFNumberCreate(
+              None, kCFNumberIntType, byref(c_int(keySize))))
+
+            cf.CFDictionaryAddValue(
+              attrDict, self._kSecAttrKeyType,
+              self._getAsymmetricKeyType(params.getKeyType()))
+            cf.CFDictionaryAddValue(
+              attrDict, self._kSecAttrKeySizeInBits, cfKeySize)
+            cf.CFDictionaryAddValue(
+              attrDict, self._kSecAttrLabel, keyLabel)
+
+            publicKey = c_void_p()
+            privateKey = c_void_p()
+            res = self._security.SecKeyGeneratePair(
+              attrDict, pointer(publicKey), pointer(privateKey))
+
+            if res != 0:
+                raise SecurityException("Fail to create a key pair")
+        finally:
+            if keyLabel != None:
+                cf.CFRelease(keyLabel)
+            if attrDict != None:
+                cf.CFRelease(attrDict)
+            if cfKeySize != None:
+                cf.CFRelease(cfKeySize)
+            if publicKey != None:
+                cf.CFRelease(publicKey)
+            if privateKey != None:
+                cf.CFRelease(privateKey)
 
     def deleteKeyPair(self, keyName):
         """
@@ -400,7 +454,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         """
         if keyType == KeyType.RSA:
           return self._kSecAttrKeyTypeRSA
-        if keyType == KeyType.ECDSA:
+        elif keyType == KeyType.ECDSA:
           return self._kSecAttrKeyTypeECDSA
         else:
           logging.getLogger(__name__).debug("Unrecognized key type!")

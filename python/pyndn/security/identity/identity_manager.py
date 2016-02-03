@@ -25,7 +25,8 @@ operations related to identity, keys, and certificates.
 """
 
 import sys
-from Crypto.Hash import SHA256
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from pyndn.name import Name
 from pyndn.data import Data
 from pyndn.util.common import Common
@@ -453,14 +454,11 @@ class IdentityManager(object):
         # Encode once to get the signed portion.
         encoding = data.wireEncode(wireFormat)
 
-        # Get the bytes to sign.
-        signedPortion = encoding.toSignedBuffer()
-        if sys.version_info[0] == 2:
-            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
-            signedPortion = Blob(signedPortion, False).toRawStr()
-
         # Digest and set the signature.
-        data.getSignature().setSignature(Blob(SHA256.new(signedPortion).digest()))
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(encoding.toSignedBytes())
+        signatureBits = sha256.finalize()
+        data.getSignature().setSignature(Blob(bytearray(signatureBits), False))
 
         # Encode again to include the signature.
         data.wireEncode(wireFormat)
@@ -490,14 +488,11 @@ class IdentityManager(object):
         # Encode once to get the signed portion.
         encoding = interest.wireEncode(wireFormat)
 
-        # Get the bytes to sign.
-        signedPortion = encoding.toSignedBuffer()
-        if sys.version_info[0] == 2:
-            # In Python 2.x, we need a str.  Use Blob to convert signedPortion.
-            signedPortion = Blob(signedPortion, False).toRawStr()
-
         # Digest and set the signature.
-        signature.setSignature(Blob(SHA256.new(signedPortion).digest()))
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(encoding.toSignedBytes())
+        signatureBits = sha256.finalize()
+        signature.setSignature(Blob(bytearray(signatureBits), False))
 
         # Remove the empty signature and append the real one.
         interest.setName(interest.getName().getPrefix(-1).append(
