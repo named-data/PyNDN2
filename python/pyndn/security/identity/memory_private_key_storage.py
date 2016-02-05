@@ -181,10 +181,14 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
 
         # Sign the data.
         data = Blob(data, False).toBytes()
-        signer = privateKey.getPrivateKey().signer(padding.PKCS1v15(), hashes.SHA256())
-        signer.update(data)
-        signature = signer.finalize()
-        return Blob(bytearray(signature), False)
+        if privateKey.getKeyType() == KeyType.RSA:
+            signer = privateKey.getPrivateKey().signer(
+              padding.PKCS1v15(), hashes.SHA256())
+            signer.update(data)
+            return Blob(bytearray(signer.finalize()), False)
+        else:
+            raise SecurityException(
+              "MemoryPrivateKeyStorage.sign: Unrecognized private key type")
 
     def doesKeyExist(self, keyName, keyClass):
         """
@@ -211,14 +215,14 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         PrivateKey is a simple class to hold a cryptography key object along
         with a KeyType.
         """
-        def __init__(self, keyType, keyDer):
+        def __init__(self, keyType, keyData):
             self._keyType = keyType
 
-            keyDer = Blob(keyDer, False).toBytes()
+            keyData = Blob(keyData, False).toBytes()
 
             if keyType == KeyType.RSA:
                 self._privateKey = serialization.load_der_private_key(
-                  keyDer, password = None, backend = default_backend())
+                  keyData, password = None, backend = default_backend())
             else:
                 raise SecurityException(
                   "PrivateKey constructor: Unrecognized keyType")
