@@ -27,7 +27,6 @@ http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 """
 
 import logging
-import collections
 from pyndn.name import Name
 from pyndn.util.common import Common
 
@@ -99,16 +98,11 @@ class MemoryContentCache(object):
         :type wireFormat: A subclass of WireFormat
         """
         if not (type(onRegisterSuccess) is list and len(onRegisterSuccess) == 1):
-          # onRegisterSuccess is omitted, so shift the arguments that follow.
+          # onRegisterSuccess is omitted, so shift the arguments.
           wireFormat = flags
           flags = onDataNotFound
           onDataNotFound = onRegisterSuccess
           onRegisterSuccess = [None]
-        if not isinstance(onDataNotFound, collections.Callable):
-          # onDataNotFound is omitted, so shift the arguments that follow.
-          wireFormat = flags
-          flags = onDataNotFound
-          onDataNotFound = None
 
         if onDataNotFound != None:
             self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
