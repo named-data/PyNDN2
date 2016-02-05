@@ -103,9 +103,6 @@ class MemoryContentCache(object):
           flags = onDataNotFound
           onDataNotFound = onRegisterSuccess
           onRegisterSuccess = [None]
-          print("debug onRegisterSuccess omitted")
-        else:
-          print("debug onRegisterSuccess provided")
 
         if onDataNotFound != None:
             self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
