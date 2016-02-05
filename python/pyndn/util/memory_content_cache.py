@@ -62,8 +62,8 @@ class MemoryContentCache(object):
         self._pendingInterestTable = [] # of PendingInterest
 
     def registerPrefix(
-      self, prefix, onRegisterFailed, onDataNotFound = None, flags = None,
-      wireFormat = None):
+      self, prefix, onRegisterFailed, onRegisterSuccess = None,
+        onDataNotFound = None, flags = None, wireFormat = None):
         """
         Call registerPrefix on the Face given to the constructor so that this
         MemoryContentCache will answer interests whose name has the prefix.
@@ -74,6 +74,14 @@ class MemoryContentCache(object):
           reason, this calls onRegisterFailed(prefix) where prefix is the prefix
           given to registerPrefix.
         :type onRegisterFailed: function object
+        :param onRegisterSuccess: (optional) This calls
+          onRegisterSuccess[0](prefix, registeredPrefixId) when this receives a
+          success message from the forwarder. If onRegisterSuccess is omitted or
+          [None], this does not use it. (As a special case, this optional
+          parameter is supplied as a list of one function object, instead of
+          just a function object, in order to detect when it is used instead of
+          the following optional onDataNotFound function object.)
+        :type onRegisterSuccess: list of one function object
         :param onDataNotFound: (optional) If a data packet for an interest is
           not found in the cache, this forwards the interest by calling
           onDataNotFound(prefix, interest, face, interestFilterId, filter). Your
@@ -89,10 +97,21 @@ class MemoryContentCache(object):
         :param wireFormat: (optional) See Face.registerPrefix.
         :type wireFormat: A subclass of WireFormat
         """
+        if not (type(onRegisterSuccess) is list and len(onRegisterSuccess) == 1):
+          # onRegisterSuccess is omitted, so shift the arguments.
+          wireFormat = flags
+          flags = onDataNotFound
+          onDataNotFound = onRegisterSuccess
+          onRegisterSuccess = [None]
+          print("debug onRegisterSuccess omitted")
+        else:
+          print("debug onRegisterSuccess provided")
+
         if onDataNotFound != None:
             self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
         registeredPrefixId = self._face.registerPrefix(
-          prefix, self._onInterest, onRegisterFailed, flags, wireFormat)
+          prefix, self._onInterest, onRegisterFailed, onRegisterSuccess[0],
+          flags, wireFormat)
         self._registeredPrefixIdList.append(registeredPrefixId)
 
     def unregisterAll(self):
