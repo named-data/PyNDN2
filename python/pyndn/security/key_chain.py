@@ -27,6 +27,8 @@ http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
 from random import SystemRandom
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, hmac
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
@@ -475,6 +477,69 @@ class KeyChain(object):
         :param Face face: The Face object.
         """
         self._face = face
+
+    @staticmethod
+    def signWithHmacWithSha256(target, key, wireFormat = None):
+        """
+        Wire encode the target, compute an HmacWithSha256 and update the
+        signature value.
+
+        :param target: If this is a Data object, update its signature and wire
+          encoding.
+        :type target: Data
+        :param Blob key: The key for the HmacWithSha256.
+        :param wireFormat: (optional) The WireFormat for calling encodeData,
+          etc., or WireFormat.getDefaultWireFormat() if omitted.
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        if isinstance(target, Data):
+            data = target
+            # Encode once to get the signed portion.
+            encoding = data.wireEncode(wireFormat)
+
+            signer = hmac.HMAC(key.toBytes(), hashes.SHA256(),
+              backend = default_backend())
+            signer.update(encoding.toSignedBytes())
+            data.getSignature().setSignature(
+              Blob(bytearray(signer.finalize()), False))
+        else:
+            raise SecurityException("signWithHmacWithSha256: Unrecognized target type")
+
+    @staticmethod
+    def verifyDataWithHmacWithSha256(target, key, wireFormat = None):
+        """
+        Compute a new HmacWithSha256 for the target and verify it against the
+          signature value.
+
+        :param target: If this is a Data object, verify its signature.
+        :type target: Data
+        :param Blob key: The key for the HmacWithSha256.
+        :param wireFormat: (optional) The WireFormat for calling encodeData,
+          etc., or WireFormat.getDefaultWireFormat() if omitted.
+        :type wireFormat: A subclass of WireFormat
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        if isinstance(target, Data):
+            data = target
+            # wireEncode returns the cached encoding if available.
+            encoding = data.wireEncode(wireFormat)
+
+            signer = hmac.HMAC(key.toBytes(), hashes.SHA256(),
+              backend = default_backend())
+            signer.update(encoding.toSignedBytes())
+            newSignatureBits = Blob(bytearray(signer.finalize()), False)
+
+            # Use the flexible Blob.equals operator.
+            return newSignatureBits == data.getSignature().getSignature()
+        else:
+            raise SecurityException("signWithHmacWithSha256: Unrecognized target type")
 
     DEFAULT_KEY_PARAMS = RsaKeyParams()
 
