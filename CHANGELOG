@@ -1,3 +1,9 @@
+Interim changes since PyNDN v2.2beta1 (2016-02-03)
+--------------------------------------------------
+
+Changes
+* In MemoryContentCache.registerPrefix, added optional onRegisterSuccess. (Thanks to Zhehao Wang.)
+
 PyNDN v2.2beta1 (2016-02-03)
 ----------------------------
 

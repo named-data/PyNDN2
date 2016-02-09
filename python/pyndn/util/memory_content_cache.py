@@ -27,6 +27,9 @@ http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 """
 
 import logging
+import collections
+from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.encoding.wire_format import WireFormat
 from pyndn.name import Name
 from pyndn.util.common import Common
 
@@ -62,8 +65,8 @@ class MemoryContentCache(object):
         self._pendingInterestTable = [] # of PendingInterest
 
     def registerPrefix(
-      self, prefix, onRegisterFailed, onDataNotFound = None, flags = None,
-      wireFormat = None):
+      self, prefix, onRegisterFailed, onRegisterSuccess = None,
+        onDataNotFound = None, flags = None, wireFormat = None):
         """
         Call registerPrefix on the Face given to the constructor so that this
         MemoryContentCache will answer interests whose name has the prefix.
@@ -74,6 +77,14 @@ class MemoryContentCache(object):
           reason, this calls onRegisterFailed(prefix) where prefix is the prefix
           given to registerPrefix.
         :type onRegisterFailed: function object
+        :param onRegisterSuccess: (optional) This calls
+          onRegisterSuccess[0](prefix, registeredPrefixId) when this receives a
+          success message from the forwarder. If onRegisterSuccess is omitted or
+          [None], this does not use it. (As a special case, this optional
+          parameter is supplied as a list of one function object, instead of
+          just a function object, in order to detect when it is used instead of
+          the following optional onDataNotFound function object.)
+        :type onRegisterSuccess: list of one function object
         :param onDataNotFound: (optional) If a data packet for an interest is
           not found in the cache, this forwards the interest by calling
           onDataNotFound(prefix, interest, face, interestFilterId, filter). Your
@@ -89,10 +100,65 @@ class MemoryContentCache(object):
         :param wireFormat: (optional) See Face.registerPrefix.
         :type wireFormat: A subclass of WireFormat
         """
+        arg3 = onRegisterSuccess
+        arg4 = onDataNotFound
+        arg5 = flags
+        arg6 = wireFormat
+        # arg3,                arg4,            arg5,            arg6 may be:
+        # [OnRegisterSuccess], OnDataNotFound,  ForwardingFlags, WireFormat
+        # [OnRegisterSuccess], OnDataNotFound,  ForwardingFlags, None
+        # [OnRegisterSuccess], OnDataNotFound,  WireFormat,      None
+        # [OnRegisterSuccess], OnDataNotFound,  None,            None
+        # [OnRegisterSuccess], ForwardingFlags, WireFormat,      None
+        # [OnRegisterSuccess], ForwardingFlags, None,            None
+        # [OnRegisterSuccess], WireFormat,      None,            None
+        # [OnRegisterSuccess], None,            None,            None
+        # OnDataNotFound,      ForwardingFlags, WireFormat,      None
+        # OnDataNotFound,      ForwardingFlags, None,            None
+        # OnDataNotFound,      WireFormat,      None,            None
+        # OnDataNotFound,      None,            None,            None
+        # ForwardingFlags,     WireFormat,      None,            None
+        # ForwardingFlags,     None,            None,            None
+        # WireFormat,          None,            None,            None
+        # None,                None,            None,            None
+        if type(arg3) is list and len(arg3) == 1:
+          onRegisterSuccess = arg3[0]
+        else:
+          onRegisterSuccess = None
+
+        if isinstance(arg3, collections.Callable):
+          onDataNotFound = arg3
+        elif isinstance(arg4, collections.Callable):
+          onDataNotFound = arg4
+        else:
+          onDataNotFound = None
+
+        if isinstance(arg3, ForwardingFlags):
+            flags = arg3
+        elif isinstance(arg4, ForwardingFlags):
+            flags = arg4
+        elif isinstance(arg5, ForwardingFlags):
+            flags = arg5
+        else:
+            flags = ForwardingFlags()
+
+        if isinstance(arg3, WireFormat):
+            wireFormat = arg3
+        elif isinstance(arg4, WireFormat):
+            wireFormat = arg4
+        elif isinstance(arg5, WireFormat):
+            wireFormat = arg5
+        elif isinstance(arg6, WireFormat):
+            wireFormat = arg6
+        else:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
         if onDataNotFound != None:
             self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
         registeredPrefixId = self._face.registerPrefix(
-          prefix, self._onInterest, onRegisterFailed, flags, wireFormat)
+          prefix, self._onInterest, onRegisterFailed, onRegisterSuccess,
+          flags, wireFormat)
         self._registeredPrefixIdList.append(registeredPrefixId)
 
     def unregisterAll(self):

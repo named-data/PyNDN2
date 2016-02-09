@@ -275,11 +275,11 @@ class Face(object):
           calls onRegisterFailed(prefix).
         :type onRegisterFailed: function object
         :param onRegisterSuccess: (optional) This calls
-          onRegisterSuccess.onRegisterSuccess(prefix, registeredPrefixId) when
-          this receives a success message from the forwarder. If
-          onRegisterSuccess is None or omitted, this does not use it. (The
-          onRegisterSuccess parameter comes after onRegisterFailed because it
-          can be None or omitted, unlike onRegisterFailed.)
+          onRegisterSuccess(prefix, registeredPrefixId) when this receives a
+          success message from the forwarder. If onRegisterSuccess is None or
+          omitted, this does not use it. (The onRegisterSuccess parameter comes
+          after onRegisterFailed because it can be None or omitted, unlike
+          onRegisterFailed.)
         :type onRegisterSuccess: function object
         :param ForwardingFlags flags: (optional) The flags for finer control of
           which interests are forwardedto the application.
