@@ -29,6 +29,7 @@ try:
 except ImportError:
     # Use Trollius on Python <= 3.2
     import trollius as asyncio
+import logging
 from pyndn.transport.transport import Transport
 from pyndn.encoding.element_reader import ElementReader
 
@@ -68,11 +69,19 @@ class AsyncSocketTransport(Transport):
             self._onConnected = onConnected
 
         def connection_made(self, transport):
-            self._parent._transport = transport
-            self._onConnected()
+            # Need to catch and log exceptions at this async entry point.
+            try:
+                self._parent._transport = transport
+                self._onConnected()
+            except:
+                logging.exception("Error in connection_made")
 
         def data_received(self, data):
-            self._parent._elementReader.onReceivedData(data)
+            # Need to catch and log exceptions at this async entry point.
+            try:
+                self._parent._elementReader.onReceivedData(data)
+            except:
+                logging.exception("Error in data_received")
 
     # This will be set True if send gets a TypeError.
     _sendNeedsStr = False

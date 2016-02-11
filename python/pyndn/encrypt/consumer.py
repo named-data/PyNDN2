@@ -24,6 +24,7 @@ decrypt a data packet in the group-based encryption protocol.
 Note: This class is an experimental feature. The API may change.
 """
 
+import logging
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.util.blob import Blob
@@ -76,9 +77,15 @@ class Consumer(object):
           decrypted, this calls onConsumeComplete(contentData, result) where
           contentData is the fetched Data packet and result is the decrypted
           plain text Blob.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onPlainText: function object
         :param onError: This calls onError(errorCode, message) for an error,
           where errorCode is from Consumer.Error and message is a str.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onError: function object
         """
         interest = Interest(contentName)
@@ -91,17 +98,21 @@ class Consumer(object):
             try:
                 def onVerified(validData):
                     # Decrypt the content.
-                    self._decryptContent(
-                        validData,
-                        lambda plainText: onConsumeComplete(contentData, plainText),
-                        onError)
+                    def onPlainText(plainText):
+                        try:
+                            onConsumeComplete(contentData, plainText)
+                        except:
+                            logging.exception("Error in onConsumeComplete")
+                    self._decryptContent(validData, onPlainText, onError)
                 self._keyChain.verifyData(
                     contentData, onVerified,
-                    lambda d: onError(Consumer.ErrorCode.Validation,
+                    lambda d: Consumer._callOnError(onError, Consumer.ErrorCode.Validation,
                                       "verifyData failed"))
             except Exception as ex:
-                onError(Consumer.ErrorCode.General,
-                        "verifyData error: " + repr(ex))
+                try:
+                    onError(Consumer.ErrorCode.General, "verifyData error: " + repr(ex))
+                except:
+                    logging.exception("Error in onError")
 
         def onTimeout(contentInterest):
             # We should re-try at least once.
@@ -109,17 +120,24 @@ class Consumer(object):
                 self._face.expressInterest(
                   interest, onData,
                   lambda contentInterest:
-                    onError(Consumer.ErrorCode.Timeout, interest.getName().toUri()))
+                    Consumer._callOnError(onError,
+                      Consumer.ErrorCode.Timeout, interest.getName().toUri()))
             except Exception as ex:
-                onError(Consumer.ErrorCode.General,
-                        "expressInterest error: " + repr(ex))
+                try:
+                    onError(Consumer.ErrorCode.General,
+                            "expressInterest error: " + repr(ex))
+                except:
+                    logging.exception("Error in onError")
 
         # Express the Interest.
         try:
             self._face.expressInterest(interest, onData, onTimeout)
         except Exception as ex:
-            onError(Consumer.ErrorCode.General,
-                    "expressInterest error: " + repr(ex))
+            try:
+                onError(Consumer.ErrorCode.General,
+                        "expressInterest error: " + repr(ex))
+            except:
+                logging.exception("Error in onError")
 
     def setGroup(self, groupName):
         """
@@ -179,7 +197,10 @@ class Consumer(object):
             try:
                 content = AesAlgorithm.decrypt(keyBits, payload, decryptParams)
             except Exception as ex:
-                onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+                try:
+                    onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+                except:
+                    logging.exception("Error in onError")
                 return
             onPlainText(content)
         elif encryptedContent.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
@@ -190,11 +211,12 @@ class Consumer(object):
             try:
                 content = RsaAlgorithm.decrypt(keyBits, payload, decryptParams)
             except Exception as ex:
-                onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+                Consumer._callOnError(onError,
+                  Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
                 return
             onPlainText(content)
         else:
-            onError(
+            Consumer._callOnError(onError,
               Consumer.ErrorCode.UnsupportedEncryptionScheme,
               repr(encryptedContent.getAlgorithmType()))
 
@@ -215,7 +237,8 @@ class Consumer(object):
         try:
             dataEncryptedContent.wireDecode(data.getContent())
         except Exception as ex:
-            onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+            Consumer._callOnError(onError,
+              Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
             return
         cKeyName = dataEncryptedContent.getKeyLocator().getKeyName()
 
@@ -245,11 +268,14 @@ class Consumer(object):
                         self._decryptCKey(validCKeyData, localOnPlainText, onError)
                     self._keyChain.verifyData(
                         cKeyData, onVerified,
-                        lambda d: onError(Consumer.ErrorCode.Validation,
+                        lambda d: Consumer._callOnError(onError, Consumer.ErrorCode.Validation,
                                           "verifyData failed"))
                 except Exception as ex:
-                    onError(Consumer.ErrorCode.General,
-                            "verifyData error: " + repr(ex))
+                    try:
+                        onError(Consumer.ErrorCode.General,
+                                "verifyData error: " + repr(ex))
+                    except:
+                        logging.exception("Error in onError")
 
             def onTimeout(dKeyInterest):
                 # We should re-try at least once.
@@ -257,17 +283,24 @@ class Consumer(object):
                     self._face.expressInterest(
                       interest, onData,
                       lambda contentInterest:
-                        onError(Consumer.ErrorCode.Timeout, interest.getName().toUri()))
+                        Consumer._callOnError(onError,
+                          Consumer.ErrorCode.Timeout, interest.getName().toUri()))
                 except Exception as ex:
-                    onError(Consumer.ErrorCode.General,
-                            "expressInterest error: " + repr(ex))
+                    try:
+                        onError(Consumer.ErrorCode.General,
+                                "expressInterest error: " + repr(ex))
+                    except:
+                        logging.exception("Error in onError")
 
             # Express the Interest.
             try:
                 self._face.expressInterest(interest, onData, onTimeout)
             except Exception as ex:
-                onError(Consumer.ErrorCode.General,
-                        "expressInterest error: " + repr(ex))
+                try:
+                    onError(Consumer.ErrorCode.General,
+                            "expressInterest error: " + repr(ex))
+                except:
+                    logging.exception("Error in onError")
 
     def _decryptCKey(self, cKeyData, onPlainText, onError):
         """
@@ -287,7 +320,10 @@ class Consumer(object):
         try:
             cKeyEncryptedContent.wireDecode(cKeyContent)
         except Exception as ex:
-            onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+            try:
+                onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+            except:
+                logging.exception("Error in onError")
             return
         eKeyName = cKeyEncryptedContent.getKeyLocator().getKeyName()
         dKeyName = eKeyName.getPrefix(-3)
@@ -320,11 +356,14 @@ class Consumer(object):
                         self._decryptDKey(validDKeyData, localOnPlainText, onError)
                     self._keyChain.verifyData(
                         dKeyData, onVerified,
-                        lambda d: onError(Consumer.ErrorCode.Validation,
+                        lambda d: Consumer._callOnError(onError, Consumer.ErrorCode.Validation,
                                           "verifyData failed"))
                 except Exception as ex:
-                    onError(Consumer.ErrorCode.General,
-                            "verifyData error: " + repr(ex))
+                    try:
+                        onError(Consumer.ErrorCode.General,
+                                "verifyData error: " + repr(ex))
+                    except:
+                        logging.exception("Error in onError")
 
             def onTimeout(dKeyInterest):
                 # We should re-try at least once.
@@ -332,17 +371,24 @@ class Consumer(object):
                     self._face.expressInterest(
                       interest, onData,
                       lambda contentInterest:
-                        onError(Consumer.ErrorCode.Timeout, interest.getName().toUri()))
+                        Consumer._callOnError(onError,
+                          Consumer.ErrorCode.Timeout, interest.getName().toUri()))
                 except Exception as ex:
-                    onError(Consumer.ErrorCode.General,
-                            "expressInterest error: " + repr(ex))
+                    try:
+                        onError(Consumer.ErrorCode.General,
+                                "expressInterest error: " + repr(ex))
+                    except:
+                        logging.exception("Error in onError")
 
             # Express the Interest.
             try:
                 self._face.expressInterest(interest, onData, onTimeout)
             except Exception as ex:
-                onError(Consumer.ErrorCode.General,
-                        "expressInterest error: " + repr(ex))
+                try:
+                    onError(Consumer.ErrorCode.General,
+                            "expressInterest error: " + repr(ex))
+                except:
+                    logging.exception("Error in onError")
 
     def _decryptDKey(self, dKeyData, onPlainText, onError):
         """
@@ -365,7 +411,10 @@ class Consumer(object):
         try:
           encryptedNonce.wireDecode(dataContent)
         except Exception as ex:
-            onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+            try:
+                onError(Consumer.ErrorCode.InvalidEncryptedFormat, repr(ex))
+            except:
+                logging.exception("Error in onError")
             return
         consumerKeyName = encryptedNonce.getKeyLocator().getKeyName()
 
@@ -373,20 +422,27 @@ class Consumer(object):
         try:
           consumerKeyBlob = self._getDecryptionKey(consumerKeyName)
         except Exception as ex:
-            onError(Consumer.ErrorCode.NoDecryptKey, "Database error: " + repr(ex))
+            Consumer._callOnError(onError,
+              Consumer.ErrorCode.NoDecryptKey, "Database error: " + repr(ex))
             return
         if consumerKeyBlob.size() == 0:
-          onError(Consumer.ErrorCode.NoDecryptKey,
-            "The desired consumer decryption key in not in the database")
-          return
+            try:
+                onError(Consumer.ErrorCode.NoDecryptKey,
+                  "The desired consumer decryption key in not in the database")
+            except:
+                logging.exception("Error in onError")
+            return
 
         # Process the D-KEY.
         # Use the size of encryptedNonce to find the start of encryptedPayload.
         encryptedPayloadBlob = Blob(
           dataContent.buf()[encryptedNonce.wireEncode().size():], False)
         if encryptedPayloadBlob.size() == 0:
-          onError(Consumer.ErrorCode.InvalidEncryptedFormat,
-            "The data packet does not satisfy the D-KEY packet format")
+            try:
+                onError(Consumer.ErrorCode.InvalidEncryptedFormat,
+                  "The data packet does not satisfy the D-KEY packet format")
+            except:
+                logging.exception("Error in onError")
 
         # Decrypt the D-KEY.
         Consumer._decrypt(
@@ -407,3 +463,15 @@ class Consumer(object):
         :raises ConsumerDb.Error: For a database error.
         """
         return self._database.getKey(decryptionKeyName)
+
+    @staticmethod
+    def _callOnError(onError, errorCode, message):
+        """
+        Call onError(errorCode, message) within a try block to log exceptions
+        that it throws. We name this separate helper function to use inside
+        lambda expressions.
+        """
+        try:
+            onError(errorCode, message)
+        except:
+            logging.exception("Error in onError")

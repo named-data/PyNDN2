@@ -729,7 +729,7 @@ class Name(object):
         if type(key) is int:
             # Get the component.
             return self._components[key]
-        elif type(key is slice):
+        elif type(key) is slice:
             # Call self.getSubName
             if key.step != None and key.step != 1:
                 raise ValueError("Name slice only supports a step of 1. Got %d." % key.step)
