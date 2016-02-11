@@ -76,6 +76,9 @@ class MemoryContentCache(object):
         :param onRegisterFailed: If this fails to register the prefix for any
           reason, this calls onRegisterFailed(prefix) where prefix is the prefix
           given to registerPrefix.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onRegisterFailed: function object
         :param onRegisterSuccess: (optional) This calls
           onRegisterSuccess[0](prefix, registeredPrefixId) when this receives a
@@ -84,6 +87,9 @@ class MemoryContentCache(object):
           parameter is supplied as a list of one function object, instead of
           just a function object, in order to detect when it is used instead of
           the following optional onDataNotFound function object.)
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onRegisterSuccess: list of one function object
         :param onDataNotFound: (optional) If a data packet for an interest is
           not found in the cache, this forwards the interest by calling
@@ -95,6 +101,9 @@ class MemoryContentCache(object):
           add(data). If you want to automatically store all pending interests,
           you can simply use getStorePendingInterest() for onDataNotFound. If
           onDataNotFound is omitted or None, this does not use it.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onDataNotFound: function object
         :param ForwardingFlags flags: (optional) See Face.registerPrefix.
         :param wireFormat: (optional) See Face.registerPrefix.
@@ -330,8 +339,11 @@ class MemoryContentCache(object):
         else:
             # Call the onDataNotFound callback (if defined).
             if prefix.toUri() in self._onDataNotFoundForPrefix:
-                self._onDataNotFoundForPrefix[prefix.toUri()](
-                  prefix, interest, face, interestFilterId, filter)
+                try:
+                    self._onDataNotFoundForPrefix[prefix.toUri()](
+                      prefix, interest, face, interestFilterId, filter)
+                except:
+                    logging.exception("Error in onDataNotFound")
 
     def _doCleanup(self):
         """

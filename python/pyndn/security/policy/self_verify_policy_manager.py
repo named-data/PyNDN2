@@ -25,6 +25,7 @@ interest, without searching a certificate chain. If the public key can't be
 found, the verification fails.
 """
 
+import logging
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
@@ -85,9 +86,15 @@ class SelfVerifyPolicyManager(PolicyManager):
           done, used to track the verification progress.
         :param onVerified: If the signature is verified, this calls
           onVerified(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails, this calls
           onVerifyFailed(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerifyFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
@@ -100,9 +107,15 @@ class SelfVerifyPolicyManager(PolicyManager):
             data = dataOrInterest
             # wireEncode returns the cached encoding if available.
             if self._verify(data.getSignature(), data.wireEncode()):
-                onVerified(data)
+                try:
+                    onVerified(data)
+                except:
+                    logging.exception("Error in onVerified")
             else:
-                onVerifyFailed(data)
+                try:
+                    onVerifyFailed(data)
+                except:
+                    logging.exception("Error in onVerifyFailed")
         elif isinstance(dataOrInterest, Interest):
             interest = dataOrInterest
             # Decode the last two name components of the signed interest
@@ -112,9 +125,15 @@ class SelfVerifyPolicyManager(PolicyManager):
 
             # wireEncode returns the cached encoding if available.
             if self._verify(signature, interest.wireEncode()):
-                onVerified(interest)
+                try:
+                    onVerified(interest)
+                except:
+                    logging.exception("Error in onVerified")
             else:
-                onVerifyFailed(interest)
+                try:
+                    onVerifyFailed(interest)
+                except:
+                    logging.exception("Error in onVerifyFailed")
         else:
             raise RuntimeError(
               "checkVerificationPolicy: unrecognized type for dataOrInterest")

@@ -61,10 +61,16 @@ class ChronoSync2013(object):
       isRecovery is true, a chat application would not want to re-display all
       the associated chat messages.) The callback should send interests to fetch
       the application data for the sequence numbers in the sync state.
+      NOTE: The library will log any exceptions raised by this callback, but
+      for better error handling the callback should catch and properly
+      handle any exceptions.
     :type onReceivedSyncState: function object
     :param onInitialized: This calls onInitialized() when the first sync data is
       received (or the interest times out because there are no other publishers
       yet).
+      NOTE: The library will log any exceptions raised by this callback, but
+      for better error handling the callback should catch and properly
+      handle any exceptions.
     :type onInitialized: function object
     :param Name applicationDataPrefix: The prefix used by this application instance
       for application data. For example, "/my/local/prefix/ndnchat4/0K4wChff2v".
@@ -86,6 +92,9 @@ class ChronoSync2013(object):
     :param onRegisterFailed: If failed to register the prefix to receive
       interests for the applicationBroadcastPrefix, this calls
       onRegisterFailed(applicationBroadcastPrefix).
+      NOTE: The library will log any exceptions raised by this callback, but
+      for better error handling the callback should catch and properly
+      handle any exceptions.
     :type onRegisterFailed: function object
     """
     def __init__(self, onReceivedSyncState, onInitialized,
@@ -405,7 +414,10 @@ class ChronoSync2013(object):
                   syncState.name, syncState.seqno.session,
                   syncState.seqno.seq))
 
-        self._onReceivedSyncState(syncStates, isRecovery)
+        try:
+            self._onReceivedSyncState(syncStates, isRecovery)
+        except:
+            logging.exception("Error in onReceivedSyncState")
 
         name = Name(self._applicationBroadcastPrefix)
         name.append(self._digestTree.getRoot())
@@ -440,7 +452,10 @@ class ChronoSync2013(object):
         content.seqno.session = self._sessionNo
         self._update(getattr(tempContent, "ss"))
 
-        self._onInitialized()
+        try:
+            self._onInitialized()
+        except:
+            logging.exception("Error in onInitialized")
 
         name = Name(self._applicationBroadcastPrefix)
         name.append(self._digestTree.getRoot())
@@ -634,7 +649,10 @@ class ChronoSync2013(object):
                 content2.seqno.session = self._sessionNo
 
                 if self._update(getattr(tempContent, "ss")):
-                    self._onInitialized()
+                    try:
+                        self._onInitialized()
+                    except:
+                        logging.exception("Error in onInitialized")
 
         tempContent2 = sync_state_pb2.SyncStateMsg()
         if self._sequenceNo >= 0:
@@ -666,7 +684,10 @@ class ChronoSync2013(object):
             content2.seqno.session = self._sessionNo
 
             if self._update(getattr(tempContent, "ss")):
-                self._onInitialized()
+                try:
+                    self._onInitialized()
+                except:
+                    logging.exception("Error in onInitialized")
 
     @staticmethod
     def _dummyOnData(interest, data):

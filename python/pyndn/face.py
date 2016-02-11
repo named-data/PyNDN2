@@ -98,11 +98,17 @@ class Face(object):
           expressInterest and data is the received Data object. NOTE: You must
           not change the interest object - if you need to change it then make a
           copy.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onData: function object
         :param onTimeout: (optional) If the interest times out according to the
           interest lifetime, this calls onTimeout(interest) where interest is
           the interest given to expressInterest. However, if onTimeout is None
           or omitted, this does not use it.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onTimeout: function object
         :param wireFormat: (optional) A WireFormat object used to encode the
            message. If omitted, use WireFormat.getDefaultWireFormat().
@@ -270,9 +276,15 @@ class Face(object):
           NOTE: You must not change the prefix or filter objects - if you need to
           change them then make a copy. If onInterest is None, it is ignored and
           you must call setInterestFilter.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onInterest: function object
         :param onRegisterFailed: If register prefix fails for any reason, this
           calls onRegisterFailed(prefix).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onRegisterFailed: function object
         :param onRegisterSuccess: (optional) This calls
           onRegisterSuccess(prefix, registeredPrefixId) when this receives a
@@ -280,6 +292,9 @@ class Face(object):
           omitted, this does not use it. (The onRegisterSuccess parameter comes
           after onRegisterFailed because it can be None or omitted, unlike
           onRegisterFailed.)
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onRegisterSuccess: function object
         :param ForwardingFlags flags: (optional) The flags for finer control of
           which interests are forwardedto the application.
@@ -372,6 +387,9 @@ class Face(object):
           incoming Interest.
         :param onInterest: When an Interest is received which matches the filter,
           this calls onInterest(prefix, interest, face, interestFilterId, filter).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onInterest: function object
         :return: The interest filter ID which can be used with unsetInterestFilter.
         :rtype: int

@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+import logging
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.name import Name
 
@@ -58,13 +59,19 @@ class NoVerifyPolicyManager(PolicyManager):
         :param int stepCount: The number of verification steps that have been
           done, used to track the verification progress. (stepCount is ignored.)
         :param onVerified: This does override to call onVerified(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerified: function object
         :param onVerifyFailed: Override to ignore this.
         :type onVerifyFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
-        onVerified(dataOrInterest)
+        try:
+            onVerified(dataOrInterest)
+        except:
+            logging.exception("Error in onVerified")
         return None
 
     def checkSigningPolicy(self, dataName, certificateName):

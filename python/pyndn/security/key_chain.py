@@ -26,6 +26,7 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
+import logging
 from random import SystemRandom
 from pyndn.name import Name
 from pyndn.interest import Interest
@@ -413,9 +414,15 @@ class KeyChain(object):
         :param Data data: The Data object with the signature to check.
         :param onVerified: If the signature is verified, this calls
           onVerified(data).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails or can't find the
           public key, this calls onVerifyFailed(data).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerifyFailed: function object
         :param int stepCount: (optional) The number of verification steps that
           have been done. If omitted, use 0.
@@ -429,9 +436,15 @@ class KeyChain(object):
                   self._makeOnCertificateInterestTimeout(
                     nextStep.retry, onVerifyFailed, data, nextStep))
         elif self._policyManager.skipVerifyAndTrust(data):
-            onVerified(data)
+            try:
+                onVerified(data)
+            except:
+                logging.exception("Error in onVerified")
         else:
-            onVerifyFailed(data)
+            try:
+                onVerifyFailed(data)
+            except:
+                logging.exception("Error in onVerifyFailed")
 
     def verifyInterest(
       self, interest, onVerified, onVerifyFailed, stepCount = 0,
@@ -444,9 +457,15 @@ class KeyChain(object):
         :param Interest interest: The interest with the signature to check.
         :param onVerified: If the signature is verified, this calls
           onVerified(interest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails or can't find the
           public key, this calls onVerifyFailed(interest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerifyFailed: function object
         :param int stepCount: (optional) The number of verification steps that
           have been done. If omitted, use 0.
@@ -464,9 +483,15 @@ class KeyChain(object):
                   self._makeOnCertificateInterestTimeout(
                     nextStep.retry, onVerifyFailed, interest, nextStep))
         elif self._policyManager.skipVerifyAndTrust(interest):
-            onVerified(interest)
+            try:
+                onVerified(interest)
+            except:
+                logging.exception("Error in onVerified")
         else:
-            onVerifyFailed(interest)
+            try:
+                onVerifyFailed(interest)
+            except:
+                logging.exception("Error in onVerifyFailed")
 
     def setFace(self, face):
         """
@@ -507,7 +532,10 @@ class KeyChain(object):
                      self._makeOnCertificateInterestTimeout(
                        retry, onVerifyFailed, data, nextStep))
             else:
-                onVerifyFailed(data)
+                try:
+                    onVerifyFailed(data)
+                except:
+                    logging.exception("Error in onVerifyFailed")
         return onTimeout
 
     def _prepareDefaultCertificateName(self):

@@ -1,8 +1,9 @@
-Interim changes since PyNDN v2.2beta1 (2016-02-03)
+Interim changes since PyNDN v2.2beta1 (2016-02-11)
 --------------------------------------------------
 
 Changes
 * In MemoryContentCache.registerPrefix, added optional onRegisterSuccess. (Thanks to Zhehao Wang.)
+* http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 
 PyNDN v2.2beta1 (2016-02-03)
 ----------------------------

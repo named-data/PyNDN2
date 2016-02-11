@@ -401,22 +401,31 @@ class Node(object):
                         includeFilter = False
 
                     if includeFilter:
-                        entry.getOnInterest()(
-                          entry.getFilter().getPrefix(), interest,
-                          entry.getFace(), entry.getInterestFilterId(),
-                          entry.getFilter())
+                        try:
+                            entry.getOnInterest()(
+                              entry.getFilter().getPrefix(), interest,
+                              entry.getFace(), entry.getInterestFilterId(),
+                              entry.getFilter())
+                        except:
+                            logging.exception("Error in onInterest")
                     else:
                         # Old-style onInterest without the filter argument. We
                         # still pass a Face instead of Transport since Face also
                         # has a send method.
-                        entry.getOnInterest()(
-                          entry.getFilter().getPrefix(), interest,
-                          entry.getFace(), entry.getInterestFilterId())
+                        try:
+                            entry.getOnInterest()(
+                              entry.getFilter().getPrefix(), interest,
+                              entry.getFace(), entry.getInterestFilterId())
+                        except:
+                            logging.exception("Error in onInterest")
         elif data != None:
             pendingInterests = self._extractEntriesForExpressedInterest(
               data.getName())
             for pendingInterest in pendingInterests:
-                pendingInterest.getOnData()(pendingInterest.getInterest(), data)
+                try:
+                    pendingInterest.getOnData()(pendingInterest.getInterest(), data)
+                except:
+                    logging.exception("Error in onData")
 
     def isLocal(self):
         """
@@ -728,11 +737,10 @@ class Node(object):
             _onTimeout.
             """
             if self._onTimeout:
-                # Ignore all exceptions.
                 try:
                     self._onTimeout(self._interest)
                 except:
-                    pass
+                    logging.exception("Error in onTimeout")
 
         def setIsRemoved(self):
             """
@@ -879,22 +887,31 @@ class Node(object):
                 logging.getLogger(__name__).info(
                   "Register prefix failed: Error decoding the NFD response: %s",
                   str(ex))
-                self._onRegisterFailed(self._prefix)
+                try:
+                    self._onRegisterFailed(self._prefix)
+                except:
+                    logging.exception("Error in onRegisterFailed")
                 return
 
             # Status code 200 is "OK".
             if statusCode != 200:
-              logging.getLogger(__name__).info(
-                "Register prefix failed: Expected NFD status code 200, got: %d",
-                statusCode)
-              self._onRegisterFailed(self._prefix)
-              return
+                logging.getLogger(__name__).info(
+                  "Register prefix failed: Expected NFD status code 200, got: %d",
+                  statusCode)
+                try:
+                    self._onRegisterFailed(self._prefix)
+                except:
+                    logging.exception("Error in onRegisterFailed")
+                return
 
             logging.getLogger(__name__).info(
               "Register prefix succeeded with the NFD forwarder for prefix %s",
               self._prefix.toUri())
             if self._onRegisterSuccess != None:
-                self._onRegisterSuccess(self._prefix, self._registeredPrefixId)
+                try:
+                    self._onRegisterSuccess(self._prefix, self._registeredPrefixId)
+                except:
+                    logging.exception("Error in onRegisterSuccess")
 
         def onTimeout(self, interest):
             """
@@ -902,5 +919,7 @@ class Node(object):
             """
             logging.getLogger(__name__).info(
               "Timeout for NFD register prefix command.")
-            self._onRegisterFailed(self._prefix)
-
+            try:
+                self._onRegisterFailed(self._prefix)
+            except:
+                logging.exception("Error in onRegisterFailed")
