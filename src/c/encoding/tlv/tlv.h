@@ -52,6 +52,7 @@ enum {
   ndn_Tlv_SignatureType =    27,
   ndn_Tlv_KeyLocator =       28,
   ndn_Tlv_KeyLocatorDigest = 29,
+  ndn_Tlv_SelectedDelegation = 32
 };
 
 enum {
@@ -91,6 +92,18 @@ enum {
   ndn_Tlv_LocalControlHeader_NextHopFaceId = 82,
   ndn_Tlv_LocalControlHeader_CachingPolicy = 83,
   ndn_Tlv_LocalControlHeader_NoCache = 96
+};
+
+enum {
+  ndn_Tlv_Link_Preference = 30,
+  ndn_Tlv_Link_Delegation = 31
+};
+
+enum {
+  ndn_Tlv_Encrypt_EncryptedContent =    130,
+  ndn_Tlv_Encrypt_EncryptionAlgorithm = 131,
+  ndn_Tlv_Encrypt_EncryptedPayload =    132,
+  ndn_Tlv_Encrypt_InitialVector =       133
 };
 
 #ifdef __cplusplus

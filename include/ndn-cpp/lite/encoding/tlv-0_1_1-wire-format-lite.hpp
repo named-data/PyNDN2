@@ -26,6 +26,8 @@
 #include "../data-lite.hpp"
 #include "../signature-lite.hpp"
 #include "../control-parameters-lite.hpp"
+#include "../delegation-set-lite.hpp"
+#include "../encrypt/encrypted-content-lite.hpp"
 #include "../util/dynamic-uint8-array-lite.hpp"
 
 namespace ndn {
@@ -165,7 +167,7 @@ public:
 
   /**
    * Encode controlParameters as an NDN-TLV ControlParameters.
-   * @param controlParameters The control parameters struct to encode.
+   * @param controlParameters The control parameters object to encode.
    * @param output A DynamicUInt8ArrayLite object which receives the encoded
    * output.  If the output's reallocFunction is null, its array must be large
    * enough to receive the entire encoding.
@@ -235,6 +237,67 @@ public:
     (SignatureLite& signature, const uint8_t *signatureInfo,
      size_t signatureInfoLength, const uint8_t *signatureValue,
      size_t signatureValueLength);
+
+  /**
+   * Encode delegation as an NDN-TLV Delegation.
+   * @param delegation The delegation object to encode.
+   * @param output A DynamicUInt8ArrayLite object which receives the encoded
+   * output.  If the output's reallocFunction is null, its array must be large
+   * enough to receive the entire encoding.
+   * @param offset The offset into the output buffer to begin encoding. This is
+   * provided so that a DelegationSet can be encoded as as series of Delegation.
+   * @param encodingLength Set encodingLength to the length of the encoded output,
+   * starting from offset.
+   * @return 0 for success, else an error code.
+   */
+  static ndn_Error
+  encodeDelegationSet_Delegation
+    (const DelegationSetLite::Delegation& delegation,
+     DynamicUInt8ArrayLite& output, size_t offset, size_t* encodingLength);
+
+  /**
+   * Decode input as an NDN-TLV Delegation and set the fields in the delegation
+   * object.
+   * @param delegation The delegation object whose fields are updated.
+   * @param input A pointer to the input buffer to decode.
+   * @param inputLength The number of bytes in input.
+   * @param encodingLength Set encodingLength to the length of the decoded value.
+   * This is provided so that a DelegationSet can be decoded as as series of
+   * Delegation.
+   * @return 0 for success, else an error code.
+   */
+  static ndn_Error
+  decodeDelegationSet_Delegation
+    (DelegationSetLite::Delegation& delegation, const uint8_t* input,
+     size_t inputLength, size_t *encodingLength);
+
+  /**
+   * Encode encryptedContent as an NDN-TLV EncryptedContent.
+   * @param encryptedContent The encrypted content object to encode.
+   * @param output A DynamicUInt8ArrayLite object which receives the encoded
+   * output.  If the output's reallocFunction is null, its array must be large
+   * enough to receive the entire encoding.
+   * @param encodingLength Set encodingLength to the length of the encoded output.
+   * @return 0 for success, else an error code.
+   */
+  static ndn_Error
+  encodeEncryptedContent
+    (const EncryptedContentLite& encryptedContent,
+     DynamicUInt8ArrayLite& output, size_t* encodingLength);
+
+  /**
+   * Decode input as a TLV EncryptedContent and set the fields in the
+   * encrypted content object.
+   * @param encryptedContent The encrypted content object whose fields are
+   * updated.
+   * @param input A pointer to the input buffer to decode.
+   * @param inputLength The number of bytes in input.
+   * @return 0 for success, else an error code.
+   */
+  static ndn_Error
+  decodeEncryptedContent
+    (EncryptedContentLite& encryptedContent, const uint8_t* input,
+     size_t inputLength);
 };
 
 }

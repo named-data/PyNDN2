@@ -134,4 +134,40 @@ Tlv0_1_1WireFormatLite::decodeSignatureInfoAndValue
      signatureValueLength);
 }
 
+ndn_Error
+Tlv0_1_1WireFormatLite::encodeDelegationSet_Delegation
+  (const DelegationSetLite::Delegation& delegation,
+   DynamicUInt8ArrayLite& output, size_t offset, size_t* encodingLength)
+{
+  return ndn_Tlv0_1_1WireFormat_encodeDelegationSet_Delegation
+    (&delegation, &output, offset, encodingLength);
+}
+
+ndn_Error
+Tlv0_1_1WireFormatLite::decodeDelegationSet_Delegation
+  (DelegationSetLite::Delegation& delegation, const uint8_t* input,
+   size_t inputLength, size_t *encodingLength)
+{
+  return ndn_Tlv0_1_1WireFormat_decodeDelegationSet_Delegation
+    (&delegation, input, inputLength, encodingLength);
+}
+
+ndn_Error
+Tlv0_1_1WireFormatLite::encodeEncryptedContent
+  (const EncryptedContentLite& encryptedContent,
+   DynamicUInt8ArrayLite& output, size_t* encodingLength)
+{
+  return ndn_Tlv0_1_1WireFormat_encodeEncryptedContent
+    (&encryptedContent, &output, encodingLength);
+}
+
+ndn_Error
+Tlv0_1_1WireFormatLite::decodeEncryptedContent
+  (EncryptedContentLite& encryptedContent, const uint8_t* input,
+   size_t inputLength)
+{
+  return ndn_Tlv0_1_1WireFormat_decodeEncryptedContent
+    (&encryptedContent, input, inputLength);
+}
+
 }
