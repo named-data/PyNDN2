@@ -80,6 +80,7 @@ Example:
       face, interest, SegmentFetcher.DontVerifySegment, onComplete, onError)
 """
 
+import logging
 from pyndn.interest import Interest
 from pyndn.util.blob import Blob
 
@@ -97,10 +98,16 @@ class SegmentFetcher(object):
     :param onComplete: When all segments are received, call
       onComplete(content) where content is a Blob which has the concatenation of
       the content of all the segments.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
     :type onComplete: function object
     :param onError: Call onError.onError(errorCode, message) for timeout or an
       error processing segments. errorCode is a value from
       SegmentFetcher.ErrorCode and message is a related string.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
     :type onError: function object
     """
     def __init__(self, face, verifySegment, onComplete, onError):
@@ -150,10 +157,16 @@ class SegmentFetcher(object):
         :param onComplete: When all segments are received, call
           onComplete(content) where content is a Blob which has the concatenation of
           the content of all the segments.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onComplete: function object
         :param onError: Call onError.onError(errorCode, message) for timeout or an
           error processing segments. errorCode is a value from
           SegmentFetcher.ErrorCode and message is a related string.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onError: function object
         """
         SegmentFetcher(face, verifySegment, onComplete, onError)._fetchFirstSegment(
@@ -176,27 +189,36 @@ class SegmentFetcher(object):
 
     def _onData(self, originalInterest, data):
         if not self._verifySegment(data):
-            self._onError(
-              self.ErrorCode.SEGMENT_VERIFICATION_FAILED,
-              "Segment verification failed")
+            try:
+                self._onError(
+                  self.ErrorCode.SEGMENT_VERIFICATION_FAILED,
+                  "Segment verification failed")
+            except:
+                logging.exception("Error in onError")
             return
 
         if not self._endsWithSegmentNumber(data.getName()):
             # We don't expect a name without a segment number.  Treat it as
             # a bad packet.
-            self._onError(
-              self.ErrorCode.DATA_HAS_NO_SEGMENT,
-               "Got an unexpected packet without a segment number: " +
-               data.getName().toUri())
+            try:
+                self._onError(
+                  self.ErrorCode.DATA_HAS_NO_SEGMENT,
+                   "Got an unexpected packet without a segment number: " +
+                   data.getName().toUri())
+            except:
+                logging.exception("Error in onError")
         else:
             currentSegment = 0
             try:
                 currentSegment = data.getName().get(-1).toSegment()
             except RuntimeError as ex:
-                self._onError(
-                  self.ErrorCode.DATA_HAS_NO_SEGMENT,
-                   "Error decoding the name segment number " +
-                   data.getName().get(-1).toEscapedString() + ": " + str(ex))
+                try:
+                    self._onError(
+                      self.ErrorCode.DATA_HAS_NO_SEGMENT,
+                       "Error decoding the name segment number " +
+                       data.getName().get(-1).toEscapedString() + ": " + str(ex))
+                except:
+                    logging.exception("Error in onError")
                 return
 
             expectedSegmentNumber = len(self._contentParts)
@@ -215,12 +237,15 @@ class SegmentFetcher(object):
                       finalSegmentNumber = (data.getMetaInfo()
                         .getFinalBlockId().toSegment())
                     except RuntimeError as ex:
-                      self._onError(
-                        self.ErrorCode.DATA_HAS_NO_SEGMENT,
-                         "Error decoding the FinalBlockId segment number " +
-                         data.getMetaInfo().getFinalBlockId().toEscapedString() +
-                         ": " + str(ex))
-                      return
+                        try:
+                            self._onError(
+                              self.ErrorCode.DATA_HAS_NO_SEGMENT,
+                               "Error decoding the FinalBlockId segment number " +
+                               data.getMetaInfo().getFinalBlockId().toEscapedString() +
+                               ": " + str(ex))
+                        except:
+                            logging.exception("Error in onError")
+                        return
 
                     if currentSegment == finalSegmentNumber:
                         # We are finished.
@@ -236,7 +261,10 @@ class SegmentFetcher(object):
                             content[offset:offset + part.size()] = part.buf()
                             offset += part.size()
 
-                        self._onComplete(Blob(content, False))
+                        try:
+                            self._onComplete(Blob(content, False))
+                        except:
+                            logging.exception("Error in onComplete")
                         return
 
                 # Fetch the next segment.
@@ -244,9 +272,12 @@ class SegmentFetcher(object):
                   originalInterest, data.getName(), expectedSegmentNumber + 1)
 
     def _onTimeout(self, interest):
-        self._onError(
-          self.ErrorCode.INTEREST_TIMEOUT,
-           "Time out for interest " + interest.getName().toUri())
+        try:
+            self._onError(
+              self.ErrorCode.INTEREST_TIMEOUT,
+               "Time out for interest " + interest.getName().toUri())
+        except:
+            logging.exception("Error in onError")
 
     @staticmethod
     def _endsWithSegmentNumber(name):
