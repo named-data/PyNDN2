@@ -79,9 +79,15 @@ class PolicyManager(object):
           done, used to track the verification progress.
         :param onVerified: If the signature is verified, this calls
           onVerified(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails, this calls
           onVerifyFailed(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerifyFailed: function object
         :return: The indication of next verification step, or None if there is
           no further step.

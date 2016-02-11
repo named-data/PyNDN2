@@ -25,6 +25,7 @@ encrypt a data packet in the group-based encryption protocol.
 Note: This class is an experimental feature. The API may change.
 """
 
+import logging
 import math
 from pyndn.name import Name
 from pyndn.exclude import Exclude
@@ -105,6 +106,9 @@ class Producer(object):
         :param onEncryptedKeys: If this creates a content key, then this calls
           onEncryptedKeys(keys) where keys is a list of encrypted content key
           Data packets. If onEncryptedKeys is None, this does not use it.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onEncryptedKeys: function object
         :return: The content key name.
         :rtype: Name
@@ -250,7 +254,10 @@ class Producer(object):
             keyRequest.interestCount -= 1
 
         if keyRequest.interestCount == 0 and onEncryptedKeys != None:
-            onEncryptedKeys(keyRequest.encryptedKeys)
+            try:
+                onEncryptedKeys(keyRequest.encryptedKeys)
+            except:
+                logging.exception("Error in onEncryptedKeys")
             if timeSlot in self._keyRequests:
                 del self._keyRequests[timeSlot]
 
@@ -330,7 +337,10 @@ class Producer(object):
 
         keyRequest.interestCount -= 1
         if keyRequest.interestCount == 0 and onEncryptedKeys != None:
-            onEncryptedKeys(keyRequest.encryptedKeys)
+            try:
+                onEncryptedKeys(keyRequest.encryptedKeys)
+            except:
+                logging.exception("Error in onEncryptedKeys")
             if timeSlot in self._keyRequests:
                 del self._keyRequests[timeSlot]
 

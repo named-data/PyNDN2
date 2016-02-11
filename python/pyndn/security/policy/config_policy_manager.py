@@ -20,6 +20,7 @@
 
 import os
 import re
+import logging
 from base64 import b64decode
 
 from pyndn import Name, Data, Interest, KeyLocator
@@ -471,26 +472,41 @@ class ConfigPolicyManager(PolicyManager):
           done, used to track the verification progress.
         :param onVerified: If the signature is verified, this calls
           onVerified(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerified: function object
         :param onVerifyFailed: If the signature check fails, this calls
           onVerifyFailed(dataOrInterest).
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
         :type onVerifyFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
         if stepCount > self._maxDepth:
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         signature = self._extractSignature(dataOrInterest, wireFormat)
         # no signature -> fail
         if signature is None:
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         if not KeyLocator.canGetFromSignature(signature):
             # We only support signature types with key locators.
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         keyLocator = None
@@ -498,13 +514,19 @@ class ConfigPolicyManager(PolicyManager):
             keyLocator = KeyLocator.getFromSignature(signature)
         except:
             # No key locator -> fail.
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         signatureName = keyLocator.getKeyName()
         # no key name in KeyLocator -> fail
         if signatureName.size() == 0:
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         objectName = dataOrInterest.getName()
@@ -523,13 +545,19 @@ class ConfigPolicyManager(PolicyManager):
 
         # no matching rule -> fail
         if matchedRule is None:
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         signatureMatches = self._checkSignatureMatch(signatureName, objectName,
                 matchedRule)
         if not signatureMatches:
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
             return None
 
         # before we look up keys, refresh any certificate directories
@@ -563,16 +591,25 @@ class ConfigPolicyManager(PolicyManager):
             timestamp = dataOrInterest.getName().get(-4).toNumber()
 
             if not self._interestTimestampIsFresh(keyName, timestamp):
-                onVerifyFailed(dataOrInterest)
+                try:
+                    onVerifyFailed(dataOrInterest)
+                except:
+                    logging.exception("Error in onVerifyFailed")
                 return None
 
         # certificate is known, verify the signature
         if self._verify(signature, dataOrInterest.wireEncode()):
-            onVerified(dataOrInterest)
+            try:
+                onVerified(dataOrInterest)
+            except:
+                logging.exception("Error in onVerified")
             if isinstance(dataOrInterest, Interest):
                 self._updateTimestampForKey(keyName, timestamp)
         else:
-            onVerifyFailed(dataOrInterest)
+            try:
+                onVerifyFailed(dataOrInterest)
+            except:
+                logging.exception("Error in onVerifyFailed")
 
     def _verify(self, signatureInfo, signedBlob):
         """
