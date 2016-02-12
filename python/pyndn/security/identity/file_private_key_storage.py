@@ -27,7 +27,7 @@ import os
 import stat
 import base64
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import padding, rsa, ec
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
@@ -70,10 +70,17 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         publicKeyDer = None
         privateKeyDer = None
 
-        if params.getKeyType() == KeyType.RSA:
-            privateKey = rsa.generate_private_key(
-              public_exponent = 65537, key_size = params.getKeySize(),
-              backend = default_backend())
+        if (params.getKeyType() == KeyType.RSA or
+            params.getKeyType() == KeyType.ECDSA):
+            if params.getKeyType() == KeyType.RSA:
+                privateKey = rsa.generate_private_key(
+                  public_exponent = 65537, key_size = params.getKeySize(),
+                  backend = default_backend())
+            else:
+                privateKey = ec.generate_private_key(
+                  PrivateKeyStorage.getEcCurve(params.getKeySize()),
+                  default_backend())
+
             publicKeyDer = privateKey.public_key().public_bytes(
               encoding = serialization.Encoding.DER,
               format = serialization.PublicFormat.SubjectPublicKeyInfo)
