@@ -131,6 +131,22 @@ class PrivateKeyStorage(object):
         """
         raise RuntimeError("generateKey is not implemented")
 
+    def doesKeyExist(self, keyName, keyClass):
+        """
+        Check if a particular key exists.
+        Your derived class should override.
+
+        :param Name keyName: The name of the key.
+        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC,
+           KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
+        :type keyClass: int from KeyClass
+        :return: True if the key exists, otherwise false.
+        :rtype: bool
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("doesKeyExist is not implemented")
+
     @staticmethod
     def getEcCurve(keySize):
         """
@@ -149,19 +165,3 @@ class PrivateKeyStorage(object):
             return ec.SECP521R1()
         else:
             raise SecurityException("Unsupported EC key size: " + str(keySize))
-
-    def doesKeyExist(self, keyName, keyClass):
-        """
-        Check if a particular key exists.
-        Your derived class should override.
-
-        :param Name keyName: The name of the key.
-        :param keyClass: The class of the key, e.g. KeyClass.PUBLIC,
-           KeyClass.PRIVATE, or KeyClass.SYMMETRIC.
-        :type keyClass: int from KeyClass
-        :return: True if the key exists, otherwise false.
-        :rtype: bool
-        :raises RuntimeError: for unimplemented if the derived class does not
-          override.
-        """
-        raise RuntimeError("doesKeyExist is not implemented")
