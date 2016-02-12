@@ -24,7 +24,7 @@ PrivateKeyStorage to implement private key storage in memory.
 """
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import padding, rsa, ec
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
@@ -103,19 +103,27 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :param Name keyName: The name of the key pair.
         :param KeyParams params: The parameters of the key.
         """
-        if params.getKeyType() == KeyType.RSA:
-            privateKey = rsa.generate_private_key(
-              public_exponent = 65537, key_size = params.getKeySize(),
-              backend = default_backend())
+        if (params.getKeyType() == KeyType.RSA or
+            params.getKeyType() == KeyType.ECDSA):
+            if params.getKeyType() == KeyType.RSA:
+                privateKey = rsa.generate_private_key(
+                  public_exponent = 65537, key_size = params.getKeySize(),
+                  backend = default_backend())
+            else:
+                privateKey = ec.generate_private_key(
+                  PrivateKeyStorage.getEcCurve(params.getKeySize()),
+                  default_backend())
+
             self.setPublicKeyForKeyName(
-              keyName, KeyType.RSA, privateKey.public_key().public_bytes(
+              keyName, params.getKeyType(), privateKey.public_key().public_bytes(
                 encoding = serialization.Encoding.DER,
                 format = serialization.PublicFormat.SubjectPublicKeyInfo))
             self.setPrivateKeyForKeyName(
-              keyName, KeyType.RSA, privateKey.private_bytes(
+              keyName, params.getKeyType(), privateKey.private_bytes(
                 encoding = serialization.Encoding.DER,
                 format = serialization.PrivateFormat.PKCS8,
                 encryption_algorithm = serialization.NoEncryption()))
+        # TODO generate ECDSA keys
         else:
             raise RuntimeError("generateKeyPair: KeyType is not supported")
 
@@ -175,15 +183,20 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         # Find the private key.
         keyUri = keyName.toUri()
         if not keyUri in self._privateKeyStore:
-          raise SecurityException(
-            "MemoryPrivateKeyStorage: Cannot find private key " + keyUri)
+            raise SecurityException(
+              "MemoryPrivateKeyStorage: Cannot find private key " + keyUri)
         privateKey = self._privateKeyStore[keyUri]
 
         # Sign the data.
         data = Blob(data, False).toBytes()
-        if privateKey.getKeyType() == KeyType.RSA:
-            signer = privateKey.getPrivateKey().signer(
-              padding.PKCS1v15(), hashes.SHA256())
+        if (privateKey.getKeyType() == KeyType.RSA or
+            privateKey.getKeyType() == KeyType.ECDSA):
+            if privateKey.getKeyType() == KeyType.RSA:
+                signer = privateKey.getPrivateKey().signer(
+                  padding.PKCS1v15(), hashes.SHA256())
+            else:
+                signer = privateKey.getPrivateKey().signer(ec.ECDSA(hashes.SHA256()))
+
             signer.update(data)
             return Blob(bytearray(signer.finalize()), False)
         else:
@@ -220,7 +233,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
 
             keyData = Blob(keyData, False).toBytes()
 
-            if keyType == KeyType.RSA:
+            if keyType == KeyType.ECDSA or keyType == KeyType.RSA:
                 self._privateKey = serialization.load_der_private_key(
                   keyData, password = None, backend = default_backend())
             else:
