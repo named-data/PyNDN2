@@ -155,9 +155,7 @@ class PrivateKeyStorage(object):
         :param int keySize: The key size.
         :raises SecurityException: If the key size is not supported.
         """
-        if keySize == 224:
-            return ec.SECT224R1()
-        elif keySize == 256:
+        if keySize == 256:
             return ec.SECP256R1()
         elif keySize == 384:
             return ec.SECP384R1()
