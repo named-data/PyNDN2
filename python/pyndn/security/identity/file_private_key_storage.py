@@ -37,6 +37,7 @@ from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
+from pyndn.encoding.der.der_node import DerNode
 
 class FilePrivateKeyStorage(PrivateKeyStorage):
     """
@@ -165,17 +166,32 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         base64Content = None
         with open(self.nameTransform(keyURI, ".pri")) as keyFile:
             base64Content = keyFile.read()
-        der = base64.b64decode(base64Content)
+        der = Blob(base64.b64decode(base64Content), False)
+
+        # Decode the PKCS #8 key to get the algorithm OID.
+        parsedNode = DerNode.parse(der.buf(), 0)
+        pkcs8Children = parsedNode.getChildren()
+        algorithmIdChildren = DerNode.getSequence(pkcs8Children, 1).getChildren()
+        oidString = algorithmIdChildren[0].toVal()
 
         privateKey = serialization.load_der_private_key(
-          Blob(der, False).toBytes(), password = None, backend = default_backend())
+          der.toBytes(), password = None, backend = default_backend())
 
         # Sign the data.
         data = Blob(data, False).toBytes()
-        signer = privateKey.signer(padding.PKCS1v15(), hashes.SHA256())
-        signer.update(data)
-        signature = signer.finalize()
-        return Blob(bytearray(signature), False)
+        if (oidString == PublicKey.RSA_ENCRYPTION_OID or
+            oidString == PublicKey.EC_ENCRYPTION_OID):
+            if oidString == PublicKey.RSA_ENCRYPTION_OID:
+                signer = privateKey.signer(padding.PKCS1v15(), hashes.SHA256())
+            else:
+                signer = privateKey.signer(ec.ECDSA(hashes.SHA256()))
+
+            signer.update(data)
+            signature = signer.finalize()
+            return Blob(bytearray(signature), False)
+        else:
+            raise SecurityException(
+              "FilePrivateKeyStorage.sign: Unrecognized private key type")
 
     def decrypt(self, keyName, data, isSymmetric = False):
         """
