@@ -177,6 +177,18 @@ class TestDataDump(ut.TestCase):
         self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
         self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
 
+    def test_verify_ecdsa(self):
+        # we create 'mock' objects to replace callbacks
+        # since we're not interested in the effect of the callbacks themselves
+        failedCallback = Mock()
+        verifiedCallback = Mock()
+
+        self.credentials.signData(self.freshData, self.credentials.ecdsaCertName)
+
+        self.credentials.verifyData(self.freshData, verifiedCallback, failedCallback)
+        self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
+        self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
+
     def test_verify_digest_sha256(self):
         # We create 'mock' objects to replace callbacks since we're not
         # interested in the effect of the callbacks themselves.
