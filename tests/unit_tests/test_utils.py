@@ -166,7 +166,7 @@ class CredentialStorage:
           "KEY").append(keyName[-1]).append("ID-CERT").append("0")
 
         ecdsaKeyName = Name("/testEcdsa/DSK-123")
-        self.ecdsaCertName = keyName[:-1].append(
+        self.ecdsaCertName = ecdsaKeyName[:-1].append(
           "KEY").append(ecdsaKeyName[-1]).append("ID-CERT").append("0")
 
         self.identityStorage.addKey(
