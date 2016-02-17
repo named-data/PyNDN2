@@ -26,7 +26,6 @@ from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
-from pyndn.hmac_with_sha256_signature import HmacWithSha256Signature
 from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
@@ -702,17 +701,12 @@ class Tlv0_1_1WireFormat(WireFormat):
         """
         saveLength = len(encoder)
 
-        # Encode backwards.
         if type(signature) is Sha256WithRsaSignature:
+            # Encode backwards.
             Tlv0_1_1WireFormat._encodeKeyLocator(
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
-        elif type(signature) is HmacWithSha256Signature:
-            Tlv0_1_1WireFormat._encodeKeyLocator(
-              Tlv.KeyLocator, signature.getKeyLocator(), encoder)
-            encoder.writeNonNegativeIntegerTlv(
-              Tlv.SignatureType, Tlv.SignatureType_SignatureHmacWithSha256)
         elif type(signature) is DigestSha256Signature:
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_DigestSha256)
@@ -731,13 +725,9 @@ class Tlv0_1_1WireFormat(WireFormat):
             signatureHolder.setSignature(Sha256WithRsaSignature())
             # Modify signatureHolder's signature object because if we create an object
             #   and set it, then signatureHolder will have to copy all the fields.
+            signatureInfo = signatureHolder.getSignature()
             Tlv0_1_1WireFormat._decodeKeyLocator(
-              Tlv.KeyLocator, signatureHolder.getSignature().getKeyLocator(),
-              decoder)
-        elif signatureType == Tlv.SignatureType_SignatureHmacWithSha256:
-            signatureHolder.setSignature(HmacWithSha256Signature())
-            Tlv0_1_1WireFormat._decodeKeyLocator(
-              Tlv.KeyLocator, signatureHolder.getSignature().getKeyLocator(),
+              Tlv.KeyLocator, signatureInfo.getKeyLocator(),
               decoder)
         elif signatureType == Tlv.SignatureType_DigestSha256:
             signatureHolder.setSignature(DigestSha256Signature())
