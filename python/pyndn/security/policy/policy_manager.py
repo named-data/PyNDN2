@@ -19,12 +19,13 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import padding, ec
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.exceptions import InvalidSignature
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
 from pyndn.security.security_exception import SecurityException
 
 """
@@ -150,6 +151,11 @@ class PolicyManager(object):
                 return False
             return PolicyManager._verifySha256WithRsaSignature(
               signature.getSignature(), signedBlob, publicKeyDer)
+        elif isinstance(signature, Sha256WithEcdsaSignature):
+            if publicKeyDer.isNull():
+                return False
+            return PolicyManager._verifySha256WithEcdsaSignature(
+              signature.getSignature(), signedBlob, publicKeyDer)
         elif isinstance(signature, DigestSha256Signature):
             return PolicyManager._verifyDigestSha256Signature(
               signature.getSignature(), signedBlob)
@@ -160,7 +166,7 @@ class PolicyManager(object):
     @staticmethod
     def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
         """
-        Verify the signature on the SignedBlob using the given public key.
+        Verify the RSA signature on the SignedBlob using the given public key.
 
         :param Blob signature: The signature bits.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
@@ -176,11 +182,42 @@ class PolicyManager(object):
             publicKey = load_der_public_key(
               publicKeyDerBytes, backend = default_backend())
         except:
-            raise SecurityException("Cannot decode RSA public key")
+            raise SecurityException("Cannot decode the RSA public key")
 
         # Verify.
         verifier = publicKey.verifier(
           signature.toBytes(), padding.PKCS1v15(), hashes.SHA256())
+        verifier.update(signedBlob.toSignedBytes())
+        try:
+            verifier.verify()
+            return True
+        except InvalidSignature:
+            return False
+
+    @staticmethod
+    def _verifySha256WithEcdsaSignature(signature, signedBlob, publicKeyDer):
+        """
+        Verify the ECDSA signature on the SignedBlob using the given public key.
+
+        :param Blob signature: The signature bits.
+        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
+          verify.
+        :param Blob publicKeyDer: The DER-encoded public key used to verify the
+          signature.
+        :return: True if the signature verifies, False if not.
+        :rtype: bool
+        """
+        # Get the public key.
+        publicKeyDerBytes = publicKeyDer.toBytes()
+        try:
+            publicKey = load_der_public_key(
+              publicKeyDerBytes, backend = default_backend())
+        except:
+            raise SecurityException("Cannot decode the ECDSA public key")
+
+        # Verify.
+        verifier = publicKey.verifier(
+          signature.toBytes(), ec.ECDSA(hashes.SHA256()))
         verifier.update(signedBlob.toSignedBytes())
         try:
             verifier.verify()

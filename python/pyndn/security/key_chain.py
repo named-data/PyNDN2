@@ -144,6 +144,22 @@ class KeyChain(object):
         return self._identityManager.generateRSAKeyPair(
           identityName, isKsk, keySize)
 
+    def generateEcdsaKeyPair(self, identityName, isKsk = False, keySize = 2048):
+        """
+        Generate a pair of ECDSA keys for the specified identity.
+
+        :param Name identityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
+          Data-Signing-Key.
+        :param int keySize: (optional) The size of the key. If omitted, use a
+          default secure key size.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        return self._identityManager.generateEcdsaKeyPair(
+          identityName, isKsk, keySize)
+
     def setDefaultKeyForIdentity(self, keyName, identityNameCheck = None):
         """
         Set a key as the default key of an identity. The identity name is
@@ -175,6 +191,24 @@ class KeyChain(object):
         :rtype: Name
         """
         return  self._identityManager.generateRSAKeyPairAsDefault(
+          identityName, isKsk, keySize)
+
+    def generateEcdsaKeyPairAsDefault(
+          self, identityName, isKsk = False, keySize = 2048):
+        """
+        Generate a pair of ECDSA keys for the specified identity and set it as
+        default key for the identity.
+
+        :param NameidentityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
+          Data-Signing-Key.
+        :param int keySize: (optional) The size of the key. If omitted, use a
+          default secure key size.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        return  self._identityManager.generateEcdsaKeyPairAsDefault(
           identityName, isKsk, keySize)
 
     def createSigningRequest(self, keyName):
