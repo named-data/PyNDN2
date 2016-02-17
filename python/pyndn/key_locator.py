@@ -141,7 +141,8 @@ class KeyLocator(object):
           otherwise False.
         :rtype: bool
         """
-        return type(signature) is Sha256WithRsaSignature
+        return (type(signature) is Sha256WithEcdsaSignature or
+                type(signature) is Sha256WithRsaSignature)
 
     @staticmethod
     def getFromSignature(signature):
@@ -154,7 +155,8 @@ class KeyLocator(object):
           have a KeyLocator.
         :rtype: KeyLocator
         """
-        if type(signature) is Sha256WithRsaSignature:
+        if (type(signature) is Sha256WithEcdsaSignature or
+            type(signature) is Sha256WithRsaSignature):
             return signature.getKeyLocator()
         else:
             raise RuntimeError(
@@ -201,3 +203,4 @@ class KeyLocatorType(object):
 
 # Put this last to avoid an import loop.
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature

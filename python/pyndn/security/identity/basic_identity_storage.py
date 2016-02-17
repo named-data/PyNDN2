@@ -258,7 +258,7 @@ class BasicIdentityStorage(IdentityStorage):
 
         :param Name keyName: The name of the key.
         """
-        raise RuntimeError("activateKey is not implemented")
+        self._updateKeyStatus(keyName, True)
 
     def deactivateKey(self, keyName):
         """
@@ -267,7 +267,7 @@ class BasicIdentityStorage(IdentityStorage):
 
         :param Name keyName: The name of the key.
         """
-        raise RuntimeError("deactivateKey is not implemented")
+        self._updateKeyStatus(keyName, False)
 
     def deletePublicKeyInfo(self, keyName):
         """
@@ -594,6 +594,24 @@ class BasicIdentityStorage(IdentityStorage):
         cursor.execute(
           "UPDATE Certificate SET default_cert=1 WHERE identity_name=? AND key_identifier=? AND cert_name=?",
             (identityUri, keyId, certificateName.toUri()))
+
+        self._database.commit()
+        cursor.close()
+
+    def _updateKeyStatus(self, keyName, isActive):
+        """
+        Update the active flag of Key.
+
+        :param Name keyName: The key name.
+        :param bool isActive: The active flag.
+        """
+        keyId = keyName[-1].toEscapedString()
+        identityName = keyName[:-1]
+
+        cursor = self._database.cursor()
+        cursor.execute(
+          "UPDATE Key SET active=? WHERE identity_name=? AND key_identifier=?",
+          ((1 if isActive else 0), identityName.toUri(), keyId))
 
         self._database.commit()
         cursor.close()

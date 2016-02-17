@@ -52,7 +52,7 @@ DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
     0x47, 0xcc, 0x5f, 0x99, 0x62, 0xee, 0x0d, 0xf3, 0x1f, 0x30, 0x25, 0x20, 0x92, 0x15, 0x4b, 0x04,
     0xfe, 0x15, 0x19, 0x1d, 0xdc, 0x7e, 0x5c, 0x10, 0x21, 0x52, 0x21, 0x91, 0x54, 0x60, 0x8b, 0x92,
     0x41, 0x02, 0x03, 0x01, 0x00, 0x01
-  ])
+])
 
 # Use an unencrypted PKCS #8 PrivateKeyInfo.
 DEFAULT_RSA_PRIVATE_KEY_DER = bytearray([
@@ -133,9 +133,29 @@ DEFAULT_RSA_PRIVATE_KEY_DER = bytearray([
     0x66, 0x52, 0x83, 0x89, 0x99, 0x5e, 0x42, 0x2b, 0x42, 0x4b, 0x84, 0x50, 0x1b, 0x3e, 0x47, 0x6d,
     0x74, 0xfb, 0xd1, 0xa6, 0x10, 0x20, 0x6c, 0x6e, 0xbe, 0x44, 0x3f, 0xb9, 0xfe, 0xbc, 0x8d, 0xda,
     0xcb, 0xea, 0x8f
-  ])
+])
 
-def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
+DEFAULT_EC_PUBLIC_KEY_DER = bytearray([
+    0x30, 0x4e, 0x30, 0x10, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x05, 0x2b,
+    0x81, 0x04, 0x00, 0x21, 0x03, 0x3a, 0x00, 0x04, 0xf7, 0xec, 0x9c, 0x3a, 0xb5, 0xd2, 0x1b, 0x36,
+    0xde, 0x72, 0x78, 0xec, 0x50, 0xf5, 0x42, 0xbf, 0x9a, 0x6e, 0x8b, 0xea, 0x0a, 0x71, 0x98, 0x79,
+    0x22, 0xfd, 0xe6, 0x96, 0x38, 0x0a, 0xd2, 0x00, 0x2b, 0x2e, 0x98, 0xb9, 0xa1, 0xca, 0xf5, 0xd7,
+    0x6a, 0xa7, 0xb4, 0x41, 0xad, 0x98, 0xa0, 0xda, 0xf8, 0x87, 0x78, 0xb6, 0x04, 0x4b, 0xcf, 0xb9
+])
+
+# Use an unencrypted PKCS #8 PrivateKeyInfo.
+DEFAULT_EC_PRIVATE_KEY_DER = bytearray([
+    0x30, 0x78, 0x02, 0x01, 0x00, 0x30, 0x10, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
+    0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x21, 0x04, 0x61, 0x30, 0x5f, 0x02, 0x01, 0x01, 0x04, 0x1c,
+    0x4f, 0xb8, 0x83, 0x1a, 0xd0, 0x2e, 0x67, 0x41, 0x96, 0xef, 0xf9, 0x61, 0xd9, 0x39, 0x7c, 0xa2,
+    0x0d, 0xd7, 0x28, 0xd1, 0x50, 0xa4, 0xd3, 0xe4, 0x18, 0xe5, 0xec, 0xc3, 0xa1, 0x3c, 0x03, 0x3a,
+    0x00, 0x04, 0xf7, 0xec, 0x9c, 0x3a, 0xb5, 0xd2, 0x1b, 0x36, 0xde, 0x72, 0x78, 0xec, 0x50, 0xf5,
+    0x42, 0xbf, 0x9a, 0x6e, 0x8b, 0xea, 0x0a, 0x71, 0x98, 0x79, 0x22, 0xfd, 0xe6, 0x96, 0x38, 0x0a,
+    0xd2, 0x00, 0x2b, 0x2e, 0x98, 0xb9, 0xa1, 0xca, 0xf5, 0xd7, 0x6a, 0xa7, 0xb4, 0x41, 0xad, 0x98,
+    0xa0, 0xda, 0xf8, 0x87, 0x78, 0xb6, 0x04, 0x4b, 0xcf, 0xb9
+])
+
+def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto, keyType):
     """
     Loop to encode a data packet nIterations times.
 
@@ -145,6 +165,7 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
       fields.
     :param bool useCrypto: If true, sign the data packet.  If false, use a blank
       signature.
+    :param KeyType keyType: KeyType.RSA or EC, used if useCrypto is True.
     :return: A tuple (duration, encoding) where duration is the number of
       seconds for all iterations and encoding is the wire encoding.
     :rtype: (float, Blob)
@@ -176,13 +197,15 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto):
     keyName = Name("/testname/DSK-123")
     certificateName = keyName.getSubName(0, keyName.size() - 1).append(
       "KEY").append(keyName[-1]).append("ID-CERT").append("0")
-    identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
+    identityStorage.addKey(keyName, keyType, Blob(
+      DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PUBLIC_KEY_DER))
     privateKeyStorage.setKeyPairForKeyName(
-      keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
+      keyName, keyType,
+      DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PUBLIC_KEY_DER,
+      DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PRIVATE_KEY_DER)
 
     # Set up signatureBits in case useCrypto is false.
     signatureBits = Blob(bytearray(256))
-    emptyBlob = Blob([])
 
     start = getNowSeconds()
     for i in range(nIterations):
@@ -217,13 +240,14 @@ def onVerified(data):
 def onVerifyFailed(data):
     print("Signature verification: FAILED")
 
-def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
+def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
     """
     Loop to decode a data packet nIterations times.
 
     :param int nIterations: The number of iterations.
     :param bool useCrypto: If true, verify the signature.  If false, don't
       verify.
+    :param KeyType keyType: KeyType.RSA or EC, used if useCrypto is True.
     :param Blob encoding: The wire encoding to decode.
     """
     # Initialize the private key storage in case useCrypto is true.
@@ -232,9 +256,9 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
     keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage),
                         SelfVerifyPolicyManager(identityStorage))
     keyName = Name("/testname/DSK-123")
-    certificateName = keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
-    identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
+    identityStorage.addKey(
+      keyName, keyType, Blob(
+      DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PUBLIC_KEY_DER))
 
     start = getNowSeconds()
     for i in range(nIterations):
@@ -248,33 +272,38 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding):
 
     return finish - start
 
-def benchmarkEncodeDecodeData(useComplex, useCrypto):
+def benchmarkEncodeDecodeData(useComplex, useCrypto, keyType):
     """
     Call benchmarkEncodeDataSeconds and benchmarkDecodeDataSeconds with
     appropriate nInterations.  Print the results to stdout.
 
     :param bool useComplex: See benchmarkEncodeDataSeconds.
     :param bool useCrypto: See benchmarkEncodeDataSeconds.
+    :param bool keyType: See benchmarkEncodeDataSeconds.
     """
-    nIterations = 1500 if useCrypto else 20000
-    (duration, encoding) = benchmarkEncodeDataSeconds(nIterations, useComplex,
-                                                      useCrypto)
+    nIterations = (4000 if keyType == KeyType.ECDSA else 1500) if useCrypto else 20000
+    (duration, encoding) = benchmarkEncodeDataSeconds(
+      nIterations, useComplex, useCrypto, keyType)
     print("Encode " + ("complex" if useComplex else "simple ") +
-          " data: Crypto? " + ("RSA" if useCrypto else "no ") +
+          " data: Crypto? " +
+          (("EC " if keyType == KeyType.ECDSA else "RSA") if useCrypto else "-  ") +
           ", Duration sec, Hz: " + repr(duration) + ", " +
           repr(nIterations / duration))
 
-    nIterations = 5000 if useCrypto else 20000
-    duration = benchmarkDecodeDataSeconds(nIterations, useCrypto, encoding)
+    nIterations = (3000 if keyType == KeyType.ECDSA else 5000) if useCrypto else 20000
+    duration = benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding)
     print("Decode " + ("complex" if useComplex else "simple ") +
-          " data: Crypto? " + ("RSA" if useCrypto else "no ") +
+          " data: Crypto? " +
+          (("EC " if keyType == KeyType.ECDSA else "RSA") if useCrypto else "-  ") +
           ", Duration sec, Hz: " + repr(duration) + ", " +
           repr(nIterations / duration))
 
 def main():
-    benchmarkEncodeDecodeData(False, False)
-    benchmarkEncodeDecodeData(True, False)
-    benchmarkEncodeDecodeData(False, True)
-    benchmarkEncodeDecodeData(True, True)
+    benchmarkEncodeDecodeData(False, False, KeyType.RSA)
+    benchmarkEncodeDecodeData(True, False, KeyType.RSA)
+    benchmarkEncodeDecodeData(False, True, KeyType.ECDSA)
+    benchmarkEncodeDecodeData(True, True, KeyType.ECDSA)
+    benchmarkEncodeDecodeData(False, True, KeyType.RSA)
+    benchmarkEncodeDecodeData(True, True, KeyType.RSA)
 
 main()

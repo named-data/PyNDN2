@@ -397,6 +397,8 @@ class Name(object):
         :param int nComponents: The number of prefix components.  If nComponents
           is -N then return the prefix up to name.size() - N. For example
           getPrefix(-1) returns the name without the final component.
+        :return: The name prefix.
+        :rtype: Name
         """
         if nComponents < 0:
             return self.getSubName(0, len(self._components) + nComponents)

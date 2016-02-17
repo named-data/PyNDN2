@@ -8,7 +8,7 @@
 # Emacs temp files
 *~
 
-# Eclipse 
+# Eclipse
 .project
 .pydevproject
 

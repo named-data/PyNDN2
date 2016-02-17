@@ -22,10 +22,12 @@
 from pyndn import control_parameters, data, exclude, face
 from pyndn import forwarding_flags, interest, interest_filter, key_locator
 from pyndn import meta_info, name, digest_sha256_signature
-from pyndn import sha256_with_rsa_signature, signature
+from pyndn import sha256_with_rsa_signature, sha256_with_ecdsa_signature
+from pyndn import signature
 __all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_flags', 
            'interest', 'interest_filter', 'key_locator', 'meta_info', 'name',
-           'digest_sha256_signature', 'sha256_with_rsa_signature', 'signature']
+           'digest_sha256_signature', 'sha256_with_rsa_signature',
+           'sha256_with_ecdsa_signature', 'signature']
 
 import sys as _sys
 
@@ -42,6 +44,7 @@ try:
     from pyndn.name import *
     from pyndn.digest_sha256_signature import *
     from pyndn.sha256_with_rsa_signature import *
+    from pyndn.sha256_with_ecdsa_signature import *
     from pyndn.signature import *
 except ImportError:
     del _sys.modules[__name__]

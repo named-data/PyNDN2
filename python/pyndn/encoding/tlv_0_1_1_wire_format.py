@@ -25,6 +25,7 @@ from pyndn.meta_info import ContentType
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature
+from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
@@ -717,6 +718,12 @@ class Tlv0_1_1WireFormat(WireFormat):
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
+        elif type(signature) is Sha256WithEcdsaSignature:
+            # Encode backwards.
+            Tlv0_1_1WireFormat._encodeKeyLocator(
+              Tlv.KeyLocator, signature.getKeyLocator(), encoder)
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithEcdsa)
         elif type(signature) is DigestSha256Signature:
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_DigestSha256)
@@ -735,6 +742,12 @@ class Tlv0_1_1WireFormat(WireFormat):
             signatureHolder.setSignature(Sha256WithRsaSignature())
             # Modify signatureHolder's signature object because if we create an object
             #   and set it, then signatureHolder will have to copy all the fields.
+            signatureInfo = signatureHolder.getSignature()
+            Tlv0_1_1WireFormat._decodeKeyLocator(
+              Tlv.KeyLocator, signatureInfo.getKeyLocator(),
+              decoder)
+        elif signatureType == Tlv.SignatureType_SignatureSha256WithEcdsa:
+            signatureHolder.setSignature(Sha256WithEcdsaSignature())
             signatureInfo = signatureHolder.getSignature()
             Tlv0_1_1WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),

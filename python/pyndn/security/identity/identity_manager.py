@@ -33,6 +33,7 @@ from pyndn.util.common import Common
 from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
 from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
@@ -41,6 +42,7 @@ from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.security_types import KeyType, DigestAlgorithm
 from pyndn.security.key_params import RsaKeyParams
+from pyndn.security.key_params import EcdsaKeyParams
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.certificate import PublicKey, CertificateSubjectDescription
 
@@ -199,6 +201,22 @@ class IdentityManager(object):
         keyName = self._generateKeyPair(identityName, isKsk, RsaKeyParams(keySize))
         return keyName
 
+    def generateEcdsaKeyPair(self, identityName, isKsk = False, keySize = 2048):
+        """
+        Generate a pair of ECDSA keys for the specified identity.
+
+        :param Name identityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
+          Data-Signing-Key.
+        :param int keySize: (optional) The size of the key. If omitted, use a
+          default secure key size.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        keyName = self._generateKeyPair(identityName, isKsk, EcdsaKeyParams(keySize))
+        return keyName
+
     def setDefaultKeyForIdentity(self, keyName, identityNameCheck = None):
         """
         Set a key as the default key of an identity. The identity name is
@@ -239,6 +257,25 @@ class IdentityManager(object):
         :rtype: Name
         """
         newKeyName = self.generateRSAKeyPair(identityName, isKsk, keySize)
+        self._identityStorage.setDefaultKeyNameForIdentity(newKeyName)
+        return newKeyName
+
+    def generateEcdsaKeyPairAsDefault(
+          self, identityName, isKsk = False, keySize = 2048):
+        """
+        Generate a pair of ECDSA keys for the specified identity and set it as
+        default key for the identity.
+
+        :param NameidentityName: The name of the identity.
+        :param bool isKsk: (optional) true for generating a Key-Signing-Key
+          (KSK), false for a Data-Signing-Key (DSK). If omitted, generate a
+          Data-Signing-Key.
+        :param int keySize: (optional) The size of the key. If omitted, use a
+          default secure key size.
+        :return: The generated key name.
+        :rtype: Name
+        """
+        newKeyName = self.generateEcdsaKeyPair(identityName, isKsk, keySize)
         self._identityStorage.setDefaultKeyNameForIdentity(newKeyName)
         return newKeyName
 
@@ -558,6 +595,14 @@ class IdentityManager(object):
 
         if keyType == KeyType.RSA:
             signature = Sha256WithRsaSignature()
+            digestAlgorithm[0] = DigestAlgorithm.SHA256
+
+            signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+            signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
+
+            return signature
+        elif keyType == KeyType.ECDSA:
+            signature = Sha256WithEcdsaSignature()
             digestAlgorithm[0] = DigestAlgorithm.SHA256
 
             signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
