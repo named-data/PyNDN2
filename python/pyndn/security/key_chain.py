@@ -569,12 +569,12 @@ class KeyChain(object):
             raise SecurityException("signWithHmacWithSha256: Unrecognized target type")
 
     @staticmethod
-    def verifyDataWithHmacWithSha256(target, key, wireFormat = None):
+    def verifyDataWithHmacWithSha256(data, key, wireFormat = None):
         """
         Compute a new HmacWithSha256 for the target and verify it against the
           signature value.
 
-        :param target: If this is a Data object, verify its signature.
+        :param target: The Data object to verify.
         :type target: Data
         :param Blob key: The key for the HmacWithSha256.
         :param wireFormat: (optional) The WireFormat for calling encodeData,
@@ -585,20 +585,16 @@ class KeyChain(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        if isinstance(target, Data):
-            data = target
-            # wireEncode returns the cached encoding if available.
-            encoding = data.wireEncode(wireFormat)
+        # wireEncode returns the cached encoding if available.
+        encoding = data.wireEncode(wireFormat)
 
-            signer = hmac.HMAC(key.toBytes(), hashes.SHA256(),
-              backend = default_backend())
-            signer.update(encoding.toSignedBytes())
-            newSignatureBits = Blob(bytearray(signer.finalize()), False)
+        signer = hmac.HMAC(key.toBytes(), hashes.SHA256(),
+          backend = default_backend())
+        signer.update(encoding.toSignedBytes())
+        newSignatureBits = Blob(bytearray(signer.finalize()), False)
 
-            # Use the flexible Blob.equals operator.
-            return newSignatureBits == data.getSignature().getSignature()
-        else:
-            raise SecurityException("signWithHmacWithSha256: Unrecognized target type")
+        # Use the flexible Blob.equals operator.
+        return newSignatureBits == data.getSignature().getSignature()
 
     DEFAULT_KEY_PARAMS = RsaKeyParams()
 
