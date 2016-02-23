@@ -29,7 +29,7 @@ from pyndn.security import KeyType
 
 def dump(*list):
     result = ""
-    l = [el if type(el) is str else repr(el) for el in list]
+    l = [el if type(el) is str else str(el) for el in list]
     return " ".join(l)
 
 DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
