@@ -1,10 +1,11 @@
-Interim changes since PyNDN v2.2beta1 (2016-02-16)
+Interim changes since PyNDN v2.2beta1 (2016-02-23)
 --------------------------------------------------
 
 Changes
 * In MemoryContentCache.registerPrefix, added optional onRegisterSuccess. (Thanks to Zhehao Wang.)
 * Added Sha256WithEcdsaSignature. Support encoding/decoding it in interests and data packets.
 * In KeyChain, added generateEcdsaKeyPair and generateEcdsaKeyPairAsDefault.
+* In util, added ExponentialReExpress.
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
 
