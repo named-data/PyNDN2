@@ -542,6 +542,7 @@ class KeyChain(object):
         """
         Wire encode the target, compute an HmacWithSha256 and update the
         signature value.
+        Note: This method is an experimental feature. The API may change.
 
         :param target: If this is a Data object, update its signature and wire
           encoding.
@@ -572,7 +573,8 @@ class KeyChain(object):
     def verifyDataWithHmacWithSha256(data, key, wireFormat = None):
         """
         Compute a new HmacWithSha256 for the target and verify it against the
-          signature value.
+        signature value.
+        Note: This method is an experimental feature. The API may change.
 
         :param target: The Data object to verify.
         :type target: Data
