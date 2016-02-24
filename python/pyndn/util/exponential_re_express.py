@@ -97,6 +97,5 @@ class ExponentialReExpress(object):
 
         nextInterest = Interest(interest)
         nextInterest.setInterestLifetimeMilliseconds(nextInterestLifetime)
-        print "debug nextInterestLifetime", nextInterestLifetime
         self._face.expressInterest(
           nextInterest, self._callerOnData, self._onTimeout)
