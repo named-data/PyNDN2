@@ -649,6 +649,18 @@ class Name(object):
 
         return True
 
+    def isPrefixOf(self, name):
+        """
+        Check if the N components of this name are the same as the first N
+        components of the given name.
+
+        :param Name name: The Name to check.
+        :return: True if this matches the given name, otherwise False.  This
+          always returns True if this name is empty.
+        :rtype: bool
+        """
+        return self.match(name)
+
     def wireEncode(self, wireFormat = None):
         """
         Encode this Name for a particular wire format.
