@@ -24,6 +24,7 @@ from pyndn import KeyLocatorType
 from pyndn import DigestSha256Signature
 from pyndn import Sha256WithRsaSignature
 from pyndn import Sha256WithEcdsaSignature
+from pyndn import HmacWithSha256Signature
 from pyndn.security import KeyType
 from pyndn.security import KeyChain
 from pyndn.security.identity import IdentityManager
@@ -205,6 +206,11 @@ def dumpData(data):
         keyLocator = signature.getKeyLocator()
     elif type(signature) is Sha256WithEcdsaSignature:
         dump("Sha256WithEcdsa signature.signature:",
+             "<none>" if signature.getSignature().size() == 0
+                      else signature.getSignature().toHex())
+        keyLocator = signature.getKeyLocator()
+    elif type(signature) is HmacWithSha256Signature:
+        dump("HmacWithSha256 signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
         keyLocator = signature.getKeyLocator()

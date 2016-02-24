@@ -21,10 +21,12 @@
 
 from pyndn import control_parameters, data, exclude, face
 from pyndn import forwarding_flags, interest, interest_filter, key_locator
+from pyndn import hmac_with_sha256_signature
 from pyndn import meta_info, name, digest_sha256_signature
 from pyndn import sha256_with_rsa_signature, sha256_with_ecdsa_signature
 from pyndn import signature
-__all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_flags', 
+__all__ = ['control_parameters', 'data', 'exclude', 'face', 'forwarding_flags',
+           'hmac_with_sha256_signature',
            'interest', 'interest_filter', 'key_locator', 'meta_info', 'name',
            'digest_sha256_signature', 'sha256_with_rsa_signature',
            'sha256_with_ecdsa_signature', 'signature']
@@ -37,6 +39,7 @@ try:
     from pyndn.exclude import *
     from pyndn.face import *
     from pyndn.forwarding_flags import *
+    from pyndn.hmac_with_sha256_signature import *
     from pyndn.interest import *
     from pyndn.interest_filter import *
     from pyndn.key_locator import *
