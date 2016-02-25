@@ -155,7 +155,7 @@ TlvInterest = Blob(bytearray([
 def dump(*list):
     result = ""
     for element in list:
-        result += (element if type(element) is str else repr(element)) + " "
+        result += (element if type(element) is str else str(element)) + " "
     print(result)
 
 def dumpInterest(interest):

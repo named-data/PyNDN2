@@ -93,6 +93,61 @@ class Name(object):
             else:
                 Name.toEscapedString(self._value.buf(), result)
 
+        def isSegment(self):
+            """
+            Check if this component is a segment number according to NDN
+            naming conventions for "Segment number" (marker 0x00).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: True if this is a segment number.
+            :rtype: bool
+            """
+            return self._value.size() >= 1 and self._value.buf()[0] == 0x00
+
+        def isSegmentOffset(self):
+            """
+            Check if this component is a segment byte offset according to NDN
+            naming conventions for segment "Byte offset" (marker 0xFB).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: True if this is a segment byte offset.
+            :rtype: bool
+            """
+            return self._value.size() >= 1 and self._value.buf()[0] == 0xFB
+
+        def isVersion(self):
+            """
+            Check if this component is a version number according to NDN
+            naming conventions for "Versioning" (marker 0xFD).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: True if this is a version number.
+            :rtype: bool
+            """
+            return self._value.size() >= 1 and self._value.buf()[0] == 0xFD
+
+        def isTimestamp(self):
+            """
+            Check if this component is a timestamp according to NDN
+            naming conventions for "Timestamp" (marker 0xFC).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: True if this is a timestamp.
+            :rtype: bool
+            """
+            return self._value.size() >= 1 and self._value.buf()[0] == 0xFC
+
+        def isSequenceNumber(self):
+            """
+            Check if this component is a sequence number according to NDN
+            naming conventions for "Sequencing" (marker 0xFE).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :return: True if this is a sequence number.
+            :rtype: bool
+            """
+            return self._value.size() >= 1 and self._value.buf()[0] == 0xFE
+
         def toNumber(self):
             """
             Interpret this name component as a network-ordered number and return
@@ -593,6 +648,18 @@ class Name(object):
                 return False
 
         return True
+
+    def isPrefixOf(self, name):
+        """
+        Check if the N components of this name are the same as the first N
+        components of the given name.
+
+        :param Name name: The Name to check.
+        :return: True if this matches the given name, otherwise False.  This
+          always returns True if this name is empty.
+        :rtype: bool
+        """
+        return self.match(name)
 
     def wireEncode(self, wireFormat = None):
         """
