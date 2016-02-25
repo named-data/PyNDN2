@@ -32,30 +32,35 @@ class TestNameConventions(ut.TestCase):
 
     def testSegment(self):
         expected = Name("/%00%27%10")
+        self.assertTrue(expected.get(0).isSegment())
         number = 10000
         self.assertEqual(Name().appendSegment(number), expected,  "appendSegment did not create the expected component")
         self.assertEqual(expected[0].toSegment(), number,  "toSegment did not return the expected value")
 
     def testSegmentOffset(self):
         expected = Name("/%FB%00%01%86%A0")
+        self.assertTrue(expected.get(0).isSegmentOffset())
         number = 100000
         self.assertEqual(Name().appendSegmentOffset(number), expected,  "appendSegmentOffset did not create the expected component")
         self.assertEqual(expected[0].toSegmentOffset(), number,  "toSegmentOffset did not return the expected value")
 
     def testVersion(self):
         expected = Name("/%FD%00%0FB%40")
+        self.assertTrue(expected.get(0).isVersion())
         number = 1000000
         self.assertEqual(Name().appendVersion(number), expected,  "appendVersion did not create the expected component")
         self.assertEqual(expected[0].toVersion(), number,  "toVersion did not return the expected value")
 
     def testSequenceNumber(self):
         expected = Name("/%FE%00%98%96%80")
+        self.assertTrue(expected.get(0).isSequenceNumber())
         number = 10000000
         self.assertEqual(Name().appendSequenceNumber(number), expected,  "appendSequenceNumber did not create the expected component")
         self.assertEqual(expected[0].toSequenceNumber(), number,  "toSequenceNumber did not return the expected value")
 
     def testTimestamp(self):
         expected = Name("/%FC%00%04%7BE%E3%1B%00%00")
+        self.assertTrue(expected.get(0).isTimestamp())
         # 40 years (not counting leap years) in microseconds.
         number = 40 * 365 * 24 * 3600 * 1000000
         self.assertEqual(Name().appendTimestamp(number), expected,  "appendTimestamp did not create the expected component")
