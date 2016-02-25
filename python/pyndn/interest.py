@@ -21,6 +21,7 @@
 This module defines the NDN Interest class.
 """
 
+from random import SystemRandom
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
 from pyndn.util.signed_blob import SignedBlob
@@ -382,6 +383,30 @@ class Interest(object):
 
         return result
 
+    def refreshNonce(self):
+        """
+        Update the bytes of the nonce with new random values. This ensures that
+        the new nonce value is different than the current one. If the current
+        nonce is not specified, this does nothing.
+        """
+        currentNonce = self.getNonce()
+        if currentNonce.size() == 0:
+            return
+
+        while True:
+            value = bytearray(currentNonce.size())
+            for i in range(len(value)):
+                value[i] = self._systemRandom.randint(0, 0xff)
+            newNonce = Blob(value, False)
+            if newNonce != currentNonce:
+                break
+
+        self._nonce = newNonce
+        # Set _getNonceChangeCount so that the next call to getNonce() won't
+        #   clear _nonce.
+        self._changeCount += 1
+        self._getNonceChangeCount = self.getChangeCount()
+
     def matchesName(self, name):
         """
         Check if this interest's name matches the given name (using Name.match)
@@ -465,6 +490,7 @@ class Interest(object):
         # getDefaultWireEncoding() won't clear _defaultWireEncoding.
         self._getDefaultWireEncodingChangeCount = self.getChangeCount()
 
+    _systemRandom = SystemRandom()
 
     # Create managed properties for read/write properties of the class for more pythonic syntax.
     name = property(getName, setName)

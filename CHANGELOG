@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-02-24)
+Interim changes since PyNDN v2.2beta1 (2016-02-25)
 --------------------------------------------------
 
 Changes
@@ -10,6 +10,7 @@ Changes
   sign/verifyDataWithHmacWithSha256.
 * http://redmine.named-data.net/issues/3450 Added Name.Component.isSegment,
   isSegmentOffset, isVersion, isTimestamp and isSequenceNumber.
+* http://redmine.named-data.net/issues/3452 Added Interest.refreshNonce.
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
 * Examples: Added test_sign_verify_data_hmac.
