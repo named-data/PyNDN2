@@ -426,8 +426,8 @@ class Name(object):
           iStartComponent is -N then return return components starting from
           name.size() - N.
         :param int nComponents: (optional) nComponents The number of components
-          starting at iStartComponent.  If omitted, return components starting
-          at iStartComponent until the end of the name.
+          starting at iStartComponent. If omitted or greater than the size of
+          this name, get until the end of the name.
         :return: A new name.
         :rtype: Name
         """
