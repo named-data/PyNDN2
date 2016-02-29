@@ -629,12 +629,12 @@ class Name(object):
         gives: /a/b/d /a/b/cc /c /c/a /bb .  This is intuitive because all names
         with the prefix /a are next to each other.  But it may be also be
         counter-intuitive because /c comes before /bb according to NDN canonical
-        ordering since it is shorter. The first form of compare is simplly
+        ordering since it is shorter. The first form of compare is simply
         compare(other). The second form is
         compare(iStartComponent, nComponents, other [, iOtherStartComponent] [, nOtherComponents])
         which is equivalent to
         self.getSubName(iStartComponent, nComponents).compare
-        (other.getSubName(iOtherStartComponent, nOtherComponents))
+        (other.getSubName(iOtherStartComponent, nOtherComponents)) .
 
         :param int iStartComponent: The index if the first component of this
           name to get. If iStartComponent is -N then compare components
