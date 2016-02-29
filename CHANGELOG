@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-02-25)
+Interim changes since PyNDN v2.2beta1 (2016-02-29)
 --------------------------------------------------
 
 Changes
@@ -8,6 +8,8 @@ Changes
 * In util, added ExponentialReExpress.
 * Added HmacWithSha256Signature. In KeyChain, added experimental static methods
   sign/verifyDataWithHmacWithSha256.
+* http://redmine.named-data.net/issues/3449 Added Name.isPrefixOf and getSuccessor.
+  In compare, support compare(int, int, Name, int, int).
 * http://redmine.named-data.net/issues/3450 Added Name.Component.isSegment,
   isSegmentOffset, isVersion, isTimestamp and isSequenceNumber.
 * http://redmine.named-data.net/issues/3452 Added Interest.refreshNonce.
