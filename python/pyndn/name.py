@@ -455,9 +455,9 @@ class Name(object):
         :param int iStartComponent: The index if the first component to get. If
           iStartComponent is -N then return return components starting from
           name.size() - N.
-        :param int nComponents: (optional) nComponents The number of components
-          starting at iStartComponent. If omitted or greater than the size of
-          this name, get until the end of the name.
+        :param int nComponents: (optional) The number of components starting at
+          iStartComponent. If omitted or greater than the size of this name, get
+          until the end of the name.
         :return: A new name.
         :rtype: Name
         """
@@ -616,7 +616,8 @@ class Name(object):
 
         return True
 
-    def compare(self, other):
+    def compare(self, iStartComponent, nComponents = None, other = None,
+          iOtherStartComponent = None, nOtherComponents = None):
         """
         Compare this to the other Name using NDN canonical ordering.  If the
         first components of each name are not equal, this returns -1 if the
@@ -628,17 +629,56 @@ class Name(object):
         gives: /a/b/d /a/b/cc /c /c/a /bb .  This is intuitive because all names
         with the prefix /a are next to each other.  But it may be also be
         counter-intuitive because /c comes before /bb according to NDN canonical
-        ordering since it is shorter.
+        ordering since it is shorter. The first form of compare is simplly
+        compare(other). The second form is
+        compare(iStartComponent, nComponents, other [, iOtherStartComponent] [, nOtherComponents])
+        which is equivalent to
+        self.getSubName(iStartComponent, nComponents).compare
+        (other.getSubName(iOtherStartComponent, nOtherComponents))
 
+        :param int iStartComponent: The index if the first component of this
+          name to get. If iStartComponent is -N then compare components
+          starting from name.size() - N.
+        :param int nComponents: The number of components starting at
+          iStartComponent. If greater than the size of this name, compare until
+          the end of the name.
         :param Name other: The other Name to compare with.
+        :param int iOtherStartComponent: (optional) The index if the first
+          component of the other name to compare. If iOtherStartComponent is -N
+          then compare components starting from other.size() - N. If omitted,
+          compare starting from index 0.
+        :param int nOtherComponents: (optional) The number of components
+          starting at iOtherStartComponent. If omitted or greater than the size
+          of this name, compare until the end of the name.
         :return: 0 If they compare equal, -1 if self comes before other in the
           canonical ordering, or 1 if self comes after other in the canonical
           ordering.
         :rtype: int
         :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
         """
-        for i in range(min(len(self._components), len(other._components))):
-            comparison = self._components[i].compare(other._components[i])
+        if isinstance(iStartComponent, Name):
+            # compare(other)
+            other = iStartComponent
+            iStartComponent = 0
+            nComponents = self.size()
+
+        if iOtherStartComponent == None:
+            iOtherStartComponent = 0
+        if nOtherComponents == None:
+            nOtherComponents = other.size()
+
+        if iStartComponent < 0:
+            iStartComponent = self.size() - (-iStartComponent)
+        if iOtherStartComponent < 0:
+            iOtherStartComponent = other.size() - (-iOtherStartComponent)
+
+        nComponents = min(nComponents, self.size() - iStartComponent)
+        nOtherComponents = min(nOtherComponents, other.size() - iOtherStartComponent)
+
+        count = min(nComponents, nOtherComponents)
+        for i in range(count):
+            comparison = self._components[iStartComponent + i].compare(
+              other._components[iOtherStartComponent + i])
             if comparison == 0:
                 # The components at this index are equal, so check the next
                 #   components.
@@ -649,9 +689,9 @@ class Name(object):
 
         # The components up to min(self.size(), other.size()) are equal, so the
         #   shorter name is less.
-        if len(self._components) < len(other._components):
+        if nComponents < nOtherComponents:
             return -1
-        elif len(self._components) > len(other._components):
+        elif nComponents > nOtherComponents:
             return 1
         else:
             return 0
