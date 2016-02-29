@@ -312,6 +312,74 @@ class Name(object):
             encoder.writeNonNegativeInteger(marker)
             return Name.Component(Blob(encoder.getOutput(), False))
 
+        @staticmethod
+        def fromSegment(segment):
+            """
+            Create a component with the encoded segment number according to NDN
+            naming conventions for "Segment number" (marker 0x00).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int segment: The segment number.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(segment, 0x00)
+
+        @staticmethod
+        def fromSegmentOffset(segmentOffset):
+            """
+            Create a component with the encoded segment byte offset according to NDN
+            naming conventions for segment "Byte offset" (marker 0xFB).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int segmentOffset: The segment byte offset.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(segmentOffset, 0xFB)
+
+        @staticmethod
+        def fromVersion(version):
+            """
+            Create a component with the encoded version number according to NDN
+            naming conventions for "Versioning" (marker 0xFD).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+            Note that this encodes the exact value of version without converting
+            from a time representation.
+
+            :param int version: The version number.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(version, 0xFD)
+
+        @staticmethod
+        def fromTimestamp(timestamp):
+            """
+            Create a component with the encoded timestamp according to NDN naming
+            conventions for "Timestamp" (marker 0xFC).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int timestamp: The number of microseconds since the UNIX epoch
+              (Thursday, 1 January 1970) not counting leap seconds.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(timestamp, 0xFC)
+
+        @staticmethod
+        def fromSequenceNumber(sequenceNumber):
+            """
+            Create a component with the encoded sequence number according to NDN naming
+            conventions for "Sequencing" (marker 0xFE).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int sequenceNumber: The sequence number.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE)
+
         def getSuccessor(self):
             """
             Get the successor of this component, as described in
@@ -544,7 +612,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(segment, 0x00))
+        return self.append(Name.Component.fromSegment(segment))
 
     def appendSegmentOffset(self, segmentOffset):
         """
@@ -556,7 +624,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(segmentOffset, 0xFB))
+        return self.append(Name.Component.fromSegmentOffset(segmentOffset))
 
     def appendVersion(self, version):
         """
@@ -570,7 +638,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(version, 0xFD))
+        return self.append(Name.Component.fromVersion(version))
 
     def appendTimestamp(self, timestamp):
         """
@@ -583,7 +651,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(timestamp, 0xFC))
+        return self.append(Name.Component.fromTimestamp(timestamp))
 
     def appendSequenceNumber(self, sequenceNumber):
         """
@@ -595,7 +663,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE))
+        return self.append(Name.Component.fromSequenceNumber(sequenceNumber))
 
     def equals(self, name):
         """
