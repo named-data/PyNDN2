@@ -12,6 +12,8 @@ Changes
   In compare, support compare(int, int, Name, int, int).
 * http://redmine.named-data.net/issues/3450 Added Name.Component.isSegment,
   isSegmentOffset, isVersion, isTimestamp and isSequenceNumber.
+* http://redmine.named-data.net/issues/3451 Added static Name.Component.fromSegment,
+  fromSegmentOffset, fromVersion, fromTimestamp and fromSequenceNumber.
 * http://redmine.named-data.net/issues/3452 Added Interest.refreshNonce.
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
