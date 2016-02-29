@@ -312,6 +312,36 @@ class Name(object):
             encoder.writeNonNegativeInteger(marker)
             return Name.Component(Blob(encoder.getOutput(), False))
 
+        def getSuccessor(self):
+            """
+            Get the successor of this component, as described in
+            Name.getSuccessor.
+
+            :return: A new Name.Component which is the successor of this.
+            :rtype: Name.Component
+            """
+            # Allocate an extra byte in case the result is larger.
+            result = bytearray(self._value.size() + 1)
+
+            carry = True
+            for i in range(self._value.size() - 1, -1, -1):
+                if carry:
+                    result[i] = (self._value.buf()[i] + 1) & 0xff
+                    carry = (result[i] == 0)
+                else:
+                    result[i] = self._value.buf()[i]
+
+            if carry:
+                # Assume all the bytes were set to zero (or the component was
+                # empty). In NDN ordering, carry does not mean to prepend a 1,
+                # but to make a component one byte longer of all zeros.
+                result[len(result) - 1] = 0
+            else:
+                # We didn't need the extra byte.
+                result = result[0:self._value.size()]
+
+            return Name.Component(Blob(result, False))
+
         # Python operators
 
         def __eq__(self, other):
@@ -625,6 +655,36 @@ class Name(object):
             return 1
         else:
             return 0
+
+    def getSuccessor(self):
+        """
+        Get the successor of this name which is defined as follows.
+
+            N represents the set of NDN Names, and X,Y in N.
+            Operator < is defined by the NDN canonical order on N.
+            Y is the successor of X, if (a) X < Y, and (b) not exists Z in N
+            s.t. X < Z < Y.
+
+        In plain words, the successor of a name is the same name, but with its last
+        component advanced to a next possible value.
+
+        Examples:
+
+        - The successor of / is /%00
+        - The successor of /%00%01/%01%02 is /%00%01/%01%03
+        - The successor of /%00%01/%01%FF is /%00%01/%02%00
+        - The successor of /%00%01/%FF%FF is /%00%01/%00%00%00
+
+        :return: A new name which is the successor of this.
+        :rtype: Name
+        """
+        if self.size() == 0:
+            # Return "/%00".
+            result = Name()
+            result.append(Name.Component(Blob(bytearray([0]), False)))
+            return result
+        else:
+            return self.getPrefix(-1).append(self.get(-1).getSuccessor())
 
     def match(self, name):
         """
