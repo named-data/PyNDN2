@@ -164,6 +164,13 @@ class TestNameMethods(ut.TestCase):
         self.assertFalse(name.match(name2), 'Name should not match shorter name')
         self.assertTrue(Name().match(name), 'Empty name should always match another')
 
+    def test_get_successor(self):
+        self.assertEqual(Name("ndn:/%00%01/%01%03"), Name("ndn:/%00%01/%01%02").getSuccessor())
+        self.assertEqual(Name("ndn:/%00%01/%02%00"), Name("ndn:/%00%01/%01%FF").getSuccessor())
+        self.assertEqual(Name("ndn:/%00%01/%00%00%00"), Name("ndn:/%00%01/%FF%FF").getSuccessor())
+        self.assertEqual(Name("/%00"), Name().getSuccessor())
+        self.assertEqual(Name("/%00%01/%00"), Name("/%00%01/...").getSuccessor())
+
 #   def test_component_constructor(self):
 #       name1 = Name([self.entree, self.comp1, self.comp2])
 #       self.assertEqual(name1.toUri(), self.expectedURI)
