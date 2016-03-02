@@ -87,7 +87,7 @@ class AsyncSocketTransport(Transport):
     _sendNeedsStr = False
     def send(self, data):
         """
-        Set data to the host. To be thread-safe, this must be called from a
+        Send data to the host. To be thread-safe, this must be called from a
         dispatch to the loop which was given to the constructor, as is done by
         ThreadsafeFace.
 
