@@ -154,6 +154,52 @@ class TestNameMethods(ut.TestCase):
         sortedURIs = [x.toUri() for x in sortedNames]
         self.assertEqual(sortedURIs, expectedOrder, 'Name comparison gave incorrect order')
 
+        # Tests from ndn-cxx name.t.cpp Compare.
+        self.assertEqual(Name("/A")  .compare(Name("/A")),    0)
+        self.assertEqual(Name("/A")  .compare(Name("/A")),    0)
+        self.assertTrue (Name("/A")  .compare(Name("/B"))   < 0)
+        self.assertTrue (Name("/B")  .compare(Name("/A"))   > 0)
+        self.assertTrue (Name("/A")  .compare(Name("/AA"))  < 0)
+        self.assertTrue (Name("/AA") .compare(Name("/A"))   > 0)
+        self.assertTrue (Name("/A")  .compare(Name("/A/C")) < 0)
+        self.assertTrue (Name("/A/C").compare(Name("/A"))   > 0)
+
+        self.assertEqual(Name("/Z/A/Y")  .compare(1, 1, Name("/A")),    0)
+        self.assertEqual(Name("/Z/A/Y")  .compare(1, 1, Name("/A")),    0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/B"))   < 0)
+        self.assertTrue (Name("/Z/B/Y")  .compare(1, 1, Name("/A"))   > 0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/AA"))  < 0)
+        self.assertTrue (Name("/Z/AA/Y") .compare(1, 1, Name("/A"))   > 0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/A/C")) < 0)
+        self.assertTrue (Name("/Z/A/C/Y").compare(1, 2, Name("/A"))   > 0)
+
+        self.assertEqual(Name("/Z/A")  .compare(1, 9, Name("/A")),    0)
+        self.assertEqual(Name("/Z/A")  .compare(1, 9, Name("/A")),    0)
+        self.assertTrue (Name("/Z/A")  .compare(1, 9, Name("/B"))   < 0)
+        self.assertTrue (Name("/Z/B")  .compare(1, 9, Name("/A"))   > 0)
+        self.assertTrue (Name("/Z/A")  .compare(1, 9, Name("/AA"))  < 0)
+        self.assertTrue (Name("/Z/AA") .compare(1, 9, Name("/A"))   > 0)
+        self.assertTrue (Name("/Z/A")  .compare(1, 9, Name("/A/C")) < 0)
+        self.assertTrue (Name("/Z/A/C").compare(1, 9, Name("/A"))   > 0)
+
+        self.assertEqual(Name("/Z/A/Y")  .compare(1, 1, Name("/X/A/W"),   1, 1),  0)
+        self.assertEqual(Name("/Z/A/Y")  .compare(1, 1, Name("/X/A/W"),   1, 1),  0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/X/B/W"),   1, 1) < 0)
+        self.assertTrue (Name("/Z/B/Y")  .compare(1, 1, Name("/X/A/W"),   1, 1) > 0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/X/AA/W"),  1, 1) < 0)
+        self.assertTrue (Name("/Z/AA/Y") .compare(1, 1, Name("/X/A/W"),   1, 1) > 0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/X/A/C/W"), 1, 2) < 0)
+        self.assertTrue (Name("/Z/A/C/Y").compare(1, 2, Name("/X/A/W"),   1, 1) > 0)
+
+        self.assertEqual(Name("/Z/A/Y")  .compare(1, 1, Name("/X/A"),   1),  0)
+        self.assertEqual(Name("/Z/A/Y")  .compare(1, 1, Name("/X/A"),   1),  0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/X/B"),   1) < 0)
+        self.assertTrue (Name("/Z/B/Y")  .compare(1, 1, Name("/X/A"),   1) > 0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/X/AA"),  1) < 0)
+        self.assertTrue (Name("/Z/AA/Y") .compare(1, 1, Name("/X/A"),   1) > 0)
+        self.assertTrue (Name("/Z/A/Y")  .compare(1, 1, Name("/X/A/C"), 1) < 0)
+        self.assertTrue (Name("/Z/A/C/Y").compare(1, 2, Name("/X/A"),   1) > 0)
+
     def test_match(self):
         name = Name("/edu/cmu/andrew/user/3498478")
         name2 = Name(name)
@@ -163,6 +209,13 @@ class TestNameMethods(ut.TestCase):
         self.assertTrue(name2.match(name), 'Name did not match prefix')
         self.assertFalse(name.match(name2), 'Name should not match shorter name')
         self.assertTrue(Name().match(name), 'Empty name should always match another')
+
+    def test_get_successor(self):
+        self.assertEqual(Name("ndn:/%00%01/%01%03"), Name("ndn:/%00%01/%01%02").getSuccessor())
+        self.assertEqual(Name("ndn:/%00%01/%02%00"), Name("ndn:/%00%01/%01%FF").getSuccessor())
+        self.assertEqual(Name("ndn:/%00%01/%00%00%00"), Name("ndn:/%00%01/%FF%FF").getSuccessor())
+        self.assertEqual(Name("/%00"), Name().getSuccessor())
+        self.assertEqual(Name("/%00%01/%00"), Name("/%00%01/...").getSuccessor())
 
 #   def test_component_constructor(self):
 #       name1 = Name([self.entree, self.comp1, self.comp2])

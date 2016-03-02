@@ -99,7 +99,7 @@ class UnixTransport(Transport):
     _sendNeedsStr = False
     def send(self, data):
         """
-        Set data to the host.
+        Send data to the host.
 
         :param data: The buffer of data to send.
         :type data: An array type accepted by socket.send

@@ -312,6 +312,104 @@ class Name(object):
             encoder.writeNonNegativeInteger(marker)
             return Name.Component(Blob(encoder.getOutput(), False))
 
+        @staticmethod
+        def fromSegment(segment):
+            """
+            Create a component with the encoded segment number according to NDN
+            naming conventions for "Segment number" (marker 0x00).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int segment: The segment number.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(segment, 0x00)
+
+        @staticmethod
+        def fromSegmentOffset(segmentOffset):
+            """
+            Create a component with the encoded segment byte offset according to NDN
+            naming conventions for segment "Byte offset" (marker 0xFB).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int segmentOffset: The segment byte offset.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(segmentOffset, 0xFB)
+
+        @staticmethod
+        def fromVersion(version):
+            """
+            Create a component with the encoded version number according to NDN
+            naming conventions for "Versioning" (marker 0xFD).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+            Note that this encodes the exact value of version without converting
+            from a time representation.
+
+            :param int version: The version number.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(version, 0xFD)
+
+        @staticmethod
+        def fromTimestamp(timestamp):
+            """
+            Create a component with the encoded timestamp according to NDN naming
+            conventions for "Timestamp" (marker 0xFC).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int timestamp: The number of microseconds since the UNIX epoch
+              (Thursday, 1 January 1970) not counting leap seconds.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(timestamp, 0xFC)
+
+        @staticmethod
+        def fromSequenceNumber(sequenceNumber):
+            """
+            Create a component with the encoded sequence number according to NDN naming
+            conventions for "Sequencing" (marker 0xFE).
+            http://named-data.net/doc/tech-memos/naming-conventions.pdf
+
+            :param int sequenceNumber: The sequence number.
+            :return: The new Component.
+            :rtype: Name.Component
+            """
+            return Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE)
+
+        def getSuccessor(self):
+            """
+            Get the successor of this component, as described in
+            Name.getSuccessor.
+
+            :return: A new Name.Component which is the successor of this.
+            :rtype: Name.Component
+            """
+            # Allocate an extra byte in case the result is larger.
+            result = bytearray(self._value.size() + 1)
+
+            carry = True
+            for i in range(self._value.size() - 1, -1, -1):
+                if carry:
+                    result[i] = (self._value.buf()[i] + 1) & 0xff
+                    carry = (result[i] == 0)
+                else:
+                    result[i] = self._value.buf()[i]
+
+            if carry:
+                # Assume all the bytes were set to zero (or the component was
+                # empty). In NDN ordering, carry does not mean to prepend a 1,
+                # but to make a component one byte longer of all zeros.
+                result[len(result) - 1] = 0
+            else:
+                # We didn't need the extra byte.
+                result = result[0:self._value.size()]
+
+            return Name.Component(Blob(result, False))
+
         # Python operators
 
         def __eq__(self, other):
@@ -425,9 +523,9 @@ class Name(object):
         :param int iStartComponent: The index if the first component to get. If
           iStartComponent is -N then return return components starting from
           name.size() - N.
-        :param int nComponents: (optional) nComponents The number of components
-          starting at iStartComponent.  If omitted, return components starting
-          at iStartComponent until the end of the name.
+        :param int nComponents: (optional) The number of components starting at
+          iStartComponent. If omitted or greater than the size of this name, get
+          until the end of the name.
         :return: A new name.
         :rtype: Name
         """
@@ -514,7 +612,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(segment, 0x00))
+        return self.append(Name.Component.fromSegment(segment))
 
     def appendSegmentOffset(self, segmentOffset):
         """
@@ -526,7 +624,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(segmentOffset, 0xFB))
+        return self.append(Name.Component.fromSegmentOffset(segmentOffset))
 
     def appendVersion(self, version):
         """
@@ -540,7 +638,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(version, 0xFD))
+        return self.append(Name.Component.fromVersion(version))
 
     def appendTimestamp(self, timestamp):
         """
@@ -553,7 +651,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(timestamp, 0xFC))
+        return self.append(Name.Component.fromTimestamp(timestamp))
 
     def appendSequenceNumber(self, sequenceNumber):
         """
@@ -565,7 +663,7 @@ class Name(object):
         :return: This name so that you can chain calls to append.
         :rtype: Name
         """
-        return self.append(Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE))
+        return self.append(Name.Component.fromSequenceNumber(sequenceNumber))
 
     def equals(self, name):
         """
@@ -586,7 +684,8 @@ class Name(object):
 
         return True
 
-    def compare(self, other):
+    def compare(self, iStartComponent, nComponents = None, other = None,
+          iOtherStartComponent = None, nOtherComponents = None):
         """
         Compare this to the other Name using NDN canonical ordering.  If the
         first components of each name are not equal, this returns -1 if the
@@ -598,17 +697,56 @@ class Name(object):
         gives: /a/b/d /a/b/cc /c /c/a /bb .  This is intuitive because all names
         with the prefix /a are next to each other.  But it may be also be
         counter-intuitive because /c comes before /bb according to NDN canonical
-        ordering since it is shorter.
+        ordering since it is shorter. The first form of compare is simply
+        compare(other). The second form is
+        compare(iStartComponent, nComponents, other [, iOtherStartComponent] [, nOtherComponents])
+        which is equivalent to
+        self.getSubName(iStartComponent, nComponents).compare
+        (other.getSubName(iOtherStartComponent, nOtherComponents)) .
 
+        :param int iStartComponent: The index if the first component of this
+          name to get. If iStartComponent is -N then compare components
+          starting from name.size() - N.
+        :param int nComponents: The number of components starting at
+          iStartComponent. If greater than the size of this name, compare until
+          the end of the name.
         :param Name other: The other Name to compare with.
+        :param int iOtherStartComponent: (optional) The index if the first
+          component of the other name to compare. If iOtherStartComponent is -N
+          then compare components starting from other.size() - N. If omitted,
+          compare starting from index 0.
+        :param int nOtherComponents: (optional) The number of components
+          starting at iOtherStartComponent. If omitted or greater than the size
+          of this name, compare until the end of the name.
         :return: 0 If they compare equal, -1 if self comes before other in the
           canonical ordering, or 1 if self comes after other in the canonical
           ordering.
         :rtype: int
         :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
         """
-        for i in range(min(len(self._components), len(other._components))):
-            comparison = self._components[i].compare(other._components[i])
+        if isinstance(iStartComponent, Name):
+            # compare(other)
+            other = iStartComponent
+            iStartComponent = 0
+            nComponents = self.size()
+
+        if iOtherStartComponent == None:
+            iOtherStartComponent = 0
+        if nOtherComponents == None:
+            nOtherComponents = other.size()
+
+        if iStartComponent < 0:
+            iStartComponent = self.size() - (-iStartComponent)
+        if iOtherStartComponent < 0:
+            iOtherStartComponent = other.size() - (-iOtherStartComponent)
+
+        nComponents = min(nComponents, self.size() - iStartComponent)
+        nOtherComponents = min(nOtherComponents, other.size() - iOtherStartComponent)
+
+        count = min(nComponents, nOtherComponents)
+        for i in range(count):
+            comparison = self._components[iStartComponent + i].compare(
+              other._components[iOtherStartComponent + i])
             if comparison == 0:
                 # The components at this index are equal, so check the next
                 #   components.
@@ -619,12 +757,42 @@ class Name(object):
 
         # The components up to min(self.size(), other.size()) are equal, so the
         #   shorter name is less.
-        if len(self._components) < len(other._components):
+        if nComponents < nOtherComponents:
             return -1
-        elif len(self._components) > len(other._components):
+        elif nComponents > nOtherComponents:
             return 1
         else:
             return 0
+
+    def getSuccessor(self):
+        """
+        Get the successor of this name which is defined as follows.
+
+            N represents the set of NDN Names, and X,Y in N.
+            Operator < is defined by the NDN canonical order on N.
+            Y is the successor of X, if (a) X < Y, and (b) not exists Z in N
+            s.t. X < Z < Y.
+
+        In plain words, the successor of a name is the same name, but with its last
+        component advanced to a next possible value.
+
+        Examples:
+
+        - The successor of / is /%00
+        - The successor of /%00%01/%01%02 is /%00%01/%01%03
+        - The successor of /%00%01/%01%FF is /%00%01/%02%00
+        - The successor of /%00%01/%FF%FF is /%00%01/%00%00%00
+
+        :return: A new name which is the successor of this.
+        :rtype: Name
+        """
+        if self.size() == 0:
+            # Return "/%00".
+            result = Name()
+            result.append(Name.Component(Blob(bytearray([0]), False)))
+            return result
+        else:
+            return self.getPrefix(-1).append(self.get(-1).getSuccessor())
 
     def match(self, name):
         """

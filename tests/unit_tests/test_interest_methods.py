@@ -183,6 +183,17 @@ class TestInterestMethods(ut.TestCase):
         interest.getExclude().clear()
         self.assertTrue(interest.getNonce().isNull(), 'Interest should not have a nonce after changing fields')
 
+    def test_refresh_nonce(self):
+        interest = Interest(self.referenceInterest)
+        oldNonce = interest.getNonce()
+        self.assertEqual(4, oldNonce.size())
+
+        interest.refreshNonce()
+        self.assertEqual(oldNonce.size(), interest.getNonce().size(),
+                         "The refreshed nonce should be the same size")
+        self.assertFalse(interest.getNonce().equals(oldNonce),
+                         "The refreshed nonce should be different")
+
     def test_exclude_matches(self):
         exclude = Exclude()
         exclude.appendComponent(Name("%00%02").get(0))
