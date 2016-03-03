@@ -223,7 +223,7 @@ class Consumer(object):
     def _decryptContent(self, data, onPlainText, onError):
         """
         Decrypt the data packet.
-        
+
         :param Data data: The data packet.
         :param onPlainText: When the data packet is decrypted, this calls
           onPlainText(decryptedBlob) with the decrypted blob.
