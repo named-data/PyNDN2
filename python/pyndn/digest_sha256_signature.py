@@ -33,7 +33,7 @@ class DigestSha256Signature(Signature):
 
     :param value: (optional) If value is a DigestSha256Signature, copy its
       values.  If value is omitted, the signature is unspecified.
-    :param value: DigestSha256Signature
+    :type value: DigestSha256Signature
     """
     def __init__(self, value = None):
         if value == None:

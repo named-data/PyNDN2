@@ -36,7 +36,7 @@ class HmacWithSha256Signature(Signature):
     :param value: (optional) If value is a HmacWithSha256Signature, copy its
       values.  If value is omitted, the keyLocator is the default with
       unspecified values and the signature is unspecified.
-    :param value: HmacWithSha256Signature
+    :type value: HmacWithSha256Signature
     """
     def __init__(self, value = None):
         if value == None:
