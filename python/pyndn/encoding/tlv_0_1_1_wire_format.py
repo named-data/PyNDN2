@@ -244,46 +244,7 @@ class Tlv0_1_1WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
-        saveLength = len(encoder)
-
-        # Encode backwards.
-        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
-          Tlv.ControlParameters_ExpirationPeriod,
-          controlParameters.getExpirationPeriod())
-
-        if controlParameters.getStrategy().size() > 0:
-            strategySaveLength = len(encoder)
-            self._encodeName(controlParameters.getStrategy(), encoder)
-            encoder.writeTypeAndLength(
-              Tlv.ControlParameters_Strategy,
-              len(encoder) - strategySaveLength)
-
-        flags = controlParameters.getForwardingFlags().getNfdForwardingFlags()
-        if (flags != ForwardingFlags().getNfdForwardingFlags()):
-            # The flags are not the default value.
-            encoder.writeNonNegativeIntegerTlv(
-              Tlv.ControlParameters_Flags, flags)
-
-        encoder.writeOptionalNonNegativeIntegerTlv(
-          Tlv.ControlParameters_Cost, controlParameters.getCost())
-        encoder.writeOptionalNonNegativeIntegerTlv(
-          Tlv.ControlParameters_Origin, controlParameters.getOrigin())
-        encoder.writeOptionalNonNegativeIntegerTlv(
-          Tlv.ControlParameters_LocalControlFeature,
-          controlParameters.getLocalControlFeature())
-
-        if len(controlParameters.getUri()) != 0:
-            encoder.writeBlobTlv(
-              Tlv.ControlParameters_Uri, Blob(controlParameters.getUri()).buf())
-
-        encoder.writeOptionalNonNegativeIntegerTlv(
-          Tlv.ControlParameters_FaceId, controlParameters.getFaceId())
-        if controlParameters.getName() != None:
-          self._encodeName(controlParameters.getName(), encoder)
-
-        encoder.writeTypeAndLength(Tlv.ControlParameters_ControlParameters,
-                                   len(encoder) - saveLength)
-
+        self._encodeControlParameters(controlParameters, encoder)
         return Blob(encoder.getOutput(), False)
 
     def decodeControlParameters(self, controlParameters, input):
@@ -296,60 +257,8 @@ class Tlv0_1_1WireFormat(WireFormat):
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         """
-        controlParameters.clear()
-
         decoder = TlvDecoder(input)
-        endOffset = decoder.readNestedTlvsStart(
-          Tlv.ControlParameters_ControlParameters)
-
-        # decode name
-        if decoder.peekType(Tlv.Name, endOffset):
-            name = Name()
-            self._decodeName(name, decoder)
-            controlParameters.setName(name)
-
-        # decode face ID
-        controlParameters.setFaceId(decoder.readOptionalNonNegativeIntegerTlv
-            (Tlv.ControlParameters_FaceId, endOffset))
-
-        # decode URI
-        if decoder.peekType(Tlv.ControlParameters_Uri, endOffset):
-            uri = Blob(
-              decoder.readOptionalBlobTlv(Tlv.ControlParameters_Uri, endOffset),
-              False)
-            controlParameters.setUri(str(uri))
-
-        # decode integers
-        controlParameters.setLocalControlFeature(
-          decoder.readOptionalNonNegativeIntegerTlv
-            (Tlv.ControlParameters_LocalControlFeature, endOffset))
-        controlParameters.setOrigin(
-          decoder.readOptionalNonNegativeIntegerTlv
-            (Tlv.ControlParameters_Origin, endOffset))
-        controlParameters.setCost(
-          decoder.readOptionalNonNegativeIntegerTlv
-            (Tlv.ControlParameters_Cost, endOffset))
-
-        # set forwarding flags
-        if decoder.peekType(Tlv.ControlParameters_Flags, endOffset):
-            flags = ForwardingFlags()
-            flags.setNfdForwardingFlags(
-              decoder.readNonNegativeIntegerTlv(Tlv.ControlParameters_Flags))
-            controlParameters.setForwardingFlags(flags)
-
-        # decode strategy
-        if decoder.peekType(Tlv.ControlParameters_Strategy, endOffset):
-            strategyEndOffset = decoder.readNestedTlvsStart(
-              Tlv.ControlParameters_Strategy)
-            self._decodeName(controlParameters.getStrategy(), decoder)
-            decoder.finishNestedTlvs(strategyEndOffset)
-
-        # decode expiration period
-        controlParameters.setExpirationPeriod(
-          decoder.readOptionalNonNegativeIntegerTlv(
-            Tlv.ControlParameters_ExpirationPeriod, endOffset))
-
-        decoder.finishNestedTlvs(endOffset)
+        self._decodeControlParameters(controlParameters, decoder)
 
     def encodeSignatureInfo(self, signature):
         """
@@ -801,5 +710,103 @@ class Tlv0_1_1WireFormat(WireFormat):
               Blob(decoder.readBlobTlv(Tlv.KeyLocatorDigest)))
         else:
             raise RuntimeError("decodeKeyLocator: Unrecognized key locator type")
+
+        decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeControlParameters(controlParameters, encoder):
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
+          Tlv.ControlParameters_ExpirationPeriod,
+          controlParameters.getExpirationPeriod())
+
+        if controlParameters.getStrategy().size() > 0:
+            strategySaveLength = len(encoder)
+            Tlv0_1_1WireFormat._encodeName(controlParameters.getStrategy(), encoder)
+            encoder.writeTypeAndLength(
+              Tlv.ControlParameters_Strategy,
+              len(encoder) - strategySaveLength)
+
+        flags = controlParameters.getForwardingFlags().getNfdForwardingFlags()
+        if (flags != ForwardingFlags().getNfdForwardingFlags()):
+            # The flags are not the default value.
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.ControlParameters_Flags, flags)
+
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_Cost, controlParameters.getCost())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_Origin, controlParameters.getOrigin())
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_LocalControlFeature,
+          controlParameters.getLocalControlFeature())
+
+        if len(controlParameters.getUri()) != 0:
+            encoder.writeBlobTlv(
+              Tlv.ControlParameters_Uri, Blob(controlParameters.getUri()).buf())
+
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.ControlParameters_FaceId, controlParameters.getFaceId())
+        if controlParameters.getName() != None:
+          Tlv0_1_1WireFormat._encodeName(controlParameters.getName(), encoder)
+
+        encoder.writeTypeAndLength(Tlv.ControlParameters_ControlParameters,
+                                   len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeControlParameters(controlParameters, decoder):
+        controlParameters.clear()
+
+        endOffset = decoder.readNestedTlvsStart(
+          Tlv.ControlParameters_ControlParameters)
+
+        # decode name
+        if decoder.peekType(Tlv.Name, endOffset):
+            name = Name()
+            Tlv0_1_1WireFormat._decodeName(name, decoder)
+            controlParameters.setName(name)
+
+        # decode face ID
+        controlParameters.setFaceId(decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_FaceId, endOffset))
+
+        # decode URI
+        if decoder.peekType(Tlv.ControlParameters_Uri, endOffset):
+            uri = Blob(
+              decoder.readOptionalBlobTlv(Tlv.ControlParameters_Uri, endOffset),
+              False)
+            controlParameters.setUri(str(uri))
+
+        # decode integers
+        controlParameters.setLocalControlFeature(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_LocalControlFeature, endOffset))
+        controlParameters.setOrigin(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_Origin, endOffset))
+        controlParameters.setCost(
+          decoder.readOptionalNonNegativeIntegerTlv
+            (Tlv.ControlParameters_Cost, endOffset))
+
+        # set forwarding flags
+        if decoder.peekType(Tlv.ControlParameters_Flags, endOffset):
+            flags = ForwardingFlags()
+            flags.setNfdForwardingFlags(
+              decoder.readNonNegativeIntegerTlv(Tlv.ControlParameters_Flags))
+            controlParameters.setForwardingFlags(flags)
+
+        # decode strategy
+        if decoder.peekType(Tlv.ControlParameters_Strategy, endOffset):
+            strategyEndOffset = decoder.readNestedTlvsStart(
+              Tlv.ControlParameters_Strategy)
+            Tlv0_1_1WireFormat._decodeName(controlParameters.getStrategy(), decoder)
+            decoder.finishNestedTlvs(strategyEndOffset)
+
+        # decode expiration period
+        controlParameters.setExpirationPeriod(
+          decoder.readOptionalNonNegativeIntegerTlv(
+            Tlv.ControlParameters_ExpirationPeriod, endOffset))
 
         decoder.finishNestedTlvs(endOffset)
