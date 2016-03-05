@@ -28,6 +28,7 @@ from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.hmac_with_sha256_signature import HmacWithSha256Signature
+from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
@@ -273,6 +274,67 @@ class Tlv0_1_1WireFormat(WireFormat):
         self._encodeSignatureInfo(signature, encoder)
 
         return Blob(encoder.getOutput(), False)
+
+    def encodeControlResponse(self, controlResponse):
+        """
+        Encode controlResponse and return the encoding.
+
+        :param controlResponse: The ControlResponse object to encode.
+        :type controlResponse: ControlResponse
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+
+        # Encode backwards.
+
+        # Encode the body.
+        if controlResponse.getBodyAsControlParameters() != None:
+            self._encodeControlParameters(
+              controlResponse.getBodyAsControlParameters(), encoder)
+
+        encoder.writeBlobTlv(
+          Tlv.NfdCommand_StatusText, Blob(controlResponse.getStatusText()).buf())
+        encoder.writeNonNegativeIntegerTlv(
+          Tlv.NfdCommand_StatusCode, controlResponse.getStatusCode())
+
+        encoder.writeTypeAndLength(Tlv.NfdCommand_ControlResponse,
+                                   len(encoder) - saveLength)
+
+        return Blob(encoder.getOutput(), False)
+
+    def decodeControlResponse(self, controlResponse, input):
+        """
+        Decode input as an NDN-TLV ControlResponse and set the fields of the
+        controlResponse object.
+
+        :param ControlResponse controlResponse: The ControlResponse object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        controlResponse.clear()
+
+        decoder = TlvDecoder(input)
+        endOffset = decoder.readNestedTlvsStart(
+          Tlv.NfdCommand_ControlResponse)
+
+        # decode face ID
+        controlResponse.setStatusCode(decoder.readNonNegativeIntegerTlv
+            (Tlv.NfdCommand_StatusCode))
+        statusText = Blob(
+          decoder.readBlobTlv(Tlv.NfdCommand_StatusText), False)
+        controlResponse.setStatusText(str(statusText))
+
+        # Decode the body.
+        if decoder.peekType(Tlv.ControlParameters_ControlParameters, endOffset):
+            controlResponse.setBodyAsControlParameters(ControlParameters())
+            # Decode into the existing ControlParameters to avoid copying.
+            self._decodeControlParameters(
+              controlResponse.getBodyAsControlParameters(), decoder)
+
+        decoder.finishNestedTlvs(endOffset)
 
     # SignatureHolder is used by decodeSignatureInfoAndValue.
     class SignatureHolder(object):
