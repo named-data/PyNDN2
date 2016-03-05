@@ -156,6 +156,34 @@ class WireFormat(object):
         """
         raise RuntimeError("decodeControlParameters is not implemented")
 
+    def encodeControlResponse(self, controlResponse):
+        """
+        Encode controlResponse and return the encoding.  Your derived class
+        should override.
+
+        :param ControlResponse controlResponse: The ControlResponse object
+          to encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("encodeControlResponse is not implemented")
+
+    def decodeControlResponse(self, controlResponse, input):
+        """
+        Decode input as a controlResponse and set the fields of the
+        controlResponse object. Your derived class should override.
+
+        :param ControlResponse controlResponse: The ControlResponse object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeControlResponse is not implemented")
+
     def encodeSignatureInfo(self, signature):
         """
         Encode signature as a SignatureInfo and return the encoding.
