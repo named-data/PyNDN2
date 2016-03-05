@@ -23,11 +23,6 @@ fields for a ControlParameters which is used, for example, in the command
 interest to register a prefix with a forwarder.
 """
 
-from pyndn.forwarding_flags import ForwardingFlags
-from pyndn.name import Name
-from pyndn.encoding.wire_format import WireFormat
-from pyndn.util.blob import Blob
-
 class ControlParameters(object):
     def __init__(self, value = None):
         if type(value) is ControlParameters:
@@ -285,3 +280,9 @@ class ControlParameters(object):
     forwardingFlags = property(getForwardingFlags, setForwardingFlags)
     strategy = property(getStrategy, setStrategy)
     expirationPeriod = property(getExpirationPeriod, setExpirationPeriod)
+
+# Import these at the end of the file to avoid circular references.
+from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.name import Name
+from pyndn.util.blob import Blob
+from pyndn.encoding.wire_format import WireFormat
