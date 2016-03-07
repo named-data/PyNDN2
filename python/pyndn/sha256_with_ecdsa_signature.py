@@ -36,7 +36,7 @@ class Sha256WithEcdsaSignature(Signature):
     :param value: (optional) If value is a Sha256WithEcdsaSignature, copy its
       values.  If value is omitted, the keyLocator is the default with
       unspecified values and the signature is unspecified.
-    :param value: Sha256WithEcdsaSignature
+    :type value: Sha256WithEcdsaSignature
     """
     def __init__(self, value = None):
         if value == None:

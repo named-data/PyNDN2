@@ -36,7 +36,7 @@ class Sha256WithRsaSignature(Signature):
     :param value: (optional) If value is a Sha256WithRsaSignature, copy its
       values.  If value is omitted, the keyLocator is the default with
       unspecified values and the signature is unspecified.
-    :param value: Sha256WithRsaSignature
+    :type value: Sha256WithRsaSignature
     """
     def __init__(self, value = None):
         if value == None:

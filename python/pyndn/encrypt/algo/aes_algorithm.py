@@ -89,7 +89,7 @@ class AesAlgorithm(object):
               keyBits.toBytes()), modes.ECB(), backend = default_backend())
         elif params.getAlgorithmType() == EncryptAlgorithmType.AesCbc:
             cipher = Cipher(algorithms.AES(
-              keyBits.toBytes()), modes.CBC(params.getInitialVector().toBytes()), 
+              keyBits.toBytes()), modes.CBC(params.getInitialVector().toBytes()),
               backend = default_backend())
         else:
             raise RuntimeError("unsupported encryption mode")

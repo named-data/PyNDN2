@@ -30,6 +30,7 @@ from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.control_parameters import ControlParameters
+from pyndn.control_response import ControlResponse
 from pyndn.interest_filter import InterestFilter
 from pyndn.util.common import Common
 from pyndn.util.command_interest_generator import CommandInterestGenerator
@@ -876,13 +877,10 @@ class Node(object):
             We received the response. Do a quick check of expected name
             components.
             """
-            # Decode responseData->getContent() and check for a success code.
-            # TODO: Move this into the TLV code.
-            statusCode = None
+            # Decode responseData.getContent() and check for a success code.
+            controlResponse = ControlResponse()
             try:
-                decoder = TlvDecoder(responseData.getContent().buf())
-                decoder.readNestedTlvsStart(Tlv.NfdCommand_ControlResponse)
-                statusCode = decoder.readNonNegativeIntegerTlv(Tlv.NfdCommand_StatusCode)
+                controlResponse.wireDecode(responseData.getContent(), TlvWireFormat.get())
             except ValueError as ex:
                 logging.getLogger(__name__).info(
                   "Register prefix failed: Error decoding the NFD response: %s",
@@ -894,10 +892,10 @@ class Node(object):
                 return
 
             # Status code 200 is "OK".
-            if statusCode != 200:
+            if controlResponse.getStatusCode() != 200:
                 logging.getLogger(__name__).info(
                   "Register prefix failed: Expected NFD status code 200, got: %d",
-                  statusCode)
+                  controlResponse.getStatusCode())
                 try:
                     self._onRegisterFailed(self._prefix)
                 except:
