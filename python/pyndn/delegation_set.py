@@ -179,6 +179,10 @@ class DelegationSet(object):
     def find(self, name):
         """
         Find the first delegation with the given name and return its index.
+
+        :param Name name: Then name of the delegation to find.
+        :return: The index of the delegation, or -1 if not found.
+        :rtype: int
         """
         for i in range(len(self._delegations)):
             if self._delegations[i].getName().equals(name):
