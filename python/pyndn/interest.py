@@ -47,6 +47,7 @@ class Interest(object):
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
             self._linkWireEncoding = value._linkWireEncoding
             self._linkWireEncodingFormat = value._linkWireEncodingFormat
+            self._link = ChangeCounter(None)
             if value._link.get() != None:
               self._link.set(Link(value._link.get()))
             self._selectedDelegationIndex = value._selectedDelegationIndex
