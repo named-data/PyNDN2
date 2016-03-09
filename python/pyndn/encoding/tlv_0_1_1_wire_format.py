@@ -92,6 +92,13 @@ class Tlv0_1_1WireFormat(WireFormat):
         saveLength = len(encoder)
 
         # Encode backwards.
+        encoder.writeOptionalNonNegativeIntegerTlv(
+          Tlv.SelectedDelegation, interest.getSelectedDelegationIndex())
+        linkWireEncoding = interest.getLinkWireEncoding(self)
+        if not linkWireEncoding.isNull():
+          # Encode the entire link as is.
+          encoder.writeBuffer(linkWireEncoding.buf())
+
         encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
           Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
 
@@ -164,6 +171,24 @@ class Tlv0_1_1WireFormat(WireFormat):
         interest.setInterestLifetimeMilliseconds(
            decoder.readOptionalNonNegativeIntegerTlvAsFloat
            (Tlv.InterestLifetime, endOffset))
+
+        if decoder.peekType(Tlv.Data, endOffset):
+            # Get the bytes of the Link TLV.
+            linkBeginOffset = decoder.getOffset()
+            linkEndOffset = decoder.readNestedTlvsStart(Tlv.Data)
+            decoder.seek(linkEndOffset)
+
+            interest.setLinkWireEncoding(
+              Blob(decoder.getSlice(linkBeginOffset, linkEndOffset), True), self)
+        else:
+            interest.unsetLink()
+        interest.setSelectedDelegationIndex(
+          decoder.readOptionalNonNegativeIntegerTlv(
+            Tlv.SelectedDelegation, endOffset))
+        if (interest.getSelectedDelegationIndex() != None and
+            interest.getSelectedDelegationIndex() >= 0 and not interest.hasLink()):
+            raise RuntimeError(
+              "Interest has a selected delegation, but no link object")
 
         # Set the nonce last because setting other interest fields clears it.
         interest.setNonce(nonce)
@@ -384,6 +409,60 @@ class Tlv0_1_1WireFormat(WireFormat):
         encoder.writeBlobTlv(Tlv.SignatureValue, signature.getSignature().buf())
 
         return Blob(encoder.getOutput(), False)
+
+    def encodeDelegationSet(self, delegationSet):
+        """
+        Encode the DelegationSet in NDN-TLV and return the encoding. Note that
+        the sequence of Delegation does not have an outer TLV type and length
+        because it is intended to use the type and length of a Data packet's
+        Content.
+
+        :param DelegationSet delegationSet: The DelegationSet object to
+          encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+
+        # Encode backwards.
+        for i in range(delegationSet.size() - 1, -1, -1):
+            saveLength = len(encoder)
+
+            Tlv0_1_1WireFormat._encodeName(delegationSet.get(i).getName(), encoder)
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.Link_Preference, delegationSet.get(i).getPreference())
+
+            encoder.writeTypeAndLength(
+              Tlv.Link_Delegation, len(encoder) - saveLength)
+
+        return Blob(encoder.getOutput(), False)
+
+    def decodeDelegationSet(self, delegationSet, input):
+        """
+        Decode input as a DelegationSet in NDN-TLV and set the fields of the
+        delegationSet object. Note that the sequence of Delegation does not have
+        an outer TLV type and length because it is intended to use the type and
+        length of a Data packet's Content. This ignores any elements after the
+        sequence of Delegation.
+
+        :param DelegationSet delegationSet: The DelegationSet object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        decoder = TlvDecoder(input)
+        endOffset = len(input)
+
+        delegationSet.clear()
+        while decoder.getOffset() < endOffset:
+            decoder.readTypeAndLength(Tlv.Link_Delegation)
+            preference = decoder.readNonNegativeIntegerTlv(Tlv.Link_Preference)
+            name = Name()
+            Tlv0_1_1WireFormat._decodeName(name, decoder)
+
+            # Add unsorted to preserve the order so that Interest selected
+            # delegation index will work.
+            delegationSet.addUnsorted(preference, name)
 
     def encodeEncryptedContent(self, encryptedContent):
         """
