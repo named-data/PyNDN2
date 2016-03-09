@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-02-29)
+Interim changes since PyNDN v2.2beta1 (2016-03-09)
 --------------------------------------------------
 
 Changes
@@ -8,6 +8,9 @@ Changes
 * In util, added ExponentialReExpress.
 * Added HmacWithSha256Signature. In KeyChain, added experimental static methods
   sign/verifyDataWithHmacWithSha256.
+* Added classes Link and DelegationSet to support link objects.
+* In Interest, added methods to support link objects and SelectedDelegation:
+  hasLink, getLink, unsetLink, get/setLinkWireEncoding, get/setSelectedDelegationIndex.
 * http://redmine.named-data.net/issues/3449 Added Name.isPrefixOf and getSuccessor.
   In compare, support compare(int, int, Name, int, int).
 * http://redmine.named-data.net/issues/3450 Added Name.Component.isSegment,
@@ -17,6 +20,7 @@ Changes
 * http://redmine.named-data.net/issues/3452 Added Interest.refreshNonce.
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
+* Unit tests: Added test_link.
 * Examples: Added test_sign_verify_data_hmac.
 
 PyNDN v2.2beta1 (2016-02-03)
