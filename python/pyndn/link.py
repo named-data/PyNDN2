@@ -74,7 +74,7 @@ class Link(Data):
 
         Data.wireDecode(self, input, wireFormat)
         if self.getMetaInfo().getType() != ContentType.LINK:
-            raise runtume_error(
+            raise RuntimeError(
               "Link.wireDecode: MetaInfo ContentType is not LINK.")
 
         self._delegations.wireDecode(self.getContent())
