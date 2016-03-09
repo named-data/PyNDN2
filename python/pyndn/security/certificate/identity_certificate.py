@@ -20,7 +20,8 @@
 
 from pyndn.security.certificate.certificate import Certificate
 from pyndn.security.security_exception import SecurityException
-from pyndn import Name,Data
+from pyndn.name import Name
+from pyndn.data import Data
 
 """
 IdentityCertificate is a subclass of Certificate that provides convenience methods
