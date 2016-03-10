@@ -23,6 +23,9 @@ Changes
 * Unit tests: Added test_link.
 * Examples: Added test_sign_verify_data_hmac.
 
+Bug fixes
+* Fix bug in encrypt/Schedule to solve problems when the black repetitive interval list is empty.
+
 PyNDN v2.2beta1 (2016-02-03)
 ----------------------------
 
