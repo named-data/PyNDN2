@@ -120,12 +120,26 @@ class Schedule(object):
           self._whiteIntervalList, timeStamp, whitePositiveResult,
           whiteNegativeResult)
 
-        # If the positive result is empty then return False for isPositive. If
-        # it is not empty then return True for isPositive.
+        if whitePositiveResult.isEmpty() and not whiteNegativeResult.isValid():
+            # There is no white interval covering the time stamp.
+            # Return False and a 24-hour interval.
+            timeStampDateOnly = RepetitiveInterval._toDateOnlyMilliseconds(
+              timeStamp)
+            return Schedule.Result(False, Interval(
+              timeStampDateOnly,
+              timeStampDateOnly + RepetitiveInterval.MILLISECONDS_IN_DAY))
+
         if not whitePositiveResult.isEmpty():
-            return Schedule.Result(
-              True, whitePositiveResult.intersectWith(blackNegativeResult))
+            # There is white interval covering the time stamp.
+            # Return True and calculate the intersection.
+            if blackNegativeResult.isValid():
+                return Schedule.Result(
+                  True, whitePositiveResult.intersectWith(blackNegativeResult))
+            else:
+                return Schedule.Result(True, whitePositiveResult)
         else:
+            # There is no white interval covering the time stamp.
+            # Return False.
             return Schedule.Result(False, whiteNegativeResult)
 
     def wireEncode(self):
