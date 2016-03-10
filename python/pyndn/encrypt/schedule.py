@@ -85,18 +85,18 @@ class Schedule(object):
             self.isPositive = isPositive
             self.interval = interval
 
-    def getCoveringInterval(self, timePoint):
+    def getCoveringInterval(self, timeStamp):
         """
-        Get the interval that covers the time point. This iterates over the two
+        Get the interval that covers the time stamp. This iterates over the two
         repetitive interval sets and find the shortest interval that allows a
         group member to access the data. If there is no interval covering the
-        time point, this returns False for isPositive and a negative interval.
+        time stamp, this returns False for isPositive and a negative interval.
 
-        :param float timePoint: The time point as milliseconds since Jan 1,
+        :param float timeStamp: The time stamp as milliseconds since Jan 1,
           1970 UTC.
         :return: An object with fields "isPositive" and "interval" where
           isPositive is True if the returned interval is positive or False if
-          negative, and interval is the Interval covering the time point, or a
+          negative, and interval is the Interval covering the time stamp, or a
           negative interval if not found.
         :rtype: Schedule.Result
         """
@@ -110,20 +110,20 @@ class Schedule(object):
         for i in range(len(self._blackIntervalList)):
             element = self._blackIntervalList[i]
 
-            result = element.getInterval(timePoint)
+            result = element.getInterval(timeStamp)
             tempInterval = result.interval
             if result.isPositive == True:
-                # tempInterval covers the time point, so union the black negative
+                # tempInterval covers the time stamp, so union the black negative
                 # result with it.
                 # Get the union interval of all the black intervals covering the
-                # time point.
+                # time stamp.
                 # Return False for isPositive and the union interval.
                 blackPositiveResult.unionWith(tempInterval)
             else:
-                # tempInterval does not cover the time point, so intersect the
+                # tempInterval does not cover the time stamp, so intersect the
                 # black negative result with it.
                 # Get the intersection interval of all the black intervals not
-                # covering the time point.
+                # covering the time stamp.
                 # Return True for isPositive if the white positive result is
                 # not empty,
                 # False if it is empty.
@@ -140,20 +140,20 @@ class Schedule(object):
         for i in range(len(self._whiteIntervalList)):
             element = self._whiteIntervalList[i]
 
-            result = element.getInterval(timePoint)
+            result = element.getInterval(timeStamp)
             tempInterval = result.interval
             if result.isPositive == True:
-                # tempInterval covers the time point, so union the white
+                # tempInterval covers the time stamp, so union the white
                 # positive result with it.
                 # Get the union interval of all the white intervals covering the
-                # time point.
+                # time stamp.
                 # Return True for isPositive.
                 whitePositiveResult.unionWith(tempInterval)
             else:
-                # tempInterval does not cover the time point, so intersect the
+                # tempInterval does not cover the time stamp, so intersect the
                 # white negative result with it.
                 # Get the intersection of all the white intervals not covering
-                # the time point.
+                # the time stamp.
                 # Return False for isPositive if the positive result is empty, or
                 # True if it is not empty.
                 if not whiteNegativeResult.isValid():
