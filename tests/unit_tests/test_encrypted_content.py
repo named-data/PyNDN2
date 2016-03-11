@@ -25,7 +25,7 @@ from pyndn.util import Blob
 from pyndn.encrypt import EncryptedContent
 from pyndn.encrypt.algo import EncryptAlgorithmType
 
-ENCRYPTED = bytearray([
+encrypted = bytearray([
 0x82, 0x30, # EncryptedContent
   0x1c, 0x16, # KeyLocator
     0x07, 0x14, # Name
@@ -43,7 +43,7 @@ ENCRYPTED = bytearray([
     0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74
 ])
 
-ENCRYPTED_NO_IV = bytearray([
+encryptedNoIv = bytearray([
 0x82, 0x24, # EncryptedContent
   0x1c, 0x16, # KeyLocator
     0x07, 0x14, # Name
@@ -59,24 +59,26 @@ ENCRYPTED_NO_IV = bytearray([
     0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74
 ])
 
-MESSAGE = bytearray([
+message = bytearray([
   0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74
 ])
 
-IV = bytearray([
+iv = bytearray([
   0x72, 0x61, 0x6e, 0x64, 0x6f, 0x6d, 0x62, 0x69, 0x74, 0x73
 ])
 
 class TestEncryptedContent(ut.TestCase):
     def test_constructor(self):
+        # Check default settings.
         content = EncryptedContent()
         self.assertEqual(content.getAlgorithmType(), None)
         self.assertTrue(content.getPayload().isNull())
         self.assertTrue(content.getInitialVector().isNull())
         self.assertEqual(content.getKeyLocator().getType(), None)
 
-        payload = Blob(MESSAGE, False)
-        initialVector = Blob(IV, False)
+        # Check an encrypted content with IV.
+        payload = Blob(message, False)
+        initialVector = Blob(iv, False)
 
         keyLocator = KeyLocator()
         keyLocator.setType(KeyLocatorType.KEYNAME)
@@ -85,61 +87,65 @@ class TestEncryptedContent(ut.TestCase):
           keyLocator).setPayload(payload).setInitialVector(initialVector)
 
         # Test the copy constructor.
-        sha256RsaContent = EncryptedContent(content)
-        contentPayload = sha256RsaContent.getPayload()
-        contentInitialVector = sha256RsaContent.getInitialVector()
+        rsaOaepContent = EncryptedContent(content)
+        contentPayload = rsaOaepContent.getPayload()
+        contentInitialVector = rsaOaepContent.getInitialVector()
 
-        self.assertEqual(sha256RsaContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
+        self.assertEqual(rsaOaepContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
         self.assertTrue(contentPayload.equals(payload))
         self.assertTrue(contentInitialVector.equals(initialVector))
-        self.assertTrue(sha256RsaContent.getKeyLocator().getType() != None)
-        self.assertTrue(sha256RsaContent.getKeyLocator().getKeyName().equals(
+        self.assertTrue(rsaOaepContent.getKeyLocator().getType() != None)
+        self.assertTrue(rsaOaepContent.getKeyLocator().getKeyName().equals(
           Name("/test/key/locator")))
 
-        encryptedBlob = Blob(ENCRYPTED, False)
-        encoded = sha256RsaContent.wireEncode()
+        # Encoding.
+        encryptedBlob = Blob(encrypted, False)
+        encoded = rsaOaepContent.wireEncode()
 
         self.assertTrue(encryptedBlob.equals(encoded))
 
-        sha256RsaContent = EncryptedContent()
-        sha256RsaContent.wireDecode(encryptedBlob)
-        contentPayload = sha256RsaContent.getPayload()
-        contentInitialVector = sha256RsaContent.getInitialVector()
+        # Decoding.
+        rsaOaepContent = EncryptedContent()
+        rsaOaepContent.wireDecode(encryptedBlob)
+        contentPayload = rsaOaepContent.getPayload()
+        contentInitialVector = rsaOaepContent.getInitialVector()
 
-        self.assertEqual(sha256RsaContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
+        self.assertEqual(rsaOaepContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
         self.assertTrue(contentPayload.equals(payload))
         self.assertTrue(contentInitialVector.equals(initialVector))
-        self.assertTrue(sha256RsaContent.getKeyLocator().getType() != None)
-        self.assertTrue(sha256RsaContent.getKeyLocator().getKeyName().equals(
+        self.assertTrue(rsaOaepContent.getKeyLocator().getType() != None)
+        self.assertTrue(rsaOaepContent.getKeyLocator().getKeyName().equals(
           Name("/test/key/locator")))
 
-        # Test no IV.
-        sha256RsaContent = EncryptedContent()
-        sha256RsaContent.setAlgorithmType(EncryptAlgorithmType.RsaOaep).setKeyLocator(
+        # Check the no IV case.
+        rsaOaepContent = EncryptedContent()
+        rsaOaepContent.setAlgorithmType(EncryptAlgorithmType.RsaOaep).setKeyLocator(
           keyLocator).setPayload(payload)
-        contentPayload = sha256RsaContent.getPayload()
+        contentPayload = rsaOaepContent.getPayload()
 
-        self.assertEqual(sha256RsaContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
+        self.assertEqual(rsaOaepContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
         self.assertTrue(contentPayload.equals(payload))
-        self.assertTrue(sha256RsaContent.getInitialVector().isNull())
-        self.assertTrue(sha256RsaContent.getKeyLocator().getType() != None)
-        self.assertTrue(sha256RsaContent.getKeyLocator().getKeyName().equals(
+        self.assertTrue(rsaOaepContent.getInitialVector().isNull())
+        self.assertTrue(rsaOaepContent.getKeyLocator().getType() != None)
+        self.assertTrue(rsaOaepContent.getKeyLocator().getKeyName().equals(
           Name("/test/key/locator")))
 
-        encryptedBlob = Blob(ENCRYPTED_NO_IV, False)
-        encodedNoIv = sha256RsaContent.wireEncode()
+        # Encoding.
+        encryptedBlob = Blob(encryptedNoIv, False)
+        encodedNoIv = rsaOaepContent.wireEncode()
 
         self.assertTrue(encryptedBlob.equals(encodedNoIv))
 
-        sha256RsaContent = EncryptedContent()
-        sha256RsaContent.wireDecode(encryptedBlob)
-        contentPayloadNoIV = sha256RsaContent.getPayload()
+        # Decoding.
+        rsaOaepContent = EncryptedContent()
+        rsaOaepContent.wireDecode(encryptedBlob)
+        contentPayloadNoIV = rsaOaepContent.getPayload()
 
-        self.assertEqual(sha256RsaContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
+        self.assertEqual(rsaOaepContent.getAlgorithmType(), EncryptAlgorithmType.RsaOaep)
         self.assertTrue(contentPayloadNoIV.equals(payload))
-        self.assertTrue(sha256RsaContent.getInitialVector().isNull())
-        self.assertTrue(sha256RsaContent.getKeyLocator().getType() != None)
-        self.assertTrue(sha256RsaContent.getKeyLocator().getKeyName().equals(
+        self.assertTrue(rsaOaepContent.getInitialVector().isNull())
+        self.assertTrue(rsaOaepContent.getKeyLocator().getType() != None)
+        self.assertTrue(rsaOaepContent.getKeyLocator().getKeyName().equals(
           Name("/test/key/locator")))
 
     def test_decoding_error(self):
@@ -274,19 +280,19 @@ class TestEncryptedContent(ut.TestCase):
         self.assertTrue(content.getPayload().isNull())
         self.assertTrue(content.getInitialVector().isNull())
 
-        payload = Blob(MESSAGE, False)
+        payload = Blob(message, False)
         content.setPayload(payload)
 
         contentPayload = content.getPayload()
         self.assertTrue(contentPayload.equals(payload))
 
-        initialVector = Blob(IV, False)
+        initialVector = Blob(iv, False)
         content.setInitialVector(initialVector)
 
         contentInitialVector = content.getInitialVector()
         self.assertTrue(contentInitialVector.equals(initialVector))
 
         encoded = content.wireEncode()
-        contentBlob = Blob(ENCRYPTED, False)
+        contentBlob = Blob(encrypted, False)
 
         self.assertTrue(contentBlob.equals(encoded))
