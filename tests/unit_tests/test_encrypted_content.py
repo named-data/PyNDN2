@@ -265,19 +265,12 @@ class TestEncryptedContent(ut.TestCase):
         self.assertTrue(content.getPayload().isNull())
         self.assertTrue(content.getInitialVector().isNull())
 
-        payload = Blob(message, False)
-        content.setPayload(payload)
+        content.setPayload(Blob(message, False))
+        self.assertTrue(content.getPayload().equals(Blob(message, False)))
 
-        contentPayload = content.getPayload()
-        self.assertTrue(contentPayload.equals(payload))
-
-        initialVector = Blob(iv, False)
-        content.setInitialVector(initialVector)
-
-        contentInitialVector = content.getInitialVector()
-        self.assertTrue(contentInitialVector.equals(initialVector))
+        content.setInitialVector(Blob(iv, False))
+        self.assertTrue(content.getInitialVector().equals(Blob(iv, False)))
 
         encoded = content.wireEncode()
         contentBlob = Blob(encrypted, False)
-
         self.assertTrue(contentBlob.equals(encoded))
