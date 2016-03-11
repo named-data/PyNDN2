@@ -121,7 +121,6 @@ class Producer(object):
         contentKeyName.append(Schedule.toIsoString(hourSlot))
 
         if self._database.hasContentKey(timeSlot):
-            contentKeyBits = self._database.getContentKey(timeSlot)
             return contentKeyName
 
         aesParams = AesKeyParams(128)
