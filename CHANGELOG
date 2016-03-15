@@ -1,5 +1,9 @@
-Interim changes since PyNDN v2.2beta1 (2016-03-09)
+Interim changes since PyNDN v2.2beta1 (2016-03-15)
 --------------------------------------------------
+
+Breaking changes
+* In encrypt/Consumer, moved ErrorCode to encrypt/EncryptError, affecting the
+  onError callback to Consumer.consume.
 
 Changes
 * In MemoryContentCache.registerPrefix, added optional onRegisterSuccess. (Thanks to Zhehao Wang.)

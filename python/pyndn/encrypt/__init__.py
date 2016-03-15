@@ -17,12 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.encrypt import consumer, consumer_db, decrypt_key, encrypt_key
+from pyndn.encrypt import consumer, consumer_db, decrypt_key, encrypt_error, encrypt_key
 from pyndn.encrypt import encrypted_content, group_manager, group_manager_db
 from pyndn.encrypt import interval, producer, producer_db, repetitive_interval
 from pyndn.encrypt import schedule, sqlite3_consumer_db
 from pyndn.encrypt import sqlite3_group_manager_db, sqlite3_producer_db
-__all__ = ['consumer', 'consumer_db', 'decrypt_key', 'encrypt_key',
+__all__ = ['consumer', 'consumer_db', 'decrypt_key', 'encrypt_key', 'encrypt_error',
            'encrypted_content', 'group_manager', 'group_manager_db', 'interval',
            'producer', 'producer_db', 'repetitive_interval', 'schedule',
            'sqlite3_consumer_db', 'sqlite3_group_manager_db',
@@ -34,6 +34,7 @@ try:
     from pyndn.encrypt.consumer import *
     from pyndn.encrypt.consumer_db import *
     from pyndn.encrypt.decrypt_key import *
+    from pyndn.encrypt.encrypt_error import *
     from pyndn.encrypt.encrypt_key import *
     from pyndn.encrypt.encrypted_content import *
     from pyndn.encrypt.group_manager import *
