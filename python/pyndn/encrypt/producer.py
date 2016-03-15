@@ -281,13 +281,13 @@ class Producer(object):
         keyName = data.getName()
 
         begin = Schedule.fromIsoString(
-          str(keyName.get(Producer.iStartTimeStamp).getValue()))
+          str(keyName.get(Producer.START_TIME_STAMP_INDEX).getValue()))
         end = Schedule.fromIsoString(
-          str(keyName.get(Producer.iEndTimeStamp).getValue()))
+          str(keyName.get(Producer.END_TIME_STAMP_INDEX).getValue()))
 
         if timeSlot >= end:
             timeRange = Exclude(interest.getExclude())
-            Producer.excludeBefore(timeRange, keyName.get(Producer.iStartTimeStamp))
+            Producer.excludeBefore(timeRange, keyName.get(Producer.START_TIME_STAMP_INDEX))
             keyRequest.repeatAttempts[interestName] = 0
             self._sendKeyInterest(
               interestName, timeSlot, keyRequest, onEncryptedKeys, timeRange)
@@ -545,5 +545,5 @@ class Producer(object):
 
         Producer.setExcludeEntries(exclude, entries)
 
-    iStartTimeStamp = -2
-    iEndTimeStamp = -1
+    START_TIME_STAMP_INDEX = -2
+    END_TIME_STAMP_INDEX = -1
