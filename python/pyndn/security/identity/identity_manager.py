@@ -385,6 +385,18 @@ class IdentityManager(object):
         return self._identityStorage.getDefaultCertificateNameForIdentity(
           self.getDefaultIdentity())
 
+    def getAllKeyNamesOfIdentity(self, identityName, nameList, isDefault):
+        """
+        Append all the key names of a particular identity to the nameList.
+
+        :param Name identityName: The identity name to search for.
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If true, add only the default key name. If false,
+          add only the non-default key names.
+        """
+        self._identityStorage.getAllKeyNamesOfIdentity(
+          identityName, nameList, isDefault)
+
     def signByCertificate(self, target, certificateName, wireFormat = None):
         """
         Sign the target based on the certificateName. If it is a Data object,
