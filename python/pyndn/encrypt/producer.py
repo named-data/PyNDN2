@@ -132,7 +132,7 @@ class Producer(object):
         self._database.addContentKey(timeSlot, contentKeyBits)
 
         # Now we need to retrieve the E-KEYs for content key encryption.
-        timeCount = timeSlot
+        timeCount = round(timeSlot)
         self._keyRequests[timeCount] = Producer._KeyRequest(len(self._eKeyInfo))
         keyRequest = self._keyRequests[timeCount]
 
@@ -150,7 +150,7 @@ class Producer(object):
                 keyRequest.repeatAttempts[keyName] = 0
                 self._sendKeyInterest(
                   Interest(keyName).setExclude(timeRange).setChildSelector(1),
-                  timeSlot, keyRequest, onEncryptedKeys)
+                  timeSlot, onEncryptedKeys)
             else:
                 # The current E-KEY can cover the content key.
                 # Encrypt the content key directly.
@@ -158,7 +158,7 @@ class Producer(object):
                 eKeyName.append(Schedule.toIsoString(keyInfo.beginTimeSlot))
                 eKeyName.append(Schedule.toIsoString(keyInfo.endTimeSlot))
                 self._encryptContentKey(
-                  keyRequest, keyInfo.keyBits, eKeyName, timeSlot, onEncryptedKeys)
+                  keyInfo.keyBits, eKeyName, timeSlot, onEncryptedKeys)
 
         return contentKeyName
 
@@ -212,7 +212,7 @@ class Producer(object):
         """
         return round(math.floor(round(timeSlot) / 3600000.0) * 3600000.0)
 
-    def _sendKeyInterest(self, interest, timeSlot, keyRequest, onEncryptedKeys):
+    def _sendKeyInterest(self, interest, timeSlot, onEncryptedKeys):
         """
         Send an interest with the given name through the face with callbacks to
           _handleCoveringKey and _handleTimeout.
@@ -220,42 +220,39 @@ class Producer(object):
         :param Interest interest: The interest to send.
         :param float timeSlot: The time slot, passed to _handleCoveringKey and
           _handleTimeout.
-        :param Producer._KeyRequest keyRequest: The KeyRequest, passed to
-          _handleCoveringKey and _handleTimeout.
         :param onEncryptedKeys: The OnEncryptedKeys callback, passed to
           _handleCoveringKey and _handleTimeout.
         :type onEncryptedKeys: function object
         """
         def onKey(interest, data):
-            self._handleCoveringKey(
-              interest, data, timeSlot, keyRequest, onEncryptedKeys)
+            self._handleCoveringKey(interest, data, timeSlot, onEncryptedKeys)
 
         def onTimeout(interest):
-            self._handleTimeout(interest, timeSlot, keyRequest, onEncryptedKeys)
+            self._handleTimeout(interest, timeSlot, onEncryptedKeys)
 
         self._face.expressInterest(interest, onKey, onTimeout)
 
-    def _handleTimeout(self, interest, timeSlot, keyRequest, onEncryptedKeys):
+    def _handleTimeout(self, interest, timeSlot, onEncryptedKeys):
         """
         This is called from an expressInterest timeout to update the state of
         keyRequest.
 
         :param Interest interest: The timed-out interest.
         :param float timeSlot: The time slot as milliseconds since Jan 1, 1970 UTC.
-        :param Producer._KeyRequest_ keyRequest: The KeyRequest which is updated.
         :param onEncryptedKeys: When there are no more interests to process,
           this calls onEncryptedKeys(keys) where keys is a list of encrypted
           content key Data packets. If onEncryptedKeys is None, this does not
           use it.
         :type onEncryptedKeys: function object
         """
-        interestName = interest.getName()
+        timeCount = round(timeSlot)
+        keyRequest = self._keyRequests[timeCount]
 
+        interestName = interest.getName()
         if keyRequest.repeatAttempts[interestName] < self._maxRepeatAttempts:
             # Increase the retrial count.
             keyRequest.repeatAttempts[interestName] += 1
-            self._sendKeyInterest(
-              interest, timeSlot, keyRequest, onEncryptedKeys)
+            self._sendKeyInterest(interest, timeSlot, onEncryptedKeys)
         else:
             # No more retrials.
             keyRequest.interestCount -= 1
@@ -268,8 +265,7 @@ class Producer(object):
             if timeSlot in self._keyRequests:
                 del self._keyRequests[timeSlot]
 
-    def _handleCoveringKey(self, interest, data, timeSlot, keyRequest,
-                           onEncryptedKeys):
+    def _handleCoveringKey(self, interest, data, timeSlot, onEncryptedKeys):
         """
         This is called from an expressInterest OnData to check that the
         encryption key contained in data fits the timeSlot. This sends a refined
@@ -278,13 +274,15 @@ class Producer(object):
         :param Interest interest: The interest given to expressInterest.
         :param Data data: The fetched Data packet.
         :param float timeSlot: The time slot as milliseconds since Jan 1, 1970 UTC.
-        :param Producer._KeyRequest keyRequest: The KeyRequest which is updated.
         :param onEncryptedKeys: When there are no more interests to process,
           this calls onEncryptedKeys(keys) where keys is a list of encrypted
           content key Data packets. If onEncryptedKeys is None, this does not
           use it.
         :type onEncryptedKeys: function object
         """
+        timeCount = round(timeSlot)
+        keyRequest = self._keyRequests[timeCount]
+
         interestName = interest.getName()
         keyName = data.getName()
 
@@ -301,7 +299,7 @@ class Producer(object):
             keyRequest.repeatAttempts[interestName] = 0
             self._sendKeyInterest(
               Interest(interestName).setExclude(timeRange).setChildSelector(1),
-              timeSlot, keyRequest, onEncryptedKeys)
+              timeSlot, onEncryptedKeys)
         else:
             # If the received E-KEY covers the content key, encrypt the content.
             encryptionKey = data.getContent()
@@ -311,15 +309,14 @@ class Producer(object):
             keyInfo.keyBits = encryptionKey
 
             self._encryptContentKey(
-              keyRequest, encryptionKey, keyName, timeSlot, onEncryptedKeys)
+              encryptionKey, keyName, timeSlot, onEncryptedKeys)
 
-    def _encryptContentKey(self, keyRequest, encryptionKey, eKeyName, timeSlot,
+    def _encryptContentKey(self, encryptionKey, eKeyName, timeSlot,
                            onEncryptedKeys):
         """
         Get the content key from the database_ and encrypt it for the timeSlot
           using encryptionKey.
 
-        :param Producer._KeyRequest keyRequest: The KeyRequest which is updated.
         :param Blob encryptionKey: The encryption key value.
         :param Name eKeyName: The key name for the EncryptedContent.
         :param float timeSlot: The time slot as milliseconds since Jan 1, 1970 UTC.
@@ -329,6 +326,9 @@ class Producer(object):
            use it.
         :type onEncryptedKeys: function object
         """
+        timeCount = round(timeSlot)
+        keyRequest = self._keyRequests[timeCount]
+
         keyName = Name(self._namespace)
         keyName.append(Encryptor.NAME_COMPONENT_C_KEY)
         keyName.append(
