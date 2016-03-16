@@ -96,6 +96,9 @@ class Producer(object):
 
     @staticmethod
     def defaultOnError(errorCode, message):
+        """
+        The default onError callback which does nothing.
+        """
         # Do nothing.
         pass
 
