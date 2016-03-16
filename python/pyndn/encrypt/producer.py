@@ -34,6 +34,7 @@ from pyndn.data import Data
 from pyndn.exclude import Exclude
 from pyndn.security.key_params import AesKeyParams
 from pyndn.encrypt.schedule import Schedule
+from pyndn.encrypt.encrypt_error import EncryptError
 from pyndn.encrypt.algo.aes_algorithm import AesAlgorithm
 from pyndn.encrypt.algo.encryptor import Encryptor
 from pyndn.encrypt.algo.encrypt_params import EncryptParams, EncryptAlgorithmType
