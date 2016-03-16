@@ -93,7 +93,12 @@ class Producer(object):
         self._namespace.append(Encryptor.NAME_COMPONENT_SAMPLE)
         self._namespace.append(dataType)
 
-    def createContentKey(self, timeSlot, onEncryptedKeys):
+    @staticmethod
+    def defaultOnError(errorCode, message):
+        # Do nothing.
+        pass
+
+    def createContentKey(self, timeSlot, onEncryptedKeys, onError = defaultOnError):
         """
         Create the content key corresponding to the timeSlot. This first checks
         if the content key exists. For an existing content key, this returns the
@@ -110,6 +115,13 @@ class Producer(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onEncryptedKeys: function object
+        :param onError: (optional) This calls  errorCode, message) for an
+          error, where errorCode is from EncryptError.ErrorCode and message is a
+          str. If omitted, use a default callback which does nothing.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
+        :type onError: function object
         :return: The content key name.
         :rtype: Name
         """
@@ -150,7 +162,7 @@ class Producer(object):
                 keyRequest.repeatAttempts[keyName] = 0
                 self._sendKeyInterest(
                   Interest(keyName).setExclude(timeRange).setChildSelector(1),
-                  timeSlot, onEncryptedKeys)
+                  timeSlot, onEncryptedKeys, onError)
             else:
                 # The current E-KEY can cover the content key.
                 # Encrypt the content key directly.
@@ -158,11 +170,11 @@ class Producer(object):
                 eKeyName.append(Schedule.toIsoString(keyInfo.beginTimeSlot))
                 eKeyName.append(Schedule.toIsoString(keyInfo.endTimeSlot))
                 self._encryptContentKey(
-                  keyInfo.keyBits, eKeyName, timeSlot, onEncryptedKeys)
+                  keyInfo.keyBits, eKeyName, timeSlot, onEncryptedKeys, onError)
 
         return contentKeyName
 
-    def produce(self, data, timeSlot, content):
+    def produce(self, data, timeSlot, content, onError = defaultOnError):
         """
         Encrypt the given content with the content key that covers timeSlot, and
         update the data packet with the encrypted content and an appropriate
@@ -171,9 +183,16 @@ class Producer(object):
         :param Data data: An empty Data object which is updated.
         :param float timeSlot: The time slot as milliseconds since Jan 1, 1970 UTC.
         :param Blob content: The content to encrypt.
+        :param onError: (optional) This calls onError(errorCode, message) for an
+          error, where errorCode is from EncryptError.ErrorCode and message is a
+          str. If omitted, use a default callback which does nothing.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
+        :type onError: function object
         """
         # Get a content key.
-        contentKeyName = Name(self.createContentKey(timeSlot, None))
+        contentKeyName = Name(self.createContentKey(timeSlot, None, onError))
         contentKey = self._database.getContentKey(timeSlot)
 
         # Produce data.
@@ -212,7 +231,7 @@ class Producer(object):
         """
         return round(math.floor(round(timeSlot) / 3600000.0) * 3600000.0)
 
-    def _sendKeyInterest(self, interest, timeSlot, onEncryptedKeys):
+    def _sendKeyInterest(self, interest, timeSlot, onEncryptedKeys, onError):
         """
         Send an interest with the given name through the face with callbacks to
           _handleCoveringKey and _handleTimeout.
@@ -223,16 +242,19 @@ class Producer(object):
         :param onEncryptedKeys: The OnEncryptedKeys callback, passed to
           _handleCoveringKey and _handleTimeout.
         :type onEncryptedKeys: function object
+        :param onError: This calls onError(errorCode, message) for an error.
+        :type onError: function object
         """
         def onKey(interest, data):
-            self._handleCoveringKey(interest, data, timeSlot, onEncryptedKeys)
+            self._handleCoveringKey(
+              interest, data, timeSlot, onEncryptedKeys, onError)
 
         def onTimeout(interest):
-            self._handleTimeout(interest, timeSlot, onEncryptedKeys)
+            self._handleTimeout(interest, timeSlot, onEncryptedKeys, onError)
 
         self._face.expressInterest(interest, onKey, onTimeout)
 
-    def _handleTimeout(self, interest, timeSlot, onEncryptedKeys):
+    def _handleTimeout(self, interest, timeSlot, onEncryptedKeys, onError):
         """
         This is called from an expressInterest timeout to update the state of
         keyRequest.
@@ -244,6 +266,8 @@ class Producer(object):
           content key Data packets. If onEncryptedKeys is None, this does not
           use it.
         :type onEncryptedKeys: function object
+        :param onError: This calls onError(errorCode, message) for an error.
+        :type onError: function object
         """
         timeCount = round(timeSlot)
         keyRequest = self._keyRequests[timeCount]
@@ -252,7 +276,7 @@ class Producer(object):
         if keyRequest.repeatAttempts[interestName] < self._maxRepeatAttempts:
             # Increase the retrial count.
             keyRequest.repeatAttempts[interestName] += 1
-            self._sendKeyInterest(interest, timeSlot, onEncryptedKeys)
+            self._sendKeyInterest(interest, timeSlot, onEncryptedKeys, onError)
         else:
             # No more retrials.
             self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
@@ -280,7 +304,8 @@ class Producer(object):
             if timeCount in self._keyRequests:
                 del self._keyRequests[timeCount]
 
-    def _handleCoveringKey(self, interest, data, timeSlot, onEncryptedKeys):
+    def _handleCoveringKey(
+          self, interest, data, timeSlot, onEncryptedKeys, onError):
         """
         This is called from an expressInterest OnData to check that the
         encryption key contained in data fits the timeSlot. This sends a refined
@@ -294,6 +319,8 @@ class Producer(object):
           content key Data packets. If onEncryptedKeys is None, this does not
           use it.
         :type onEncryptedKeys: function object
+        :param onError: This calls onError(errorCode, message) for an error.
+        :type onError: function object
         """
         timeCount = round(timeSlot)
         keyRequest = self._keyRequests[timeCount]
@@ -314,20 +341,20 @@ class Producer(object):
             keyRequest.repeatAttempts[interestName] = 0
             self._sendKeyInterest(
               Interest(interestName).setExclude(timeRange).setChildSelector(1),
-              timeSlot, onEncryptedKeys)
+              timeSlot, onEncryptedKeys, onError)
         else:
             # If the received E-KEY covers the content key, encrypt the content.
             encryptionKey = data.getContent()
             # If everything is correct, save the E-KEY as the current key.
             if self._encryptContentKey(
-              encryptionKey, keyName, timeSlot, onEncryptedKeys):
+              encryptionKey, keyName, timeSlot, onEncryptedKeys, onError):
                 keyInfo = self._eKeyInfo[interestName]
                 keyInfo.beginTimeSlot = begin
                 keyInfo.endTimeSlot = end
                 keyInfo.keyBits = encryptionKey
 
     def _encryptContentKey(self, encryptionKey, eKeyName, timeSlot,
-                           onEncryptedKeys):
+                           onEncryptedKeys, onError):
         """
         Get the content key from the database_ and encrypt it for the timeSlot
           using encryptionKey.
@@ -340,6 +367,8 @@ class Producer(object):
            content key Data packets. If onEncryptedKeys is None, this does not
            use it.
         :type onEncryptedKeys: function object
+        :param onError: This calls onError(errorCode, message) for an error.
+        :type onError: function object
         :return: True if encryption succeeds, otherwise False.
         :rtype: bool
         """
@@ -356,8 +385,16 @@ class Producer(object):
         cKeyData = Data()
         cKeyData.setName(keyName)
         params = EncryptParams(EncryptAlgorithmType.RsaOaep)
-        Encryptor.encryptData(
-          cKeyData, contentKey, eKeyName, encryptionKey, params)
+        try:
+            Encryptor.encryptData(
+              cKeyData, contentKey, eKeyName, encryptionKey, params)
+        except Exception as ex:
+            try:
+                onError(EncryptError.ErrorCode.EncryptionFailure,
+                        "encryptData error: " + repr(ex))
+            except:
+                logging.exception("Error in onError")
+            return False
 
         self._keyChain.sign(cKeyData)
         keyRequest.encryptedKeys.append(cKeyData)

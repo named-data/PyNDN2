@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-03-15)
+Interim changes since PyNDN v2.2beta1 (2016-03-16)
 --------------------------------------------------
 
 Breaking changes
@@ -23,6 +23,8 @@ Changes
   fromSegmentOffset, fromVersion, fromTimestamp and fromSequenceNumber.
 * http://redmine.named-data.net/issues/3452 Added Interest.refreshNonce.
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
+* http://redmine.named-data.net/issues/3355 In Producer.createContentKey and produce,
+  added an optional onError callback.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
 * Unit tests: Added test_link.
 * Examples: Added test_sign_verify_data_hmac.
