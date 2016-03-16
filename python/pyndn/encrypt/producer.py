@@ -318,13 +318,13 @@ class Producer(object):
         else:
             # If the received E-KEY covers the content key, encrypt the content.
             encryptionKey = data.getContent()
-            keyInfo = self._eKeyInfo[interestName]
-            keyInfo.beginTimeSlot = begin
-            keyInfo.endTimeSlot = end
-            keyInfo.keyBits = encryptionKey
-
-            self._encryptContentKey(
-              encryptionKey, keyName, timeSlot, onEncryptedKeys)
+            # If everything is correct, save the E-KEY as the current key.
+            if self._encryptContentKey(
+              encryptionKey, keyName, timeSlot, onEncryptedKeys):
+                keyInfo = self._eKeyInfo[interestName]
+                keyInfo.beginTimeSlot = begin
+                keyInfo.endTimeSlot = end
+                keyInfo.keyBits = encryptionKey
 
     def _encryptContentKey(self, encryptionKey, eKeyName, timeSlot,
                            onEncryptedKeys):
@@ -340,6 +340,8 @@ class Producer(object):
            content key Data packets. If onEncryptedKeys is None, this does not
            use it.
         :type onEncryptedKeys: function object
+        :return: True if encryption succeeds, otherwise False.
+        :rtype: bool
         """
         timeCount = round(timeSlot)
         keyRequest = self._keyRequests[timeCount]
@@ -360,6 +362,7 @@ class Producer(object):
         self._keyChain.sign(cKeyData)
         keyRequest.encryptedKeys.append(cKeyData)
         self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
+        return True
 
     # TODO: Move this to be the main representation inside the Exclude object.
     class ExcludeEntry(object):
