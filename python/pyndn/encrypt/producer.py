@@ -144,10 +144,10 @@ class Producer(object):
         for keyName in self._eKeyInfo:
             # For each current E-KEY.
             keyInfo = self._eKeyInfo[keyName]
-            keyRequest.repeatAttempts[keyName] = 0
             if (timeSlot < keyInfo.beginTimeSlot or
                 timeSlot >= keyInfo.endTimeSlot):
                 # The current E-KEY cannot cover the content key, so retrieve one.
+                keyRequest.repeatAttempts[keyName] = 0
                 self._sendKeyInterest(
                   Interest(keyName).setExclude(timeRange).setChildSelector(1),
                   timeSlot, keyRequest, onEncryptedKeys)
