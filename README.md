@@ -12,6 +12,7 @@ for instructions to build and run from the full distribution.
 If you only need to install the pyndn Python module, you can use easy_install.
 (If you don't have easy_install, see the instructions at
 https://pypi.python.org/pypi/setuptools#installation-instructions .)
+To avoid installation problems, make sure you have the latest version of pip.
 
 For OS X, in a terminal, enter:
 

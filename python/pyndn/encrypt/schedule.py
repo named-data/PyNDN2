@@ -85,18 +85,18 @@ class Schedule(object):
             self.isPositive = isPositive
             self.interval = interval
 
-    def getCoveringInterval(self, timePoint):
+    def getCoveringInterval(self, timeStamp):
         """
-        Get the interval that covers the time point. This iterates over the two
+        Get the interval that covers the time stamp. This iterates over the two
         repetitive interval sets and find the shortest interval that allows a
         group member to access the data. If there is no interval covering the
-        time point, this returns False for isPositive and a negative interval.
+        time stamp, this returns False for isPositive and a negative interval.
 
-        :param float timePoint: The time point as milliseconds since Jan 1,
+        :param float timeStamp: The time stamp as milliseconds since Jan 1,
           1970 UTC.
         :return: An object with fields "isPositive" and "interval" where
           isPositive is True if the returned interval is positive or False if
-          negative, and interval is the Interval covering the time point, or a
+          negative, and interval is the Interval covering the time stamp, or a
           negative interval if not found.
         :rtype: Schedule.Result
         """
@@ -107,66 +107,39 @@ class Schedule(object):
         whiteNegativeResult = Interval()
 
         # Get the black result.
-        for i in range(len(self._blackIntervalList)):
-            element = self._blackIntervalList[i]
+        Schedule._calculateIntervalResult(
+          self._blackIntervalList, timeStamp, blackPositiveResult,
+          blackNegativeResult)
 
-            result = element.getInterval(timePoint)
-            tempInterval = result.interval
-            if result.isPositive == True:
-                # tempInterval covers the time point, so union the black negative
-                # result with it.
-                # Get the union interval of all the black intervals covering the
-                # time point.
-                # Return False for isPositive and the union interval.
-                blackPositiveResult.unionWith(tempInterval)
-            else:
-                # tempInterval does not cover the time point, so intersect the
-                # black negative result with it.
-                # Get the intersection interval of all the black intervals not
-                # covering the time point.
-                # Return True for isPositive if the white positive result is
-                # not empty,
-                # False if it is empty.
-                if not blackNegativeResult.isValid():
-                    blackNegativeResult = tempInterval
-                else:
-                    blackNegativeResult.intersectWith(tempInterval)
-
-        # If the black positive result is not full, then isPositive must be False.
+        # If the black positive result is not empty, then isPositive must be False.
         if not blackPositiveResult.isEmpty():
             return Schedule.Result(False, blackPositiveResult)
 
         # Get the whiteResult.
-        for i in range(len(self._whiteIntervalList)):
-            element = self._whiteIntervalList[i]
+        Schedule._calculateIntervalResult(
+          self._whiteIntervalList, timeStamp, whitePositiveResult,
+          whiteNegativeResult)
 
-            result = element.getInterval(timePoint)
-            tempInterval = result.interval
-            if result.isPositive == True:
-                # tempInterval covers the time point, so union the white
-                # positive result with it.
-                # Get the union interval of all the white intervals covering the
-                # time point.
-                # Return True for isPositive.
-                whitePositiveResult.unionWith(tempInterval)
-            else:
-                # tempInterval does not cover the time point, so intersect the
-                # white negative result with it.
-                # Get the intersection of all the white intervals not covering
-                # the time point.
-                # Return False for isPositive if the positive result is empty, or
-                # True if it is not empty.
-                if not whiteNegativeResult.isValid():
-                    whiteNegativeResult = tempInterval
-                else:
-                    whiteNegativeResult.intersectWith(tempInterval)
+        if whitePositiveResult.isEmpty() and not whiteNegativeResult.isValid():
+            # There is no white interval covering the time stamp.
+            # Return False and a 24-hour interval.
+            timeStampDateOnly = RepetitiveInterval._toDateOnlyMilliseconds(
+              timeStamp)
+            return Schedule.Result(False, Interval(
+              timeStampDateOnly,
+              timeStampDateOnly + RepetitiveInterval.MILLISECONDS_IN_DAY))
 
-        # If the positive result is empty then return False for isPositive. If
-        # it is not empty then return True for isPositive.
         if not whitePositiveResult.isEmpty():
-            return Schedule.Result(
-              True, whitePositiveResult.intersectWith(blackNegativeResult))
+            # There is white interval covering the time stamp.
+            # Return True and calculate the intersection.
+            if blackNegativeResult.isValid():
+                return Schedule.Result(
+                  True, whitePositiveResult.intersectWith(blackNegativeResult))
+            else:
+                return Schedule.Result(True, whitePositiveResult)
         else:
+            # There is no white interval covering the time stamp.
+            # Return False.
             return Schedule.Result(False, whiteNegativeResult)
 
     def wireEncode(self):
@@ -312,6 +285,32 @@ class Schedule(object):
         decoder.finishNestedTlvs(endOffset)
         return RepetitiveInterval(
           startDate, endDate, startHour, endHour, nRepeats, repeatUnit)
+
+    @staticmethod
+    def _calculateIntervalResult(list, timeStamp, positiveResult, negativeResult):
+        """
+        A helper function to calculate black interval results or white interval
+        results.
+
+        :param list list: The set of RepetitiveInterval, which can be the white
+          list or the black list.
+        :param float timeStamp: The time stamp as milliseconds since Jan 1,
+          1970 UTC.
+        :param Interval positiveResult: The positive result which is updated.
+        :param Interval negativeResult: The negative result which is updated.
+        """
+        for i in range(len(list)):
+            element = list[i]
+
+            result = element.getInterval(timeStamp)
+            tempInterval = result.interval
+            if result.isPositive == True:
+                positiveResult.unionWith(tempInterval)
+            else:
+                if not negativeResult.isValid():
+                    negativeResult.set(tempInterval)
+                else:
+                    negativeResult.intersectWith(tempInterval)
 
     @staticmethod
     def toIsoString(msSince1970):

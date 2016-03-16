@@ -233,6 +233,35 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeSignatureInfo is not implemented")
 
+    def encodeDelegationSet(self, delegationSet):
+        """
+        Encode the DelegationSet and return the encoding.
+        Your derived class should override.
+
+        :param DelegationSet delegationSet: The DelegationSet object to
+          encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("encodeDelegationSet is not implemented")
+
+    def decodeDelegationSet(self, delegationSet, input):
+        """
+        Decode input as a DelegationSet and set the fields of the delegationSet
+        object.
+        Your derived class should override.
+
+        :param DelegationSet delegationSet: The DelegationSet object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeDelegationSet is not implemented")
+
     def encodeEncryptedContent(self, encryptedContent):
         """
         Encode the EncryptedContent and return the encoding.

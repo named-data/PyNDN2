@@ -29,6 +29,7 @@ from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.key_locator import KeyLocator
 from pyndn.exclude import Exclude
+from pyndn.link import Link
 
 class Interest(object):
     def __init__(self, value = None):
@@ -44,6 +45,12 @@ class Interest(object):
 
             self._nonce = value.getNonce()
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
+            self._linkWireEncoding = value._linkWireEncoding
+            self._linkWireEncodingFormat = value._linkWireEncodingFormat
+            self._link = ChangeCounter(None)
+            if value._link.get() != None:
+              self._link.set(Link(value._link.get()))
+            self._selectedDelegationIndex = value._selectedDelegationIndex
             self._defaultWireEncoding = value.getDefaultWireEncoding()
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
@@ -58,13 +65,16 @@ class Interest(object):
 
             self._nonce = Blob()
             self._interestLifetimeMilliseconds = None
+            self._linkWireEncoding = Blob()
+            self._linkWireEncodingFormat = None
+            self._link = ChangeCounter(None)
+            self._selectedDelegationIndex = None
             self._defaultWireEncoding = SignedBlob()
             self._defaultWireEncodingFormat = None
 
         self._getNonceChangeCount = 0
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
-
 
     def getName(self):
         """
@@ -147,6 +157,76 @@ class Interest(object):
 
         return self._nonce
 
+    def hasLink(self):
+        """
+        Check if this interest has a link object (or a link wire encoding which
+        can be decoded to make the link object).
+
+        :return:  True if this interest has a link object, False if not.
+        :rtype: bool
+        """
+        return self._link.get() != None or not self._linkWireEncoding.isNull()
+
+    def getLink(self):
+        """
+        Get the link object. If necessary, decode it from the link wire encoding.
+
+        :return: The link object, or null if not specified.
+        :rtype: Link
+        :raises ValueError: For error decoding the link wire encoding (if
+          necessary).
+        """
+        if self._link.get() != None:
+            return self._link.get()
+        elif not self._linkWireEncoding.isNull():
+            # Decode the link object from linkWireEncoding_.
+            link = Link()
+            link.wireDecode(self._linkWireEncoding, self._linkWireEncodingFormat)
+            self._link.set(link)
+
+            # Clear _linkWireEncoding since it is now managed by the link object.
+            self._linkWireEncoding = Blob()
+            self._linkWireEncodingFormat = None
+
+            return link
+        else:
+            return None
+
+    def getLinkWireEncoding(self, wireFormat = None):
+        """
+        Get the wire encoding of the link object. If there is already a wire
+        encoding then return it. Otherwise encode from the link object (if
+        available).
+
+        :param WireFormat wireFormat: (optional) A WireFormat object used to
+          encode the Link. If omitted, use WireFormat.getDefaultWireFormat().
+        :return: The wire encoding, or an isNull Blob if the link is not
+          specified.
+        :rtype: Blob
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        if (not self._linkWireEncoding.isNull() and
+            self._linkWireEncodingFormat == wireFormat):
+          return self._linkWireEncoding
+
+        link = self.getLink()
+        if link != None:
+          return link.wireEncode(wireFormat)
+        else:
+          return Blob()
+
+    def getSelectedDelegationIndex(self):
+        """
+        Get the selected delegation index.
+
+        :return: The selected delegation index. If not specified, return None.
+        :rtype: int
+        """
+        return self._selectedDelegationIndex
+
     def getInterestLifetimeMilliseconds(self):
         """
         Get the interest lifetime.
@@ -225,6 +305,56 @@ class Interest(object):
         """
         self._exclude.set(
           Exclude(exclude) if type(exclude) is Exclude else Exclude())
+        self._changeCount += 1
+        return self
+
+    def setLinkWireEncoding(self, encoding, wireFormat = None):
+        """
+        Set the link wire encoding bytes, without decoding them. If there is a
+        link object, set it to null. If you later call getLink(), it will decode
+        the wireEncoding to create the link object.
+
+        :param Blob encoding: The Blob with the bytes of the link wire encoding.
+          If no link is specified, set to an empty Blob() or call unsetLink().
+        :param WireFormat wireFormat: The wire format of the encoding, to be
+          used later if necessary to decode. If omitted, use
+          WireFormat.getDefaultWireFormat().
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        self._linkWireEncoding = encoding
+        self._linkWireEncodingFormat = wireFormat
+
+        # Clear the link object, assuming that it has a different encoding.
+        self._link.set(None)
+
+        self._changeCount += 1
+        return self
+
+    def unsetLink(self):
+        """
+        Clear the link wire encoding and link object so that getLink() returns
+        None.
+
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        return self.setLinkWireEncoding(Blob(), None)
+
+    def setSelectedDelegationIndex(self, selectedDelegationIndex):
+        """
+        Set the selected delegation index.
+
+        :param int selectedDelegationIndex: The selected delegation index. If
+          not specified, set to None.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        self._selectedDelegationIndex = selectedDelegationIndex
         self._changeCount += 1
         return self
 

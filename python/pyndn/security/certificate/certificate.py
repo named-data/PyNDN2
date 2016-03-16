@@ -23,7 +23,8 @@ from pyndn.encoding.der.der_node import *
 from pyndn.encoding.der.der import *
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.util.blob import Blob
-from pyndn import Data, ContentType
+from pyndn.data import Data
+from pyndn.meta_info import ContentType
 from datetime import datetime
 
 import base64

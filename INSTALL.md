@@ -19,6 +19,7 @@ Prerequisites
 
 If you use easy_install to install the pyndn module, it automatically installs
 the prerequisites for trollius/asyncio and Protobuf needed to run PyNDN.
+To avoid installation problems, make sure you have the latest version of pip.
 
 To use easy_install in OS X, change directory to the PyNDN root and enter:
 

@@ -47,6 +47,7 @@ class Tlv(object):
     SignatureType =    27
     KeyLocator =       28
     KeyLocatorDigest = 29
+    SelectedDelegation = 32
     FaceInstance =     128
     ForwardingEntry =  129
     StatusResponse =   130
@@ -89,6 +90,9 @@ class Tlv(object):
     LocalControlHeader_NextHopFaceId = 82
     LocalControlHeader_CachingPolicy = 83
     LocalControlHeader_NoCache = 96
+
+    Link_Preference = 30
+    Link_Delegation = 31
 
     Encrypt_EncryptedContent = 130
     Encrypt_EncryptionAlgorithm = 131

@@ -1,5 +1,9 @@
-Interim changes since PyNDN v2.2beta1 (2016-02-29)
+Interim changes since PyNDN v2.2beta1 (2016-03-16)
 --------------------------------------------------
+
+Breaking changes
+* In encrypt/Consumer, moved ErrorCode to encrypt/EncryptError, affecting the
+  onError callback to Consumer.consume.
 
 Changes
 * In MemoryContentCache.registerPrefix, added optional onRegisterSuccess. (Thanks to Zhehao Wang.)
@@ -8,6 +12,9 @@ Changes
 * In util, added ExponentialReExpress.
 * Added HmacWithSha256Signature. In KeyChain, added experimental static methods
   sign/verifyDataWithHmacWithSha256.
+* Added classes Link and DelegationSet to support link objects.
+* In Interest, added methods to support link objects and SelectedDelegation:
+  hasLink, getLink, unsetLink, get/setLinkWireEncoding, get/setSelectedDelegationIndex.
 * http://redmine.named-data.net/issues/3449 Added Name.isPrefixOf and getSuccessor.
   In compare, support compare(int, int, Name, int, int).
 * http://redmine.named-data.net/issues/3450 Added Name.Component.isSegment,
@@ -16,8 +23,14 @@ Changes
   fromSegmentOffset, fromVersion, fromTimestamp and fromSequenceNumber.
 * http://redmine.named-data.net/issues/3452 Added Interest.refreshNonce.
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
+* http://redmine.named-data.net/issues/3355 In Producer.createContentKey and produce,
+  added an optional onError callback.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
+* Unit tests: Added test_link.
 * Examples: Added test_sign_verify_data_hmac.
+
+Bug fixes
+* Fix bug in encrypt/Schedule to solve problems when the black repetitive interval list is empty.
 
 PyNDN v2.2beta1 (2016-02-03)
 ----------------------------

@@ -88,7 +88,7 @@ SCHEDULE = bytearray([
 ])
 
 class TestSchedule(ut.TestCase):
-    def test_calculate_covering_interval(self):
+    def test_calculate_interval_with_black_and_white(self):
         schedule = Schedule()
 
         interval1 = RepetitiveInterval(
@@ -153,6 +153,93 @@ class TestSchedule(ut.TestCase):
         self.assertEqual(result.isPositive, False)
         self.assertEqual(result.interval.isEmpty(), False)
         self.assertEqual(toIsoString(result.interval.getStartTime()), "20150825T100000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150826T000000")
+
+    def test_calculate_interval_without_black(self):
+        schedule = Schedule()
+
+        interval1 = RepetitiveInterval(
+          fromIsoString("20150825T000000"),
+          fromIsoString("20150827T000000"), 5, 10, 2,
+          RepetitiveInterval.RepeatUnit.DAY)
+        interval2 = RepetitiveInterval(
+          fromIsoString("20150825T000000"),
+          fromIsoString("20150827T000000"), 6, 8, 1,
+          RepetitiveInterval.RepeatUnit.DAY)
+        interval3 = RepetitiveInterval(
+          fromIsoString("20150825T000000"),
+          fromIsoString("20150825T000000"), 4, 7)
+
+        schedule.addWhiteInterval(interval1)
+        schedule.addWhiteInterval(interval2)
+        schedule.addWhiteInterval(interval3)
+
+        # timePoint1 --> positive 8.25 4-10
+        timePoint1 = fromIsoString("20150825T063000")
+        result = schedule.getCoveringInterval(timePoint1)
+        self.assertEqual(result.isPositive, True)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150825T040000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150825T100000")
+
+        # timePoint2 --> positive 8.26 6-8
+        timePoint2 = fromIsoString("20150826T073000")
+        result = schedule.getCoveringInterval(timePoint2)
+        self.assertEqual(result.isPositive, True)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150826T060000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150826T080000")
+
+        # timePoint3 --> positive 8.27 5-10
+        timePoint3 = fromIsoString("20150827T053000")
+        result = schedule.getCoveringInterval(timePoint3)
+        self.assertEqual(result.isPositive, True)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150827T050000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150827T100000")
+
+        # timePoint4 --> negative 8.25 10-24
+        timePoint4 = fromIsoString("20150825T113000")
+        result = schedule.getCoveringInterval(timePoint4)
+        self.assertEqual(result.isPositive, False)
+        self.assertEqual(result.interval.isEmpty(), False)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150825T100000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150826T000000")
+
+        # timePoint5 --> negative 8.25 0-4
+        timePoint5 = fromIsoString("20150825T013000")
+        result = schedule.getCoveringInterval(timePoint5)
+        self.assertEqual(result.isPositive, False)
+        self.assertEqual(result.interval.isEmpty(), False)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150825T000000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150825T040000")
+
+    def test_calculate_interval_without_white(self):
+        schedule = Schedule()
+
+        interval1 = RepetitiveInterval(
+          fromIsoString("20150825T000000"),
+          fromIsoString("20150827T000000"), 5, 10, 2,
+          RepetitiveInterval.RepeatUnit.DAY)
+        interval2 = RepetitiveInterval(
+          fromIsoString("20150825T000000"),
+          fromIsoString("20150827T000000"), 6, 8, 1,
+          RepetitiveInterval.RepeatUnit.DAY)
+
+        schedule.addBlackInterval(interval1)
+        schedule.addBlackInterval(interval2)
+
+        # timePoint1 --> negative 8.25 4-10
+        timePoint1 = fromIsoString("20150825T063000")
+        result = schedule.getCoveringInterval(timePoint1)
+        self.assertEqual(result.isPositive, False)
+        self.assertEqual(result.interval.isEmpty(), False)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150825T050000")
+        self.assertEqual(toIsoString(result.interval.getEndTime()), "20150825T100000")
+
+        # timePoint2 --> negative 8.25 0-4
+        timePoint2 = fromIsoString("20150825T013000")
+        result = schedule.getCoveringInterval(timePoint2)
+        self.assertEqual(result.isPositive, False)
+        self.assertEqual(result.interval.isEmpty(), False)
+        self.assertEqual(toIsoString(result.interval.getStartTime()), "20150825T000000")
         self.assertEqual(toIsoString(result.interval.getEndTime()), "20150826T000000")
 
     def test_encode_and_decode(self):

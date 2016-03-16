@@ -64,6 +64,16 @@ class Interval(object):
             self._endTime = -sys.float_info.max
             self._isValid = isValid
 
+    def set(self, other):
+        """
+        Set this interval to have the same values as the other interval.
+
+        :param Interval other: The other Interval with values to copy.
+        """
+        self._startTime = other._startTime
+        self._endTime = other._endTime
+        self._isValid = other._isValid
+
     def covers(self, timePoint):
         """
         Check if the time point is in this interval.

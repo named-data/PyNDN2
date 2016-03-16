@@ -360,3 +360,18 @@ class TlvDecoder(object):
         :param int offset: The new offset.
         """
         self._offset = offset
+
+    def getSlice(self, beginOffset, endOffset):
+        """
+        Return an array of a slice of the input for the given offset range.
+
+        :param int beginOffset: The offset in the input of the beginning of the
+          slice.
+        :param int endOffset: The offset in the input of the end of the slice.
+        :return: The bytes in the value as a slice on the byte array.  This is
+          not necessarily a copy of the bytes in the input buffer.  If you need
+          a copy, then you must make a copy of the return value.
+        :rtype: memoryview or equivalent
+        """
+        # Use _inputView to get the slice.
+        return self._inputView[beginOffset:endOffset]

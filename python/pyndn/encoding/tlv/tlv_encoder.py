@@ -179,6 +179,21 @@ class TlvEncoder(object):
             #   is a 32-bit system.
             self.writeNonNegativeIntegerTlv(type, int(round(value)))
 
+    def writeBuffer(self, buffer):
+        """
+        Write the buffer value to self._output just before self._length from the
+        back. Advance self._length.
+
+        :param buffer: The byte array with the bytes to write. If value is None,
+          then do nothing.
+        :type value: bytearray or memoryview
+        """
+        if buffer == None:
+            return
+
+        self._length += len(buffer)
+        self._output.copyFromBack(buffer, self._length)
+
     def writeBlobTlv(self, type, value):
         """
         Write the type, then the length of the blob then the blob value
@@ -195,9 +210,7 @@ class TlvEncoder(object):
             return
 
         # Write backwards, starting with the blob array.
-        self._length += len(value)
-        self._output.copyFromBack(value, self._length)
-
+        self.writeBuffer(value)
         self.writeTypeAndLength(type, len(value))
 
     def writeOptionalBlobTlv(self, type, value):
