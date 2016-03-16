@@ -149,7 +149,8 @@ class Producer(object):
                 timeSlot >= keyInfo.endTimeSlot):
                 # The current E-KEY cannot cover the content key, so retrieve one.
                 self._sendKeyInterest(
-                  keyName, timeSlot, keyRequest, onEncryptedKeys, timeRange)
+                  Interest(keyName).setExclude(timeRange).setChildSelector(1),
+                  timeSlot, keyRequest, onEncryptedKeys)
             else:
                 # The current E-KEY can cover the content key.
                 # Encrypt the content key directly.
@@ -211,13 +212,12 @@ class Producer(object):
         """
         return round(math.floor(round(timeSlot) / 3600000.0) * 3600000.0)
 
-    def _sendKeyInterest(self, name, timeSlot, keyRequest, onEncryptedKeys,
-                         timeRange):
+    def _sendKeyInterest(self, interest, timeSlot, keyRequest, onEncryptedKeys):
         """
         Send an interest with the given name through the face with callbacks to
           _handleCoveringKey and _handleTimeout.
 
-        :param Name name: The name of the interest to send.
+        :param Interest interest: The interest to send.
         :param float timeSlot: The time slot, passed to _handleCoveringKey and
           _handleTimeout.
         :param Producer._KeyRequest keyRequest: The KeyRequest, passed to
@@ -225,7 +225,6 @@ class Producer(object):
         :param onEncryptedKeys: The OnEncryptedKeys callback, passed to
           _handleCoveringKey and _handleTimeout.
         :type onEncryptedKeys: function object
-        :param Exclude timeRange: The Exclude for the interest.
         """
         def onKey(interest, data):
             self._handleCoveringKey(
@@ -234,11 +233,7 @@ class Producer(object):
         def onTimeout(interest):
             self._handleTimeout(interest, timeSlot, keyRequest, onEncryptedKeys)
 
-        keyInterest = Interest(name)
-        keyInterest.setExclude(timeRange)
-        keyInterest.setChildSelector(1)
-
-        self._face.expressInterest(keyInterest, onKey, onTimeout)
+        self._face.expressInterest(interest, onKey, onTimeout)
 
     def _handleTimeout(self, interest, timeSlot, keyRequest, onEncryptedKeys):
         """
@@ -260,8 +255,7 @@ class Producer(object):
             # Increase the retrial count.
             keyRequest.repeatAttempts[interestName] += 1
             self._sendKeyInterest(
-              interestName, timeSlot, keyRequest, onEncryptedKeys,
-              interest.getExclude())
+              interest, timeSlot, keyRequest, onEncryptedKeys)
         else:
             # No more retrials.
             keyRequest.interestCount -= 1
@@ -306,7 +300,8 @@ class Producer(object):
             Producer.excludeBefore(timeRange, keyName.get(Producer.START_TIME_STAMP_INDEX))
             keyRequest.repeatAttempts[interestName] = 0
             self._sendKeyInterest(
-              interestName, timeSlot, keyRequest, onEncryptedKeys, timeRange)
+              Interest(interestName).setExclude(timeRange).setChildSelector(1),
+              timeSlot, keyRequest, onEncryptedKeys)
         else:
             # If the received E-KEY covers the content key, encrypt the content.
             encryptionKey = data.getContent()
