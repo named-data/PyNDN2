@@ -255,15 +255,30 @@ class Producer(object):
             self._sendKeyInterest(interest, timeSlot, onEncryptedKeys)
         else:
             # No more retrials.
-            keyRequest.interestCount -= 1
+            self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
 
+    def _updateKeyRequest(self, keyRequest, timeCount, onEncryptedKeys):
+        """
+        Decrease the count of outstanding E-KEY interests for the C-KEY for
+        timeCount. If the count decreases to 0, invoke onEncryptedKeys.
+
+        :param Producer._KeyRequest keyRequest: The KeyRequest with the
+          interestCount to update.
+        :param float timeCount: The time count for indexing keyRequests_.
+        :param onEncryptedKeys: When there are no more interests to process,
+          this calls onEncryptedKeys(keys) where keys is a list of encrypted
+          content key Data packets. If onEncryptedKeys is None, this does not
+          use it.
+        :type onEncryptedKeys: function object
+        """
+        keyRequest.interestCount -= 1
         if keyRequest.interestCount == 0 and onEncryptedKeys != None:
             try:
                 onEncryptedKeys(keyRequest.encryptedKeys)
             except:
                 logging.exception("Error in onEncryptedKeys")
-            if timeSlot in self._keyRequests:
-                del self._keyRequests[timeSlot]
+            if timeCount in self._keyRequests:
+                del self._keyRequests[timeCount]
 
     def _handleCoveringKey(self, interest, data, timeSlot, onEncryptedKeys):
         """
@@ -341,18 +356,10 @@ class Producer(object):
         params = EncryptParams(EncryptAlgorithmType.RsaOaep)
         Encryptor.encryptData(
           cKeyData, contentKey, eKeyName, encryptionKey, params)
+
         self._keyChain.sign(cKeyData)
-
         keyRequest.encryptedKeys.append(cKeyData)
-
-        keyRequest.interestCount -= 1
-        if keyRequest.interestCount == 0 and onEncryptedKeys != None:
-            try:
-                onEncryptedKeys(keyRequest.encryptedKeys)
-            except:
-                logging.exception("Error in onEncryptedKeys")
-            if timeSlot in self._keyRequests:
-                del self._keyRequests[timeSlot]
+        self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
 
     # TODO: Move this to be the main representation inside the Exclude object.
     class ExcludeEntry(object):
