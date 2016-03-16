@@ -95,11 +95,11 @@ class Producer(object):
 
     def createContentKey(self, timeSlot, onEncryptedKeys):
         """
-        Create the content key. This first checks if the content key exists. For
-        an existing content key, this returns the content key name directly. If
-        the key does not exist, this creates one and encrypts it using the
-        corresponding E-KEYs. The encrypted content keys are passed to the
-        onEncryptedKeys callback.
+        Create the content key corresponding to the timeSlot. This first checks
+        if the content key exists. For an existing content key, this returns the
+        content key name directly. If the key does not exist, this creates one
+        and encrypts it using the corresponding E-KEYs. The encrypted content
+        keys are passed to the onEncryptedKeys callback.
 
         :param float timeSlot: The time slot as milliseconds since Jan 1,
           1970 UTC.
@@ -120,29 +120,39 @@ class Producer(object):
         contentKeyName.append(Encryptor.NAME_COMPONENT_C_KEY)
         contentKeyName.append(Schedule.toIsoString(hourSlot))
 
+        # Check if we have created the content key before.
         if self._database.hasContentKey(timeSlot):
+            # We have created the content key. Return its name directly.
             return contentKeyName
 
+        # We haven't created the content key. Create one and add it into the
+        # database.
         aesParams = AesKeyParams(128)
         contentKeyBits = AesAlgorithm.generateKey(aesParams).getKeyBits()
         self._database.addContentKey(timeSlot, contentKeyBits)
 
+        # Now we need to retrieve the E-KEYs for content key encryption.
         timeCount = timeSlot
         self._keyRequests[timeCount] = Producer._KeyRequest(len(self._eKeyInfo))
         keyRequest = self._keyRequests[timeCount]
 
+        # Check if the current E-KEYs can cover the content key.
         timeRange = Exclude()
         Producer.excludeAfter(
           timeRange, Name.Component(Schedule.toIsoString(timeSlot)))
         # Send interests for all nodes in the tree.
         for keyName in self._eKeyInfo:
+            # For each current E-KEY.
             keyInfo = self._eKeyInfo[keyName]
             keyRequest.repeatAttempts[keyName] = 0
             if (timeSlot < keyInfo.beginTimeSlot or
                 timeSlot >= keyInfo.endTimeSlot):
+                # The current E-KEY cannot cover the content key, so retrieve one.
                 self._sendKeyInterest(
                   keyName, timeSlot, keyRequest, onEncryptedKeys, timeRange)
             else:
+                # The current E-KEY can cover the content key.
+                # Encrypt the content key directly.
                 eKeyName = Name(keyName)
                 eKeyName.append(Schedule.toIsoString(keyInfo.beginTimeSlot))
                 eKeyName.append(Schedule.toIsoString(keyInfo.endTimeSlot))
@@ -161,9 +171,11 @@ class Producer(object):
         :param float timeSlot: The time slot as milliseconds since Jan 1, 1970 UTC.
         :param Blob content: The content to encrypt.
         """
+        # Get a content key.
         contentKeyName = Name(self.createContentKey(timeSlot, None))
         contentKey = self._database.getContentKey(timeSlot)
 
+        # Produce data.
         dataName = Name(self._namespace)
         dataName.append(
           Schedule.toIsoString(Producer._getRoundedTimeSlot(timeSlot)))
@@ -245,11 +257,13 @@ class Producer(object):
         interestName = interest.getName()
 
         if keyRequest.repeatAttempts[interestName] < self._maxRepeatAttempts:
+            # Increase the retrial count.
             keyRequest.repeatAttempts[interestName] += 1
             self._sendKeyInterest(
               interestName, timeSlot, keyRequest, onEncryptedKeys,
               interest.getExclude())
         else:
+            # No more retrials.
             keyRequest.interestCount -= 1
 
         if keyRequest.interestCount == 0 and onEncryptedKeys != None:
@@ -286,21 +300,23 @@ class Producer(object):
           str(keyName.get(Producer.END_TIME_STAMP_INDEX).getValue()))
 
         if timeSlot >= end:
+            # If the received E-KEY covers some earlier period, try to retrieve
+            # an E-KEY covering a later one.
             timeRange = Exclude(interest.getExclude())
             Producer.excludeBefore(timeRange, keyName.get(Producer.START_TIME_STAMP_INDEX))
             keyRequest.repeatAttempts[interestName] = 0
             self._sendKeyInterest(
               interestName, timeSlot, keyRequest, onEncryptedKeys, timeRange)
-            return
+        else:
+            # If the received E-KEY covers the content key, encrypt the content.
+            encryptionKey = data.getContent()
+            keyInfo = self._eKeyInfo[interestName]
+            keyInfo.beginTimeSlot = begin
+            keyInfo.endTimeSlot = end
+            keyInfo.keyBits = encryptionKey
 
-        encryptionKey = data.getContent()
-        keyInfo = self._eKeyInfo[interestName]
-        keyInfo.beginTimeSlot = begin
-        keyInfo.endTimeSlot = end
-        keyInfo.keyBits = encryptionKey
-
-        self._encryptContentKey(
-          keyRequest, encryptionKey, keyName, timeSlot, onEncryptedKeys)
+            self._encryptContentKey(
+              keyRequest, encryptionKey, keyName, timeSlot, onEncryptedKeys)
 
     def _encryptContentKey(self, keyRequest, encryptionKey, eKeyName, timeSlot,
                            onEncryptedKeys):
