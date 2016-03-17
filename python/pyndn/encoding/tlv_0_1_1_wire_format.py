@@ -753,24 +753,24 @@ class Tlv0_1_1WireFormat(WireFormat):
         """
         saveLength = len(encoder)
 
-        if type(signature) is Sha256WithRsaSignature:
+        if isinstance(signature, Sha256WithRsaSignature):
             # Encode backwards.
             Tlv0_1_1WireFormat._encodeKeyLocator(
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
-        elif type(signature) is Sha256WithEcdsaSignature:
+        elif isinstance(signature, Sha256WithEcdsaSignature):
             # Encode backwards.
             Tlv0_1_1WireFormat._encodeKeyLocator(
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithEcdsa)
-        elif type(signature) is HmacWithSha256Signature:
+        elif isinstance(signature, HmacWithSha256Signature):
             Tlv0_1_1WireFormat._encodeKeyLocator(
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureHmacWithSha256)
-        elif type(signature) is DigestSha256Signature:
+        elif isinstance(signature, DigestSha256Signature):
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_DigestSha256)
         else:
