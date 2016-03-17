@@ -22,6 +22,7 @@ from pyndn import Data
 from pyndn import ContentType
 from pyndn import KeyLocatorType
 from pyndn import Sha256WithRsaSignature
+from pyndn import GenericSignature
 from pyndn.util import Blob
 from test_utils import dump, CredentialStorage
 import unittest as ut
@@ -60,6 +61,23 @@ codedData = Blob(bytearray([
 1
   ]))
 
+experimentalSignatureType = 100
+experimentalSignatureInfo = Blob(bytearray([
+0x16, 0x08, # SignatureInfo
+  0x1B, 0x01, experimentalSignatureType, # SignatureType
+  0x81, 0x03, 1, 2, 3 # Experimental info
+  ]))
+
+experimentalSignatureInfoNoSignatureType = Blob(bytearray([
+0x16, 0x05, # SignatureInfo
+  0x81, 0x03, 1, 2, 3 # Experimental info
+  ]))
+
+experimentalSignatureInfoBadTlv = Blob(bytearray([
+0x16, 0x08, # SignatureInfo
+  0x1B, 0x01, experimentalSignatureType, # SignatureType
+  0x81, 0x10, 1, 2, 3 # Bad TLV encoding (length 0x10 doesn't match the value length.
+  ]))
 
 def dumpData(data):
     result = []
@@ -133,8 +151,6 @@ class TestDataDump(ut.TestCase):
         # Initialize the storage.
         return freshData
 
-
-
     def test_dump(self):
         data = Data()
         data.wireDecode(codedData)
@@ -200,6 +216,55 @@ class TestDataDump(ut.TestCase):
         self.credentials.verifyData(self.freshData, verifiedCallback, failedCallback)
         self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
         self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
+
+    def test_generic_signature(self):
+        # Test correct encoding.
+        signature = GenericSignature()
+        signature.setSignatureInfoEncoding(
+          Blob(experimentalSignatureInfo, False), None)
+        signatureValue = Blob([1, 2, 3, 4], False)
+        signature.setSignature(signatureValue)
+
+        self.freshData.setSignature(signature)
+        encoding = self.freshData.wireEncode()
+
+        decodedData = Data()
+        decodedData.wireDecode(encoding)
+
+        decodedSignature = decodedData.getSignature()
+        self.assertEqual(decodedSignature.getTypeCode(), experimentalSignatureType)
+        self.assertTrue(Blob(experimentalSignatureInfo, False).equals
+                        (decodedSignature.getSignatureInfoEncoding()))
+        self.assertTrue(signatureValue.equals(decodedSignature.getSignature()))
+
+        # Test bad encoding.
+        signature = GenericSignature()
+        signature.setSignatureInfoEncoding(
+          Blob(experimentalSignatureInfoNoSignatureType, False), None)
+        signature.setSignature(signatureValue)
+        self.freshData.setSignature(signature)
+        gotError = True
+        try:
+            self.freshData.wireEncode()
+            gotError = False
+        except:
+            pass
+        if not gotError:
+          self.fail("Expected encoding error for experimentalSignatureInfoNoSignatureType")
+
+        signature = GenericSignature()
+        signature.setSignatureInfoEncoding(
+          Blob(experimentalSignatureInfoBadTlv, False), None)
+        signature.setSignature(signatureValue)
+        self.freshData.setSignature(signature)
+        gotError = True
+        try:
+            self.freshData.wireEncode()
+            gotError = False
+        except:
+            pass
+        if not gotError:
+          self.fail("Expected encoding error for experimentalSignatureInfoBadTlv")
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

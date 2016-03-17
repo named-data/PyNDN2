@@ -27,6 +27,7 @@ from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.generic_signature import GenericSignature
 from pyndn.hmac_with_sha256_signature import HmacWithSha256Signature
 from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
@@ -751,6 +752,24 @@ class Tlv0_1_1WireFormat(WireFormat):
         :param Signature signature: An object of a subclass of Signature to encode.
         :param TlvEncoder encoder: The TlvEncoder to receive the encoding.
         """
+        if isinstance(signature, GenericSignature):
+            # Handle GenericSignature separately since it has the entire encoding.
+            encoding = signature.getSignatureInfoEncoding()
+
+            # Do a test decoding to sanity check that it is valid TLV.
+            try:
+                decoder = TlvDecoder(encoding.buf())
+                endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
+                decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
+                decoder.finishNestedTlvs(endOffset)
+            except ValueError as ex:
+                raise ValueError(
+                  "The GenericSignature encoding is not a valid NDN-TLV SignatureInfo: " +
+                   ex)
+
+            encoder.writeBuffer(encoding.buf())
+            return
+
         saveLength = len(encoder)
 
         if isinstance(signature, Sha256WithRsaSignature):
@@ -781,6 +800,7 @@ class Tlv0_1_1WireFormat(WireFormat):
 
     @staticmethod
     def _decodeSignatureInfo(signatureHolder, decoder):
+        beginOffset = decoder.getOffset()
         endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
 
         signatureType = decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
@@ -806,9 +826,12 @@ class Tlv0_1_1WireFormat(WireFormat):
         elif signatureType == Tlv.SignatureType_DigestSha256:
             signatureHolder.setSignature(DigestSha256Signature())
         else:
-            raise RuntimeError(
-              "decodeSignatureInfo: unrecognized SignatureInfo type" +
-              str(signatureType))
+            signatureHolder.setSignature(GenericSignature())
+            signatureInfo = signatureHolder.getSignature()
+
+            # Get the bytes of the SignatureInfo TLV.
+            signatureInfo.setSignatureInfoEncoding(
+              Blob(decoder.getSlice(beginOffset, endOffset), True), signatureType)
 
         decoder.finishNestedTlvs(endOffset)
 
