@@ -582,6 +582,8 @@ class KeyChain(object):
         :param wireFormat: (optional) The WireFormat for calling encodeData,
           etc., or WireFormat.getDefaultWireFormat() if omitted.
         :type wireFormat: A subclass of WireFormat
+        :return: True if the signature verifies, otherwise False.
+        :rtype: bool
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
