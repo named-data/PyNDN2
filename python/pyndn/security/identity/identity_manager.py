@@ -291,6 +291,99 @@ class IdentityManager(object):
 
     # TODO: Add two versions of createIdentityCertificate.
 
+    def prepareUnsignedIdentityCertificate(self, keyName, publicKey,
+          signingIdentity, notBefore, notAfter, subjectDescription = None,
+          certPrefix = None):
+        """
+        Prepare an unsigned identity certificate.
+
+        :param Name keyName: The key name, e.g., `/{identity_name}/ksk-123456`.
+        :param PublicKey publicKey: (optional) The public key to sign. If
+          ommited, use the keyName to get the public key from the identity
+          storage.
+        :param Name signingIdentity: The signing identity.
+        :param float notBefore: See IdentityCertificate.
+        :param float notAfter: See IdentityCertificate.
+        :param Array<CertificateSubjectDescription> subjectDescription: A list
+          of CertificateSubjectDescription. See IdentityCertificate. If None or
+          empty, this adds a an ATTRIBUTE_NAME based on the keyName.
+        :param Name certPrefix: (optional) The prefix before the `KEY`
+          component. If None, this infers the certificate name according to the
+          relation between the signingIdentity and the subject identity. If the
+          signingIdentity is a prefix of the subject identity, `KEY` will be
+          inserted after the signingIdentity, otherwise `KEY` is inserted after
+          subject identity (i.e., before `ksk-...`).
+        :return: The unsigned IdentityCertificate, or None if the inputs are
+          invalid.
+        :rtype: IdentityCertificate
+        """
+        if not isinstance(publicKey, PublicKey):
+            # The publicKey was omitted. Shift arguments.
+            certPrefix = subjectDescription
+            subjectDescription = notAfter
+            notAfter = notBefore
+            notBefore = signingIdentity
+            signingIdentity = publicKey
+
+            publicKey = PublicKey(self._identityStorage.getKey(keyName))
+
+        if keyName.size() < 1:
+            return None
+
+        tempKeyIdPrefix = keyName.get(-1).toEscapedString()
+        if len(tempKeyIdPrefix) < 4:
+            return null
+        keyIdPrefix = tempKeyIdPrefix[0:4]
+        if keyIdPrefix != "ksk-" and keyIdPrefix != "dsk-":
+            return None
+
+        certificate = IdentityCertificate()
+        certName = Name()
+
+        if certPrefix == None:
+            # No certificate prefix hint, so infer the prefix.
+            if signingIdentity.match(keyName):
+                certName.append(signingIdentity) \
+                    .append("KEY") \
+                    .append(keyName.getSubName(signingIdentity.size())) \
+                    .append("ID-CERT") \
+                    .appendVersion(int(Common.getNowMilliseconds()))
+            else:
+                certName.append(keyName.getPrefix(-1)) \
+                    .append("KEY") \
+                    .append(keyName.get(-1)) \
+                    .append("ID-CERT") \
+                    .appendVersion(int(Common.getNowMilliseconds()))
+        else:
+            # A cert prefix hint is supplied, so determine the cert name.
+            if certPrefix.match(keyName) and not certPrefix.equals(keyName):
+                certName.append(certPrefix) \
+                    .append("KEY") \
+                    .append(keyName.getSubName(certPrefix.size())) \
+                    .append("ID-CERT") \
+                    .appendVersion(int(Common.getNowMilliseconds()))
+            else:
+                return None
+
+        certificate.setName(certName)
+        certificate.setNotBefore(notBefore)
+        certificate.setNotAfter(notAfter)
+        certificate.setPublicKeyInfo(publicKey)
+
+        if subjectDescription == None or len(subjectDescription) == 0:
+            certificate.addSubjectDescription(CertificateSubjectDescription(
+              "2.5.4.41", keyName.getPrefix(-1).toUri()))
+        else:
+            for i in range(len(subjectDescription)):
+                certificate.addSubjectDescription(subjectDescription[i])
+
+        try:
+            certificate.encode()
+        except Exception as ex:
+            raise SecurityException("DerEncodingException: " + str(ex))
+
+        return certificate
+
     def addCertificate(self, certificate):
         """
         Add a certificate into the public key identity storage.
