@@ -201,8 +201,7 @@ class Producer(object):
 
         # Produce data.
         dataName = Name(self._namespace)
-        dataName.append(
-          Schedule.toIsoString(Producer._getRoundedTimeSlot(timeSlot)))
+        dataName.append(Schedule.toIsoString(timeSlot))
 
         data.setName(dataName)
         params = EncryptParams(EncryptAlgorithmType.AesCbc, 16)
