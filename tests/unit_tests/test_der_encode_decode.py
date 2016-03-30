@@ -22,9 +22,13 @@
           ndn-cxx / tests / unit-tests / security / test-encode-decode-certificate.cpp
 """
 
-from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger, DerOid
+from pyndn.encoding.der import DerNode, DerSequence, DerOctetString, DerInteger
+from pyndn.encoding.der import DerOid
 from pyndn.util import Blob
-from pyndn.security.certificate import PublicKey, Certificate, CertificateSubjectDescription, CertificateExtension
+from pyndn.security.certificate import PublicKey, Certificate
+from pyndn.security.certificate import CertificateSubjectDescription
+from pyndn.security.certificate import CertificateExtension, IdentityCertificate
+from pyndn.security import KeyType
 from pyndn.security.identity import IdentityManager
 from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
@@ -205,6 +209,32 @@ class TestCertificate(ut.TestCase):
         self.assertEqual(expectedEncoding, derOid.encode().toHex(),
                          "Incorrect OID encoding")
         self.assertEqual(oidString, derOid.toVal(), "Incorrect decoded OID")
+
+    def test_prepare_unsigned_certificate(self):
+        identityStorage = MemoryIdentityStorage()
+        privateKeyStorage = MemoryPrivateKeyStorage()
+        identityManager = IdentityManager(identityStorage, privateKeyStorage)
+        keyName = Name("/test/ksk-1457560485494")
+        identityStorage.addKey(keyName, KeyType.RSA, Blob(PUBLIC_KEY))
+
+        subjectDescriptions = []
+        subjectDescriptions.append(CertificateSubjectDescription(
+          TEST_OID, "TEST NAME"))
+        newCertificate = identityManager.prepareUnsignedIdentityCertificate(
+            keyName,
+            keyName.getPrefix(1), self.toyCertNotBefore,
+            self.toyCertNotAfter, subjectDescriptions)
+
+        # Update the generated certificate version to equal the one in toyCert.
+        newCertificate.setName(
+          Name(newCertificate.getName().getPrefix(-1).append
+           (self.toyCert.getName().get(-1))))
+
+        # Make a copy to test encoding.
+        certificateCopy = IdentityCertificate(newCertificate)
+        self.assertEqual(
+          str(self.toyCert), str(certificateCopy),
+          "Prepared unsigned certificate dump does not have the expected format")
 
 if __name__ == '__main__':
    ut.main(verbosity=2)
