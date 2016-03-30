@@ -99,6 +99,7 @@ class TestProducer(ut.TestCase):
         testTime2 = Schedule.fromIsoString("20150101T110001")
         testTimeRounded1 = Name.Component("20150101T100000")
         testTimeRounded2 = Name.Component("20150101T110000")
+        testTimeComponent2 = Name.Component("20150101T110001")
 
         # Create content keys required for this test case:
         for i in range(suffix.size()):
@@ -187,7 +188,7 @@ class TestProducer(ut.TestCase):
 
         producedName = testData.getName()
         self.assertEqual(cKeyName.getPrefix(-1), producedName.getSubName(0, 5))
-        self.assertEqual(testTimeRounded2, producedName.get(5))
+        self.assertEqual(testTimeComponent2, producedName.get(5))
         self.assertEqual(Encryptor.NAME_COMPONENT_FOR, producedName.get(6))
         self.assertEqual(cKeyName, producedName.getSubName(7, 6))
         self.assertEqual(testTimeRounded2, producedName.get(13))
