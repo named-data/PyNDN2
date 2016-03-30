@@ -332,7 +332,7 @@ class IdentityManager(object):
 
         tempKeyIdPrefix = keyName.get(-1).toEscapedString()
         if len(tempKeyIdPrefix) < 4:
-            return null
+            return None
         keyIdPrefix = tempKeyIdPrefix[0:4]
         if keyIdPrefix != "ksk-" and keyIdPrefix != "dsk-":
             return None
