@@ -32,6 +32,7 @@ from pyndn.data import Data
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
 from pyndn.key_locator import KeyLocator, KeyLocatorType
+from pyndn.security.security_exception import SecurityException
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 
@@ -200,9 +201,13 @@ class SelfVerifyPolicyManager(PolicyManager):
         """
         if (keyLocator.getType() == KeyLocatorType.KEYNAME and
             self._identityStorage != None):
-            # Assume the key name is a certificate name.
-            return self._identityStorage.getKey(
-              IdentityCertificate.certificateNameToPublicKeyName(
-                keyLocator.getKeyName()))
+            try:
+              # Assume the key name is a certificate name.
+              return self._identityStorage.getKey(
+                IdentityCertificate.certificateNameToPublicKeyName(
+                  keyLocator.getKeyName()))
+            except SecurityException as ex:
+              # The storage doesn't have the key.
+              return Blob()
         else:
             return Blob()
