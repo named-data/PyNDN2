@@ -99,13 +99,13 @@ class IdentityStorage(object):
     def addKey(self, keyName, keyType, publicKeyDer):
         """
         Add a public key to the identity storage. Also call addIdentity to ensure
-        that the identityName for the key exists.
+        that the identityName for the key exists. However, if the key already
+        exists, do nothing.
 
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
-        :raises SecurityException: If a key with the keyName already exists.
         """
         raise RuntimeError("addKey is not implemented")
 
