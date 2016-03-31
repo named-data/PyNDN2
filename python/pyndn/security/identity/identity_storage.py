@@ -165,14 +165,11 @@ class IdentityStorage(object):
         """
         raise RuntimeError("addCertificate is not implemented")
 
-    def getCertificate(self, certificateName, allowAny = False):
+    def getCertificate(self, certificateName):
         """
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will
-          be returned, otherwise validity is disregarded.  If omitted,
-          allowAny is False.
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
         """
@@ -300,7 +297,7 @@ class IdentityStorage(object):
             # The default is not defined.
             return None
 
-        return self.getCertificate(certName, True)
+        return self.getCertificate(certName)
 
     # A static value to make each timestamp unique among calls.
     _lastTimestamp = math.floor(Common.getNowMilliseconds() / 1000.0)

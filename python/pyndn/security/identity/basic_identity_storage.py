@@ -356,23 +356,16 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def getCertificate(self, certificateName, allowAny = False):
+    def getCertificate(self, certificateName):
         """
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will
-          be returned, otherwise validity is disregarded.  If omitted,
-          allowAny is False.
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
         """
         if not self.doesCertificateExist(certificateName):
             return None
-
-        if not allowAny:
-            raise RuntimeError(
-              "BasicIdentityStorage.getCertificate for not allowAny is not implemented")
 
         cursor = self._database.cursor()
         cursor.execute("SELECT certificate_data FROM Certificate WHERE cert_name=?",

@@ -188,21 +188,14 @@ class MemoryIdentityStorage(IdentityStorage):
         self._certificateStore[certificateName.toUri()] = (
            certificate.wireEncode())
 
-    def getCertificate(self, certificateName, allowAny = False):
+    def getCertificate(self, certificateName):
         """
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will
-          be returned, otherwise validity is disregarded.  If omitted,
-          allowAny is False.
         :return: The requested certificate. If not found, return None.
         :rtype: IdentityCertificate
         """
-        if not allowAny:
-            raise RuntimeError(
-              "MemoryIdentityStorage.getCertificate for !allowAny is not implemented")
-
         certificateNameUri = certificateName.toUri()
         if not (certificateNameUri in self._certificateStore):
             # Not found.  Silently return None.
