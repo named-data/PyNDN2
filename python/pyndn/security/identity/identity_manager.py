@@ -436,20 +436,10 @@ class IdentityManager(object):
         Get a certificate with the specified name.
 
         :param Name certificateName: The name of the requested certificate.
-        :return: The requested certificate which is valid.
-        :rtype: IdentityCertificate
-        """
-        return self._identityStorage.getCertificate(certificateName, False)
-
-    def getAnyCertificate(self, certificateName):
-        """
-        Get a certificate even if the certificate is not valid anymore.
-
-        :param Name certificateName: The name of the requested certificate.
         :return: The requested certificate.
         :rtype: IdentityCertificate
         """
-        return self._identityStorage.getCertificate(certificateName, True)
+        return self._identityStorage.getCertificate(certificateName, False)
 
     def getDefaultCertificateNameForIdentity(self, identityName):
         """

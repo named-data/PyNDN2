@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-03-30)
+Interim changes since PyNDN v2.2beta1 (2016-03-31)
 --------------------------------------------------
 
 Breaking changes
@@ -27,9 +27,13 @@ Changes
 * http://redmine.named-data.net/issues/3355 In Producer.createContentKey and produce,
   added an optional onError callback.
 * In IdentityManager, added prepareUnsignedIdentityCertificate.
+* In KeyChain, removed getAnyCertificate and getAnyIdentityCertificate.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
 * Unit tests: Added test_link.
 * Examples: Added test_sign_verify_data_hmac.
+
+Deprecated
+* In KeyChain, deprecated getIdentityCertificate. Use getCertificate.
 
 Bug fixes
 * Fix bug in encrypt/Schedule to solve problems when the black repetitive interval list is empty.

@@ -242,40 +242,16 @@ class KeyChain(object):
         Get a certificate with the specified name.
 
         :param Name certificateName: The name of the requested certificate.
-        :return: The requested certificate which is valid.
-        :rtype: IdentityCertificate
-        """
-        return self._identityManager.getCertificate(certificateName)
-
-    def getAnyCertificate(self, certificateName):
-        """
-        Get a certificate even if the certificate is not valid anymore.
-
-        :param Name certificateName: The name of the requested certificate.
         :return: The requested certificate.
         :rtype: IdentityCertificate
         """
-        return self._identityManager.getAnyCertificate(certificateName)
+        return self._identityManager.getCertificate(certificateName)
 
     def getIdentityCertificate(self, certificateName):
         """
-        Get an identity certificate with the specified name.
-
-        :param Name certificateName: The name of the requested certificate.
-        :return: The requested certificate which is valid.
-        :rtype: IdentityCertificate
+        :deprecated: Use getCertificate.
         """
         return self._identityManager.getCertificate(certificateName)
-
-    def getAnyIdentityCertificate(self, certificateName):
-        """
-        Get an identity certificate even if the certificate is not valid anymore.
-
-        :param Name certificateName: The name of the requested certificate.
-        :return: The requested certificate.
-        :rtype: IdentityCertificate
-        """
-        return self._identityManager.getAnyCertificate(certificateName)
 
     def revokeKey(self, keyName):
         """
