@@ -159,32 +159,21 @@ class MemoryIdentityStorage(IdentityStorage):
 
     def addCertificate(self, certificate):
         """
-        Add a certificate to the identity storage.
+        Add a certificate to the identity storage. Also call addKey to ensure
+        that the certificate key exists. If the certificate is already
+        installed, don't replace it.
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
-        :raises SecurityException: If the certificate is already installed.
         """
         certificateName = certificate.getName()
         keyName = certificate.getPublicKeyName()
 
-        if not self.doesKeyExist(keyName):
-            raise SecurityException(
-              "No corresponding Key record for certificate! " +
-              keyName.toUri() + " " + certificateName.toUri())
+        self.addKey(keyName, certificate.getPublicKeyInfo().getKeyType(),
+                    certificate.getPublicKeyInfo().getKeyDer())
 
-        # Check if the certificate already exists.
         if self.doesCertificateExist(certificateName):
-            raise SecurityException("Certificate has already been installed!")
-
-        # Check if the public key of certificate is the same as the key record.
-        keyBlob = self.getKey(keyName)
-        if (keyBlob.isNull() or
-              # Note: In Python, != should do a byte-by-byte comparison.
-              keyBlob.toBuffer() !=
-              certificate.getPublicKeyInfo().getKeyDer().toBuffer()):
-            raise SecurityException(
-              "Certificate does not match the public key!")
+          return
 
         # Insert the certificate.
         # wireEncode returns the cached encoding if available.

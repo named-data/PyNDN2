@@ -157,11 +157,12 @@ class IdentityStorage(object):
 
     def addCertificate(self, certificate):
         """
-        Add a certificate to the identity storage.
+        Add a certificate to the identity storage. Also call addKey to ensure
+        that the certificate key exists. If the certificate is already
+        installed, don't replace it.
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
-        :raises SecurityException: If the certificate is already installed.
         """
         raise RuntimeError("addCertificate is not implemented")
 

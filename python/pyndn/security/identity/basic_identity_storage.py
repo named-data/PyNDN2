@@ -312,31 +312,24 @@ class BasicIdentityStorage(IdentityStorage):
 
     def addCertificate(self, certificate):
         """
-        Add a certificate to the identity storage.
+        Add a certificate to the identity storage. Also call addKey to ensure
+        that the certificate key exists. If the certificate is already
+        installed, don't replace it.
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
-        :raises SecurityException: If the certificate is already installed.
         """
         certificateName = certificate.getName()
         keyName = certificate.getPublicKeyName()
 
-        if not self.doesKeyExist(keyName):
-            raise SecurityException("No corresponding Key record for certificate! " +
-              keyName.toUri() + " " + certificateName.toUri())
+        self.addKey(keyName, certificate.getPublicKeyInfo().getKeyType(),
+                    certificate.getPublicKeyInfo().getKeyDer())
 
-        # Check if the certificate already exists.
         if self.doesCertificateExist(certificateName):
-            raise SecurityException("Certificate has already been installed!")
+          return
 
         keyId = keyName.get(-1).toEscapedString()
         identity = keyName[:-1]
-
-        # Check if the public key of the certificate is the same as the key record.
-        keyBlob = self.getKey(keyName)
-        if (keyBlob.isNull() or
-            not keyBlob.equals(certificate.getPublicKeyInfo().getKeyDer())):
-            raise SecurityException("Certificate does not match public key")
 
         # Insert the certificate.
 
