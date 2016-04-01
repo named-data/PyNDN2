@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-03-16)
+Interim changes since PyNDN v2.2beta1 (2016-03-31)
 --------------------------------------------------
 
 Breaking changes
@@ -15,6 +15,7 @@ Changes
 * Added classes Link and DelegationSet to support link objects.
 * In Interest, added methods to support link objects and SelectedDelegation:
   hasLink, getLink, unsetLink, get/setLinkWireEncoding, get/setSelectedDelegationIndex.
+* http://redmine.named-data.net/issues/3260 Added GenericSignature.
 * http://redmine.named-data.net/issues/3449 Added Name.isPrefixOf and getSuccessor.
   In compare, support compare(int, int, Name, int, int).
 * http://redmine.named-data.net/issues/3450 Added Name.Component.isSegment,
@@ -25,12 +26,18 @@ Changes
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 * http://redmine.named-data.net/issues/3355 In Producer.createContentKey and produce,
   added an optional onError callback.
+* In IdentityManager, added prepareUnsignedIdentityCertificate.
+* In KeyChain, removed getAnyCertificate and getAnyIdentityCertificate.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
 * Unit tests: Added test_link.
 * Examples: Added test_sign_verify_data_hmac.
 
+Deprecated
+* In KeyChain, deprecated getIdentityCertificate. Use getCertificate.
+
 Bug fixes
 * Fix bug in encrypt/Schedule to solve problems when the black repetitive interval list is empty.
+* In Producer, the produced data name should not use a rounded timestamp.
 
 PyNDN v2.2beta1 (2016-02-03)
 ----------------------------

@@ -99,13 +99,13 @@ class IdentityStorage(object):
     def addKey(self, keyName, keyType, publicKeyDer):
         """
         Add a public key to the identity storage. Also call addIdentity to ensure
-        that the identityName for the key exists.
+        that the identityName for the key exists. However, if the key already
+        exists, do nothing.
 
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
-        :raises SecurityException: If a key with the keyName already exists.
         """
         raise RuntimeError("addKey is not implemented")
 
@@ -114,8 +114,9 @@ class IdentityStorage(object):
         Get the public key DER blob from the identity storage.
 
         :param Name keyName: The name of the requested public key.
-        :return: The DER Blob. If not found, return a isNull() Blob.
+        :return: The DER Blob.
         :rtype: Blob
+        :raises SecurityException: if the key doesn't exist.
         """
         raise RuntimeError("getKey is not implemented")
 
@@ -157,24 +158,23 @@ class IdentityStorage(object):
 
     def addCertificate(self, certificate):
         """
-        Add a certificate to the identity storage.
+        Add a certificate to the identity storage. Also call addKey to ensure
+        that the certificate key exists. If the certificate is already
+        installed, don't replace it.
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
-        :raises SecurityException: If the certificate is already installed.
         """
         raise RuntimeError("addCertificate is not implemented")
 
-    def getCertificate(self, certificateName, allowAny = False):
+    def getCertificate(self, certificateName):
         """
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will
-          be returned, otherwise validity is disregarded.  If omitted,
-          allowAny is False.
-        :return: The requested certificate. If not found, return None.
+        :return: The requested certificate.
         :rtype: IdentityCertificate
+        :raises SecurityException: if the certificate doesn't exist.
         """
         raise RuntimeError("getCertificate is not implemented")
 
@@ -300,7 +300,7 @@ class IdentityStorage(object):
             # The default is not defined.
             return None
 
-        return self.getCertificate(certName, True)
+        return self.getCertificate(certName)
 
     # A static value to make each timestamp unique among calls.
     _lastTimestamp = math.floor(Common.getNowMilliseconds() / 1000.0)

@@ -91,20 +91,23 @@ class MemoryIdentityStorage(IdentityStorage):
     def addKey(self, keyName, keyType, publicKeyDer):
         """
         Add a public key to the identity storage. Also call addIdentity to ensure
-        that the identityName for the key exists.
+        that the identityName for the key exists. However, if the key already
+        exists, do nothing.
 
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
-        :raises SecurityException: If a key with the keyName already exists.
         """
+        if keyName.size() == 0:
+            return
+
+        if self.doesKeyExist(keyName):
+            return
+
         identityName = keyName.getSubName(0, keyName.size() - 1)
 
         self.addIdentity(identityName)
-
-        if self.doesKeyExist(keyName):
-            raise SecurityException("A key with the same name already exists!")
 
         self._keyStore[keyName.toUri()] = (keyType, Blob(publicKeyDer), None)
 
@@ -113,13 +116,18 @@ class MemoryIdentityStorage(IdentityStorage):
         Get the public key DER blob from the identity storage.
 
         :param Name keyName: The name of the requested public key.
-        :return: The DER Blob. If not found, return a isNull() Blob.
+        :return: The DER Blob.
         :rtype: Blob
+        :raises SecurityException: if the key doesn't exist.
         """
+        if keyName.size() == 0:
+            raise SecurityException(
+              "MemoryIdentityStorage::getKey: Empty keyName")
+
         keyNameUri = keyName.toUri()
         if not (keyNameUri in self._keyStore):
-            # Not found.  Silently return a null Blob.
-            return Blob()
+            raise SecurityException(
+              "MemoryIdentityStorage::getKey: The key does not exist")
 
         (_, publicKeyDer, _) = self._keyStore[keyNameUri]
         return publicKeyDer
@@ -156,60 +164,48 @@ class MemoryIdentityStorage(IdentityStorage):
 
     def addCertificate(self, certificate):
         """
-        Add a certificate to the identity storage.
+        Add a certificate to the identity storage. Also call addKey to ensure
+        that the certificate key exists. If the certificate is already
+        installed, don't replace it.
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
-        :raises SecurityException: If the certificate is already installed.
         """
         certificateName = certificate.getName()
         keyName = certificate.getPublicKeyName()
 
-        if not self.doesKeyExist(keyName):
-            raise SecurityException(
-              "No corresponding Key record for certificate! " +
-              keyName.toUri() + " " + certificateName.toUri())
+        self.addKey(keyName, certificate.getPublicKeyInfo().getKeyType(),
+                    certificate.getPublicKeyInfo().getKeyDer())
 
-        # Check if the certificate already exists.
         if self.doesCertificateExist(certificateName):
-            raise SecurityException("Certificate has already been installed!")
-
-        # Check if the public key of certificate is the same as the key record.
-        keyBlob = self.getKey(keyName)
-        if (keyBlob.isNull() or
-              # Note: In Python, != should do a byte-by-byte comparison.
-              keyBlob.toBuffer() !=
-              certificate.getPublicKeyInfo().getKeyDer().toBuffer()):
-            raise SecurityException(
-              "Certificate does not match the public key!")
+          return
 
         # Insert the certificate.
         # wireEncode returns the cached encoding if available.
         self._certificateStore[certificateName.toUri()] = (
            certificate.wireEncode())
 
-    def getCertificate(self, certificateName, allowAny = False):
+    def getCertificate(self, certificateName):
         """
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will
-          be returned, otherwise validity is disregarded.  If omitted,
-          allowAny is False.
-        :return: The requested certificate. If not found, return None.
+        :return: The requested certificate.
         :rtype: IdentityCertificate
+        :raises SecurityException: if the certificate doesn't exist.
         """
-        if not allowAny:
-            raise RuntimeError(
-              "MemoryIdentityStorage.getCertificate for !allowAny is not implemented")
-
         certificateNameUri = certificateName.toUri()
         if not (certificateNameUri in self._certificateStore):
-            # Not found.  Silently return None.
-            return None
+            raise SecurityException(
+              "MemoryIdentityStorage::getCertificate: The certificate does not exist")
 
         certificate = IdentityCertificate()
-        certificate.wireDecode(self._certificateStore[certificateNameUri])
+        try:
+            certificate.wireDecode(self._certificateStore[certificateNameUri])
+        except ValueError:
+            raise SecurityException(
+              "MemoryIdentityStorage::getCertificate: The certificate cannot be decoded")
+
         return certificate
 
     #

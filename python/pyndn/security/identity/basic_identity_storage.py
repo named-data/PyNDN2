@@ -201,19 +201,19 @@ class BasicIdentityStorage(IdentityStorage):
     def addKey(self, keyName, keyType, publicKeyDer):
         """
         Add a public key to the identity storage. Also call addIdentity to ensure
-        that the identityName for the key exists.
+        that the identityName for the key exists. However, if the key already
+        exists, do nothing.
 
         :param Name keyName: The name of the public key to be added.
         :param keyType: Type of the public key to be added.
         :type keyType: int from KeyType
         :param Blob publicKeyDer: A blob of the public key DER to be added.
-        :raises SecurityException: If a key with the keyName already exists.
         """
         if keyName.size() == 0:
             return
 
         if self.doesKeyExist(keyName):
-            raise SecurityException("A key with the same name already exists!")
+            return
 
         identityName = keyName[:-1]
         identityUri = identityName.toUri()
@@ -235,11 +235,13 @@ class BasicIdentityStorage(IdentityStorage):
         Get the public key DER blob from the identity storage.
 
         :param Name keyName: The name of the requested public key.
-        :return: The DER Blob. If not found, return a isNull() Blob.
+        :return: The DER Blob.
         :rtype: Blob
+        :raises SecurityException: if the key doesn't exist.
         """
-        if not self.doesKeyExist(keyName):
-            return Blob()
+        if keyName.size() == 0:
+            raise SecurityException(
+              "BasicIdentityStorage::getKey: Empty keyName")
 
         identityUri = keyName[:-1].toUri()
         keyId = keyName[-1].toEscapedString()
@@ -247,9 +249,15 @@ class BasicIdentityStorage(IdentityStorage):
         cursor = self._database.cursor()
         cursor.execute("SELECT public_key FROM Key WHERE identity_name=? AND key_identifier=?",
             (identityUri, keyId))
-        (keyData, ) = cursor.fetchone()
-        cursor.close()
-        return Blob(bytearray(keyData), False)
+        row = cursor.fetchone()
+        if row != None:
+            (keyData, ) = row
+            cursor.close()
+            return Blob(bytearray(keyData), False)
+        else:
+            cursor.close()
+            raise SecurityException(
+              "BasicIdentityStorage::getKey: The key does not exist")
 
     def activateKey(self, keyName):
         """
@@ -312,31 +320,24 @@ class BasicIdentityStorage(IdentityStorage):
 
     def addCertificate(self, certificate):
         """
-        Add a certificate to the identity storage.
+        Add a certificate to the identity storage. Also call addKey to ensure
+        that the certificate key exists. If the certificate is already
+        installed, don't replace it.
 
         :param IdentityCertificate certificate: The certificate to be added.
           This makes a copy of the certificate.
-        :raises SecurityException: If the certificate is already installed.
         """
         certificateName = certificate.getName()
         keyName = certificate.getPublicKeyName()
 
-        if not self.doesKeyExist(keyName):
-            raise SecurityException("No corresponding Key record for certificate! " +
-              keyName.toUri() + " " + certificateName.toUri())
+        self.addKey(keyName, certificate.getPublicKeyInfo().getKeyType(),
+                    certificate.getPublicKeyInfo().getKeyDer())
 
-        # Check if the certificate already exists.
         if self.doesCertificateExist(certificateName):
-            raise SecurityException("Certificate has already been installed!")
+          return
 
         keyId = keyName.get(-1).toEscapedString()
         identity = keyName[:-1]
-
-        # Check if the public key of the certificate is the same as the key record.
-        keyBlob = self.getKey(keyName)
-        if (keyBlob.isNull() or
-            not keyBlob.equals(certificate.getPublicKeyInfo().getKeyDer())):
-            raise SecurityException("Certificate does not match public key")
 
         # Insert the certificate.
 
@@ -356,33 +357,35 @@ class BasicIdentityStorage(IdentityStorage):
         self._database.commit()
         cursor.close()
 
-    def getCertificate(self, certificateName, allowAny = False):
+    def getCertificate(self, certificateName):
         """
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :param bool allowAny: (optional) If False, only a valid certificate will
-          be returned, otherwise validity is disregarded.  If omitted,
-          allowAny is False.
-        :return: The requested certificate. If not found, return None.
+        :return: The requested certificate.
         :rtype: IdentityCertificate
+        :raises SecurityException: if the certificate doesn't exist.
         """
-        if not self.doesCertificateExist(certificateName):
-            return None
-
-        if not allowAny:
-            raise RuntimeError(
-              "BasicIdentityStorage.getCertificate for not allowAny is not implemented")
-
         cursor = self._database.cursor()
         cursor.execute("SELECT certificate_data FROM Certificate WHERE cert_name=?",
             (certificateName.toUri(), ))
-        (certData, ) = cursor.fetchone()
-        cursor.close()
+        row = cursor.fetchone()
+        if row != None:
+            (certData, ) = row
+            cursor.close()
 
-        certificate = IdentityCertificate()
-        certificate.wireDecode(bytearray(certData))
-        return certificate
+            certificate = IdentityCertificate()
+            try:
+                certificate.wireDecode(bytearray(certData))
+            except ValueError:
+                raise SecurityException(
+                  "BasicIdentityStorage::getCertificate: The certificate cannot be decoded")
+
+            return certificate
+        else:
+            cursor.close()
+            raise SecurityException(
+              "BasicIdentityStorage::getCertificate: The certificate does not exist")
 
     def deleteCertificateInfo(self, certificateName):
         """
