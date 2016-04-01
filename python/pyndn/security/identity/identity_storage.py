@@ -114,8 +114,9 @@ class IdentityStorage(object):
         Get the public key DER blob from the identity storage.
 
         :param Name keyName: The name of the requested public key.
-        :return: The DER Blob. If not found, return a isNull() Blob.
+        :return: The DER Blob.
         :rtype: Blob
+        :raises SecurityException: if the key doesn't exist.
         """
         raise RuntimeError("getKey is not implemented")
 
@@ -171,8 +172,9 @@ class IdentityStorage(object):
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :return: The requested certificate. If not found, return None.
+        :return: The requested certificate.
         :rtype: IdentityCertificate
+        :raises SecurityException: if the certificate doesn't exist.
         """
         raise RuntimeError("getCertificate is not implemented")
 

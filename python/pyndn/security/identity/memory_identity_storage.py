@@ -116,13 +116,18 @@ class MemoryIdentityStorage(IdentityStorage):
         Get the public key DER blob from the identity storage.
 
         :param Name keyName: The name of the requested public key.
-        :return: The DER Blob. If not found, return a isNull() Blob.
+        :return: The DER Blob.
         :rtype: Blob
+        :raises SecurityException: if the key doesn't exist.
         """
+        if keyName.size() == 0:
+            raise SecurityException(
+              "MemoryIdentityStorage::getKey: Empty keyName")
+
         keyNameUri = keyName.toUri()
         if not (keyNameUri in self._keyStore):
-            # Not found.  Silently return a null Blob.
-            return Blob()
+            raise SecurityException(
+              "MemoryIdentityStorage::getKey: The key does not exist")
 
         (_, publicKeyDer, _) = self._keyStore[keyNameUri]
         return publicKeyDer
@@ -185,16 +190,22 @@ class MemoryIdentityStorage(IdentityStorage):
         Get a certificate from the identity storage.
 
         :param Name certificateName: The name of the requested certificate.
-        :return: The requested certificate. If not found, return None.
+        :return: The requested certificate.
         :rtype: IdentityCertificate
+        :raises SecurityException: if the certificate doesn't exist.
         """
         certificateNameUri = certificateName.toUri()
         if not (certificateNameUri in self._certificateStore):
-            # Not found.  Silently return None.
-            return None
+            raise SecurityException(
+              "MemoryIdentityStorage::getCertificate: The certificate does not exist")
 
         certificate = IdentityCertificate()
-        certificate.wireDecode(self._certificateStore[certificateNameUri])
+        try:
+            certificate.wireDecode(self._certificateStore[certificateNameUri])
+        except ValueError:
+            raise SecurityException(
+              "MemoryIdentityStorage::getCertificate: The certificate cannot be decoded")
+
         return certificate
 
     #
