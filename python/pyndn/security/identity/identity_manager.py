@@ -468,17 +468,39 @@ class IdentityManager(object):
         return self._identityStorage.getDefaultCertificateNameForIdentity(
           self.getDefaultIdentity())
 
+    def getAllIdentities(self, nameList, isDefault):
+        """
+        Append all the identity names to the nameList.
+
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If True, add only the default identity name. If
+          false, add only the non-default identity names.
+        """
+        self._identityStorage.getAllIdentities(nameList, isDefault)
+
     def getAllKeyNamesOfIdentity(self, identityName, nameList, isDefault):
         """
         Append all the key names of a particular identity to the nameList.
 
         :param Name identityName: The identity name to search for.
         :param Array<Name> nameList: Append result names to nameList.
-        :param bool isDefault: If true, add only the default key name. If false,
+        :param bool isDefault: If True, add only the default key name. If False,
           add only the non-default key names.
         """
         self._identityStorage.getAllKeyNamesOfIdentity(
           identityName, nameList, isDefault)
+
+    def getAllCertificateNamesOfKey(self, keyName, nameList, isDefault):
+        """
+        Append all the certificate names of a particular key name to the nameList.
+
+        :param Name keyName: The key name to search for.
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If True, add only the default certificate name.
+          If False, add only the non-default certificate names.
+        """
+        self._identityStorage.getAllCertificateNamesOfKey(
+          keyName, nameList, isDefault)
 
     def signByCertificate(self, target, certificateName, wireFormat = None):
         """
