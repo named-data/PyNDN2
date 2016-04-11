@@ -22,6 +22,8 @@ This module defines InterestFilterTable which is an internal class to hold a
 list of entries with an interest Filter and its OnInterestCallback.
 """
 
+import logging
+
 class InterestFilterTable(object):
     def __init__(self):
         self._table = [] # of Entry
