@@ -26,8 +26,15 @@ registration later.
 import logging
 
 class RegisteredPrefixTable(object):
-    def __init__(self):
+    """
+    Create a new RegisteredPrefixTable with an empty table.
+
+    :param InterestFilterTable interestFilterTable: See removeRegisteredPrefix(),
+      which may call interestFilterTable.unsetInterestFilter().
+    """
+    def __init__(self, interestFilterTable):
         self._table = [] # of _entry
+        self._interestFilterTable = interestFilterTable
 
     def add(self, registeredPrefixId, prefix, relatedInterestFilterId):
         """
@@ -64,7 +71,8 @@ class RegisteredPrefixTable(object):
 
                 if entry.getRelatedInterestFilterId() > 0:
                     # Remove the related interest filter.
-                    self.unsetInterestFilter(entry.getRelatedInterestFilterId())
+                    self._interestFilterTable.unsetInterestFilter(
+                      entry.getRelatedInterestFilterId())
 
                 self._table.pop(i)
             i -= 1
