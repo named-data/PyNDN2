@@ -58,8 +58,8 @@ class Node(object):
         self._transport = transport
         self._connectionInfo = connectionInfo
         self._pendingInterestTable = PendingInterestTable()
-        self._registeredPrefixTable = RegisteredPrefixTable()
         self._interestFilterTable = InterestFilterTable()
+        self._registeredPrefixTable = RegisteredPrefixTable(self._interestFilterTable)
         self._delayedCallTable = DelayedCallTable()
         # An array of function objects
         self._onConnectedCallbacks = []
@@ -94,7 +94,6 @@ class Node(object):
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
-        # TODO: Properly check if we are already connected to the expected host.
         if self._connectStatus == self._ConnectStatus.CONNECT_COMPLETE:
             # We are connected. Simply send the interest.
             self._expressInterestHelper(
@@ -102,6 +101,18 @@ class Node(object):
               face)
             return
 
+        # TODO: Properly check if we are already connected to the expected host.
+        if not self._transport.isAsync():
+            # The simple case: Just do a blocking connect and express.
+            self._transport.connect(self._connectionInfo, self, None);
+            self._expressInterestHelper(pendingInterestId,
+              interestCopy, onData, onTimeout, wireFormat, face)
+            # Make future calls to expressInterest send directly to the Transport.
+            self._connectStatus = self._ConnectStatus.CONNECT_COMPLETE
+
+            return
+
+        # Handle the async case.
         if self._connectStatus == Node._ConnectStatus.UNCONNECTED:
             self._connectStatus = Node._ConnectStatus.CONNECT_REQUESTED
 
