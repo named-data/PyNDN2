@@ -37,6 +37,7 @@ from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
+from pyndn.impl.pending_interest_table import PendingInterestTable
 
 _systemRandom = SystemRandom()
 
@@ -53,8 +54,7 @@ class Node(object):
     def __init__(self, transport, connectionInfo):
         self._transport = transport
         self._connectionInfo = connectionInfo
-        # An array of _PendingInterest
-        self._pendingInterestTable = []
+        self._pendingInterestTable = PendingInterestTable()
         # An array of _RegisteredPrefix
         self._registeredPrefixTable = []
         # An array of _InterestFilterEntry
@@ -145,23 +145,7 @@ class Node(object):
 
         :param int pendingInterestId: The ID returned from expressInterest.
         """
-        count = 0
-        # Go backwards through the list so we can erase entries.
-        # Remove all entries even though pendingInterestId should be unique.
-        i = len(self._pendingInterestTable) - 1
-        while i >= 0:
-            if (self._pendingInterestTable[i].getPendingInterestId() ==
-                  pendingInterestId):
-                count += 1
-                # For efficiency, mark this as removed so that
-                # _processInterestTimeout doesn't look for it.
-                self._pendingInterestTable[i].setIsRemoved()
-                self._pendingInterestTable.pop(i)
-            i -= 1
-
-        if count == 0:
-            logging.getLogger(__name__).debug(
-              "removePendingInterest: Didn't find pendingInterestId " + pendingInterestId)
+        self._pendingInterestTable.removePendingInterest(pendingInterestId)
 
     def makeCommandInterest(self, interest, keyChain, certificateName, wireFormat):
         """
@@ -420,8 +404,9 @@ class Node(object):
                         except:
                             logging.exception("Error in onInterest")
         elif data != None:
-            pendingInterests = self._extractEntriesForExpressedInterest(
-              data.getName())
+            pendingInterests = []
+            self._pendingInterestTable.extractEntriesForExpressedInterest(
+              data.getName(), pendingInterests)
             for pendingInterest in pendingInterests:
                 try:
                     pendingInterest.getOnData()(pendingInterest.getInterest(), data)
@@ -480,9 +465,8 @@ class Node(object):
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
-        pendingInterest = Node._PendingInterest(
+        pendingInterest = self._pendingInterestTable.add(
           pendingInterestId, interestCopy, onData, onTimeout)
-        self._pendingInterestTable.append(pendingInterest)
         if (onTimeout or
             interestCopy.getInterestLifetimeMilliseconds() != None and
             interestCopy.getInterestLifetimeMilliseconds() >= 0.0):
@@ -503,36 +487,6 @@ class Node(object):
                   "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
 
             self._transport.send(encoding.toBuffer())
-
-    def _extractEntriesForExpressedInterest(self, name):
-        """
-        Find all entries from the _pendingInterestTable where the name conforms
-        to the entry's interest selectors, remove the entries from the table
-        and return them.
-
-        :param Name name: The name to find the interest for (from the incoming
-          data packet).
-        :return: The matching entries from the _pendingInterestTable, or []
-          if none are found.
-        :rtype: array of _PendingInterest
-        """
-        result = []
-
-        # Go backwards through the list so we can erase entries.
-        i = len(self._pendingInterestTable) - 1
-        while i >= 0:
-            pendingInterest = self._pendingInterestTable[i]
-
-            if pendingInterest.getInterest().matchesName(name):
-                result.append(pendingInterest)
-                # We let the callback from callLater call _processInterestTimeout,
-                # but for efficiency, mark this as removed so that it returns
-                # right away.
-                self._pendingInterestTable.pop(i)
-                pendingInterest.setIsRemoved()
-            i -= 1
-
-        return result
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
@@ -617,20 +571,8 @@ class Node(object):
         the pendingInterest is still in the _pendingInterestTable, remove it and
         call its onTimeout callback.
         """
-        if pendingInterest.getIsRemoved():
-            # _extractEntriesForExpressedInterest or removePendingInterest has
-            # removed pendingInterest from _pendingInterestTable, so we don't
-            # need to look for it. Do nothing.
-            return
-
-        try:
-            index = self._pendingInterestTable.index(pendingInterest)
-        except ValueError:
-            # The pending interest has been removed. Do nothing.
-            return
-
-        del self._pendingInterestTable[index]
-        pendingInterest.callTimeout()
+        if self._pendingInterestTable.removeEntry(pendingInterest):
+            pendingInterest.callTimeout()
 
     def getNextEntryId(self):
         """
@@ -682,81 +624,6 @@ class Node(object):
             exceptions.
             """
             self._callback()
-
-    class _PendingInterest(object):
-        """
-        _PendingInterest is a private class for the members of the
-        _pendingInterestTable.
-
-        :param int pendingInterestId: A unique ID for this entry, which you
-          should get with getNextEntryId().
-        :param Interest interest: The interest.
-        :param onData: A function object to call when a matching data packet is
-          received.
-        :type onData: function object
-        :param onTimeout: A function object to call if the interest times out.
-          If onTimeout is None, this does not use it.
-        :type onTimeout: function object
-        """
-        def __init__(self, pendingInterestId, interest, onData, onTimeout):
-            self._pendingInterestId = pendingInterestId
-            self._interest = interest
-            self._onData = onData
-            self._onTimeout = onTimeout
-            self._isRemoved = False
-
-        def getPendingInterestId(self):
-            """
-            Get the pendingInterestId given to the constructor.
-
-            :return: The pending interest ID.
-            :rtype: int
-            """
-            return self._pendingInterestId
-
-        def getInterest(self):
-            """
-            Get the interest given to the constructor.
-
-            :return: The interest.
-            :rtype: int
-            """
-            return self._interest
-
-        def getOnData(self):
-            """
-            Get the onData function object given to the constructor.
-
-            :return: The onData function object.
-            :rtype: function object
-            """
-            return self._onData
-
-        def callTimeout(self):
-            """
-            Call _onTimeout (if defined).  This ignores exceptions from
-            _onTimeout.
-            """
-            if self._onTimeout:
-                try:
-                    self._onTimeout(self._interest)
-                except:
-                    logging.exception("Error in onTimeout")
-
-        def setIsRemoved(self):
-            """
-            Set the isRemoved flag which is returned by getIsRemoved().
-            """
-            self._isRemoved = True
-
-        def getIsRemoved(self):
-            """
-            Check if setIsRemoved() was called.
-
-            :return: True if setIsRemoved() was called.
-            :rtype: bool
-            """
-            return self._isRemoved
 
     class _RegisteredPrefix(object):
         """
