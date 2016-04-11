@@ -99,6 +99,16 @@ class TcpTransport(Transport):
 
         return self._isLocal
 
+    def isAsync(self):
+        """
+        Override to return false since connect does not need to use the
+        onConnected callback.
+
+        :return: False
+        :rtype bool:
+        """
+        return False
+
     def connect(self, connectionInfo, elementListener, onConnected):
         """
         Connect according to the info in connectionInfo, and use
@@ -121,7 +131,8 @@ class TcpTransport(Transport):
         self._socketPoller = SocketPoller(self._socket)
         self._elementReader = ElementReader(elementListener)
 
-        onConnected()
+        if onConnected != None:
+            onConnected()
 
     # This will be set True if send gets a TypeError.
     _sendNeedsStr = False
