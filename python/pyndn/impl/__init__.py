@@ -16,3 +16,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
+
+# Don't include internal modules.
+__all__ = []
+
+import sys as _sys
+
+try:
+    pass
+except ImportError:
+    del _sys.modules[__name__]
+    raise

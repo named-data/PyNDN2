@@ -38,6 +38,7 @@ from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
 from pyndn.impl.delayed_call_table import DelayedCallTable
+from pyndn.impl.interest_filter_table import InterestFilterTable
 from pyndn.impl.pending_interest_table import PendingInterestTable
 
 _systemRandom = SystemRandom()
@@ -58,8 +59,7 @@ class Node(object):
         self._pendingInterestTable = PendingInterestTable()
         # An array of _RegisteredPrefix
         self._registeredPrefixTable = []
-        # An array of _InterestFilterEntry
-        self._interestFilterTable = []
+        self._interestFilterTable = InterestFilterTable()
         self._delayedCallTable = DelayedCallTable()
         # An array of function objects
         self._onConnectedCallbacks = []
@@ -261,8 +261,8 @@ class Node(object):
         :type onInterest: function object
         :param Face face: The face which is passed to the onInterest callback.
         """
-        self._interestFilterTable.append(Node._InterestFilterEntry
-          (interestFilterId, filterCopy, onInterest, face))
+        self._interestFilterTable.setInterestFilter(
+          interestFilterId, InterestFilter(filter), onInterest, face)
 
     def unsetInterestFilter(self, interestFilterId):
         """
@@ -273,20 +273,7 @@ class Node(object):
 
         :param int interestFilterId: The ID returned from setInterestFilter.
         """
-        count = 0
-        # Go backwards through the list so we can erase entries.
-        # Remove all entries even though interestFilterId should be unique.
-        i = len(self._interestFilterTable) - 1
-        while i >= 0:
-            if (self._interestFilterTable[i].getInterestFilterId() ==
-                  interestFilterId):
-                count += 1
-                self._interestFilterTable.pop(i)
-            i -= 1
-
-        if count == 0:
-            logging.getLogger(__name__).debug(
-              "unsetInterestFilter: Didn't find interestFilterId " + interestFilterId)
+        self._interestFilterTable.unsetInterestFilter(interestFilterId)
 
     def send(self, encoding):
         """
@@ -363,36 +350,37 @@ class Node(object):
         # Now process as Interest or Data.
         if interest != None:
             # Call all interest filter callbacks which match.
-            for i in range(len(self._interestFilterTable)):
-                entry = self._interestFilterTable[i]
-                if entry.getFilter().doesMatch(interest.getName()):
-                    includeFilter = True
-                    # Use getcallargs to test if onInterest accepts 5 args.
-                    try:
-                        inspect.getcallargs(entry.getOnInterest(),
-                          None, None, None, None, None)
-                    except TypeError:
-                        # Assume onInterest is old-style with 4 arguments.
-                        includeFilter = False
+            matchedFilters = []
+            self._interestFilterTable.getMatchedFilters(interest, matchedFilters)
+            for i in range(len(matchedFilters)):
+                entry = matchedFilters[i]
+                includeFilter = True
+                # Use getcallargs to test if onInterest accepts 5 args.
+                try:
+                    inspect.getcallargs(entry.getOnInterest(),
+                      None, None, None, None, None)
+                except TypeError:
+                    # Assume onInterest is old-style with 4 arguments.
+                    includeFilter = False
 
-                    if includeFilter:
-                        try:
-                            entry.getOnInterest()(
-                              entry.getFilter().getPrefix(), interest,
-                              entry.getFace(), entry.getInterestFilterId(),
-                              entry.getFilter())
-                        except:
-                            logging.exception("Error in onInterest")
-                    else:
-                        # Old-style onInterest without the filter argument. We
-                        # still pass a Face instead of Transport since Face also
-                        # has a send method.
-                        try:
-                            entry.getOnInterest()(
-                              entry.getFilter().getPrefix(), interest,
-                              entry.getFace(), entry.getInterestFilterId())
-                        except:
-                            logging.exception("Error in onInterest")
+                if includeFilter:
+                    try:
+                        entry.getOnInterest()(
+                          entry.getFilter().getPrefix(), interest,
+                          entry.getFace(), entry.getInterestFilterId(),
+                          entry.getFilter())
+                    except:
+                        logging.exception("Error in onInterest")
+                else:
+                    # Old-style onInterest without the filter argument. We
+                    # still pass a Face instead of Transport since Face also
+                    # has a send method.
+                    try:
+                        entry.getOnInterest()(
+                          entry.getFilter().getPrefix(), interest,
+                          entry.getFace(), entry.getInterestFilterId())
+                    except:
+                        logging.exception("Error in onInterest")
         elif data != None:
             pendingInterests = []
             self._pendingInterestTable.extractEntriesForExpressedInterest(
@@ -618,61 +606,6 @@ class Node(object):
             :rtype: int
             """
             return self._relatedInterestFilterId
-
-    class _InterestFilterEntry(object):
-        """
-        An _InterestFilterEntry holds an interestFilterId, an InterestFilter
-        and the OnInterestCallback with its related Face.
-        Create a new InterestFilterEntry with the given values.
-
-        :param int interestFilterId: The ID from getNextEntryId().
-        :param InterestFilter filter: The InterestFilter for this entry.
-        :param onInterest: The callback to call.
-        :type onInterest: function object
-        :param Face face: The face on which was called registerPrefix or
-          setInterestFilter which is passed to the onInterest callback.
-        """
-        def __init__(self, interestFilterId, filter, onInterest, face):
-            self._interestFilterId = interestFilterId
-            self._filter = filter
-            self._onInterest = onInterest
-            self._face = face
-
-        def getInterestFilterId(self):
-            """
-            Get the interestFilterId given to the constructor.
-
-            :return: The interestFilterId.
-            :rtype: int
-            """
-            return self._interestFilterId
-
-        def getFilter(self):
-            """
-            Get the InterestFilter given to the constructor.
-
-            :return: The InterestFilter.
-            :rtype: InterestFilter
-            """
-            return self._filter
-
-        def getOnInterest(self):
-            """
-            Get the OnInterestCallback given to the constructor.
-
-            :return: The OnInterestCallback.
-            :rtype: function object
-            """
-            return self._onInterest
-
-        def getFace(self):
-            """
-            Get the Face given to the constructor.
-
-            :return: The Face.
-            :rtype: Face
-            """
-            return self._face
 
     class _RegisterResponse(object):
         """
