@@ -40,6 +40,7 @@ from pyndn.encoding.tlv_wire_format import TlvWireFormat
 from pyndn.impl.delayed_call_table import DelayedCallTable
 from pyndn.impl.interest_filter_table import InterestFilterTable
 from pyndn.impl.pending_interest_table import PendingInterestTable
+from pyndn.impl.registered_prefix_table import RegisteredPrefixTable
 
 _systemRandom = SystemRandom()
 
@@ -57,8 +58,7 @@ class Node(object):
         self._transport = transport
         self._connectionInfo = connectionInfo
         self._pendingInterestTable = PendingInterestTable()
-        # An array of _RegisteredPrefix
-        self._registeredPrefixTable = []
+        self._registeredPrefixTable = RegisteredPrefixTable()
         self._interestFilterTable = InterestFilterTable()
         self._delayedCallTable = DelayedCallTable()
         # An array of function objects
@@ -222,25 +222,7 @@ class Node(object):
 
         :param int registeredPrefixId: The ID returned from registerPrefix.
         """
-        count = 0
-        # Go backwards through the list so we can erase entries.
-        # Remove all entries even though registeredPrefixId should be unique.
-        i = len(self._registeredPrefixTable) - 1
-        while i >= 0:
-            entry = self._registeredPrefixTable[i]
-            if (entry.getRegisteredPrefixId() == registeredPrefixId):
-                count += 1
-
-                if entry.getRelatedInterestFilterId() > 0:
-                    # Remove the related interest filter.
-                    self.unsetInterestFilter(entry.getRelatedInterestFilterId())
-
-                self._registeredPrefixTable.pop(i)
-            i -= 1
-
-        if count == 0:
-            logging.getLogger(__name__).debug(
-              "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
+        self._registeredPrefixTable.removeRegisteredPrefix(registeredPrefixId)
 
     def setInterestFilter(self, interestFilterId, filterCopy, onInterest, face):
         """
@@ -511,8 +493,8 @@ class Node(object):
                 self.setInterestFilter(
                   interestFilterId, InterestFilter(prefix), onInterest, face)
 
-            self._registeredPrefixTable.append(Node._RegisteredPrefix(
-              registeredPrefixId, prefix, interestFilterId))
+            self._registeredPrefixTable.add(
+              registeredPrefixId, prefix, interestFilterId)
 
         # Send the registration interest.
         response = Node._RegisterResponse(
@@ -560,52 +542,6 @@ class Node(object):
         UNCONNECTED = 1
         CONNECT_REQUESTED = 2
         CONNECT_COMPLETE = 3
-
-    class _RegisteredPrefix(object):
-        """
-        A _RegisteredPrefix holds a registeredPrefixId and information necessary
-        to remove the registration later. It optionally holds a related
-        interestFilterId if the InterestFilter was set in the same
-        registerPrefix operation.
-
-        :param int registeredPrefixId: A unique ID for this entry, which you
-          should get with getNextEntryId().
-        :param Name prefix: The name prefix.
-        :param int relatedInterestFilterId: (optional) The related
-          interestFilterId for the filter set in the same registerPrefix
-          operation. If omitted, set to 0.
-        """
-        def __init__(self, registeredPrefixId, prefix, relatedInterestFilterId):
-            self._registeredPrefixId = registeredPrefixId
-            self._prefix = prefix
-            self._relatedInterestFilterId = relatedInterestFilterId
-
-        def getRegisteredPrefixId(self):
-            """
-            Get the registeredPrefixId given to the constructor.
-
-            :return: The registered prefix ID.
-            :rtype: int
-            """
-            return self._registeredPrefixId
-
-        def getPrefix(self):
-            """
-            Get the name prefix to the constructor.
-
-            :return: The name prefix.
-            :rtype: Name
-            """
-            return self._prefix
-
-        def getRelatedInterestFilterId(self):
-            """
-            Get the related interestFilterId given to the constructor.
-
-            :return: The related interestFilterId.
-            :rtype: int
-            """
-            return self._relatedInterestFilterId
 
     class _RegisterResponse(object):
         """
