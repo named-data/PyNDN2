@@ -37,6 +37,7 @@ from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
+from pyndn.impl.delayed_call_table import DelayedCallTable
 from pyndn.impl.pending_interest_table import PendingInterestTable
 
 _systemRandom = SystemRandom()
@@ -59,8 +60,7 @@ class Node(object):
         self._registeredPrefixTable = []
         # An array of _InterestFilterEntry
         self._interestFilterTable = []
-        # An array of _DelayedCall
-        self._delayedCallTable = []
+        self._delayedCallTable = DelayedCallTable()
         # An array of function objects
         self._onConnectedCallbacks = []
         self._commandInterestGenerator = CommandInterestGenerator()
@@ -319,19 +319,9 @@ class Node(object):
         """
         self._transport.processEvents()
 
-        # Check for delayed calls. Since callLater does a sorted insert into
-        # _delayedCallTable, the check for timeouts is quick and does not
-        # require searching the entire table. If callLater is overridden to use
-        # a different mechanism, then processEvents is not needed to check for
-        # delayed calls.
-        now = Common.getNowMilliseconds()
-        # _delayedCallTable is sorted on _callTime, so we only need to process
-        # the timed-out entries at the front, then quit.
-        while (len(self._delayedCallTable) > 0 and
-               self._delayedCallTable[0].getCallTime() <= now):
-            delayedCall = self._delayedCallTable[0]
-            del self._delayedCallTable[0]
-            delayedCall.callCallback()
+        # If Face.callLater is overridden to use a different mechanism, then
+        # processEvents is not needed to check for delayed calls.
+        self._delayedCallTable.callTimedOut();
 
     def getTransport(self):
         """
@@ -552,18 +542,7 @@ class Node(object):
         :param callback: This calls callback() after the delay.
         :type callback: function object
         """
-        delayedCall = Node._DelayedCall(delayMilliseconds, callback)
-        # Insert into _delayedCallTable, sorted on delayedCall.getCallTime().
-        # Search from the back since we expect it to go there.
-        i = len(self._delayedCallTable) - 1
-        while i >= 0:
-            if (self._delayedCallTable[i].getCallTime() <= delayedCall.getCallTime()):
-                break
-            i -= 1
-
-        # Element i is the greatest less than or equal to
-        # delayedCall.getCallTime(), so insert after it.
-        self._delayedCallTable.insert(i + 1, delayedCall)
+        self._delayedCallTable.callLater(delayMilliseconds, callback)
 
     def _processInterestTimeout(self, pendingInterest):
         """
@@ -593,37 +572,6 @@ class Node(object):
         UNCONNECTED = 1
         CONNECT_REQUESTED = 2
         CONNECT_COMPLETE = 3
-
-    class _DelayedCall(object):
-        """
-        _DelayedCall is a private class for the members of the _delayedCallTable.
-        Create a new _DelayedCall and set the call time based on the current
-        time and the delayMilliseconds.
-
-        :param float delayMilliseconds: The delay in milliseconds.
-        :param callback: This calls callback() after the delay.
-        :type callback: function object
-        """
-        def __init__(self, delayMilliseconds, callback):
-            self._callback = callback
-            self._callTime = Common.getNowMilliseconds() + delayMilliseconds
-
-        def getCallTime(self):
-            """
-            Get the time at which the callback should be called.
-
-            :return: The call time in milliseconds, similar to
-              Common.getNowMilliseconds().
-            :rtype: float
-            """
-            return self._callTime
-
-        def callCallback(self):
-            """
-            Call the callback given to the constructor. This does not catch
-            exceptions.
-            """
-            self._callback()
 
     class _RegisteredPrefix(object):
         """
