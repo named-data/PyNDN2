@@ -101,6 +101,16 @@ class AsyncTcpTransport(AsyncSocketTransport):
 
         return self._isLocal
 
+    def isAsync(self):
+        """
+        Override to return true since connect needs to use the onConnected
+        callback.
+
+        :return: True
+        :rtype bool:
+        """
+        return True
+
     def connect(self, connectionInfo, elementListener, onConnected):
         """
         Connect according to the info in connectionInfo, and use

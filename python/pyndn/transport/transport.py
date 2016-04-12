@@ -45,6 +45,16 @@ class Transport(object):
         """
         raise RuntimeError("isLocal is not implemented")
 
+    def isAsync(self):
+        """
+        Check if this transport is async where connect needs to use the
+        onConnected callback.
+
+        :return: True if transport connect is async, False if not.
+        :rtype bool:
+        """
+        raise RuntimeError("isAsync is not implemented")
+
     def connect(self, connectionInfo, elementListener, onConnected):
         """
         Connect according to the info in ConnectionInfo, and use

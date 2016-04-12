@@ -37,6 +37,10 @@ from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
+from pyndn.impl.delayed_call_table import DelayedCallTable
+from pyndn.impl.interest_filter_table import InterestFilterTable
+from pyndn.impl.pending_interest_table import PendingInterestTable
+from pyndn.impl.registered_prefix_table import RegisteredPrefixTable
 
 _systemRandom = SystemRandom()
 
@@ -53,14 +57,10 @@ class Node(object):
     def __init__(self, transport, connectionInfo):
         self._transport = transport
         self._connectionInfo = connectionInfo
-        # An array of _PendingInterest
-        self._pendingInterestTable = []
-        # An array of _RegisteredPrefix
-        self._registeredPrefixTable = []
-        # An array of _InterestFilterEntry
-        self._interestFilterTable = []
-        # An array of _DelayedCall
-        self._delayedCallTable = []
+        self._pendingInterestTable = PendingInterestTable()
+        self._interestFilterTable = InterestFilterTable()
+        self._registeredPrefixTable = RegisteredPrefixTable(self._interestFilterTable)
+        self._delayedCallTable = DelayedCallTable()
         # An array of function objects
         self._onConnectedCallbacks = []
         self._commandInterestGenerator = CommandInterestGenerator()
@@ -94,7 +94,6 @@ class Node(object):
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
-        # TODO: Properly check if we are already connected to the expected host.
         if self._connectStatus == self._ConnectStatus.CONNECT_COMPLETE:
             # We are connected. Simply send the interest.
             self._expressInterestHelper(
@@ -102,6 +101,18 @@ class Node(object):
               face)
             return
 
+        # TODO: Properly check if we are already connected to the expected host.
+        if not self._transport.isAsync():
+            # The simple case: Just do a blocking connect and express.
+            self._transport.connect(self._connectionInfo, self, None);
+            self._expressInterestHelper(pendingInterestId,
+              interestCopy, onData, onTimeout, wireFormat, face)
+            # Make future calls to expressInterest send directly to the Transport.
+            self._connectStatus = self._ConnectStatus.CONNECT_COMPLETE
+
+            return
+
+        # Handle the async case.
         if self._connectStatus == Node._ConnectStatus.UNCONNECTED:
             self._connectStatus = Node._ConnectStatus.CONNECT_REQUESTED
 
@@ -145,23 +156,7 @@ class Node(object):
 
         :param int pendingInterestId: The ID returned from expressInterest.
         """
-        count = 0
-        # Go backwards through the list so we can erase entries.
-        # Remove all entries even though pendingInterestId should be unique.
-        i = len(self._pendingInterestTable) - 1
-        while i >= 0:
-            if (self._pendingInterestTable[i].getPendingInterestId() ==
-                  pendingInterestId):
-                count += 1
-                # For efficiency, mark this as removed so that
-                # _processInterestTimeout doesn't look for it.
-                self._pendingInterestTable[i].setIsRemoved()
-                self._pendingInterestTable.pop(i)
-            i -= 1
-
-        if count == 0:
-            logging.getLogger(__name__).debug(
-              "removePendingInterest: Didn't find pendingInterestId " + pendingInterestId)
+        self._pendingInterestTable.removePendingInterest(pendingInterestId)
 
     def makeCommandInterest(self, interest, keyChain, certificateName, wireFormat):
         """
@@ -238,25 +233,7 @@ class Node(object):
 
         :param int registeredPrefixId: The ID returned from registerPrefix.
         """
-        count = 0
-        # Go backwards through the list so we can erase entries.
-        # Remove all entries even though registeredPrefixId should be unique.
-        i = len(self._registeredPrefixTable) - 1
-        while i >= 0:
-            entry = self._registeredPrefixTable[i]
-            if (entry.getRegisteredPrefixId() == registeredPrefixId):
-                count += 1
-
-                if entry.getRelatedInterestFilterId() > 0:
-                    # Remove the related interest filter.
-                    self.unsetInterestFilter(entry.getRelatedInterestFilterId())
-
-                self._registeredPrefixTable.pop(i)
-            i -= 1
-
-        if count == 0:
-            logging.getLogger(__name__).debug(
-              "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
+        self._registeredPrefixTable.removeRegisteredPrefix(registeredPrefixId)
 
     def setInterestFilter(self, interestFilterId, filterCopy, onInterest, face):
         """
@@ -277,8 +254,8 @@ class Node(object):
         :type onInterest: function object
         :param Face face: The face which is passed to the onInterest callback.
         """
-        self._interestFilterTable.append(Node._InterestFilterEntry
-          (interestFilterId, filterCopy, onInterest, face))
+        self._interestFilterTable.setInterestFilter(
+          interestFilterId, InterestFilter(filter), onInterest, face)
 
     def unsetInterestFilter(self, interestFilterId):
         """
@@ -289,20 +266,7 @@ class Node(object):
 
         :param int interestFilterId: The ID returned from setInterestFilter.
         """
-        count = 0
-        # Go backwards through the list so we can erase entries.
-        # Remove all entries even though interestFilterId should be unique.
-        i = len(self._interestFilterTable) - 1
-        while i >= 0:
-            if (self._interestFilterTable[i].getInterestFilterId() ==
-                  interestFilterId):
-                count += 1
-                self._interestFilterTable.pop(i)
-            i -= 1
-
-        if count == 0:
-            logging.getLogger(__name__).debug(
-              "unsetInterestFilter: Didn't find interestFilterId " + interestFilterId)
+        self._interestFilterTable.unsetInterestFilter(interestFilterId)
 
     def send(self, encoding):
         """
@@ -335,19 +299,9 @@ class Node(object):
         """
         self._transport.processEvents()
 
-        # Check for delayed calls. Since callLater does a sorted insert into
-        # _delayedCallTable, the check for timeouts is quick and does not
-        # require searching the entire table. If callLater is overridden to use
-        # a different mechanism, then processEvents is not needed to check for
-        # delayed calls.
-        now = Common.getNowMilliseconds()
-        # _delayedCallTable is sorted on _callTime, so we only need to process
-        # the timed-out entries at the front, then quit.
-        while (len(self._delayedCallTable) > 0 and
-               self._delayedCallTable[0].getCallTime() <= now):
-            delayedCall = self._delayedCallTable[0]
-            del self._delayedCallTable[0]
-            delayedCall.callCallback()
+        # If Face.callLater is overridden to use a different mechanism, then
+        # processEvents is not needed to check for delayed calls.
+        self._delayedCallTable.callTimedOut();
 
     def getTransport(self):
         """
@@ -389,39 +343,41 @@ class Node(object):
         # Now process as Interest or Data.
         if interest != None:
             # Call all interest filter callbacks which match.
-            for i in range(len(self._interestFilterTable)):
-                entry = self._interestFilterTable[i]
-                if entry.getFilter().doesMatch(interest.getName()):
-                    includeFilter = True
-                    # Use getcallargs to test if onInterest accepts 5 args.
-                    try:
-                        inspect.getcallargs(entry.getOnInterest(),
-                          None, None, None, None, None)
-                    except TypeError:
-                        # Assume onInterest is old-style with 4 arguments.
-                        includeFilter = False
+            matchedFilters = []
+            self._interestFilterTable.getMatchedFilters(interest, matchedFilters)
+            for i in range(len(matchedFilters)):
+                entry = matchedFilters[i]
+                includeFilter = True
+                # Use getcallargs to test if onInterest accepts 5 args.
+                try:
+                    inspect.getcallargs(entry.getOnInterest(),
+                      None, None, None, None, None)
+                except TypeError:
+                    # Assume onInterest is old-style with 4 arguments.
+                    includeFilter = False
 
-                    if includeFilter:
-                        try:
-                            entry.getOnInterest()(
-                              entry.getFilter().getPrefix(), interest,
-                              entry.getFace(), entry.getInterestFilterId(),
-                              entry.getFilter())
-                        except:
-                            logging.exception("Error in onInterest")
-                    else:
-                        # Old-style onInterest without the filter argument. We
-                        # still pass a Face instead of Transport since Face also
-                        # has a send method.
-                        try:
-                            entry.getOnInterest()(
-                              entry.getFilter().getPrefix(), interest,
-                              entry.getFace(), entry.getInterestFilterId())
-                        except:
-                            logging.exception("Error in onInterest")
+                if includeFilter:
+                    try:
+                        entry.getOnInterest()(
+                          entry.getFilter().getPrefix(), interest,
+                          entry.getFace(), entry.getInterestFilterId(),
+                          entry.getFilter())
+                    except:
+                        logging.exception("Error in onInterest")
+                else:
+                    # Old-style onInterest without the filter argument. We
+                    # still pass a Face instead of Transport since Face also
+                    # has a send method.
+                    try:
+                        entry.getOnInterest()(
+                          entry.getFilter().getPrefix(), interest,
+                          entry.getFace(), entry.getInterestFilterId())
+                    except:
+                        logging.exception("Error in onInterest")
         elif data != None:
-            pendingInterests = self._extractEntriesForExpressedInterest(
-              data.getName())
+            pendingInterests = []
+            self._pendingInterestTable.extractEntriesForExpressedInterest(
+              data.getName(), pendingInterests)
             for pendingInterest in pendingInterests:
                 try:
                     pendingInterest.getOnData()(pendingInterest.getInterest(), data)
@@ -480,9 +436,8 @@ class Node(object):
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
-        pendingInterest = Node._PendingInterest(
+        pendingInterest = self._pendingInterestTable.add(
           pendingInterestId, interestCopy, onData, onTimeout)
-        self._pendingInterestTable.append(pendingInterest)
         if (onTimeout or
             interestCopy.getInterestLifetimeMilliseconds() != None and
             interestCopy.getInterestLifetimeMilliseconds() >= 0.0):
@@ -503,36 +458,6 @@ class Node(object):
                   "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
 
             self._transport.send(encoding.toBuffer())
-
-    def _extractEntriesForExpressedInterest(self, name):
-        """
-        Find all entries from the _pendingInterestTable where the name conforms
-        to the entry's interest selectors, remove the entries from the table
-        and return them.
-
-        :param Name name: The name to find the interest for (from the incoming
-          data packet).
-        :return: The matching entries from the _pendingInterestTable, or []
-          if none are found.
-        :rtype: array of _PendingInterest
-        """
-        result = []
-
-        # Go backwards through the list so we can erase entries.
-        i = len(self._pendingInterestTable) - 1
-        while i >= 0:
-            pendingInterest = self._pendingInterestTable[i]
-
-            if pendingInterest.getInterest().matchesName(name):
-                result.append(pendingInterest)
-                # We let the callback from callLater call _processInterestTimeout,
-                # but for efficiency, mark this as removed so that it returns
-                # right away.
-                self._pendingInterestTable.pop(i)
-                pendingInterest.setIsRemoved()
-            i -= 1
-
-        return result
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
@@ -579,8 +504,8 @@ class Node(object):
                 self.setInterestFilter(
                   interestFilterId, InterestFilter(prefix), onInterest, face)
 
-            self._registeredPrefixTable.append(Node._RegisteredPrefix(
-              registeredPrefixId, prefix, interestFilterId))
+            self._registeredPrefixTable.add(
+              registeredPrefixId, prefix, interestFilterId)
 
         # Send the registration interest.
         response = Node._RegisterResponse(
@@ -598,18 +523,7 @@ class Node(object):
         :param callback: This calls callback() after the delay.
         :type callback: function object
         """
-        delayedCall = Node._DelayedCall(delayMilliseconds, callback)
-        # Insert into _delayedCallTable, sorted on delayedCall.getCallTime().
-        # Search from the back since we expect it to go there.
-        i = len(self._delayedCallTable) - 1
-        while i >= 0:
-            if (self._delayedCallTable[i].getCallTime() <= delayedCall.getCallTime()):
-                break
-            i -= 1
-
-        # Element i is the greatest less than or equal to
-        # delayedCall.getCallTime(), so insert after it.
-        self._delayedCallTable.insert(i + 1, delayedCall)
+        self._delayedCallTable.callLater(delayMilliseconds, callback)
 
     def _processInterestTimeout(self, pendingInterest):
         """
@@ -617,20 +531,8 @@ class Node(object):
         the pendingInterest is still in the _pendingInterestTable, remove it and
         call its onTimeout callback.
         """
-        if pendingInterest.getIsRemoved():
-            # _extractEntriesForExpressedInterest or removePendingInterest has
-            # removed pendingInterest from _pendingInterestTable, so we don't
-            # need to look for it. Do nothing.
-            return
-
-        try:
-            index = self._pendingInterestTable.index(pendingInterest)
-        except ValueError:
-            # The pending interest has been removed. Do nothing.
-            return
-
-        del self._pendingInterestTable[index]
-        pendingInterest.callTimeout()
+        if self._pendingInterestTable.removeEntry(pendingInterest):
+            pendingInterest.callTimeout()
 
     def getNextEntryId(self):
         """
@@ -651,213 +553,6 @@ class Node(object):
         UNCONNECTED = 1
         CONNECT_REQUESTED = 2
         CONNECT_COMPLETE = 3
-
-    class _DelayedCall(object):
-        """
-        _DelayedCall is a private class for the members of the _delayedCallTable.
-        Create a new _DelayedCall and set the call time based on the current
-        time and the delayMilliseconds.
-
-        :param float delayMilliseconds: The delay in milliseconds.
-        :param callback: This calls callback() after the delay.
-        :type callback: function object
-        """
-        def __init__(self, delayMilliseconds, callback):
-            self._callback = callback
-            self._callTime = Common.getNowMilliseconds() + delayMilliseconds
-
-        def getCallTime(self):
-            """
-            Get the time at which the callback should be called.
-
-            :return: The call time in milliseconds, similar to
-              Common.getNowMilliseconds().
-            :rtype: float
-            """
-            return self._callTime
-
-        def callCallback(self):
-            """
-            Call the callback given to the constructor. This does not catch
-            exceptions.
-            """
-            self._callback()
-
-    class _PendingInterest(object):
-        """
-        _PendingInterest is a private class for the members of the
-        _pendingInterestTable.
-
-        :param int pendingInterestId: A unique ID for this entry, which you
-          should get with getNextEntryId().
-        :param Interest interest: The interest.
-        :param onData: A function object to call when a matching data packet is
-          received.
-        :type onData: function object
-        :param onTimeout: A function object to call if the interest times out.
-          If onTimeout is None, this does not use it.
-        :type onTimeout: function object
-        """
-        def __init__(self, pendingInterestId, interest, onData, onTimeout):
-            self._pendingInterestId = pendingInterestId
-            self._interest = interest
-            self._onData = onData
-            self._onTimeout = onTimeout
-            self._isRemoved = False
-
-        def getPendingInterestId(self):
-            """
-            Get the pendingInterestId given to the constructor.
-
-            :return: The pending interest ID.
-            :rtype: int
-            """
-            return self._pendingInterestId
-
-        def getInterest(self):
-            """
-            Get the interest given to the constructor.
-
-            :return: The interest.
-            :rtype: int
-            """
-            return self._interest
-
-        def getOnData(self):
-            """
-            Get the onData function object given to the constructor.
-
-            :return: The onData function object.
-            :rtype: function object
-            """
-            return self._onData
-
-        def callTimeout(self):
-            """
-            Call _onTimeout (if defined).  This ignores exceptions from
-            _onTimeout.
-            """
-            if self._onTimeout:
-                try:
-                    self._onTimeout(self._interest)
-                except:
-                    logging.exception("Error in onTimeout")
-
-        def setIsRemoved(self):
-            """
-            Set the isRemoved flag which is returned by getIsRemoved().
-            """
-            self._isRemoved = True
-
-        def getIsRemoved(self):
-            """
-            Check if setIsRemoved() was called.
-
-            :return: True if setIsRemoved() was called.
-            :rtype: bool
-            """
-            return self._isRemoved
-
-    class _RegisteredPrefix(object):
-        """
-        A _RegisteredPrefix holds a registeredPrefixId and information necessary
-        to remove the registration later. It optionally holds a related
-        interestFilterId if the InterestFilter was set in the same
-        registerPrefix operation.
-
-        :param int registeredPrefixId: A unique ID for this entry, which you
-          should get with getNextEntryId().
-        :param Name prefix: The name prefix.
-        :param int relatedInterestFilterId: (optional) The related
-          interestFilterId for the filter set in the same registerPrefix
-          operation. If omitted, set to 0.
-        """
-        def __init__(self, registeredPrefixId, prefix, relatedInterestFilterId):
-            self._registeredPrefixId = registeredPrefixId
-            self._prefix = prefix
-            self._relatedInterestFilterId = relatedInterestFilterId
-
-        def getRegisteredPrefixId(self):
-            """
-            Get the registeredPrefixId given to the constructor.
-
-            :return: The registered prefix ID.
-            :rtype: int
-            """
-            return self._registeredPrefixId
-
-        def getPrefix(self):
-            """
-            Get the name prefix to the constructor.
-
-            :return: The name prefix.
-            :rtype: Name
-            """
-            return self._prefix
-
-        def getRelatedInterestFilterId(self):
-            """
-            Get the related interestFilterId given to the constructor.
-
-            :return: The related interestFilterId.
-            :rtype: int
-            """
-            return self._relatedInterestFilterId
-
-    class _InterestFilterEntry(object):
-        """
-        An _InterestFilterEntry holds an interestFilterId, an InterestFilter
-        and the OnInterestCallback with its related Face.
-        Create a new InterestFilterEntry with the given values.
-
-        :param int interestFilterId: The ID from getNextEntryId().
-        :param InterestFilter filter: The InterestFilter for this entry.
-        :param onInterest: The callback to call.
-        :type onInterest: function object
-        :param Face face: The face on which was called registerPrefix or
-          setInterestFilter which is passed to the onInterest callback.
-        """
-        def __init__(self, interestFilterId, filter, onInterest, face):
-            self._interestFilterId = interestFilterId
-            self._filter = filter
-            self._onInterest = onInterest
-            self._face = face
-
-        def getInterestFilterId(self):
-            """
-            Get the interestFilterId given to the constructor.
-
-            :return: The interestFilterId.
-            :rtype: int
-            """
-            return self._interestFilterId
-
-        def getFilter(self):
-            """
-            Get the InterestFilter given to the constructor.
-
-            :return: The InterestFilter.
-            :rtype: InterestFilter
-            """
-            return self._filter
-
-        def getOnInterest(self):
-            """
-            Get the OnInterestCallback given to the constructor.
-
-            :return: The OnInterestCallback.
-            :rtype: function object
-            """
-            return self._onInterest
-
-        def getFace(self):
-            """
-            Get the Face given to the constructor.
-
-            :return: The Face.
-            :rtype: Face
-            """
-            return self._face
 
     class _RegisterResponse(object):
         """

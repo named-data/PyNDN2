@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.2beta1 (2016-03-31)
+Interim changes since PyNDN v2.2beta1 (2016-04-06)
 --------------------------------------------------
 
 Breaking changes
@@ -26,7 +26,8 @@ Changes
 * http://redmine.named-data.net/issues/3152 In API callbacks, catch and log exceptions.
 * http://redmine.named-data.net/issues/3355 In Producer.createContentKey and produce,
   added an optional onError callback.
-* In IdentityManager, added prepareUnsignedIdentityCertificate.
+* In IdentityManager, added prepareUnsignedIdentityCertificate, getAllIdentities
+  and getAllCertificateNamesOfKey.
 * In KeyChain, removed getAnyCertificate and getAnyIdentityCertificate.
 * Unit tests: In test_data_methods, added test_verify_ecdsa.
 * Unit tests: Added test_link.
@@ -36,6 +37,7 @@ Deprecated
 * In KeyChain, deprecated getIdentityCertificate. Use getCertificate.
 
 Bug fixes
+* http://redmine.named-data.net/issues/3589 Update examples face-status.proto.
 * Fix bug in encrypt/Schedule to solve problems when the black repetitive interval list is empty.
 * In Producer, the produced data name should not use a rounded timestamp.
 

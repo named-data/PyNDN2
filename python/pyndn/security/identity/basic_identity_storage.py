@@ -502,13 +502,33 @@ class BasicIdentityStorage(IdentityStorage):
             raise SecurityException(
               "BasicIdentityStorage::getDefaultCertificateNameForKey: The default certificate for the key name is not defined")
 
+    def getAllIdentities(self, nameList, isDefault):
+        """
+        Append all the identity names to the nameList.
+
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If True, add only the default identity name. If
+          false, add only the non-default identity names.
+        """
+        if isDefault:
+            query = "SELECT identity_name FROM Identity WHERE default_identity=1"
+        else:
+            query = "SELECT identity_name FROM Identity WHERE default_identity=0"
+
+        cursor = self._database.cursor()
+        cursor.execute(query)
+        keyIds = cursor.fetchall()
+        for (keyId, ) in keyIds:
+            nameList.append(Name(keyId))
+        cursor.close()
+
     def getAllKeyNamesOfIdentity(self, identityName, nameList, isDefault):
         """
         Append all the key names of a particular identity to the nameList.
 
         :param Name identityName: The identity name to search for.
         :param Array<Name> nameList: Append result names to nameList.
-        :param bool isDefault: If true, add only the default key name. If false,
+        :param bool isDefault: If True, add only the default key name. If False,
           add only the non-default key names.
         """
         if isDefault:
@@ -521,6 +541,30 @@ class BasicIdentityStorage(IdentityStorage):
         keyIds = cursor.fetchall()
         for (keyId, ) in keyIds:
             nameList.append(Name(identityName).append(keyId))
+        cursor.close()
+
+    def getAllCertificateNamesOfKey(self, keyName, nameList, isDefault):
+        """
+        Append all the certificate names of a particular key name to the nameList.
+
+        :param Name keyName: The key name to search for.
+        :param Array<Name> nameList: Append result names to nameList.
+        :param bool isDefault: If True, add only the default certificate name.
+          If False, add only the non-default certificate names.
+        """
+        if isDefault:
+            query = """SELECT cert_name FROM Certificate
+          WHERE default_cert=1 and identity_name=? and key_identifier=?"""
+        else:
+            query = """SELECT cert_name FROM Certificate
+          WHERE default_cert=0 and identity_name=? and key_identifier=?"""
+
+        cursor = self._database.cursor()
+        cursor.execute(query, (keyName.getPrefix(-1).toUri(),
+                               keyName.get(-1).toEscapedString()))
+        keyIds = cursor.fetchall()
+        for (keyId, ) in keyIds:
+            nameList.append(Name(keyId))
         cursor.close()
 
     def setDefaultIdentity(self, identityName):
