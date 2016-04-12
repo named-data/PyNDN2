@@ -177,7 +177,13 @@ class TestFaceRegisterMethods(ut.TestCase):
 
         self.face_in.registerPrefix(prefixName, onInterest, failedCallback)
         # Give the 'server' time to register the interest.
-        time.sleep(1)
+        timeout = 1000
+        startTime = getNowMilliseconds()
+        while True:
+            if getNowMilliseconds() - startTime >= timeout:
+                break
+            self.face_in.processEvents()
+            time.sleep(0.01)
 
         # express an interest on another face
         dataCallback = Mock()
