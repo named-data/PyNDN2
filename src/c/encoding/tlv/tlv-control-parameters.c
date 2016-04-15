@@ -144,6 +144,7 @@ ndn_decodeTlvControlParameters
        (decoder, ndn_Tlv_Name, endOffset, &gotExpectedType)))
     return error;
   if (gotExpectedType) {
+    controlParameters->hasName = 1;
     if ((error = ndn_decodeTlvName
          (&controlParameters->name, &dummyBeginOffset, &dummyEndOffset, decoder)))
       return error;
@@ -188,7 +189,7 @@ ndn_decodeTlvControlParameters
     if ((error = ndn_TlvDecoder_readNonNegativeIntegerTlv
          (decoder, ndn_Tlv_ControlParameters_Flags, &flags)))
       return error;
-    ndn_ForwardingFlags_setNfdForwardingFlags(&controlParameters->flags, flags);
+    ndn_ForwardingFlags_setNfdForwardingFlags(&controlParameters->flags, (int)flags);
   }
   else
     ndn_ForwardingFlags_initialize(&controlParameters->flags);

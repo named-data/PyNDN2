@@ -66,7 +66,7 @@ public:
     /**
      * Set this delegation to have the values from the other delegation.
      * @param other The other DelegationSetLite::Delegation to get values from.
-     * @return 0 for success, or an error code if there is not enough room in 
+     * @return 0 for success, or an error code if there is not enough room in
      * this object's keyName components array.
      */
     ndn_Error
@@ -99,7 +99,6 @@ public:
      * which can return an error if there is no more room in the name components
      * array.
      */
-    Delegation(Delegation& other);
     Delegation(const Delegation& other);
 
     /**
