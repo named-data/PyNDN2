@@ -3,11 +3,6 @@
 
 using namespace ndn;
 
-extern "C" {
-  static PyObject *
-  _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args);
-}
-
 /**
  * When PyObjectRef goes out of scope, it calls Py_DECREF on the PyObject given
  * to the constructor.
@@ -20,17 +15,48 @@ public:
   PyObject* obj;
 };
 
+// Static Python string objects.
+class strClass {
+public:
+  strClass() {
+    getContent = Py_BuildValue("s", "getContent");
+    getFinalBlockId = Py_BuildValue("s", "getFinalBlockId");
+    getFreshnessPeriod = Py_BuildValue("s", "getFreshnessPeriod");
+    getKeyData = Py_BuildValue("s", "getKeyData");
+    getKeyLocator = Py_BuildValue("s", "getKeyLocator");
+    getKeyName = Py_BuildValue("s", "getKeyName");
+    getMetaInfo = Py_BuildValue("s", "getMetaInfo");
+    getName = Py_BuildValue("s", "getName");
+    getValue = Py_BuildValue("s", "getValue");
+    getSignature = Py_BuildValue("s", "getSignature");
+    getType = Py_BuildValue("s", "getType");
+  }
+  PyObject* getContent;
+  PyObject* getFinalBlockId;
+  PyObject* getFreshnessPeriod;
+  PyObject* getKeyData;
+  PyObject* getKeyLocator;
+  PyObject* getKeyName;
+  PyObject* getMetaInfo;
+  PyObject* getName;
+  PyObject* getValue;
+  PyObject* getSignature;
+  PyObject* getType;
+};
+
+static strClass str;
+
 static long
-toLongByMethod(PyObject* obj, const char* methodName)
+toLongByMethod(PyObject* obj, PyObject* methodName)
 {
-  PyObjectRef val(PyObject_CallMethod(obj, (char*)methodName, (char*)""));
+  PyObjectRef val(PyObject_CallMethodObjArgs(obj, methodName, NULL));
   return PyInt_AsLong(val);
 }
 
 static double
-toDoubleByMethod(PyObject* obj, const char* methodName)
+toDoubleByMethod(PyObject* obj, PyObject* methodName)
 {
-  PyObjectRef val(PyObject_CallMethod(obj, (char*)methodName, (char*)""));
+  PyObjectRef val(PyObject_CallMethodObjArgs(obj, methodName, NULL));
   return PyFloat_AsDouble(val);
 }
 
@@ -43,9 +69,9 @@ toDoubleByMethod(PyObject* obj, const char* methodName)
  * if the Blob isNull.
  */
 static BlobLite
-toBlobLiteByMethod(PyObject* obj, const char* methodName)
+toBlobLiteByMethod(PyObject* obj, PyObject* methodName)
 {
-  PyObjectRef blob(PyObject_CallMethod(obj, (char*)methodName, (char*)""));
+  PyObjectRef blob(PyObject_CallMethodObjArgs(obj, methodName, NULL));
 
   // Imitate Blob.toBuffer to be bufferObj.
   PyObjectRef blobArray(PyObject_GetAttrString(blob, "_array"));
@@ -85,7 +111,7 @@ toNameLite(PyObject* name, NameLite& nameLite)
     ndn_Error error;
     if ((error = nameLite.append
          (toBlobLiteByMethod
-          (PyList_GET_ITEM(components.obj, i), "getValue"))))
+          (PyList_GET_ITEM(components.obj, i), str.getValue))))
       // TODO: Handle the error!
       return;
   }
@@ -96,11 +122,12 @@ static void
 toKeyLocatorLite(PyObject* keyLocator, KeyLocatorLite& keyLocatorLite)
 {
   keyLocatorLite.setType
-    ((ndn_KeyLocatorType)(int)toLongByMethod(keyLocator, "getType"));
+    ((ndn_KeyLocatorType)(int)toLongByMethod(keyLocator, str.getType));
   keyLocatorLite.setKeyData
-    (toBlobLiteByMethod(keyLocator, "getKeyData"));
+    (toBlobLiteByMethod(keyLocator, str.getKeyData));
 
-  PyObjectRef keyName(PyObject_CallMethod(keyLocator, (char*)"getKeyName", (char*)""));
+  PyObjectRef keyName(PyObject_CallMethodObjArgs
+    (keyLocator, str.getKeyName, NULL));
   toNameLite(keyName, keyLocatorLite.getKeyName());
 }
 
@@ -109,10 +136,10 @@ static void
 toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
 {
   signatureLite.setType(ndn_SignatureType_Sha256WithRsaSignature);
-  signatureLite.setSignature(toBlobLiteByMethod(signature, "getSignature"));
+  signatureLite.setSignature(toBlobLiteByMethod(signature, str.getSignature));
 
   PyObjectRef keyLocator
-    (PyObject_CallMethod(signature, (char*)"getKeyLocator", (char*)""));
+    (PyObject_CallMethodObjArgs(signature, str.getKeyLocator, NULL));
   toKeyLocatorLite(keyLocator, signatureLite.getKeyLocator());
 }
 
@@ -120,12 +147,12 @@ toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
 static void
 toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
 {
-  metaInfoLite.setType((ndn_ContentType)(int)toLongByMethod(metaInfo, "getType"));
-  metaInfoLite.setFreshnessPeriod(toDoubleByMethod(metaInfo, "getFreshnessPeriod"));
-  PyObjectRef finalBlockId(PyObject_CallMethod
-    (metaInfo, (char*)"getFinalBlockId", (char*)""));
+  metaInfoLite.setType((ndn_ContentType)(int)toLongByMethod(metaInfo, str.getType));
+  metaInfoLite.setFreshnessPeriod(toDoubleByMethod(metaInfo, str.getFreshnessPeriod));
+  PyObjectRef finalBlockId(PyObject_CallMethodObjArgs
+    (metaInfo, str.getFinalBlockId, NULL));
   metaInfoLite.setFinalBlockId(NameLite::Component
-    (toBlobLiteByMethod(finalBlockId, "getValue")));
+    (toBlobLiteByMethod(finalBlockId, str.getValue)));
 }
 
 // Imitate Data::get(DataLite& dataLite).
@@ -133,16 +160,16 @@ static void
 toDataLite(PyObject* data, DataLite& dataLite)
 {
   // TODO: Handle types other than Sha256WithRsaSignature
-  PyObjectRef signature(PyObject_CallMethod(data, (char*)"getSignature", (char*)""));
+  PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
   toSha256WithRsaSignatureLite(signature, dataLite.getSignature());
 
-  PyObjectRef name(PyObject_CallMethod(data, (char*)"getName", (char*)""));
+  PyObjectRef name(PyObject_CallMethodObjArgs(data, str.getName, NULL));
   toNameLite(name, dataLite.getName());
 
-  PyObjectRef metaInfo(PyObject_CallMethod(data, (char*)"getMetaInfo", (char*)""));
+  PyObjectRef metaInfo(PyObject_CallMethodObjArgs(data, str.getMetaInfo, NULL));
   toMetaInfoLite(metaInfo, dataLite.getMetaInfo());
 
-  dataLite.setContent(toBlobLiteByMethod(data, "getContent"));
+  dataLite.setContent(toBlobLiteByMethod(data, str.getContent));
 }
 
 static PyObject *
@@ -170,7 +197,7 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
        (dataLite, &signedPortionBeginOffset, &signedPortionEndOffset,
         output, &encodingLength))) {
     PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
-    return 0;
+    return NULL;
   }
 
   // TODO: Does returning a str work in Python 3 (where this is Unicode)?
