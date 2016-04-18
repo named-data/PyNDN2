@@ -255,6 +255,10 @@ class Tlv0_1_1WireFormat(WireFormat):
           the offset in the encoding of the end of the signed portion.
         :rtype: (int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeData(data, input)
+
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Data)
