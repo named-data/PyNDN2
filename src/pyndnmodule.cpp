@@ -22,6 +22,10 @@ public:
     _array = Py_BuildValue("s", "_array");
     _components = Py_BuildValue("s", "_components");
     _view = Py_BuildValue("s", "_view");
+    Blob = Py_BuildValue("s", "Blob");
+    Sha256WithRsaSignature = Py_BuildValue("s", "Sha256WithRsaSignature");
+    append = Py_BuildValue("s", "append");
+    clear = Py_BuildValue("s", "clear");
     getContent = Py_BuildValue("s", "getContent");
     getFinalBlockId = Py_BuildValue("s", "getFinalBlockId");
     getFreshnessPeriod = Py_BuildValue("s", "getFreshnessPeriod");
@@ -33,10 +37,20 @@ public:
     getValue = Py_BuildValue("s", "getValue");
     getSignature = Py_BuildValue("s", "getSignature");
     getType = Py_BuildValue("s", "getType");
+    setContent = Py_BuildValue("s", "setContent");
+    setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
+    setFreshnessPeriod = Py_BuildValue("s", "setFreshnessPeriod");
+    setKeyData = Py_BuildValue("s", "setKeyData");
+    setSignature = Py_BuildValue("s", "setSignature");
+    setType = Py_BuildValue("s", "setType");
   }
   PyObject* _array;
   PyObject* _components;
   PyObject* _view;
+  PyObject* Blob;
+  PyObject* Sha256WithRsaSignature;
+  PyObject* append;
+  PyObject* clear;
   PyObject* getContent;
   PyObject* getFinalBlockId;
   PyObject* getFreshnessPeriod;
@@ -48,6 +62,12 @@ public:
   PyObject* getValue;
   PyObject* getSignature;
   PyObject* getType;
+  PyObject* setContent;
+  PyObject* setFinalBlockId;
+  PyObject* setFreshnessPeriod;
+  PyObject* setKeyData;
+  PyObject* setSignature;
+  PyObject* setType;
 };
 
 static strClass str;
@@ -67,32 +87,23 @@ toDoubleByMethod(PyObject* obj, PyObject* methodName)
 }
 
 /**
- * Get a Blob by calling obj.methodName() and imitate Blob.toBuffer to get
- * the array in a BlobLite.
- * @param obj The object with the Blob.
- * @param methodName The method name that returns a Blob.
- * @return A BlobLite which points into the raw bytes, or an empty BlobLite if
- * if the Blob isNull.
+ * Imitate Blob.toBuffer to get the array in a BlobLite.
+ * @param array The array object such as from blob.buf().
+ * @return A BlobLite which points into the raw bytes.
  */
 static BlobLite
-toBlobLiteByMethod(PyObject* obj, PyObject* methodName)
+toBlobLiteFromArray(PyObject* array)
 {
-  PyObjectRef blob(PyObject_CallMethodObjArgs(obj, methodName, NULL));
-
   // Imitate Blob.toBuffer to be bufferObj.
-  PyObjectRef blobArray(PyObject_GetAttr(blob, str._array));
-  if (blobArray.obj == Py_None)
-    return BlobLite();
-
   PyObject* bufferObj;
   PyObjectRef blobArrayView(0);
-  if (PyObject_HasAttr(blobArray, str._view)) {
-    // Assume _array is a _memoryviewWrapper.
-    blobArrayView.obj = PyObject_GetAttr(blobArray, str._view);
+  if (PyObject_HasAttr(array, str._view)) {
+    // Assume array is a _memoryviewWrapper.
+    blobArrayView.obj = PyObject_GetAttr(array, str._view);
     bufferObj = blobArrayView.obj;
   }
   else
-    bufferObj = blobArray.obj;
+    bufferObj = array;
 
   Py_buffer bufferView;
   if (PyObject_GetBuffer(bufferObj, &bufferView, PyBUF_SIMPLE) != 0)
@@ -105,6 +116,44 @@ toBlobLiteByMethod(PyObject* obj, PyObject* methodName)
   PyBuffer_Release(&bufferView);
 
   return BlobLite(buf, size);
+}
+
+/**
+ * Get a Blob by calling obj.methodName() and imitate Blob.toBuffer to get
+ * the array in a BlobLite.
+ * @param obj The object with the Blob.
+ * @param methodName The method name that returns a Blob.
+ * @return A BlobLite which points into the raw bytes, or an empty BlobLite if
+ * if the Blob isNull.
+ */
+static BlobLite
+toBlobLiteByMethod(PyObject* obj, PyObject* methodName)
+{
+  PyObjectRef blob(PyObject_CallMethodObjArgs(obj, methodName, NULL));
+  PyObjectRef blobArray(PyObject_GetAttr(blob, str._array));
+  if (blobArray.obj == Py_None)
+    return BlobLite();
+
+  return toBlobLiteFromArray(blobArray);
+}
+
+/**
+ * Make a new Blob object.
+ * @param blobLite The BlobLite with the bytes for the blob, which are copied.
+ * @return A new PyObject for the Blob object.
+ */
+static PyObject*
+makeBlob(const BlobLite& blobLite)
+{
+  PyObjectRef util(PyImport_ImportModule("pyndn.util"));
+  PyObjectRef Blob(PyObject_GetAttr(util, str.Blob));
+  // TODO: Will this raw string work in Python 3?
+  PyObjectRef array(PyByteArray_FromStringAndSize
+    ((const char*)blobLite.buf(), (Py_ssize_t)blobLite.size()));
+
+  // Call Blob(array, 0). Use 0 in place of False.
+  PyObjectRef args(Py_BuildValue("(O,i)", array.obj, 0));
+  return PyObject_CallObject(Blob, args);
 }
 
 // Imitate Name::get(NameLite& nameLite).
@@ -123,6 +172,19 @@ toNameLite(PyObject* name, NameLite& nameLite)
   }
 }
 
+// Imitate Name::set(const NameLite& nameLite).
+static void
+setName(PyObject* name, const NameLite& nameLite)
+{
+  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs(name, str.clear, NULL));
+
+  for (size_t i = 0; i < nameLite.size(); ++i) {
+    PyObjectRef blob(makeBlob(nameLite.get(i).getValue()));
+    PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+      (name, str.append, blob.obj, NULL));
+  }
+}
+
 // Imitate KeyLocator::get(KeyLocatorLite& keyLocatorLite).
 static void
 toKeyLocatorLite(PyObject* keyLocator, KeyLocatorLite& keyLocatorLite)
@@ -137,6 +199,25 @@ toKeyLocatorLite(PyObject* keyLocator, KeyLocatorLite& keyLocatorLite)
   toNameLite(keyName, keyLocatorLite.getKeyName());
 }
 
+// Imitate KeyLocator::set(const KeyLocatorLite& keyLocatorLite).
+static void
+setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
+{
+  PyObjectRef type(PyLong_FromLong(keyLocatorLite.getType()));
+  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
+    (keyLocator, str.setType, type.obj, NULL));
+
+  PyObjectRef keyData(makeBlob(keyLocatorLite.getKeyData()));
+  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+    (keyLocator, str.setKeyData, keyData.obj, NULL));
+
+  PyObjectRef keyName(PyObject_CallMethodObjArgs(keyLocator, str.getKeyName, NULL));
+  if (keyLocatorLite.getType() == ndn_KeyLocatorType_KEYNAME)
+    setName(keyName, keyLocatorLite.getKeyName());
+  else
+    PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs(keyName, str.clear, NULL));
+}
+
 // Imitate Sha256WithRsaSignature::get(SignatureLite& signatureLite).
 static void
 toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
@@ -147,6 +228,23 @@ toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
   PyObjectRef keyLocator
     (PyObject_CallMethodObjArgs(signature, str.getKeyLocator, NULL));
   toKeyLocatorLite(keyLocator, signatureLite.getKeyLocator());
+}
+
+// Imitate Sha256WithRsaSignature::set(const SignatureLite& signatureLite).
+static void
+setSha256WithRsaSignature(PyObject* signature, const SignatureLite& signatureLite)
+{
+  // The caller should already have checked the type, but check again.
+  if (signatureLite.getType() != ndn_SignatureType_Sha256WithRsaSignature)
+    return;
+
+  PyObjectRef signatureBlob(makeBlob(signatureLite.getSignature()));
+  PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+    (signature, str.setSignature, signatureBlob.obj, NULL));
+
+  PyObjectRef keyLocator(PyObject_CallMethodObjArgs
+    (signature, str.getKeyLocator, NULL));
+  setKeyLocator(keyLocator, signatureLite.getKeyLocator());
 }
 
 // Imitate MetaInfo::get(MetaInfoLite& metaInfoLite).
@@ -161,11 +259,28 @@ toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
     (toBlobLiteByMethod(finalBlockId, str.getValue)));
 }
 
+// Imitate MetaInfo::set(const MetaInfoLite& metaInfoLite).
+static void
+setMetaInfo(PyObject* metaInfo, const MetaInfoLite& metaInfoLite)
+{
+  PyObjectRef type(PyLong_FromLong(metaInfoLite.getType()));
+  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
+    (metaInfo, str.setType, type.obj, NULL));
+
+  PyObjectRef freshnessPeriod(PyFloat_FromDouble(metaInfoLite.getFreshnessPeriod()));
+  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+    (metaInfo, str.setFreshnessPeriod, freshnessPeriod.obj, NULL));
+
+  PyObjectRef finalBlockId(makeBlob(metaInfoLite.getFinalBlockId().getValue()));
+  PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
+    (metaInfo, str.setFinalBlockId, finalBlockId.obj, NULL));
+}
+
 // Imitate Data::get(DataLite& dataLite).
 static void
 toDataLite(PyObject* data, DataLite& dataLite)
 {
-  // TODO: Handle types other than Sha256WithRsaSignature
+  // TODO: Handle types other than Sha256WithRsaSignature.
   PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
   toSha256WithRsaSignatureLite(signature, dataLite.getSignature());
 
@@ -176,6 +291,33 @@ toDataLite(PyObject* data, DataLite& dataLite)
   toMetaInfoLite(metaInfo, dataLite.getMetaInfo());
 
   dataLite.setContent(toBlobLiteByMethod(data, str.getContent));
+}
+
+// Imitate Data::set(const DataLite& dataLite).
+static void
+setData(PyObject* data, const DataLite& dataLite)
+{
+  // TODO: Handle types other than Sha256WithRsaSignature.
+  PyObject* signatureName = str.Sha256WithRsaSignature;
+  PyObjectRef pyndnModule(PyImport_ImportModule("pyndn"));
+  PyObjectRef signatureClass(PyObject_GetAttr(pyndnModule, signatureName));
+  PyObjectRef tempSignature(PyObject_CallObject(signatureClass, NULL));
+  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
+    (data, str.setSignature, tempSignature.obj, NULL));
+
+  // Now use the signature object that was copied into data.
+  PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
+  setSha256WithRsaSignature(signature, dataLite.getSignature());
+
+  PyObjectRef name(PyObject_CallMethodObjArgs(data, str.getName, NULL));
+  setName(name, dataLite.getName());
+
+  PyObjectRef metaInfo(PyObject_CallMethodObjArgs(data, str.getMetaInfo, NULL));
+  setMetaInfo(metaInfo, dataLite.getMetaInfo());
+
+  PyObjectRef blob(makeBlob(dataLite.getContent()));
+  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+    (data, str.setContent, blob.obj, NULL));
 }
 
 static PyObject *
@@ -212,6 +354,37 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
      (int)signedPortionEndOffset);
 }
 
+static PyObject *
+_pyndn_Tlv0_1_1WireFormat_decodeData(PyObject *self, PyObject *args)
+{
+  PyObject* data;
+  PyObject* input;
+  if (!PyArg_ParseTuple(args, "OO", &data, &input))
+    return NULL;
+
+  BlobLite inputLite = toBlobLiteFromArray(input);
+
+  struct ndn_NameComponent nameComponents[100];
+  struct ndn_NameComponent keyNameComponents[100];
+  DataLite dataLite
+    (nameComponents, sizeof(nameComponents) / sizeof(nameComponents[0]),
+     keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
+
+  size_t signedPortionBeginOffset, signedPortionEndOffset;
+  ndn_Error error;
+  if ((error = Tlv0_1_1WireFormatLite::decodeData
+       (dataLite, inputLite.buf(), inputLite.size(), &signedPortionBeginOffset,
+        &signedPortionEndOffset))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  setData(data, dataLite);
+
+  return Py_BuildValue
+    ("(i,i)", (int)signedPortionBeginOffset, (int)signedPortionEndOffset);
+}
+
 extern "C" {
   static PyMethodDef PyndnMethods[] = {
     {"Tlv0_1_1WireFormat_encodeData",  _pyndn_Tlv0_1_1WireFormat_encodeData, METH_VARARGS,
@@ -225,6 +398,18 @@ extern "C" {
   the offset in the encoding of the end of the signed portion. If r is the\n\
   result Tuple, the encoding Blob is Blob(r[0], False).\n\
 :rtype: (str, int, int)"},
+    {"Tlv0_1_1WireFormat_decodeData",  _pyndn_Tlv0_1_1WireFormat_decodeData, METH_VARARGS,
+"Decode input as an NDN-TLV data packet, set the fields in the data\n\
+object, and return the signed offsets.\n\
+\n\
+:param Data data:  The Data object whose fields are updated.\n\
+:param input: The array with the bytes to decode.\n\
+:type input: An array type with int elements\n\
+:return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)\n\
+  where signedPortionBeginOffset is the offset in the encoding of\n\
+  the beginning of the signed portion, and signedPortionEndOffset is\n\
+  the offset in the encoding of the end of the signed portion.\n\
+:rtype: (int, int)"},
     {NULL, NULL, 0, NULL} // sentinel
   };
 
