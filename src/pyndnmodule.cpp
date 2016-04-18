@@ -19,6 +19,9 @@ public:
 class strClass {
 public:
   strClass() {
+    _array = Py_BuildValue("s", "_array");
+    _components = Py_BuildValue("s", "_components");
+    _view = Py_BuildValue("s", "_view");
     getContent = Py_BuildValue("s", "getContent");
     getFinalBlockId = Py_BuildValue("s", "getFinalBlockId");
     getFreshnessPeriod = Py_BuildValue("s", "getFreshnessPeriod");
@@ -31,6 +34,9 @@ public:
     getSignature = Py_BuildValue("s", "getSignature");
     getType = Py_BuildValue("s", "getType");
   }
+  PyObject* _array;
+  PyObject* _components;
+  PyObject* _view;
   PyObject* getContent;
   PyObject* getFinalBlockId;
   PyObject* getFreshnessPeriod;
@@ -74,15 +80,15 @@ toBlobLiteByMethod(PyObject* obj, PyObject* methodName)
   PyObjectRef blob(PyObject_CallMethodObjArgs(obj, methodName, NULL));
 
   // Imitate Blob.toBuffer to be bufferObj.
-  PyObjectRef blobArray(PyObject_GetAttrString(blob, "_array"));
+  PyObjectRef blobArray(PyObject_GetAttr(blob, str._array));
   if (blobArray.obj == Py_None)
     return BlobLite();
 
   PyObject* bufferObj;
   PyObjectRef blobArrayView(0);
-  if (PyObject_HasAttrString(blobArray, "_view")) {
+  if (PyObject_HasAttr(blobArray, str._view)) {
     // Assume _array is a _memoryviewWrapper.
-    blobArrayView.obj = PyObject_GetAttrString(blobArray, "_view");
+    blobArrayView.obj = PyObject_GetAttr(blobArray, str._view);
     bufferObj = blobArrayView.obj;
   }
   else
@@ -106,7 +112,7 @@ static void
 toNameLite(PyObject* name, NameLite& nameLite)
 {
   nameLite.clear();
-  PyObjectRef components(PyObject_GetAttrString(name, "_components"));
+  PyObjectRef components(PyObject_GetAttr(name, str._components));
   for (size_t i = 0; i < PyList_GET_SIZE(components.obj); ++i) {
     ndn_Error error;
     if ((error = nameLite.append
