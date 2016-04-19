@@ -438,6 +438,10 @@ class Node(object):
         """
         pendingInterest = self._pendingInterestTable.add(
           pendingInterestId, interestCopy, onData, onTimeout)
+        if pendingInterest == None:
+            # removePendingInterest was already called with the pendingInterestId.
+            return
+
         if (onTimeout or
             interestCopy.getInterestLifetimeMilliseconds() != None and
             interestCopy.getInterestLifetimeMilliseconds() >= 0.0):

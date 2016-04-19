@@ -27,6 +27,7 @@ import logging
 class PendingInterestTable(object):
     def __init__(self):
         self._table = []  # of Entry
+        self._removeRequests = [] # of int
 
     class Entry(object):
         """
@@ -105,7 +106,9 @@ class PendingInterestTable(object):
 
     def add(self, pendingInterestId, interestCopy, onData, onTimeout):
         """
-        Add a new entry to the pending interest table.
+        Add a new entry to the pending interest table. However, if
+        removePendingInterest was already called with the pendingInterestId,
+        don't add an entry and return None.
 
         :param int pendingInterestId: A unique ID for this entry, which you
           should get with Node.getNextEntryId().
@@ -117,9 +120,19 @@ class PendingInterestTable(object):
         :param onTimeout: A function object to call if the interest times out.
           If onTimeout is None, this does not use it.
         :type onTimeout: function object
-        :return: The new PendingInterestTable.Entry.
+        :return: The new PendingInterestTable.Entry, or None if
+          removePendingInterest was already called with the pendingInterestId.
         :rtype: PendingInterestTable.Entry
         """
+        try:
+            removeRequestIndex = self._removeRequests.index(pendingInterestId)
+            # removePendingInterest was called with the pendingInterestId returned by
+            #   expressInterest before we got here, so don't add a PIT entry.
+            del self._removeRequests[removeRequestIndex]
+            return None
+        except ValueError:
+            pass
+
         entry = PendingInterestTable.Entry(
           pendingInterestId, interestCopy, onData, onTimeout)
         self._table.append(entry)
@@ -178,6 +191,16 @@ class PendingInterestTable(object):
         if count == 0:
             logging.getLogger(__name__).debug(
               "removePendingInterest: Didn't find pendingInterestId " + pendingInterestId)
+
+        if count == 0:
+            # The pendingInterestId was not found. Perhaps this has been called before
+            #   the callback in expressInterest can add to the PIT. Add this
+            #   removal request which will be checked before adding to the PIT.
+            try:
+                self._removeRequests.index(pendingInterestId)
+            except ValueError:
+                # Not already requested, so add the request.
+                self._removeRequests.append(pendingInterestId)
 
     def removeEntry(self, pendingInterest):
         """
