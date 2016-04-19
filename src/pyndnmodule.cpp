@@ -348,9 +348,10 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
     return NULL;
   }
 
-  // TODO: Does returning a str work in Python 3 (where this is Unicode)?
+  PyObjectRef encoding(PyByteArray_FromStringAndSize
+    ((const char*)debugEncoding, encodingLength));
   return Py_BuildValue
-    ("(s#,i,i)", debugEncoding, encodingLength, (int)signedPortionBeginOffset,
+    ("(O,i,i)", encoding.obj, (int)signedPortionBeginOffset,
      (int)signedPortionEndOffset);
 }
 
@@ -392,7 +393,7 @@ extern "C" {
 \n\
 :param Data data: The Data object to encode.\n\
 :return: A Tuple of (encoding, signedPortionBeginOffset,\n\
-  signedPortionEndOffset) where encoding is a raw str (not Blob) containing the\n\
+  signedPortionEndOffset) where encoding is a bytearray (not Blob) containing the\n\
   encoding, signedPortionBeginOffset is the offset in the encoding of\n\
   the beginning of the signed portion, and signedPortionEndOffset is\n\
   the offset in the encoding of the end of the signed portion. If r is the\n\
