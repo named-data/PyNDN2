@@ -190,7 +190,8 @@ class PendingInterestTable(object):
 
         if count == 0:
             logging.getLogger(__name__).debug(
-              "removePendingInterest: Didn't find pendingInterestId " + pendingInterestId)
+              "removePendingInterest: Didn't find pendingInterestId " +
+              str(pendingInterestId))
 
         if count == 0:
             # The pendingInterestId was not found. Perhaps this has been called before

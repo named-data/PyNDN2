@@ -79,7 +79,8 @@ class RegisteredPrefixTable(object):
 
         if count == 0:
             logging.getLogger(__name__).debug(
-              "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
+              "removeRegisteredPrefix: Didn't find registeredPrefixId " +
+              str(registeredPrefixId))
 
     class _Entry(object):
         """
