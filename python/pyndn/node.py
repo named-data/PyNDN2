@@ -510,6 +510,11 @@ class Node(object):
 
             if not self._registeredPrefixTable.add(
                   registeredPrefixId, prefix, interestFilterId):
+                # removeRegisteredPrefix was already called with the registeredPrefixId.
+                if interestFilterId > 0:
+                    # Remove the related interest filter we just added.
+                    self.unsetInterestFilter(interestFilterId)
+
                 return
 
         # Send the registration interest.
