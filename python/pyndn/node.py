@@ -499,27 +499,10 @@ class Node(object):
           commandInterest, commandKeyChain, commandCertificateName,
           TlvWireFormat.get())
 
-        if registeredPrefixId != 0:
-            interestFilterId = 0
-            if onInterest != None:
-                # registerPrefix was called with the "combined" form that includes
-                # the callback, so add an InterestFilterEntry.
-                interestFilterId = self.getNextEntryId()
-                self.setInterestFilter(
-                  interestFilterId, InterestFilter(prefix), onInterest, face)
-
-            if not self._registeredPrefixTable.add(
-                  registeredPrefixId, prefix, interestFilterId):
-                # removeRegisteredPrefix was already called with the registeredPrefixId.
-                if interestFilterId > 0:
-                    # Remove the related interest filter we just added.
-                    self.unsetInterestFilter(interestFilterId)
-
-                return
-
         # Send the registration interest.
         response = Node._RegisterResponse(
-          prefix, onRegisterFailed, onRegisterSuccess, registeredPrefixId)
+          prefix, onRegisterFailed, onRegisterSuccess, registeredPrefixId, self,
+          onInterest, face)
         self.expressInterest(
           self.getNextEntryId(), commandInterest, response.onData,
           response.onTimeout, TlvWireFormat.get(), face)
@@ -571,16 +554,18 @@ class Node(object):
         response or a timeout, call onRegisterFailed.
         """
         def __init__(self, prefix, onRegisterFailed, onRegisterSuccess,
-              registeredPrefixId):
+              registeredPrefixId, parent, onInterest, face):
             self._prefix = prefix
             self._onRegisterFailed = onRegisterFailed
             self._onRegisterSuccess = onRegisterSuccess
             self._registeredPrefixId = registeredPrefixId
+            self._parent = parent
+            self._onInterest = onInterest
+            self._face = face
 
         def onData(self, interest, responseData):
             """
-            We received the response. Do a quick check of expected name
-            components.
+            We received the response.
             """
             # Decode responseData.getContent() and check for a success code.
             controlResponse = ControlResponse()
@@ -606,6 +591,26 @@ class Node(object):
                 except:
                     logging.exception("Error in onRegisterFailed")
                 return
+
+            # Success, so we can add to the registered prefix table.
+            if self._registeredPrefixId != 0:
+                interestFilterId = 0
+                if self._onInterest != None:
+                    # registerPrefix was called with the "combined" form that includes
+                    # the callback, so add an InterestFilterEntry.
+                    interestFilterId = self._parent.getNextEntryId()
+                    self._parent.setInterestFilter(
+                      interestFilterId, InterestFilter(self._prefix),
+                      self._onInterest, self._face)
+
+                if not self._parent._registeredPrefixTable.add(
+                      self._registeredPrefixId, self._prefix, interestFilterId):
+                    # removeRegisteredPrefix was already called with the registeredPrefixId.
+                    if interestFilterId > 0:
+                        # Remove the related interest filter we just added.
+                        self._parent.unsetInterestFilter(interestFilterId)
+
+                    return
 
             logging.getLogger(__name__).info(
               "Register prefix succeeded with the NFD forwarder for prefix %s",
