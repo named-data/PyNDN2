@@ -508,8 +508,9 @@ class Node(object):
                 self.setInterestFilter(
                   interestFilterId, InterestFilter(prefix), onInterest, face)
 
-            self._registeredPrefixTable.add(
-              registeredPrefixId, prefix, interestFilterId)
+            if not self._registeredPrefixTable.add(
+                  registeredPrefixId, prefix, interestFilterId):
+                return
 
         # Send the registration interest.
         response = Node._RegisterResponse(
