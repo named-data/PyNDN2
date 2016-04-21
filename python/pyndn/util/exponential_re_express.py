@@ -48,7 +48,7 @@ class ExponentialReExpress(object):
         def onData: ...
         def onTimeout ...
         face.expressInterest(interest, onData,
-           ExponentialReExpress.makeOnTimeout(face, onData, onTimeout))
+        ExponentialReExpress.makeOnTimeout(face, onData, onTimeout))
 
         :param Face face: This calls face.expressInterest.
         :param onData: When a matching data packet is received, this calls
