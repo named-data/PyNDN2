@@ -52,6 +52,14 @@ pyndn.util.dynamic_byte_array module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.exponential_re_express module
+----------------------------------------
+
+.. automodule:: pyndn.util.exponential_re_express
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.memory_content_cache module
 --------------------------------------
 

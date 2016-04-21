@@ -35,6 +35,14 @@ pyndn.encrypt.decrypt_key module
     :undoc-members:
     :show-inheritance:
 
+pyndn.encrypt.encrypt_error module
+----------------------------------
+
+.. automodule:: pyndn.encrypt.encrypt_error
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.encrypt.encrypt_key module
 --------------------------------
 
