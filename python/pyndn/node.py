@@ -255,7 +255,7 @@ class Node(object):
         :param Face face: The face which is passed to the onInterest callback.
         """
         self._interestFilterTable.setInterestFilter(
-          interestFilterId, InterestFilter(filter), onInterest, face)
+          interestFilterId, InterestFilter(filterCopy), onInterest, face)
 
     def unsetInterestFilter(self, interestFilterId):
         """
