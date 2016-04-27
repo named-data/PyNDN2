@@ -32,6 +32,7 @@ from pyndn.data import Data
 from pyndn.control_parameters import ControlParameters
 from pyndn.control_response import ControlResponse
 from pyndn.interest_filter import InterestFilter
+from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
@@ -94,6 +95,10 @@ class Node(object):
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
+        # Set the nonce in our copy of the Interest so it is saved in the PIT.
+        interestCopy.setNonce(Node._nonceTemplate)
+        interestCopy.refreshNonce()
+
         if self._connectStatus == self._ConnectStatus.CONNECT_COMPLETE:
             # We are connected. Simply send the interest.
             self._expressInterestHelper(
@@ -631,3 +636,5 @@ class Node(object):
                 self._onRegisterFailed(self._prefix)
             except:
                 logging.exception("Error in onRegisterFailed")
+
+    _nonceTemplate = Blob(bytearray(4), False)
