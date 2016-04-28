@@ -29,6 +29,7 @@ http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 import logging
 import collections
 from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.interest_filter import InterestFilter
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.name import Name
 from pyndn.util.common import Common
@@ -37,8 +38,8 @@ class MemoryContentCache(object):
     """
     Create a new MemoryContentCache to use the given Face.
 
-    :param Face face: The Face to use to call registerPrefix and which will call
-      the OnInterest callback.
+    :param Face face: The Face to use to call registerPrefix and
+      setInterestFilter, and which will call this object's OnInterest callback.
     :param float cleanupIntervalMilliseconds: (optional) The interval in
       milliseconds between each check to clean up stale content in the cache. If
       omitted, use a default of 1000 milliseconds. If this is a large number,
@@ -56,6 +57,8 @@ class MemoryContentCache(object):
         # The map key is the prefix.toUri(). The value is an OnInterest function.
         self._onDataNotFoundForPrefix = {}
         # elements are int
+        self._interestFilterIdList = []
+        # elements are int
         self._registeredPrefixIdList = []
         # elements are MemoryContentCache._Content
         self._noStaleTimeCache = []
@@ -70,6 +73,8 @@ class MemoryContentCache(object):
         """
         Call registerPrefix on the Face given to the constructor so that this
         MemoryContentCache will answer interests whose name has the prefix.
+        Alternatively, if the Face's registerPrefix has already been called,
+        then you can call this object's setInterestFilter.
 
         :param Name prefix: The Name for the prefix to register. This copies the
           Name.
@@ -170,13 +175,58 @@ class MemoryContentCache(object):
           flags, wireFormat)
         self._registeredPrefixIdList.append(registeredPrefixId)
 
+    def setInterestFilter(self, filterOrPrefix, onDataNotFound = None):
+        """
+        Call setInterestFilter on the Face given to the constructor so that this
+        MemoryContentCache will answer interests whose name matches the filter.
+        There are two forms of setInterestFilter.
+        The first form uses the exact given InterestFilter:
+        setInterestFilter(filter, [onDataNotFound]).
+        The second form creates an InterestFilter from the given prefix Name:
+        setInterestFilter(prefix, [onDataNotFound]).
+
+        :param InterestFilter filter: The InterestFilter with a prefix and
+          optional regex filter used to match the name of an incoming Interest.
+          This makes a copy of filter.
+        :param Name prefix: The Name prefix used to match the name of an
+          incoming Interest. This makes a copy of the Name.
+        :param onDataNotFound: (optional) If a data packet for an interest is
+          not found in the cache, this forwards the interest by calling
+          onDataNotFound(prefix, interest, face, interestFilterId, filter). Your
+          callback can find the Data packet for the interest and call
+          face.putData(data). If your callback cannot find the Data packet, it can
+          optionally call storePendingInterest(interest, face) to store the
+          pending interest in this object to be satisfied by a later call to
+          add(data). If you want to automatically store all pending interests,
+          you can simply use getStorePendingInterest() for onDataNotFound. If
+          onDataNotFound is omitted or None, this does not use it.
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
+        :type onDataNotFound: function object
+        """
+        if onDataNotFound != None:
+            if type(filterOrPrefix) is InterestFilter:
+                prefix = filterOrPrefix.getPrefix()
+            else:
+                prefix = filterOrPrefix
+            self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
+        interestFilterId = self._face.setInterestFilter(
+          filterOrPrefix, self._onInterest)
+        self._interestFilterIdList.append(interestFilterId)
+
     def unregisterAll(self):
         """
-        Call Face.removeRegisteredPrefix for all the prefixes given to the
-        registerPrefix method on this MemoryContentCache object so that it will
-        not receive interests any more. You can call this if you want to "shut
-        down" this MemoryContentCache while your application is still running.
+        Call Face.unsetInterestFilter and Face.removeRegisteredPrefix for all
+        the prefixes given to the setInterestFilter and registerPrefix method on
+        this MemoryContentCache object so that it will not receive interests any
+        more. You can call this if you want to "shut down" this
+        MemoryContentCache while your application is still running.
         """
+        for interestFilterId in self._interestFilterIdList:
+            self._face.unsetInterestFilter(interestFilterId)
+        self._interestFilterIdList = []
+
         for registeredPrefixId in self._registeredPrefixIdList:
             self._face.removeRegisteredPrefix(registeredPrefixId)
         self._registeredPrefixIdList = []
