@@ -98,16 +98,16 @@ class SegmentFetcher(object):
     :param onComplete: When all segments are received, call
       onComplete(content) where content is a Blob which has the concatenation of
       the content of all the segments.
-          NOTE: The library will log any exceptions raised by this callback, but
-          for better error handling the callback should catch and properly
-          handle any exceptions.
+      NOTE: The library will log any exceptions raised by this callback, but
+      for better error handling the callback should catch and properly
+      handle any exceptions.
     :type onComplete: function object
     :param onError: Call onError.onError(errorCode, message) for timeout or an
       error processing segments. errorCode is a value from
       SegmentFetcher.ErrorCode and message is a related string.
-          NOTE: The library will log any exceptions raised by this callback, but
-          for better error handling the callback should catch and properly
-          handle any exceptions.
+      NOTE: The library will log any exceptions raised by this callback, but
+      for better error handling the callback should catch and properly
+      handle any exceptions.
     :type onError: function object
     """
     def __init__(self, face, verifySegment, onComplete, onError):

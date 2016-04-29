@@ -133,4 +133,5 @@ class InterestFilterTable(object):
 
         if count == 0:
             logging.getLogger(__name__).debug(
-              "unsetInterestFilter: Didn't find interestFilterId " + interestFilterId)
+              "unsetInterestFilter: Didn't find interestFilterId " +
+              str(interestFilterId))

@@ -165,19 +165,24 @@ class TestFaceRegisterMethods(ut.TestCase):
                 self.keyChain.getDefaultCertificateName())
 
         interestCallbackCount = [0]
-        def onInterest(prefix, interest, transport, prefixID):
+        def onInterest(prefix, interest, face, interestFilterId, filter):
             interestCallbackCount[0] += 1
             data = Data(interest.getName())
             data.setContent("SUCCESS")
             self.keyChain.sign(data, self.keyChain.getDefaultCertificateName())
-            encodedData = data.wireEncode()
-            transport.send(encodedData.toBuffer())
+            face.putData(data)
 
         failedCallback = Mock()
 
         self.face_in.registerPrefix(prefixName, onInterest, failedCallback)
         # Give the 'server' time to register the interest.
-        time.sleep(1)
+        timeout = 1000
+        startTime = getNowMilliseconds()
+        while True:
+            if getNowMilliseconds() - startTime >= timeout:
+                break
+            self.face_in.processEvents()
+            time.sleep(0.01)
 
         # express an interest on another face
         dataCallback = Mock()

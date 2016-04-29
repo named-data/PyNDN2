@@ -139,7 +139,7 @@ class Link(Data):
 
     def encodeContent(self, wireFormat):
         """
-        A private method to encode the delegations_ and set this object's
+        A private method to encode the delegations and set this object's
         content. Also set the meta info content type to LINK.
 
         :param WireFormat wireFormat: A WireFormat object used to encode the

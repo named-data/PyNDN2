@@ -384,7 +384,7 @@ class Face(object):
           optional regex filter used to match the name of an incoming Interest.
           This makes a copy of filter.
         :param Name prefix: The Name prefix used to match the name of an
-          incoming Interest.
+          incoming Interest. This makes a copy of the Name.
         :param onInterest: When an Interest is received which matches the filter,
           this calls onInterest(prefix, interest, face, interestFilterId, filter).
           NOTE: The library will log any exceptions raised by this callback, but

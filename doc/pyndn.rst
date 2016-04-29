@@ -8,6 +8,7 @@ Subpackages
 
     pyndn.encoding
     pyndn.encrypt
+    pyndn.impl
     pyndn.security
     pyndn.sync
     pyndn.transport
@@ -24,10 +25,26 @@ pyndn.control_parameters module
     :undoc-members:
     :show-inheritance:
 
+pyndn.control_response module
+-----------------------------
+
+.. automodule:: pyndn.control_response
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.data module
 -----------------
 
 .. automodule:: pyndn.data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.delegation_set module
+---------------------------
+
+.. automodule:: pyndn.delegation_set
     :members:
     :undoc-members:
     :show-inheritance:
@@ -64,6 +81,22 @@ pyndn.forwarding_flags module
     :undoc-members:
     :show-inheritance:
 
+pyndn.generic_signature module
+------------------------------
+
+.. automodule:: pyndn.generic_signature
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.hmac_with_sha256_signature module
+---------------------------------------
+
+.. automodule:: pyndn.hmac_with_sha256_signature
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.interest module
 ---------------------
 
@@ -88,6 +121,14 @@ pyndn.key_locator module
     :undoc-members:
     :show-inheritance:
 
+pyndn.link module
+-----------------
+
+.. automodule:: pyndn.link
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.meta_info module
 ----------------------
 
@@ -108,6 +149,14 @@ pyndn.node module
 -----------------
 
 .. automodule:: pyndn.node
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.sha256_with_ecdsa_signature module
+----------------------------------------
+
+.. automodule:: pyndn.sha256_with_ecdsa_signature
     :members:
     :undoc-members:
     :show-inheritance:

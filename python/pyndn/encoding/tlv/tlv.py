@@ -85,12 +85,6 @@ class Tlv(object):
     ControlParameters_Strategy =            107
     ControlParameters_ExpirationPeriod =    109
 
-    LocalControlHeader_LocalControlHeader = 80
-    LocalControlHeader_IncomingFaceId = 81
-    LocalControlHeader_NextHopFaceId = 82
-    LocalControlHeader_CachingPolicy = 83
-    LocalControlHeader_NoCache = 96
-
     Link_Preference = 30
     Link_Delegation = 31
 

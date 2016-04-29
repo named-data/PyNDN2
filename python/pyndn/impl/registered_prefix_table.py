@@ -35,6 +35,7 @@ class RegisteredPrefixTable(object):
     def __init__(self, interestFilterTable):
         self._table = [] # of _entry
         self._interestFilterTable = interestFilterTable
+        self._removeRequests = [] # of int
 
     def add(self, registeredPrefixId, prefix, relatedInterestFilterId):
         """
@@ -45,9 +46,23 @@ class RegisteredPrefixTable(object):
         :param int relatedInterestFilterId: (optional) The related
           interestFilterId for the filter set in the same registerPrefix
           operation. If omitted, set to 0.
+        :return: True if added an entry, false if removeRegisteredPrefix was
+          already called with the registeredPrefixId.
+        :rtype: bool
         """
+        try:
+            removeRequestIndex = self._removeRequests.index(registeredPrefixId)
+            # removeRegisteredPrefix was called with the registeredPrefixId
+            #   returned by registerPrefix before we got here, so don't add a
+            #   registered prefix table entry.
+            del self._removeRequests[removeRequestIndex]
+            return False
+        except ValueError:
+            pass
+
         self._table.append(RegisteredPrefixTable._Entry
           (registeredPrefixId, prefix, relatedInterestFilterId))
+        return True
 
     def removeRegisteredPrefix(self, registeredPrefixId):
         """
@@ -79,7 +94,19 @@ class RegisteredPrefixTable(object):
 
         if count == 0:
             logging.getLogger(__name__).debug(
-              "removeRegisteredPrefix: Didn't find registeredPrefixId " + registeredPrefixId)
+              "removeRegisteredPrefix: Didn't find registeredPrefixId " +
+              str(registeredPrefixId))
+
+        if count == 0:
+            # The registeredPrefixId was not found. Perhaps this has been called
+            #   before the callback in registerPrefix can add to the registered
+            #   prefix table. Add this removal request which will be checked
+            #   before adding to the registered prefix table.
+            try:
+                self._removeRequests.index(registeredPrefixId)
+            except ValueError:
+                # Not already requested, so add the request.
+                self._removeRequests.append(registeredPrefixId)
 
     class _Entry(object):
         """

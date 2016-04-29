@@ -190,7 +190,18 @@ class PendingInterestTable(object):
 
         if count == 0:
             logging.getLogger(__name__).debug(
-              "removePendingInterest: Didn't find pendingInterestId " + pendingInterestId)
+              "removePendingInterest: Didn't find pendingInterestId " +
+              str(pendingInterestId))
+
+        if count == 0:
+            # The pendingInterestId was not found. Perhaps this has been called before
+            #   the callback in expressInterest can add to the PIT. Add this
+            #   removal request which will be checked before adding to the PIT.
+            try:
+                self._removeRequests.index(pendingInterestId)
+            except ValueError:
+                # Not already requested, so add the request.
+                self._removeRequests.append(pendingInterestId)
 
         if count == 0:
             # The pendingInterestId was not found. Perhaps this has been called before
