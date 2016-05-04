@@ -233,6 +233,19 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeSignatureInfo is not implemented")
 
+    def decodeLpPacket(self, lpPacket, input):
+        """
+        Decode input as an LpPacket and set the fields of the lpPacket object.
+        Your derived class should override.
+
+        :param LpPacket lpPacket: The LpPacket object whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeLpPacket is not implemented")
+
     def encodeDelegationSet(self, delegationSet):
         """
         Encode the DelegationSet and return the encoding.

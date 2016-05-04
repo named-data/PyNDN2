@@ -85,18 +85,19 @@ class ThreadsafeFace(Face):
         super(ThreadsafeFace, self).__init__(transport, connectionInfo)
 
     def expressInterest(
-      self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None):
+      self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None,
+      arg6 = None):
         """
         Override to use the event loop given to the constructor to schedule
         expressInterest to be called in a thread-safe manner. See
         Face.expressInterest for calling details.
         """
         args = self._getExpressInterestArgs(
-          interestOrName, arg2, arg3, arg4, arg5)
+          interestOrName, arg2, arg3, arg4, arg5, arg6)
         self._loop.call_soon_threadsafe(
           self._node.expressInterest, args['pendingInterestId'],
           args['interestCopy'], args['onData'], args['onTimeout'],
-          args['wireFormat'], self)
+          args['onNetworkNack'], args['wireFormat'], self)
 
         return args['pendingInterestId']
 

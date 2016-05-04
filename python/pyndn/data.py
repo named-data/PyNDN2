@@ -28,6 +28,7 @@ from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
 from pyndn.meta_info import MetaInfo
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.lp.incoming_face_id import IncomingFaceId
 
 class Data(object):
     def __init__(self, value = None):
@@ -50,6 +51,7 @@ class Data(object):
 
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
+        self._lpPacket = None
 
     def wireEncode(self, wireFormat = None):
         """
@@ -180,6 +182,17 @@ class Data(object):
         """
         return self._defaultWireEncodingFormat
 
+    def getIncomingFaceId(self):
+        """
+        Get the incoming face ID according to the incoming packet header.
+
+        :return: The incoming face ID. If not specified, return None.
+        :rtype: int
+        """
+        field = (None if self._lpPacket == None
+                 else IncomingFaceId.getFirstHeader(self._lpPacket))
+        return None if field == None else field.getFaceId()
+
     def setName(self, name):
         """
         Set name to a copy of the given Name.
@@ -230,6 +243,20 @@ class Data(object):
         """
         self._content = content if type(content) is Blob else Blob(content)
         self._changeCount += 1
+
+    def setLpPacket(self, lpPacket):
+        """
+        An internal library method to set the LpPacket for an incoming packet.
+        The application should not call this.
+
+        :param LpPacket lpPacket: The LpPacket. This does not make a copy.
+        :return: This Data so that you can chain calls to update values.
+        :rtype: Data
+        :note: This is an experimental feature. This API may change in the future.
+        """
+        self._lpPacket = lpPacket
+        # Don't update _changeCount since this doesn't affect the wire encoding.
+        return self
 
     def getChangeCount(self):
         """

@@ -21,11 +21,11 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn import Face
 from pyndn import Data
+from pyndn import NetworkNack
 from pyndn import Blob
 
 from pyndn.security import KeyChain
 
-import sys
 import unittest as ut
 import time
 
@@ -47,25 +47,32 @@ class TestFaceInterestMethods(ut.TestCase):
     def tearDown(self):
         self.face.shutdown()
 
-    def run_express_name_test(self, interestName, timeout=12):
+    def run_express_name_test(self, interestName, useOnNack = False):
         # returns the dataCallback and timeoutCallback mock objects so we can test timeout behavior
         # as well as a bool for if we timed out without timeoutCallback being called
         name = Name(interestName)
         dataCallback = Mock()
         timeoutCallback = Mock()
-        self.face.expressInterest(name, dataCallback, timeoutCallback)
+        onNackCallback = Mock()
+
+        if useOnNack:
+            self.face.expressInterest(
+              name, dataCallback, timeoutCallback, onNackCallback)
+        else:
+            self.face.expressInterest(name, dataCallback, timeoutCallback)
 
         while True:
             self.face.processEvents()
             time.sleep(0.01)
-            if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0):
+            if (dataCallback.call_count > 0 or timeoutCallback.call_count > 0 or
+                onNackCallback.call_count > 0):
                 break
 
-        return dataCallback, timeoutCallback
+        return dataCallback, timeoutCallback, onNackCallback
 
     def test_any_interest(self):
         uri = "/"
-        (dataCallback, timeoutCallback) = self.run_express_name_test(uri)
+        (dataCallback, timeoutCallback, onNackCallback) = self.run_express_name_test(uri)
         self.assertTrue(timeoutCallback.call_count == 0 , 'Timeout on expressed interest')
 
         # check that the callback was correct
@@ -80,7 +87,7 @@ class TestFaceInterestMethods(ut.TestCase):
     # TODO: Replace this with a test that connects to a Face on localhost
     #def test_specific_interest(self):
     #    uri = "/ndn/edu/ucla/remap/ndn-js-test/howdy.txt/%FD%052%A1%DF%5E%A4"
-    #    (dataCallback, timeoutCallback) = self.run_express_name_test(uri)
+    #    (dataCallback, timeoutCallback, onNackCallback) = self.run_express_name_test(uri)
     #    self.assertTrue(timeoutCallback.call_count == 0, 'Unexpected timeout on expressed interest')
     #
     #    # check that the callback was correct
@@ -94,7 +101,7 @@ class TestFaceInterestMethods(ut.TestCase):
 
     def test_timeout(self):
         uri = "/test/timeout"
-        (dataCallback, timeoutCallback) = self.run_express_name_test(uri)
+        (dataCallback, timeoutCallback, onNackCallback) = self.run_express_name_test(uri)
 
         # we're expecting a timeout callback, and only 1
         self.assertTrue(dataCallback.call_count == 0, 'Data callback called for invalid interest')
@@ -148,6 +155,26 @@ class TestFaceInterestMethods(ut.TestCase):
             # If no error is raised, then expressInterest didn't throw an
             # exception when the interest size exceeds getMaxNdnPacketSize()
             self.face.expressInterest(interest, Mock(), Mock())
+
+    def test_network_nack(self):
+        uri = "/noroute" + str(getNowMilliseconds())
+        (dataCallback, timeoutCallback, onNackCallback) = self.run_express_name_test(
+          uri, True)
+
+        # We're expecting a network Nack callback, and only 1.
+        self.assertEqual(dataCallback.call_count, 0,
+          "Data callback called for unroutable interest")
+        self.assertEqual(timeoutCallback.call_count, 0,
+          "Timeout callback called for unroutable interest")
+        self.assertEqual(onNackCallback.call_count, 1,
+          "Expected 1 network Nack call")
+
+        # The args are returned as ([ordered arguments], [keyword arguments])
+        onNetworkNackArgs = onNackCallback.call_args[0]
+
+        callbackNetworkNack = onNetworkNackArgs[1]
+        self.assertEqual(callbackNetworkNack.getReason(), NetworkNack.Reason.NO_ROUTE,
+          "Network Nack has unexpected reason")
 
 class TestFaceRegisterMethods(ut.TestCase):
     def setUp(self):

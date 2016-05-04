@@ -31,6 +31,8 @@ from pyndn.generic_signature import GenericSignature
 from pyndn.hmac_with_sha256_signature import HmacWithSha256Signature
 from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
+from pyndn.network_nack import NetworkNack
+from pyndn.lp.incoming_face_id import IncomingFaceId
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
@@ -410,6 +412,75 @@ class Tlv0_1_1WireFormat(WireFormat):
         encoder.writeBlobTlv(Tlv.SignatureValue, signature.getSignature().buf())
 
         return Blob(encoder.getOutput(), False)
+
+    def decodeLpPacket(self, lpPacket, input):
+        """
+        Decode input as an NDN-TLV LpPacket and set the fields of the lpPacket
+        object.
+
+        :param LpPacket lpPacket: The LpPacket object whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        """
+        lpPacket.clear()
+
+        decoder = TlvDecoder(input)
+        endOffset = decoder.readNestedTlvsStart(Tlv.LpPacket_LpPacket)
+
+        while decoder.getOffset() < endOffset:
+            # Imitate TlvDecoder.readTypeAndLength.
+            fieldType = decoder.readVarNumber()
+            fieldLength = decoder.readVarNumber()
+            fieldEndOffset = decoder.getOffset() + fieldLength
+            if fieldEndOffset > len(input):
+                raise ValueError("TLV length exceeds the buffer length")
+
+            if fieldType == Tlv.LpPacket_Fragment:
+                # Set the fragment to the bytes of the TLV value.
+                lpPacket.setFragmentWireEncoding(
+                  Blob(decoder.getSlice(decoder.getOffset(), fieldEndOffset), True))
+                decoder.seek(fieldEndOffset)
+
+                # The fragment is supposed to be the last field.
+                break
+            elif fieldType == Tlv.LpPacket_Nack:
+                networkNack = NetworkNack()
+                code = decoder.readOptionalNonNegativeIntegerTlv(
+                  Tlv.LpPacket_NackReason, fieldEndOffset)
+                # The enum numeric values are the same as this wire format, so
+                #   use as is.
+                if code < 0 or code == NetworkNack.Reason.NONE:
+                    # This includes an omitted NackReason.
+                    networkNack.setReason(NetworkNack.Reason.NONE)
+                elif (code == NetworkNack.Reason.CONGESTION or
+                      code == NetworkNack.Reason.DUPLICATE or
+                      code == NetworkNack.Reason.NO_ROUTE):
+                    networkNack.setReason(code)
+                else:
+                    # Unrecognized reason.
+                    networkNack.setReason(NetworkNack.Reason.OTHER_CODE)
+                    networkNack.setOtherReasonCode(code)
+
+                lpPacket.addHeaderField(networkNack)
+            elif fieldType == Tlv.LpPacket_IncomingFaceId:
+                incomingFaceId = IncomingFaceId()
+                incomingFaceId.setFaceId(decoder.readNonNegativeInteger(fieldLength))
+                lpPacket.addHeaderField(incomingFaceId)
+            else:
+                # Unrecognized field type. The conditions for ignoring are here:
+                # http://redmine.named-data.net/projects/nfd/wiki/NDNLPv2
+                canIgnore = (fieldType >= Tlv.LpPacket_IGNORE_MIN and
+                             fieldType <= Tlv.LpPacket_IGNORE_MAX and
+                             (fieldType & 0x01) == 1)
+                if not canIgnore:
+                    raise ValueError("Did not get the expected TLV type")
+
+                # Ignore.
+                decoder.seek(fieldEndOffset)
+
+            decoder.finishNestedTlvs(fieldEndOffset)
+
+        decoder.finishNestedTlvs(endOffset)
 
     def encodeDelegationSet(self, delegationSet):
         """

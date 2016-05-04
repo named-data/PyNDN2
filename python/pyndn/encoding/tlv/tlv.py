@@ -85,6 +85,20 @@ class Tlv(object):
     ControlParameters_Strategy =            107
     ControlParameters_ExpirationPeriod =    109
 
+    LpPacket_LpPacket =        100
+    LpPacket_Fragment =         80
+    LpPacket_Sequence =         81
+    LpPacket_FragIndex =        82
+    LpPacket_FragCount =        83
+    LpPacket_Nack =            800
+    LpPacket_NackReason =      801
+    LpPacket_NextHopFaceId =   816
+    LpPacket_IncomingFaceId =  817
+    LpPacket_CachePolicy =     820
+    LpPacket_CachePolicyType = 821
+    LpPacket_IGNORE_MIN =      800
+    LpPacket_IGNORE_MAX =      959
+
     Link_Preference = 30
     Link_Delegation = 31
 

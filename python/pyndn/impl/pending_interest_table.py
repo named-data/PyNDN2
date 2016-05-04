@@ -43,12 +43,17 @@ class PendingInterestTable(object):
         :param onTimeout: A function object to call if the interest times out.
           If onTimeout is None, this does not use it.
         :type onTimeout: function object
+        :param onNetworkNack: A function object to call when a network Nack
+          packet is received.
+        :type onNetworkNack: function object
         """
-        def __init__(self, pendingInterestId, interest, onData, onTimeout):
+        def __init__(
+          self, pendingInterestId, interest, onData, onTimeout, onNetworkNack):
             self._pendingInterestId = pendingInterestId
             self._interest = interest
             self._onData = onData
             self._onTimeout = onTimeout
+            self._onNetworkNack = onNetworkNack
             self._isRemoved = False
 
         def getPendingInterestId(self):
@@ -78,6 +83,15 @@ class PendingInterestTable(object):
             """
             return self._onData
 
+        def getOnNetworkNack(self):
+            """
+            Get the onNetworkNack function object given to the constructor.
+
+            :return: The onNetworkNack function object.
+            :rtype: function object
+            """
+            return self._onNetworkNack
+
         def callTimeout(self):
             """
             Call _onTimeout (if defined).  This ignores exceptions from
@@ -104,7 +118,8 @@ class PendingInterestTable(object):
             """
             return self._isRemoved
 
-    def add(self, pendingInterestId, interestCopy, onData, onTimeout):
+    def add(
+      self, pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack):
         """
         Add a new entry to the pending interest table. However, if
         removePendingInterest was already called with the pendingInterestId,
@@ -120,6 +135,9 @@ class PendingInterestTable(object):
         :param onTimeout: A function object to call if the interest times out.
           If onTimeout is None, this does not use it.
         :type onTimeout: function object
+        :param onNetworkNack: A function object to call when a network Nack
+          packet is received.
+        :type onNetworkNack: function object
         :return: The new PendingInterestTable.Entry, or None if
           removePendingInterest was already called with the pendingInterestId.
         :rtype: PendingInterestTable.Entry
@@ -134,7 +152,7 @@ class PendingInterestTable(object):
             pass
 
         entry = PendingInterestTable.Entry(
-          pendingInterestId, interestCopy, onData, onTimeout)
+          pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack)
         self._table.append(entry)
         return entry
 
@@ -162,6 +180,42 @@ class PendingInterestTable(object):
                 # right away.
                 self._table.pop(i)
                 pendingInterest.setIsRemoved()
+            i -= 1
+
+    def extractEntriesForNackInterest(self, interest, entries):
+        """
+        Find all entries from the pending interest table where the OnNetworkNack
+        callback is not null and the entry's interest is the same as the given
+        interest, remove the entries from the table, set each entry's isRemoved
+        flag, and add to the entries list. (We don't remove the entry if the
+        OnNetworkNack callback is None so that OnTimeout will be called later.)
+        The interests are the same if their default wire encoding is the same
+        (which has everything including the name, nonce, link object and
+        selectors).
+
+        :param Interest interest: The Interest to search for (typically from a
+          Nack packet).
+        :param List<PendingInterestTable.Entry> entries: Add matching
+          PendingInterestTable.Entry from the pending interest table. The caller
+          should pass in an empty list.
+        """
+        encoding = interest.wireEncode()
+
+        # Go backwards through the list so we can erase entries.
+        i = len(self._table) - 1
+        while i >= 0:
+            pendingInterest = self._table[i]
+            if pendingInterest.getOnNetworkNack() != None:
+                # wireEncode returns the encoding cached when the interest was
+                # sent (if it was the default wire encoding).
+                if pendingInterest.getInterest().wireEncode().equals(encoding):
+                    entries.append(pendingInterest)
+                    # We let the callback from callLater call _processInterestTimeout,
+                    # but for efficiency, mark this as removed so that it returns
+                    # right away.
+                    self._table.pop(i)
+                    pendingInterest.setIsRemoved()
+
             i -= 1
 
     def removePendingInterest(self, pendingInterestId):
