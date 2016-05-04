@@ -18,7 +18,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the Link which extends Data and represents a Link instance
+This module defines the Link class which extends Data and represents a Link instance
 where the Data content is an encoded delegation set. The format is defined in
 "link.pdf" attached to Redmine issue http://redmine.named-data.net/issues/2587 .
 """
