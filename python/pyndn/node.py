@@ -42,6 +42,8 @@ from pyndn.impl.delayed_call_table import DelayedCallTable
 from pyndn.impl.interest_filter_table import InterestFilterTable
 from pyndn.impl.pending_interest_table import PendingInterestTable
 from pyndn.impl.registered_prefix_table import RegisteredPrefixTable
+from pyndn.lp.lp_packet import LpPacket
+from pyndn.network_nack import NetworkNack
 
 _systemRandom = SystemRandom()
 
@@ -71,22 +73,33 @@ class Node(object):
         self._connectStatus = Node._ConnectStatus.UNCONNECTED
 
     def expressInterest(
-      self, pendingInterestId, interestCopy, onData, onTimeout, wireFormat, face):
+      self, pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack,
+      wireFormat, face):
         """
         Send the Interest through the transport, read the entire response and
-        call onData(interest, data).
+        call onData, onTimeout or onNetworkNack as described below.
 
         :param int pendingInterestId: The getNextEntryId() for the pending
           interest ID which Face got so it could return it to the caller.
         :param Interest interestCopy: The Interest which is NOT copied for this
           internal Node method.  The Face expressInterest is responsible for
           making a copy for Node to use.
-        :param onData: A function object to call when a matching data packet is
-          received.
+        :param onData: When a matching data packet is received, this calls
+          onData(interest, data) where interest is the Interest given to
+          expressInterest and data is the received Data object.
         :type onData: function object
-        :param onTimeout: A function object to call if the interest times out.
-          If onTimeout is None, this does not use it.
+        :param onTimeout: If the interest times out according to the interest
+          lifetime, this calls onTimeout(interest) where interest is the
+          Interest given to expressInterest. If onTimeout is None, this does not
+          use it.
         :type onTimeout: function object
+        :param onNetworkNack: When a network Nack packet for the interest is
+          received and onNetworkNack is not None, this calls
+          onNetworkNack(interest, networkNack) and does not call onTimeout.
+          interest is the sent Interest and networkNack is the received
+          NetworkNack. However, if a network Nack is received and onNetworkNack
+          is None, do nothing and wait for the interest to time out.
+        :type onNetworkNack: function object
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
         :param Face face: The face which has the callLater method, used for
@@ -102,8 +115,8 @@ class Node(object):
         if self._connectStatus == self._ConnectStatus.CONNECT_COMPLETE:
             # We are connected. Simply send the interest.
             self._expressInterestHelper(
-              pendingInterestId, interestCopy, onData, onTimeout, wireFormat,
-              face)
+              pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack,
+              wireFormat, face)
             return
 
         # TODO: Properly check if we are already connected to the expected host.
@@ -111,7 +124,7 @@ class Node(object):
             # The simple case: Just do a blocking connect and express.
             self._transport.connect(self._connectionInfo, self, None);
             self._expressInterestHelper(pendingInterestId,
-              interestCopy, onData, onTimeout, wireFormat, face)
+              interestCopy, onData, onTimeout, onNetworkNack, wireFormat, face)
             # Make future calls to expressInterest send directly to the Transport.
             self._connectStatus = self._ConnectStatus.CONNECT_COMPLETE
 
@@ -124,8 +137,8 @@ class Node(object):
             # expressInterestHelper will be called by onConnected.
             self._onConnectedCallbacks.append(
               lambda: self._expressInterestHelper
-                (pendingInterestId, interestCopy, onData, onTimeout, wireFormat,
-                 face))
+                (pendingInterestId, interestCopy, onData, onTimeout,
+                 onNetworkNack, wireFormat, face))
 
             def onConnected():
                 # Assume that further calls to expressInterest dispatched to the
@@ -145,8 +158,8 @@ class Node(object):
             # Still connecting. add to the interests to express by onConnected.
             self._onConnectedCallbacks.append(
               lambda: self._expressInterestHelper
-                (pendingInterestId, interestCopy, onData, onTimeout, wireFormat,
-                 face))
+                (pendingInterestId, interestCopy, onData, onTimeout,
+                 onNetworkNack, wireFormat, face))
         else:
             # Don't expect this to happen.
             raise RuntimeError(
@@ -334,6 +347,14 @@ class Node(object):
         :param element: The bytes of the incoming element.
         :type element: An array type with int elements
         """
+
+        lpPacket = None
+        if element[0] == Tlv.LpPacket_LpPacket:
+            # Decode the LpPacket and replace element with the fragment.
+            lpPacket = LpPacket()
+            TlvWireFormat.get().decodeLpPacket(lpPacket, element)
+            element = lpPacket.getFragmentWireEncoding().buf()
+
         # First, decode as Interest or Data.
         interest = None
         data = None
@@ -341,9 +362,39 @@ class Node(object):
         if decoder.peekType(Tlv.Interest, len(element)):
             interest = Interest()
             interest.wireDecode(element, TlvWireFormat.get())
+
+            if lpPacket != None:
+                interest.setLpPacket(lpPacket)
         elif decoder.peekType(Tlv.Data, len(element)):
             data = Data()
             data.wireDecode(element, TlvWireFormat.get())
+
+            if lpPacket != None:
+                data.setLpPacket(lpPacket)
+
+        if lpPacket != None:
+            # We have decoded the fragment, so remove the wire encoding to save
+            #   memory.
+            lpPacket.setFragmentWireEncoding(Blob())
+
+            networkNack = NetworkNack.getFirstHeader(lpPacket)
+            if networkNack != None:
+                if interest == None:
+                    # We got a Nack but not for an Interest, so drop the packet.
+                    return
+
+                pendingInterests = []
+                self._pendingInterestTable.extractEntriesForNackInterest(
+                  interest, pendingInterests)
+                for pendingInterest in pendingInterests:
+                    try:
+                        pendingInterest.getOnNetworkNack()(
+                          pendingInterest.getInterest(), networkNack)
+                    except:
+                        logging.exception("Error in onNetworkNack")
+
+                # We have process the network Nack packet.
+                return
 
         # Now process as Interest or Data.
         if interest != None:
@@ -418,7 +469,8 @@ class Node(object):
         return Common.MAX_NDN_PACKET_SIZE
 
     def _expressInterestHelper(
-      self, pendingInterestId, interestCopy, onData, onTimeout, wireFormat, face):
+      self, pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack,
+      wireFormat, face):
         """
         Do the work of expressInterest once we know we are connected. Add the
         entry to the PIT, encode and send the interest.
@@ -433,6 +485,9 @@ class Node(object):
         :param onTimeout: A function object to call if the interest times out.
           If onTimeout is None, this does not use it.
         :type onTimeout: function object
+        :param onNetworkNack: A function object to call when a network Nack
+          packet is received.
+        :type onNetworkNack: function object
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
         :param Face face: The face which has the callLater method, used for
@@ -442,7 +497,7 @@ class Node(object):
           getMaxNdnPacketSize().
         """
         pendingInterest = self._pendingInterestTable.add(
-          pendingInterestId, interestCopy, onData, onTimeout)
+          pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack)
         if pendingInterest == None:
             # removePendingInterest was already called with the pendingInterestId.
             return
@@ -510,7 +565,7 @@ class Node(object):
           onInterest, face)
         self.expressInterest(
           self.getNextEntryId(), commandInterest, response.onData,
-          response.onTimeout, TlvWireFormat.get(), face)
+          response.onTimeout, None, TlvWireFormat.get(), face)
 
     def callLater(self, delayMilliseconds, callback):
         """
