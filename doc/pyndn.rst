@@ -9,6 +9,7 @@ Subpackages
     pyndn.encoding
     pyndn.encrypt
     pyndn.impl
+    pyndn.lp
     pyndn.security
     pyndn.sync
     pyndn.transport
@@ -141,6 +142,14 @@ pyndn.name module
 -----------------
 
 .. automodule:: pyndn.name
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.network_nack module
+-------------------------
+
+.. automodule:: pyndn.network_nack
     :members:
     :undoc-members:
     :show-inheritance:

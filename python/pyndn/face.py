@@ -76,16 +76,18 @@ class Face(object):
         self._commandCertificateName = Name()
 
     def expressInterest(
-      self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None):
+      self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None,
+      arg6 = None):
         """
         Send the Interest through the transport, read the entire response and
-        call onData(interest, data).  There are two forms of expressInterest.
+        call onData, onTimeout or onNetworkNack as described below.
+        There are two forms of expressInterest.
         The first form takes the exact interest (including lifetime):
-        expressInterest(interest, onData [, onTimeout] [, wireFormat]).
+        expressInterest(interest, onData [, onTimeout] [, onNetworkNack] [, wireFormat]).
         The second form creates the interest from a name and optional
         interest template:
         expressInterest(name [, interestTemplate], onData [, onTimeout]
-        [, wireFormat]).
+        [, onNetworkNack] [, wireFormat]).
 
         :param Interest interest: The Interest (if the first form is used). This
           copies the Interest.
@@ -110,6 +112,19 @@ class Face(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onTimeout: function object
+        :param onNetworkNack: (optional) When a network Nack packet for the
+          interest is received and onNetworkNack is not None, this calls
+          onNetworkNack(interest, networkNack) and does not call onTimeout.
+          interest is the sent Interest and networkNack is the received
+          NetworkNack. If onNetworkNack is supplied, then onTimeout must be
+          supplied too. However, if a network Nack is received and onNetworkNack
+          is null, do nothing and wait for the interest to time out. (Therefore,
+          an application which does not yet process a network Nack reason treats
+          a Nack the same as a timeout.)
+          NOTE: The library will log any exceptions raised by this callback, but
+          for better error handling the callback should catch and properly
+          handle any exceptions.
+        :type onNetworkNack: function object
         :param wireFormat: (optional) A WireFormat object used to encode the
            message. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
@@ -120,14 +135,14 @@ class Face(object):
           Face.getMaxNdnPacketSize().
         """
         args = self._getExpressInterestArgs(
-          interestOrName, arg2, arg3, arg4, arg5)
+          interestOrName, arg2, arg3, arg4, arg5, arg6)
         self._node.expressInterest(
           args['pendingInterestId'], args['interestCopy'], args['onData'],
-          args['onTimeout'], args['wireFormat'], self)
+          args['onTimeout'], args['onNetworkNack'], args['wireFormat'], self)
 
         return args['pendingInterestId']
 
-    def _getExpressInterestArgs(self, interestOrName, arg2, arg3, arg4, arg5):
+    def _getExpressInterestArgs(self, interestOrName, arg2, arg3, arg4, arg5, arg6):
         """
         This is a protected helper method to resolve the different overloaded
         forms of Face.expressInterest and return the arguments to pass to
@@ -135,67 +150,62 @@ class Face(object):
         interestCopy before dispatching to Node.expressInterest.
 
         :return: A dictionary with the following keys: 'pendingInterestId',
-          'interestCopy', 'onData', 'onTimeout' and 'wireFormat'.
+          'interestCopy', 'onData', 'onTimeout', 'onNetworkNack' and 'wireFormat'.
         :rtype: dict
         """
-        # expressInterest(interest, onData)
-        # expressInterest(interest, onData, wireFormat)
-        # expressInterest(interest, onData, onTimeout)
-        # expressInterest(interest, onData, onTimeout, wireFormat)
         if type(interestOrName) is Interest:
             # Node.expressInterest requires a copy of the interest.
             interestCopy = Interest(interestOrName)
-            onData = arg2
-            if isinstance(arg3, WireFormat):
-                onTimeout = None
-                wireFormat = arg3
-            else:
-                onTimeout = arg3
-                wireFormat = arg4
         else:
             # The first argument is a name. Make the interest from the name and
             #   possible template.
-
-            # expressInterest(name, interestTemplate, onData)
-            # expressInterest(name, interestTemplate, onData, wireFormat)
-            # expressInterest(name, interestTemplate, onData, onTimeout)
-            # expressInterest(name, interestTemplate, onData, onTimeout, wireFormat)
             if type(arg2) is Interest:
                 template = arg2
                 # Copy the template.
                 interestCopy = Interest(template)
                 interestCopy.setName(interestOrName)
 
-                onData = arg3
-                if isinstance(arg4, WireFormat):
-                    onTimeout = None
-                    wireFormat = arg4
-                else:
-                    onTimeout = arg4
-                    wireFormat = arg5
-            # expressInterest(name, onData)
-            # expressInterest(name, onData, wireFormat)
-            # expressInterest(name, onData, onTimeout)
-            # expressInterest(name, onData, onTimeout, wireFormat)
+                # Shift the remaining args to be processed below.
+                arg2 = arg3
+                arg3 = arg4
+                arg4 = arg5
+                arg5 = arg6
             else:
+                # No template.
                 interestCopy = Interest(interestOrName)
                 # Set a default interest lifetime.
                 interestCopy.setInterestLifetimeMilliseconds(4000.0)
-                onData = arg2
-                if isinstance(arg3, WireFormat):
-                    onTimeout = None
-                    wireFormat = arg3
-                else:
-                    onTimeout = arg3
-                    wireFormat = arg4
 
-        if wireFormat == None:
-            # Don't use a default argument since getDefaultWireFormat can change.
+        onData = arg2
+        # arg3,       arg4,          arg5 may be:
+        # OnTimeout,  OnNetworkNack, WireFormat
+        # OnTimeout,  OnNetworkNack, None
+        # OnTimeout,  WireFormat,    None
+        # OnTimeout,  None,          None
+        # WireFormat, None,          None
+        # None,       None,          None
+        if isinstance(arg3, collections.Callable):
+            onTimeout = arg3
+        else:
+            onTimeout = None
+
+        if isinstance(arg4, collections.Callable):
+            onNetworkNack = arg4
+        else:
+            onNetworkNack = None
+
+        if isinstance(arg3, WireFormat):
+            wireFormat = arg3
+        elif isinstance(arg4, WireFormat):
+            wireFormat = arg4
+        elif isinstance(arg5, WireFormat):
+            wireFormat = arg5
+        else:
             wireFormat = WireFormat.getDefaultWireFormat()
 
         return { 'pendingInterestId': self._node.getNextEntryId(),
           'interestCopy': interestCopy, 'onData': onData, 'onTimeout': onTimeout,
-          'wireFormat': wireFormat }
+          'onNetworkNack': onNetworkNack, 'wireFormat': wireFormat }
 
     def removePendingInterest(self, pendingInterestId):
         """

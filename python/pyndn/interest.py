@@ -30,6 +30,7 @@ from pyndn.name import Name
 from pyndn.key_locator import KeyLocator
 from pyndn.exclude import Exclude
 from pyndn.link import Link
+from pyndn.lp.incoming_face_id import IncomingFaceId
 
 class Interest(object):
     def __init__(self, value = None):
@@ -75,6 +76,7 @@ class Interest(object):
         self._getNonceChangeCount = 0
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
+        self._lpPacket = None
 
     def getName(self):
         """
@@ -235,6 +237,17 @@ class Interest(object):
         :rtype: float
         """
         return self._interestLifetimeMilliseconds
+
+    def getIncomingFaceId(self):
+        """
+        Get the incoming face ID according to the incoming packet header.
+
+        :return: The incoming face ID. If not specified, return None.
+        :rtype: int
+        """
+        field = (None if self._lpPacket == None
+                 else IncomingFaceId.getFirstHeader(self._lpPacket))
+        return None if field == None else field.getFaceId()
 
     def setName(self, name):
         """
@@ -593,6 +606,20 @@ class Interest(object):
         :rtype: WireFormat
         """
         return self._defaultWireEncodingFormat
+
+    def setLpPacket(self, lpPacket):
+        """
+        An internal library method to set the LpPacket for an incoming packet.
+        The application should not call this.
+
+        :param LpPacket lpPacket: The LpPacket. This does not make a copy.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        :note: This is an experimental feature. This API may change in the future.
+        """
+        self._lpPacket = lpPacket
+        # Don't update _changeCount since this doesn't affect the wire encoding.
+        return self
 
     def getChangeCount(self):
         """
