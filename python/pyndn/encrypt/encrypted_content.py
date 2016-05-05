@@ -124,7 +124,7 @@ class EncryptedContent(object):
         :rtype: EncryptedContent
         """
         self._initialVector = (initialVector if
-          type(initialVector) is Blob else Blob(initialVector))
+          isinstance(initialVector, Blob) else Blob(initialVector))
         return self
 
     def setPayload(self, payload):
@@ -137,7 +137,7 @@ class EncryptedContent(object):
           values.
         :rtype: EncryptedContent
         """
-        self._payload = payload if type(payload) is Blob else Blob(payload)
+        self._payload = payload if isinstance(payload, Blob) else Blob(payload)
         return self
 
     def wireEncode(self, wireFormat = None):

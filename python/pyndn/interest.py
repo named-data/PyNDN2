@@ -401,7 +401,7 @@ class Interest(object):
         :deprecated: You should let the wire encoder generate a random nonce
           internally before sending the interest.
         """
-        self._nonce = nonce if type(nonce) is Blob else Blob(nonce)
+        self._nonce = nonce if isinstance(nonce, Blob) else Blob(nonce)
         # Set _getNonceChangeCount so that the next call to getNonce() won't
         #   clear _nonce.
         self._changeCount += 1

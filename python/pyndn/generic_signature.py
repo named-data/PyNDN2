@@ -102,7 +102,7 @@ class GenericSignature(Signature):
           take another pointer to the same Blob).
         :type signature: A Blob or an array type with int elements
         """
-        self._signature = (signature if type(signature) is Blob
+        self._signature = (signature if isinstance(signature, Blob)
                            else Blob(signature))
         self._changeCount += 1
 
@@ -120,7 +120,7 @@ class GenericSignature(Signature):
           decoding, it sets the typeCode.)
         """
         self._signatureInfoEncoding = (
-          signatureInfoEncoding if type(signatureInfoEncoding) is Blob
+          signatureInfoEncoding if isinstance(signatureInfoEncoding, Blob)
             else Blob(signatureInfoEncoding))
         self._typeCode = typeCode
         self._changeCount += 1

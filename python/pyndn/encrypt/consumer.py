@@ -173,7 +173,7 @@ class Consumer(object):
           where errorCode is from EncryptError.ErrorCode and message is a str.
         :type onError: function object
         """
-        if type(encryptedContent) is Blob:
+        if isinstance(encryptedContent, Blob):
             # Decode as EncryptedContent.
             encryptedBlob = encryptedContent
             encryptedContent = EncryptedContent()

@@ -114,7 +114,7 @@ class KeyLocator(object):
           take another pointer to the same Blob).
         :type keyData: A Blob or an array type with int elements
         """
-        self._keyData = keyData if type(keyData) is Blob else Blob(keyData)
+        self._keyData = keyData if isinstance(keyData, Blob) else Blob(keyData)
         self._changeCount += 1
 
     def clear(self):

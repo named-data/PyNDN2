@@ -100,6 +100,6 @@ class EncryptParams(object):
         :return: This EncryptParams so that you can chain calls to update values.
         :rtype: EncryptParams
         """
-        self._initialVector = (initialVector if type(initialVector) is Blob else
-                               Blob(initialVector))
+        self._initialVector = (initialVector if isinstance(initialVector, Blob)
+                               else Blob(initialVector))
         return self
