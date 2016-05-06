@@ -33,6 +33,14 @@ from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 
+INIT_TPM_INFO_TABLE = ["""
+CREATE TABLE IF NOT EXISTS
+  TpmInfo(
+      tpm_locator BLOB NOT NULL,
+      PRIMARY KEY (tpm_locator)
+  );
+"""]
+
 INIT_ID_TABLE = ["""
 CREATE TABLE IF NOT EXISTS
   Identity(
@@ -102,6 +110,14 @@ class BasicIdentityStorage(IdentityStorage):
             databaseFilePath = os.path.join(identityDirectory, "ndnsec-public-info.db")
 
         self._database = sqlite3.connect(databaseFilePath)
+
+        # Check if the TpmInfo table exists.
+        cursor = self._database.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' And name='TpmInfo'")
+        if cursor.fetchone() == None:
+            for command in INIT_TPM_INFO_TABLE:
+                self._database.execute(command)
+        cursor.close()
 
         # Check if the ID table exists.
         cursor = self._database.cursor()
@@ -386,6 +402,27 @@ class BasicIdentityStorage(IdentityStorage):
             cursor.close()
             raise SecurityException(
               "BasicIdentityStorage::getCertificate: The certificate does not exist")
+
+    def getTpmLocator(self):
+        """
+        Get the TPM locator associated with this storage.
+
+        :return: The TPM locator.
+        :rtype: str
+        :raises SecurityException: if the TPM locator doesn't exist.
+        """
+        cursor = self._database.cursor()
+        cursor.execute("SELECT tpm_locator FROM TpmInfo")
+        row = cursor.fetchone()
+
+        if row != None:
+            (tpmLocator,) = row
+            cursor.close()
+            return str(tpmLocator)
+        else:
+            cursor.close()
+            raise SecurityException(
+              "BasicIdentityStorage::getTpmLocator: TPM info does not exist")
 
     def deleteCertificateInfo(self, certificateName):
         """
