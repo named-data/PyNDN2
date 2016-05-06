@@ -217,7 +217,7 @@ class Consumer(object):
         """
         Decrypt the data packet.
 
-        :param Data data: The data packet.
+        :param Data data: The data packet. This does not verify the packet.
         :param onPlainText: When the data packet is decrypted, this calls
           onPlainText(decryptedBlob) with the decrypted blob.
         :type onPlainText: function object
