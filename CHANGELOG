@@ -1,3 +1,9 @@
+Interim changes since PyNDN v2.3beta1 (2016-05-09)
+--------------------------------------------------
+
+Bug fixes
+* http://redmine.named-data.net/issues/2760 Respect tpm= setting in client.conf.
+
 PyNDN v2.3beta1 (2016-05-06)
 ----------------------------
 
