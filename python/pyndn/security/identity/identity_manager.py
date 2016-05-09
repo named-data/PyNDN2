@@ -59,17 +59,10 @@ class IdentityManager(object):
       otherwise FilePrivateKeyStorage.
     """
     def __init__(self, identityStorage = None, privateKeyStorage = None):
-        if identityStorage == None:
-            identityStorage = BasicIdentityStorage()
-        if privateKeyStorage == None:
-            if sys.platform == 'darwin':
-                # Use the OS X Keychain
-                privateKeyStorage = OSXPrivateKeyStorage()
-            else:
-                privateKeyStorage = FilePrivateKeyStorage()
-
-        self._identityStorage = identityStorage
-        self._privateKeyStorage = privateKeyStorage
+        self._identityStorage = (identityStorage if identityStorage != None
+          else IdentityManager._getDefaultIdentityStorage())
+        self._privateKeyStorage = (privateKeyStorage if privateKeyStorage != None
+          else IdentityManager._getDefaultPrivateKeyStorage())
 
     def createIdentityAndCertificate(self, identityName, params):
         """
@@ -746,3 +739,16 @@ class IdentityManager(object):
         self._identityStorage.addKey(keyName, params.getKeyType(), publicKeyBits)
 
         return keyName
+
+    @staticmethod
+    def _getDefaultIdentityStorage():
+        return BasicIdentityStorage()
+
+    @staticmethod
+    def _getDefaultPrivateKeyStorage():
+        if sys.platform == 'darwin':
+            # Use the OS X Keychain
+            return OSXPrivateKeyStorage()
+        else:
+            return FilePrivateKeyStorage()
+        
