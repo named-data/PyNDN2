@@ -208,6 +208,16 @@ class MemoryIdentityStorage(IdentityStorage):
 
         return certificate
 
+    def getTpmLocator(self):
+        """
+        Get the TPM locator associated with this storage.
+
+        :return: The TPM locator.
+        :rtype: str
+        :raises SecurityException: if the TPM locator doesn't exist.
+        """
+        return "tpm-memory:"
+
     #
     # Get/Set Default
     #

@@ -31,6 +31,7 @@ from pyndn.name import Name
 from pyndn.data import Data
 from pyndn.util.common import Common
 from pyndn.util.blob import Blob
+from pyndn.util.config_file import ConfigFile
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
@@ -59,17 +60,24 @@ class IdentityManager(object):
       otherwise FilePrivateKeyStorage.
     """
     def __init__(self, identityStorage = None, privateKeyStorage = None):
-        if identityStorage == None:
-            identityStorage = BasicIdentityStorage()
-        if privateKeyStorage == None:
-            if sys.platform == 'darwin':
-                # Use the OS X Keychain
-                privateKeyStorage = OSXPrivateKeyStorage()
-            else:
-                privateKeyStorage = FilePrivateKeyStorage()
+        if privateKeyStorage != None:
+            # Don't call checkTpm() when using a custom PrivateKeyStorage.
+            if identityStorage == None:
+                # We don't expect this to happen.
+                raise RuntimeError(
+                  "IdentityManager: A custom privateKeyStorage is supplied with a null identityStorage")
 
-        self._identityStorage = identityStorage
-        self._privateKeyStorage = privateKeyStorage
+            self._identityStorage = identityStorage
+            self._privateKeyStorage = privateKeyStorage
+        else:
+            config = ConfigFile()
+            canonicalTpmLocator = [None]
+            self._identityStorage = (identityStorage if identityStorage != None
+              else IdentityManager._getDefaultIdentityStorage(config))
+            self._privateKeyStorage = IdentityManager._getDefaultPrivateKeyStorage(
+              config, canonicalTpmLocator)
+
+            self._checkTpm(canonicalTpmLocator[0])
 
     def createIdentityAndCertificate(self, identityName, params):
         """
@@ -746,3 +754,82 @@ class IdentityManager(object):
         self._identityStorage.addKey(keyName, params.getKeyType(), publicKeyBits)
 
         return keyName
+
+    @staticmethod
+    def _getDefaultIdentityStorage(config):
+        """
+        Get the IdentityStorage from the pib value in the configuration file if
+        supplied. Otherwise, get the default for this platform.
+
+        :param ConfigFile config: The configuration file to check.
+        :return: A new IdentityStorage.
+        :rtype: IdentityStorage
+        """
+        pibLocator = config.get("pib", "")
+
+        if pibLocator != "":
+            # Don't support non-default locations for now.
+            if pibLocator != "pib-sqlite3":
+                raise SecurityException(
+                  "Invalid config file pib value: " + pibLocator)
+
+        return BasicIdentityStorage()
+
+    @staticmethod
+    def _getDefaultPrivateKeyStorage(config, canonicalTpmLocator):
+        """
+        Get the PrivateKeyStorage from the tpm value in the configuration file
+        if supplied. Otherwise, get the default for this platform.
+
+        :param ConfigFile config: The configuration file to check.
+        :param list<str> canonicalTpmLocator Set canonicalTpmLocator[0] to the
+          canonical value including the colon, * e.g. "tpm-file:".
+        :return: A new PrivateKeyStorage.
+        :rtype: PrivateKeyStorage
+        """
+        tpmLocator = config.get("tpm", "")
+
+        if tpmLocator == "":
+            # Use the system default.
+            if sys.platform == 'darwin':
+                # Use the OS X Keychain.
+                canonicalTpmLocator[0] = "tpm-osxkeychain:"
+                return OSXPrivateKeyStorage()
+            else:
+                canonicalTpmLocator[0] = "tpm-file:"
+                return FilePrivateKeyStorage()
+        elif tpmLocator == "tpm-osxkeychain":
+            if sys.platform == 'darwin':
+                canonicalTpmLocator[0] = "tpm-osxkeychain:"
+                return OSXPrivateKeyStorage()
+            else:
+                raise SecurityException(
+                  "Can't use config file tpm=tpm-osxkeychain because the system doesn't support it.")
+        elif tpmLocator == "tpm-file":
+            # Don't support non-default locations for now.
+            canonicalTpmLocator[0] = "tpm-file:"
+            return FilePrivateKeyStorage()
+        else:
+            raise SecurityException(
+              "Invalid config file tpm value: " + tpmLocator)
+
+    def _checkTpm(self, canonicalTpmLocator):
+        """
+        Check that _identityStorage.getTpmLocator() (if defined) matches the
+        canonicalTpmLocator.
+
+        :param str canonicalTpmLocator The canonical locator from
+          _getDefaultPrivateKeyStorage().
+        :raises SecurityException: if the private key storage does not match.
+        """
+        try:
+            tpmLocator = self._identityStorage.getTpmLocator()
+        except SecurityException:
+            # The TPM locator is not set in PIB yet.
+            return
+
+        # Just check. If a PIB reset is required, expect ndn-cxx/NFD to do it.
+        if tpmLocator != "" and tpmLocator != canonicalTpmLocator:
+            raise SecurityException(
+              "The TPM locator supplied does not match the TPM locator in the PIB: " +
+              tpmLocator + " != " + canonicalTpmLocator)
