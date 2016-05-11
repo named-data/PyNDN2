@@ -218,6 +218,13 @@ def dumpData(data):
         dump("DigestSha256 signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
+    elif type(signature) is GenericSignature:
+        dump("Generic signature.signature:",
+             "<none>" if signature.getSignature().size() == 0
+                      else signature.getSignature().toHex())
+        dump("  Type code:", signature.getTypeCode(), "signatureInfo:",
+             "<none>" if signature.getSignatureInfoEncoding().size() == 0
+                      else signature.getSignatureInfoEncoding().toHex())
     if keyLocator != None:
         if keyLocator.getType() != None:
             if (keyLocator.getType() ==
