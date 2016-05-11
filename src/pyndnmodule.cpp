@@ -23,7 +23,11 @@ public:
     _components = Py_BuildValue("s", "_components");
     _view = Py_BuildValue("s", "_view");
     Blob = Py_BuildValue("s", "Blob");
+    DigestSha256Signature = Py_BuildValue("s", "DigestSha256Signature");
+    GenericSignature = Py_BuildValue("s", "GenericSignature");
+    HmacWithSha256Signature = Py_BuildValue("s", "HmacWithSha256Signature");
     Sha256WithRsaSignature = Py_BuildValue("s", "Sha256WithRsaSignature");
+    Sha256WithEcdsaSignature = Py_BuildValue("s", "Sha256WithEcdsaSignature");
     append = Py_BuildValue("s", "append");
     clear = Py_BuildValue("s", "clear");
     getContent = Py_BuildValue("s", "getContent");
@@ -48,7 +52,11 @@ public:
   PyObject* _components;
   PyObject* _view;
   PyObject* Blob;
+  PyObject* DigestSha256Signature;
+  PyObject* GenericSignature;
+  PyObject* HmacWithSha256Signature;
   PyObject* Sha256WithRsaSignature;
+  PyObject* Sha256WithEcdsaSignature;
   PyObject* append;
   PyObject* clear;
   PyObject* getContent;
@@ -72,6 +80,12 @@ public:
 
 static strClass str;
 
+/**
+ * Get a long value by calling obj.methodName() and using PyInt_AsLong.
+ * @param obj The object with the method to call.
+ * @param methodName A Python string object of the method name to call.
+ * @return The long value.
+ */
 static long
 toLongByMethod(PyObject* obj, PyObject* methodName)
 {
@@ -79,11 +93,34 @@ toLongByMethod(PyObject* obj, PyObject* methodName)
   return PyInt_AsLong(val);
 }
 
+/**
+ * Get a double value by calling obj.methodName() and using PyFloat_AsDouble.
+ * @param obj The object with the method to call.
+ * @param methodName A Python string object of the method name to call.
+ * @return The double value.
+ */
 static double
 toDoubleByMethod(PyObject* obj, PyObject* methodName)
 {
   PyObjectRef val(PyObject_CallMethodObjArgs(obj, methodName, NULL));
   return PyFloat_AsDouble(val);
+}
+
+/**
+ * Imitate Python isinstance(obj, module.class) by loading a Python class from
+ * an imported module.
+ * @param obj The Python object to check.
+ * @param moduleName The module name to import.
+ * @param className A Python string object of the class name.
+ * @return True if obj is an instance of the class.
+ */
+static bool
+isInstance(PyObject* obj, const char* moduleName, PyObject* className)
+{
+  // TODO: Cache the loaded module?
+  PyObjectRef module(PyImport_ImportModule(moduleName));
+  PyObjectRef pyClass(PyObject_GetAttr(module, className));
+  return PyObject_IsInstance(obj, pyClass) != 0;
 }
 
 /**
@@ -218,11 +255,14 @@ setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
     PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs(keyName, str.clear, NULL));
 }
 
-// Imitate Sha256WithRsaSignature::get(SignatureLite& signatureLite).
+// Imitate Sha256WithRsaSignature::get(SignatureLite& signatureLite),
+//         Sha256WithEcdsaSignature::get(SignatureLite& signatureLite),
+//         HmacWithSha256Signature::get(SignatureLite& signatureLite).
 static void
-toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
+toSignatureLiteWithKeyLocator
+  (PyObject* signature, ndn_SignatureType type, SignatureLite& signatureLite)
 {
-  signatureLite.setType(ndn_SignatureType_Sha256WithRsaSignature);
+  signatureLite.setType(type);
   signatureLite.setSignature(toBlobLiteByMethod(signature, str.getSignature));
 
   PyObjectRef keyLocator
@@ -230,14 +270,12 @@ toSha256WithRsaSignatureLite(PyObject* signature, SignatureLite& signatureLite)
   toKeyLocatorLite(keyLocator, signatureLite.getKeyLocator());
 }
 
-// Imitate Sha256WithRsaSignature::set(const SignatureLite& signatureLite).
+// Imitate Sha256WithRsaSignature::set(const SignatureLite& signatureLite),
+//         Sha256WithEcdsaSignature::set(const SignatureLite& signatureLite),
+//         HmacWithSha256Signature::set(const SignatureLite& signatureLite).
 static void
-setSha256WithRsaSignature(PyObject* signature, const SignatureLite& signatureLite)
+setSignatureWithKeyLocator(PyObject* signature, const SignatureLite& signatureLite)
 {
-  // The caller should already have checked the type, but check again.
-  if (signatureLite.getType() != ndn_SignatureType_Sha256WithRsaSignature)
-    return;
-
   PyObjectRef signatureBlob(makeBlob(signatureLite.getSignature()));
   PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
     (signature, str.setSignature, signatureBlob.obj, NULL));
@@ -280,9 +318,20 @@ setMetaInfo(PyObject* metaInfo, const MetaInfoLite& metaInfoLite)
 static void
 toDataLite(PyObject* data, DataLite& dataLite)
 {
-  // TODO: Handle types other than Sha256WithRsaSignature.
   PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
-  toSha256WithRsaSignatureLite(signature, dataLite.getSignature());
+  ndn_SignatureType type;
+  if (isInstance(signature, "pyndn", str.Sha256WithRsaSignature))
+    type = ndn_SignatureType_Sha256WithRsaSignature;
+  else if (isInstance(signature, "pyndn", str.Sha256WithEcdsaSignature))
+    type = ndn_SignatureType_Sha256WithEcdsaSignature;
+  else if (isInstance(signature, "pyndn", str.HmacWithSha256Signature))
+    type = ndn_SignatureType_HmacWithSha256Signature;
+  // TODO: Handle DigestSha256Signature and GenericSignature.
+  else
+    // TODO: Handle the error "Unrecognized signature type".
+    return;
+
+  toSignatureLiteWithKeyLocator(signature, type, dataLite.getSignature());
 
   PyObjectRef name(PyObject_CallMethodObjArgs(data, str.getName, NULL));
   toNameLite(name, dataLite.getName());
@@ -297,8 +346,18 @@ toDataLite(PyObject* data, DataLite& dataLite)
 static void
 setData(PyObject* data, const DataLite& dataLite)
 {
-  // TODO: Handle types other than Sha256WithRsaSignature.
-  PyObject* signatureName = str.Sha256WithRsaSignature;
+  PyObject* signatureName;
+  if (dataLite.getSignature().getType() == ndn_SignatureType_Sha256WithRsaSignature)
+    signatureName = str.Sha256WithRsaSignature;
+  else if (dataLite.getSignature().getType() == ndn_SignatureType_Sha256WithEcdsaSignature)
+    signatureName = str.Sha256WithEcdsaSignature;
+  else if (dataLite.getSignature().getType() == ndn_SignatureType_HmacWithSha256Signature)
+    signatureName = str.HmacWithSha256Signature;
+  // TODO: Handle DigestSha256Signature and GenericSignature.
+  else
+    // TODO: Handle the error "Unrecognized signature type".
+    return;
+
   PyObjectRef pyndnModule(PyImport_ImportModule("pyndn"));
   PyObjectRef signatureClass(PyObject_GetAttr(pyndnModule, signatureName));
   PyObjectRef tempSignature(PyObject_CallObject(signatureClass, NULL));
@@ -307,7 +366,7 @@ setData(PyObject* data, const DataLite& dataLite)
 
   // Now use the signature object that was copied into data.
   PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
-  setSha256WithRsaSignature(signature, dataLite.getSignature());
+  setSignatureWithKeyLocator(signature, dataLite.getSignature());
 
   PyObjectRef name(PyObject_CallMethodObjArgs(data, str.getName, NULL));
   setName(name, dataLite.getName());
