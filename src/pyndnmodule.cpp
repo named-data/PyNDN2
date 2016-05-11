@@ -40,12 +40,15 @@ public:
     getName = Py_BuildValue("s", "getName");
     getValue = Py_BuildValue("s", "getValue");
     getSignature = Py_BuildValue("s", "getSignature");
+    getSignatureInfoEncoding = Py_BuildValue("s", "getSignatureInfoEncoding");
     getType = Py_BuildValue("s", "getType");
+    getTypeCode = Py_BuildValue("s", "getTypeCode");
     setContent = Py_BuildValue("s", "setContent");
     setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
     setFreshnessPeriod = Py_BuildValue("s", "setFreshnessPeriod");
     setKeyData = Py_BuildValue("s", "setKeyData");
     setSignature = Py_BuildValue("s", "setSignature");
+    setSignatureInfoEncoding = Py_BuildValue("s", "setSignatureInfoEncoding");
     setType = Py_BuildValue("s", "setType");
   }
   PyObject* _array;
@@ -69,12 +72,15 @@ public:
   PyObject* getName;
   PyObject* getValue;
   PyObject* getSignature;
+  PyObject* getSignatureInfoEncoding;
   PyObject* getType;
+  PyObject* getTypeCode;
   PyObject* setContent;
   PyObject* setFinalBlockId;
   PyObject* setFreshnessPeriod;
   PyObject* setKeyData;
   PyObject* setSignature;
+  PyObject* setSignatureInfoEncoding;
   PyObject* setType;
 };
 
@@ -307,6 +313,35 @@ setSignatureWithSignatureOnly(PyObject* signature, const SignatureLite& signatur
     (signature, str.setSignature, signatureBlob.obj, NULL));
 }
 
+// Imitate GenericSignature::get(SignatureLite& signatureLite).
+static void
+toGenericSignatureLite(PyObject* signature, SignatureLite& signatureLite)
+{
+  signatureLite.clear();
+
+  signatureLite.setType(ndn_SignatureType_Generic);
+  signatureLite.setSignature(toBlobLiteByMethod(signature, str.getSignature));
+  signatureLite.setSignatureInfoEncoding
+    (toBlobLiteByMethod(signature, str.getSignatureInfoEncoding),
+     (int)toLongByMethod(signature, str.getTypeCode));
+}
+
+// Imitate GenericSignature::set(const SignatureLite& signatureLite).
+static void
+setGenericSignature(PyObject* signature, const SignatureLite& signatureLite)
+{
+  PyObjectRef signatureBlob(makeBlob(signatureLite.getSignature()));
+  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
+    (signature, str.setSignature, signatureBlob.obj, NULL));
+
+  PyObjectRef signatureInfoEncoding
+    (makeBlob(signatureLite.getSignatureInfoEncoding()));
+  PyObjectRef typeCode(PyLong_FromLong(signatureLite.getGenericTypeCode()));
+  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+    (signature, str.setSignatureInfoEncoding, signatureInfoEncoding.obj,
+     typeCode.obj, NULL));
+}
+
 // Imitate MetaInfo::get(MetaInfoLite& metaInfoLite).
 static void
 toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
@@ -357,7 +392,8 @@ toDataLite(PyObject* data, DataLite& dataLite)
     toSignatureLiteWithSignatureOnly
       (signature, ndn_SignatureType_DigestSha256Signature,
        dataLite.getSignature());
-  // TODO: Handle GenericSignature.
+  else if (isInstance(signature, "pyndn", str.GenericSignature))
+    toGenericSignatureLite(signature, dataLite.getSignature());
   else
     // TODO: Handle the error "Unrecognized signature type".
     return;
@@ -384,7 +420,8 @@ setData(PyObject* data, const DataLite& dataLite)
     signatureName = str.HmacWithSha256Signature;
   else if (dataLite.getSignature().getType() == ndn_SignatureType_DigestSha256Signature)
     signatureName = str.DigestSha256Signature;
-  // TODO: Handle GenericSignature.
+  else if (dataLite.getSignature().getType() == ndn_SignatureType_Generic)
+    signatureName = str.GenericSignature;
   else
     // TODO: Handle the error "Unrecognized signature type".
     return;
@@ -403,6 +440,8 @@ setData(PyObject* data, const DataLite& dataLite)
     setSignatureWithKeyLocator(signature, dataLite.getSignature());
   else if (dataLite.getSignature().getType() == ndn_SignatureType_DigestSha256Signature)
     setSignatureWithSignatureOnly(signature, dataLite.getSignature());
+  else if (dataLite.getSignature().getType() == ndn_SignatureType_Generic)
+    setGenericSignature(signature, dataLite.getSignature());
   else
     // We don't expect this to happen since we just checked above.
     return;
