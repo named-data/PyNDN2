@@ -232,6 +232,7 @@ setName(PyObject* name, const NameLite& nameLite)
 static void
 toKeyLocatorLite(PyObject* keyLocator, KeyLocatorLite& keyLocatorLite)
 {
+  // If the val is None, PyInt_AsLong returns -1 as desired.
   keyLocatorLite.setType
     ((ndn_KeyLocatorType)(int)toLongByMethod(keyLocator, str.getType));
   keyLocatorLite.setKeyData
@@ -247,6 +248,7 @@ static void
 setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
 {
   PyObjectRef type(PyLong_FromLong(keyLocatorLite.getType()));
+  // If type is -1, KeyLocator.setType will set to None as desired.
   PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
     (keyLocator, str.setType, type.obj, NULL));
 
