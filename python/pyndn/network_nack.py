@@ -37,10 +37,10 @@ class NetworkNack(object):
         formats.
         """
         NONE =         0
-        OTHER_CODE =   1
         CONGESTION =  50
         DUPLICATE =  100
         NO_ROUTE =   150
+        OTHER_CODE = 0x7fff
 
     def getReason(self):
         """
