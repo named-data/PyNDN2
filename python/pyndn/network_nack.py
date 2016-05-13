@@ -80,8 +80,11 @@ class NetworkNack(object):
         Reason.OTHER_CODE. If the packet's reason code is a recognized enum
         value, just call setReason().
 
-        :param int otherReasonCode: The packet's unrecognized reason code.
+        :param int otherReasonCode: The packet's unrecognized reason code, which
+          must be non-negative.
         """
+        if otherReasonCode < 0:
+          raise RuntimeError("NetworkNack other reason code must be non-negative")
         self._otherReasonCode = otherReasonCode
 
     @staticmethod
