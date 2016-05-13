@@ -93,8 +93,9 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
             raise SecurityException("Unsupported key type")
 
         keyUri = keyName.toUri()
-        publicKeyFilePath = self.nameTransform(keyUri, ".pub")
-        privateKeyFilePath = self.nameTransform(keyUri, ".pri")
+        keyFilePathNoExtension = self.maintainMapping(keyUri)
+        publicKeyFilePath = keyFilePathNoExtension + ".pub"
+        privateKeyFilePath = keyFilePathNoExtension + ".pri"
 
         with open(publicKeyFilePath, 'w') as keyFile:
             keyFile.write(Blob(base64.b64encode(publicKeyDer), False).toRawStr())
@@ -275,3 +276,20 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         digest = digest.replace('/', '%')
 
         return os.path.join(self._keyStorePath, digest + extension)
+
+    def maintainMapping(self, keyName):
+        """
+        Use nameTransform to get the file path for keyName (without the
+        extension) and also add to the mapping.txt file.
+
+        :param str keyName: The key name URI.
+        :return: The key file path without the extension.
+        :rtype: str
+        """
+        keyFilePathNoExtension = self.nameTransform(keyName, "")
+
+        mappingFilePath = os.path.join(self._keyStorePath, "mapping.txt")
+        with open(mappingFilePath, 'a') as mappingFile:
+            mappingFile.write(keyName + ' ' + keyFilePathNoExtension + '\n')
+
+        return keyFilePathNoExtension
