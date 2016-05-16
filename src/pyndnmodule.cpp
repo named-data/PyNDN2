@@ -38,15 +38,17 @@ public:
     getKeyName = Py_BuildValue("s", "getKeyName");
     getMetaInfo = Py_BuildValue("s", "getMetaInfo");
     getName = Py_BuildValue("s", "getName");
-    getValue = Py_BuildValue("s", "getValue");
+    getOtherTypeCode = Py_BuildValue("s", "getOtherTypeCode");
     getSignature = Py_BuildValue("s", "getSignature");
     getSignatureInfoEncoding = Py_BuildValue("s", "getSignatureInfoEncoding");
     getType = Py_BuildValue("s", "getType");
     getTypeCode = Py_BuildValue("s", "getTypeCode");
+    getValue = Py_BuildValue("s", "getValue");
     setContent = Py_BuildValue("s", "setContent");
     setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
     setFreshnessPeriod = Py_BuildValue("s", "setFreshnessPeriod");
     setKeyData = Py_BuildValue("s", "setKeyData");
+    setOtherTypeCode = Py_BuildValue("s", "setOtherTypeCode");
     setSignature = Py_BuildValue("s", "setSignature");
     setSignatureInfoEncoding = Py_BuildValue("s", "setSignatureInfoEncoding");
     setType = Py_BuildValue("s", "setType");
@@ -70,15 +72,17 @@ public:
   PyObject* getKeyName;
   PyObject* getMetaInfo;
   PyObject* getName;
-  PyObject* getValue;
+  PyObject* getOtherTypeCode;
   PyObject* getSignature;
   PyObject* getSignatureInfoEncoding;
   PyObject* getType;
   PyObject* getTypeCode;
+  PyObject* getValue;
   PyObject* setContent;
   PyObject* setFinalBlockId;
   PyObject* setFreshnessPeriod;
   PyObject* setKeyData;
+  PyObject* setOtherTypeCode;
   PyObject* setSignature;
   PyObject* setSignatureInfoEncoding;
   PyObject* setType;
@@ -349,6 +353,7 @@ static void
 toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
 {
   metaInfoLite.setType((ndn_ContentType)(int)toLongByMethod(metaInfo, str.getType));
+  metaInfoLite.setOtherTypeCode((int)toLongByMethod(metaInfo, str.getOtherTypeCode));
   metaInfoLite.setFreshnessPeriod(toDoubleByMethod(metaInfo, str.getFreshnessPeriod));
   PyObjectRef finalBlockId(PyObject_CallMethodObjArgs
     (metaInfo, str.getFinalBlockId, NULL));
@@ -364,12 +369,16 @@ setMetaInfo(PyObject* metaInfo, const MetaInfoLite& metaInfoLite)
   PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
     (metaInfo, str.setType, type.obj, NULL));
 
-  PyObjectRef freshnessPeriod(PyFloat_FromDouble(metaInfoLite.getFreshnessPeriod()));
+  PyObjectRef otherTypeCode(PyLong_FromLong(metaInfoLite.getOtherTypeCode()));
   PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+    (metaInfo, str.setOtherTypeCode, otherTypeCode.obj, NULL));
+
+  PyObjectRef freshnessPeriod(PyFloat_FromDouble(metaInfoLite.getFreshnessPeriod()));
+  PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
     (metaInfo, str.setFreshnessPeriod, freshnessPeriod.obj, NULL));
 
   PyObjectRef finalBlockId(makeBlob(metaInfoLite.getFinalBlockId().getValue()));
-  PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
+  PyObjectRef ignoreResult4(PyObject_CallMethodObjArgs
     (metaInfo, str.setFinalBlockId, finalBlockId.obj, NULL));
 }
 
