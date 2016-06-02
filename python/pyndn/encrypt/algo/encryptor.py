@@ -65,9 +65,7 @@ class Encryptor(object):
         :param Blob key: The encryption key value.
         :param EncryptParams params: The parameters for encryption.
         """
-        dataName = data.getName()
-        dataName.append(Encryptor.NAME_COMPONENT_FOR).append(keyName)
-        data.setName(dataName)
+        data.getName().append(Encryptor.NAME_COMPONENT_FOR).append(keyName)
 
         algorithmType = params.getAlgorithmType()
 
