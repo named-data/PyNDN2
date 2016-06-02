@@ -257,36 +257,37 @@ class RepetitiveInterval(object):
         :return: True if the date of the time point is in any interval.
         :rtype: bool
         """
-        timePointDate = datetime.utcfromtimestamp(
-          round(RepetitiveInterval._toDateOnlyMilliseconds(timePoint) / 1000.0))
-        startDate = datetime.utcfromtimestamp(self._startDate / 1000.0)
-        endDate = datetime.utcfromtimestamp(self._endDate / 1000.0)
+        timePointDateMilliseconds = RepetitiveInterval._toDateOnlyMilliseconds(timePoint)
 
-        if timePointDate < startDate or timePointDate > endDate:
+        if (timePointDateMilliseconds < self._startDate or
+            timePointDateMilliseconds > self._endDate):
             return False
 
         if self._repeatUnit == RepetitiveInterval.RepeatUnit.NONE:
             return True
-
-        if self._repeatUnit == RepetitiveInterval.RepeatUnit.DAY:
-            durationDays = int(round(
-              (timePointDate - startDate).total_seconds() /
-              RepetitiveInterval.SECONDS_IN_DAY))
+        elif self._repeatUnit == RepetitiveInterval.RepeatUnit.DAY:
+            durationDays = ((timePointDateMilliseconds - self._startDate) /
+                            RepetitiveInterval.MILLISECONDS_IN_DAY)
             if durationDays % self._nRepeats == 0:
                 return True
-        elif (self._repeatUnit == RepetitiveInterval.RepeatUnit.MONTH and
-              timePointDate.day == startDate.day):
-            yearDifference = timePointDate.year - startDate.year
-            monthDifference = (12 * yearDifference +
-              timePointDate.month - startDate.month)
-            if monthDifference % self._nRepeats == 0:
-              return True
-        elif (self._repeatUnit == RepetitiveInterval.RepeatUnit.YEAR and
-              timePointDate.day == startDate.day and
-              timePointDate.month == startDate.month):
-            difference = timePointDate.year - startDate.year
-            if difference % self._nRepeats == 0:
-              return True
+        else:
+            timePointDate = datetime.utcfromtimestamp(
+              round(timePointDateMilliseconds / 1000.0))
+            startDate = datetime.utcfromtimestamp(self._startDate / 1000.0)
+
+            if (self._repeatUnit == RepetitiveInterval.RepeatUnit.MONTH and
+                  timePointDate.day == startDate.day):
+                yearDifference = timePointDate.year - startDate.year
+                monthDifference = (12 * yearDifference +
+                  timePointDate.month - startDate.month)
+                if monthDifference % self._nRepeats == 0:
+                  return True
+            elif (self._repeatUnit == RepetitiveInterval.RepeatUnit.YEAR and
+                  timePointDate.day == startDate.day and
+                  timePointDate.month == startDate.month):
+                difference = timePointDate.year - startDate.year
+                if difference % self._nRepeats == 0:
+                  return True
 
         return False
 
@@ -307,4 +308,3 @@ class RepetitiveInterval(object):
 
     MILLISECONDS_IN_HOUR = 3600 * 1000
     MILLISECONDS_IN_DAY = 24 * 3600 * 1000
-    SECONDS_IN_DAY = 24 * 3600
