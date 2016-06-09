@@ -196,7 +196,7 @@ class Producer(object):
         :type onError: function object
         """
         # Get a content key.
-        contentKeyName = Name(self.createContentKey(timeSlot, None, onError))
+        contentKeyName = self.createContentKey(timeSlot, None, onError)
         contentKey = self._database.getContentKey(timeSlot)
 
         # Produce data.
