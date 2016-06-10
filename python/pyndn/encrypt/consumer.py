@@ -436,6 +436,7 @@ class Consumer(object):
                   "The data packet does not satisfy the D-KEY packet format")
             except:
                 logging.exception("Error in onError")
+            return
 
         # Decrypt the D-KEY.
         Consumer._decrypt(
