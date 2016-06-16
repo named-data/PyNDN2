@@ -28,10 +28,12 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/lp/lp-packet-types.h \
   include/ndn-cpp/c/transport/transport-types.h \
   include/ndn-cpp/c/util/blob-types.h \
-  include/ndn-cpp/c/util/dynamic-uint8-array-types.h
+  include/ndn-cpp/c/util/dynamic-uint8-array-types.h \
+  include/ndn-cpp/c/util/ec-private-key-types.h \
+  include/ndn-cpp/c/util/rsa-private-key-types.h
 
 # Public C++ headers.
-ndn_cpp_c_headers = \
+ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/common-lite.hpp \
   include/ndn-cpp/lite/control-parameters-lite.hpp \
   include/ndn-cpp/lite/control-response-lite.hpp \
@@ -55,7 +57,10 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
   include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
-  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp
+  include/ndn-cpp/lite/util/crypto-lite.hpp \
+  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp \
+  include/ndn-cpp/lite/util/ec-private-key-lite.hpp \
+  include/ndn-cpp/lite/util/rsa-private-key-lite.hpp
 
 # Just the C code.
 ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
@@ -93,8 +98,10 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/util/blob.h \
   src/c/util/crypto.c src/c/util/crypto.h \
   src/c/util/dynamic-uint8-array.c src/c/util/dynamic-uint8-array.h \
+  src/c/util/ec-private-key.c src/c/util/ec-private-key.h \
   src/c/util/ndn_memory.c src/c/util/ndn_memory.h \
   src/c/util/ndn_realloc.c src/c/util/ndn_realloc.h \
+  src/c/util/rsa-private-key.c src/c/util/rsa-private-key.h \
   src/c/util/time.c src/c/util/time.h
 
 # C++ code and also the C code.
@@ -117,8 +124,14 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
   src/lite/lp/lp-packet-lite.cpp \
+  src/lite/transport/tcp-transport-lite.cpp \
+  src/lite/transport/udp-transport-lite.cpp \
+  src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
-  src/lite/util/dynamic-uint8-array-lite.cpp
+  src/lite/util/crypto-lite.cpp \
+  src/lite/util/dynamic-uint8-array-lite.cpp \
+  src/lite/util/ec-private-key-lite.cpp \
+  src/lite/util/rsa-private-key-lite.cpp
 
 pyexec_LTLIBRARIES = _pyndn.la
 _pyndn_la_CFLAGS = $(PYTHON_CFLAGS)

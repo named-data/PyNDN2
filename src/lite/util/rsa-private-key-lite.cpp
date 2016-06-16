@@ -19,19 +19,35 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#include "../c/control-response.h"
-#include <ndn-cpp/lite/control-response-lite.hpp>
+#include "../../c/util/rsa-private-key.h"
+#include <ndn-cpp/lite/util/rsa-private-key-lite.hpp>
 
 namespace ndn {
 
-ControlResponseLite::ControlResponseLite
-  (struct ndn_NameComponent *nameComponents, size_t maxNameComponents,
-   struct ndn_NameComponent *strategyNameComponents,
-   size_t strategyMaxNameComponents)
+RsaPrivateKeyLite::RsaPrivateKeyLite()
 {
-  ndn_ControlResponse_initialize
-    (this, nameComponents, maxNameComponents, strategyNameComponents,
-     strategyMaxNameComponents);
+  ndn_RsaPrivateKey_initialize(this);
+}
+
+RsaPrivateKeyLite::~RsaPrivateKeyLite()
+{
+  ndn_RsaPrivateKey_finalize(this);
+}
+
+ndn_Error
+RsaPrivateKeyLite::decode
+  (const uint8_t* privateKeyDer, size_t privateKeyDerLength)
+{
+  return ndn_RsaPrivateKey_decode(this, privateKeyDer, privateKeyDerLength);
+}
+
+ndn_Error
+RsaPrivateKeyLite::signWithSha256
+  (const uint8_t* data, size_t dataLength, const uint8_t* signature,
+   size_t& signatureLength) const
+{
+  return ndn_RsaPrivateKey_signWithSha256
+    (this, data, dataLength, signature, &signatureLength);
 }
 
 }

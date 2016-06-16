@@ -35,6 +35,7 @@ void ndn_generateRandomBytes(uint8_t *buffer, size_t bufferLength)
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
+#include "ndn_memory.h"
 
 static int CURVE_OID_224[] = { OBJ_secp224r1 };
 static int CURVE_OID_256[] = { OBJ_X9_62_prime256v1 };
@@ -58,6 +59,12 @@ ndn_digestSha256(const uint8_t *data, size_t dataLength, uint8_t *digest)
 }
 
 void
+ndn_generateRandomBytes(uint8_t *buffer, size_t bufferLength)
+{
+  RAND_bytes(buffer, (int)bufferLength);
+}
+
+void
 ndn_computeHmacWithSha256
   (const uint8_t *key, size_t keyLength, const uint8_t *data, size_t dataLength,
    uint8_t *digest)
@@ -70,10 +77,66 @@ ndn_computeHmacWithSha256
   HMAC_Final(&hmac, digest, &dummyDigestLength);
 }
 
-void
-ndn_generateRandomBytes(uint8_t *buffer, size_t bufferLength)
+int
+ndn_verifyDigestSha256Signature
+  (const uint8_t *signature, size_t signatureLength, const uint8_t *data,
+   size_t dataLength)
 {
-  RAND_bytes(buffer, (int)bufferLength);
+  uint8_t dataDigest[ndn_SHA256_DIGEST_SIZE];
+  ndn_digestSha256(data, dataLength, dataDigest);
+
+  return signatureLength == ndn_SHA256_DIGEST_SIZE && ndn_memcmp
+    (signature, dataDigest, ndn_SHA256_DIGEST_SIZE) == 0;
+}
+
+ndn_Error
+ndn_verifySha256WithEcdsaSignature
+  (const uint8_t *signature, size_t signatureLength, const uint8_t *data,
+   size_t dataLength, const uint8_t *publicKeyDer, size_t publicKeyDerLength,
+   int *verified)
+{
+  // Set digest to the digest of the signed portion of the signedBlob.
+  uint8_t digest[ndn_SHA256_DIGEST_SIZE];
+  ndn_digestSha256(data, dataLength, digest);
+
+  // Verify the digest.
+  EC_KEY *ecPublicKey = d2i_EC_PUBKEY(NULL, &publicKeyDer, publicKeyDerLength);
+  if (!ecPublicKey)
+    return NDN_ERROR_Error_decoding_key;
+  int success = ECDSA_verify
+    (NID_sha256, digest, sizeof(digest), (uint8_t *)signature, signatureLength,
+     ecPublicKey);
+  // Free the public key before checking for success.
+  EC_KEY_free(ecPublicKey);
+
+  // ECDSA_verify returns 1 for a valid signature.
+  *verified = (success == 1);
+  return NDN_ERROR_success;
+}
+
+ndn_Error
+ndn_verifySha256WithRsaSignature
+  (const uint8_t *signature, size_t signatureLength, const uint8_t *data,
+   size_t dataLength, const uint8_t *publicKeyDer, size_t publicKeyDerLength,
+   int *verified)
+{
+  // Set digest to the digest of the signed portion of the signedBlob.
+  uint8_t digest[ndn_SHA256_DIGEST_SIZE];
+  ndn_digestSha256(data, dataLength, digest);
+
+  // Verify the digest.
+  RSA *rsaPublicKey = d2i_RSA_PUBKEY(NULL, &publicKeyDer, publicKeyDerLength);
+  if (!rsaPublicKey)
+    return NDN_ERROR_Error_decoding_key;
+  int success = RSA_verify
+    (NID_sha256, digest, sizeof(digest), (uint8_t *)signature, signatureLength,
+     rsaPublicKey);
+  // Free the public key before checking for success.
+  RSA_free(rsaPublicKey);
+
+  // RSA_verify returns 1 for a valid signature.
+  *verified = (success == 1);
+  return NDN_ERROR_success;
 }
 
 size_t

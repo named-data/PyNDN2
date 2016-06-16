@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 /**
  * Copyright (C) 2016 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
@@ -19,19 +18,25 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#include "../c/control-response.h"
-#include <ndn-cpp/lite/control-response-lite.hpp>
+#ifndef NDN_RSA_PRIVATE_KEY_TYPES_H
+#define NDN_RSA_PRIVATE_KEY_TYPES_H
 
-namespace ndn {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-ControlResponseLite::ControlResponseLite
-  (struct ndn_NameComponent *nameComponents, size_t maxNameComponents,
-   struct ndn_NameComponent *strategyNameComponents,
-   size_t strategyMaxNameComponents)
-{
-  ndn_ControlResponse_initialize
-    (this, nameComponents, maxNameComponents, strategyNameComponents,
-     strategyMaxNameComponents);
+struct rsa_st;
+
+/**
+ * A struct ndn_RsaPrivateKey holds a decoded RSA private key for use in crypto
+ * operations.
+ */
+struct ndn_RsaPrivateKey {
+  struct rsa_st *privateKey;
+};
+
+#ifdef __cplusplus
 }
+#endif
 
-}
+#endif

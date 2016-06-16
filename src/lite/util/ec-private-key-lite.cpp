@@ -19,19 +19,42 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#include "../c/control-response.h"
-#include <ndn-cpp/lite/control-response-lite.hpp>
+#include "../../c/util/ec-private-key.h"
+#include <ndn-cpp/lite/util/ec-private-key-lite.hpp>
 
 namespace ndn {
 
-ControlResponseLite::ControlResponseLite
-  (struct ndn_NameComponent *nameComponents, size_t maxNameComponents,
-   struct ndn_NameComponent *strategyNameComponents,
-   size_t strategyMaxNameComponents)
+EcPrivateKeyLite::EcPrivateKeyLite()
 {
-  ndn_ControlResponse_initialize
-    (this, nameComponents, maxNameComponents, strategyNameComponents,
-     strategyMaxNameComponents);
+  ndn_EcPrivateKey_initialize(this);
+}
+
+EcPrivateKeyLite::~EcPrivateKeyLite()
+{
+  ndn_EcPrivateKey_finalize(this);
+}
+
+ndn_Error
+EcPrivateKeyLite::decode
+  (const uint8_t* privateKeyDer, size_t privateKeyDerLength)
+{
+  return ndn_EcPrivateKey_decode(this, privateKeyDer, privateKeyDerLength);
+}
+
+ndn_Error
+EcPrivateKeyLite::setByCurve
+  (int curveId, const uint8_t* value, size_t valueLength)
+{
+  return ndn_EcPrivateKey_setByCurve(this, curveId, value, valueLength);
+}
+
+ndn_Error
+EcPrivateKeyLite::signWithSha256
+  (const uint8_t* data, size_t dataLength, const uint8_t* signature,
+   size_t& signatureLength) const
+{
+  return ndn_EcPrivateKey_signWithSha256
+    (this, data, dataLength, signature, &signatureLength);
 }
 
 }
