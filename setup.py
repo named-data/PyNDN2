@@ -5,9 +5,9 @@
 
 # To build/upload the package, do the following as described in
 # https://python-packaging-user-guide.readthedocs.org/en/latest/distributing.html
-# python setup.py sdist
-# python setup.py bdist_wheel --universal
-# python setup.py sdist bdist_wheel upload
+# sudo python setup.py sdist
+# sudo python setup.py bdist_wheel --universal
+# sudo python setup.py sdist bdist_wheel upload
 
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
 import sys
@@ -26,7 +26,7 @@ elif sys.version_info[0] == 3:
 setup(
     name='PyNDN',
 
-    version='2.2b1',
+    version='2.3b1',
 
     description='An NDN client library with TLV wire format support in native Python',
 

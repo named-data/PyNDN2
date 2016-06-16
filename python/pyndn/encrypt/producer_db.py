@@ -19,7 +19,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the ProducerDb class which is an abstract base class the
+This module defines the ProducerDb class which is an abstract base class for the
 storage of keys for the producer. It contains one table that maps time slots (to
 the nearest hour) to the content key created for that time slot. A subclass must
 implement the methods. For example, see Sqlite3ProducerDb.

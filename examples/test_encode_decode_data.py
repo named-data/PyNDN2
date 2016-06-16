@@ -189,6 +189,9 @@ def dumpData(data):
         dump("metaInfo.type:",
              "LINK" if data.getMetaInfo().getType() == ContentType.LINK
              else "KEY" if data.getMetaInfo().getType() == ContentType.KEY
+             else "NACK" if data.getMetaInfo().getType() == ContentType.NACK
+             else "other code " + str(data.getMetaInfo().getOtherTypeCode())
+                  if data.getMetaInfo().getType() == ContentType.OTHER_CODE
              else "uknown")
     dump("metaInfo.freshnessPeriod (milliseconds):",
          data.getMetaInfo().getFreshnessPeriod()
@@ -218,6 +221,13 @@ def dumpData(data):
         dump("DigestSha256 signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
+    elif type(signature) is GenericSignature:
+        dump("Generic signature.signature:",
+             "<none>" if signature.getSignature().size() == 0
+                      else signature.getSignature().toHex())
+        dump("  Type code:", signature.getTypeCode(), "signatureInfo:",
+             "<none>" if signature.getSignatureInfoEncoding().size() == 0
+                      else signature.getSignatureInfoEncoding().toHex())
     if keyLocator != None:
         if keyLocator.getType() != None:
             if (keyLocator.getType() ==

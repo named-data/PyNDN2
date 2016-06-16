@@ -75,7 +75,7 @@ class DigestSha256Signature(Signature):
           take another pointer to the same Blob).
         :type signature: A Blob or an array type with int elements
         """
-        self._signature = (signature if type(signature) is Blob
+        self._signature = (signature if isinstance(signature, Blob)
                            else Blob(signature))
         self._changeCount += 1
 

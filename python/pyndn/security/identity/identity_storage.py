@@ -178,6 +178,16 @@ class IdentityStorage(object):
         """
         raise RuntimeError("getCertificate is not implemented")
 
+    def getTpmLocator(self):
+        """
+        Get the TPM locator associated with this storage.
+
+        :return: The TPM locator.
+        :rtype: str
+        :raises SecurityException: if the TPM locator doesn't exist.
+        """
+        raise RuntimeError("getTpmLocator is not implemented")
+
     def deleteCertificateInfo(self, certificateName):
         """
         Remove a certificate from associated keys.

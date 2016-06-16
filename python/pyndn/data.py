@@ -241,7 +241,7 @@ class Data(object):
           take another pointer to the same Blob).
         :type content: A Blob or an array type with int elements
         """
-        self._content = content if type(content) is Blob else Blob(content)
+        self._content = content if isinstance(content, Blob) else Blob(content)
         self._changeCount += 1
 
     def setLpPacket(self, lpPacket):

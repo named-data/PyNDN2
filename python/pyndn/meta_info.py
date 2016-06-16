@@ -35,11 +35,13 @@ class MetaInfo(object):
     def __init__(self, value = None):
         if value == None:
             self._type = ContentType.BLOB
+            self._otherTypeCode = -1
             self._freshnessPeriod = None
             self._finalBlockId = Name.Component()
         elif type(value) is MetaInfo:
             # Copy its values.
             self._type = value._type
+            self._otherTypeCode = value._otherTypeCode
             self._freshnessPeriod = value._freshnessPeriod
             self._finalBlockId = value._finalBlockId
         else:
@@ -53,10 +55,22 @@ class MetaInfo(object):
         """
         Get the content type.
 
-        :return: The content type.
+        :return: The content type enum value. If this is ContentType.OTHER_CODE,
+          then call getOtherTypeCode() to get the unrecognized content type code.
         :rtype: an int from ContentType
         """
         return self._type
+
+    def getOtherTypeCode(self):
+        """
+        Get the content type code from the packet which is other than a
+        recognized ContentType enum value. This is only meaningful if getType()
+        is ContentType.OTHER_CODE.
+
+        :return: The type code.
+        :rtype: int
+        """
+        return self._otherTypeCode
 
     def getFreshnessPeriod(self):
         """
@@ -87,10 +101,27 @@ class MetaInfo(object):
         """
         Set the content type.
 
-        :param type: The content type.  If None, this uses ContentType.BLOB.
+        :param type: The content type.  If None, this uses ContentType.BLOB. If
+          the packet's content type is not a recognized ContentType enum value,
+          use ContentType.OTHER_CODE and call setOtherTypeCode().
         :type type: an int from ContentType
         """
         self._type = ContentType.BLOB if type == None or type < 0 else type
+        self._changeCount += 1
+
+    def setOtherTypeCode(self, otherTypeCode):
+        """
+        Set the packet's content type code to use when the content type enum is
+        ContentType.OTHER_CODE. If the packet's content type code is a
+        recognized enum value, just call setType().
+
+        :param int otherTypeCode: The packet's unrecognized content type code,
+          which must be non-negative.
+        """
+        if otherTypeCode < 0:
+            raise RuntimeError("MetaInfo other type code must be non-negative")
+
+        self._otherTypeCode = otherTypeCode
         self._changeCount += 1
 
     def setFreshnessPeriod(self, freshnessPeriod):
@@ -153,9 +184,14 @@ class MetaInfo(object):
 
 class ContentType(object):
     """
-    A ContentType specifies the content type in a MetaInfo object.
+    A ContentType specifies the content type in a MetaInfo object. If the
+    content type in the packet is not a recognized enum value, then we use
+    ContentType.OTHER_CODE and you can call MetaInfo.getOtherTypeCode(). We do
+    this to keep the recognized content type values independent of packet
+    encoding formats.
     """
     BLOB = 0
     LINK = 1
     KEY =  2
     NACK = 3
+    OTHER_CODE = 0x7fff

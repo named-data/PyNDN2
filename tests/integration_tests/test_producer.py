@@ -113,10 +113,11 @@ class TestProducer(ut.TestCase):
         class TestFace(object):
             def __init__(self, handleExpressInterest):
                 self.handleExpressInterest = handleExpressInterest
-            def expressInterest(self, interest, onData, onTimeout):
-                return self.handleExpressInterest(interest, onData, onTimeout)
+            def expressInterest(self, interest, onData, onTimeout, onNetworkNack):
+                return self.handleExpressInterest(
+                  interest, onData, onTimeout, onNetworkNack)
 
-        def handleExpressInterest(interest, onData, onTimeout):
+        def handleExpressInterest(interest, onData, onTimeout, onNetworkNack):
             expressInterestCallCount[0] += 1
 
             interestName = Name(interest.getName())
@@ -235,10 +236,11 @@ class TestProducer(ut.TestCase):
         class TestFace(object):
             def __init__(self, handleExpressInterest):
                 self.handleExpressInterest = handleExpressInterest
-            def expressInterest(self, interest, onData, onTimeout):
-                return self.handleExpressInterest(interest, onData, onTimeout)
+            def expressInterest(self, interest, onData, onTimeout, onNetworkNack):
+                return self.handleExpressInterest(
+                  interest, onData, onTimeout, onNetworkNack)
 
-        def handleExpressInterest(interest, onData, onTimeout):
+        def handleExpressInterest(interest, onData, onTimeout, onNetworkNack):
             self.assertEqual(expectedInterest, interest.getName())
 
             gotInterestName = False
@@ -296,10 +298,11 @@ class TestProducer(ut.TestCase):
         class TestFace(object):
             def __init__(self, handleExpressInterest):
                 self.handleExpressInterest = handleExpressInterest
-            def expressInterest(self, interest, onData, onTimeout):
-                return self.handleExpressInterest(interest, onData, onTimeout)
+            def expressInterest(self, interest, onData, onTimeout, onNetworkNack):
+                return self.handleExpressInterest(
+                  interest, onData, onTimeout, onNetworkNack)
 
-        def handleExpressInterest(interest, onData, onTimeout):
+        def handleExpressInterest(interest, onData, onTimeout, onNetworkNack):
             self.assertEqual(expectedInterest, interest.getName())
             timeoutCount[0] += 1
             onTimeout(interest)

@@ -76,7 +76,7 @@ class LpPacket(object):
           isNull Blob if not specified.
         """
         self._fragmentWireEncoding = (
-          fragmentWireEncoding if type(fragmentWireEncoding) is Blob
+          fragmentWireEncoding if isinstance(fragmentWireEncoding, Blob)
             else Blob(fragmentWireEncoding))
 
     def addHeaderField(self, headerField):

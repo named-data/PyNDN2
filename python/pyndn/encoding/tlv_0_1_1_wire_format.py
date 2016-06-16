@@ -797,12 +797,17 @@ class Tlv0_1_1WireFormat(WireFormat):
         if metaInfo.getType() != ContentType.BLOB:
             # Not the default, so we need to encode the type.
             if (metaInfo.getType() == ContentType.LINK or
-                  metaInfo.getType() == ContentType.KEY):
+                metaInfo.getType() == ContentType.KEY or
+                metaInfo.getType() == ContentType.NACK):
                 # The ContentType enum is set up with the correct integer for
                 # each NDN-TLV ContentType.
                 encoder.writeNonNegativeIntegerTlv(
                   Tlv.ContentType, metaInfo.getType())
+            elif metaInfo.getType() == ContentType.OTHER_CODE:
+                encoder.writeNonNegativeIntegerTlv(
+                  Tlv.ContentType, metaInfo.getOtherTypeCode())
             else:
+              # We don't expect this to happen.
                 raise RuntimeError("unrecognized TLV ContentType")
 
         encoder.writeTypeAndLength(Tlv.MetaInfo, len(encoder) - saveLength)
@@ -811,11 +816,22 @@ class Tlv0_1_1WireFormat(WireFormat):
     def _decodeMetaInfo(metaInfo, decoder):
         endOffset = decoder.readNestedTlvsStart(Tlv.MetaInfo)
 
-        # The ContentType enum is set up with the correct integer for each
-        # NDN-TLV ContentType.  If readOptionalNonNegativeIntegerTlv returns
-        # None, then setType will convert it to BLOB.
-        metaInfo.setType(decoder.readOptionalNonNegativeIntegerTlv(
-          Tlv.ContentType, endOffset))
+        typeCode = decoder.readOptionalNonNegativeIntegerTlv(
+          Tlv.ContentType, endOffset)
+        if typeCode == None or typeCode < 0 or typeCode == ContentType.BLOB:
+            # Default to BLOB if the value is omitted.
+            metaInfo.setType(ContentType.BLOB)
+        elif (typeCode == ContentType.LINK or
+              typeCode == ContentType.KEY or
+              typeCode == ContentType.NACK):
+            # The ContentType enum is set up with the correct integer for each
+            # NDN-TLV ContentType.
+            metaInfo.setType(typeCode)
+        else:
+            # Unrecognized content type.
+            metaInfo.setType(ContentType.OTHER_CODE)
+            metaInfo.setOtherTypeCode(typeCode)
+
         metaInfo.setFreshnessPeriod(
           decoder.readOptionalNonNegativeIntegerTlvAsFloat(
             Tlv.FreshnessPeriod, endOffset))

@@ -39,7 +39,7 @@ class DecryptKey(object):
             self._keyBits = value._keyBits
         else:
             keyBits = value
-            self._keyBits = keyBits if type(keyBits) is Blob else Blob(keyBits)
+            self._keyBits = keyBits if isinstance(keyBits, Blob) else Blob(keyBits)
 
     def getKeyBits(self):
         """

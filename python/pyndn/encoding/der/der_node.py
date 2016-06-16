@@ -81,7 +81,7 @@ class DerNode (object):
             :type startIdx: int
         """
 
-        if type(inputBuf) is Blob:
+        if isinstance(inputBuf, Blob):
             inputBuf = inputBuf.buf()
 
         idx = startIdx
@@ -126,7 +126,7 @@ class DerNode (object):
         :param startIdx: (optional) An offset into the buffer.
         :type startIdx: int
         """
-        if type(inputBuf) is Blob:
+        if isinstance(inputBuf, Blob):
             inputBuf = inputBuf.buf()
 
         idx = startIdx
@@ -145,7 +145,7 @@ class DerNode (object):
         :param startIdx: (optional) An offset into the buffer.
         :type startIdx: int
         """
-        if type(inputBuf) is Blob:
+        if isinstance(inputBuf, Blob):
             inputBuf = inputBuf.buf()
 
         nodeType = inputBuf[startIdx] # don't increment, we're just peeking
@@ -345,7 +345,7 @@ class DerByteString(DerNode):
         """
         super(DerByteString, self).__init__(nodeType)
         if inputData is not None:
-            if type(inputData) is Blob:
+            if isinstance(inputData, Blob):
                 inputData = inputData.buf()
             else:
                 inputData = bytearray(inputData)
@@ -429,7 +429,7 @@ class DerBitString(DerNode):
         """
         super(DerBitString, self).__init__(Der.BitString)
         if inputBuf is not None:
-            if type(inputBuf) is Blob:
+            if isinstance(inputBuf, Blob):
                 inputBuf = inputBuf.buf()
             self._payload.append(padding)
             self._payload.extend(inputBuf)

@@ -196,7 +196,7 @@ class Producer(object):
         :type onError: function object
         """
         # Get a content key.
-        contentKeyName = Name(self.createContentKey(timeSlot, None, onError))
+        contentKeyName = self.createContentKey(timeSlot, None, onError)
         contentKey = self._database.getContentKey(timeSlot)
 
         # Produce data.
@@ -237,13 +237,13 @@ class Producer(object):
     def _sendKeyInterest(self, interest, timeSlot, onEncryptedKeys, onError):
         """
         Send an interest with the given name through the face with callbacks to
-          _handleCoveringKey and _handleTimeout.
+          _handleCoveringKey, _handleTimeout and _handleNetworkNack.
 
         :param Interest interest: The interest to send.
-        :param float timeSlot: The time slot, passed to _handleCoveringKey and
-          _handleTimeout.
+        :param float timeSlot: The time slot, passed to _handleCoveringKey,
+          _handleTimeout and _handleNetworkNack.
         :param onEncryptedKeys: The OnEncryptedKeys callback, passed to
-          _handleCoveringKey and _handleTimeout.
+          _handleCoveringKey, _handleTimeout and _handleNetworkNack.
         :type onEncryptedKeys: function object
         :param onError: This calls onError(errorCode, message) for an error.
         :type onError: function object
@@ -255,7 +255,11 @@ class Producer(object):
         def onTimeout(interest):
             self._handleTimeout(interest, timeSlot, onEncryptedKeys, onError)
 
-        self._face.expressInterest(interest, onKey, onTimeout)
+        def onNetworkNack(interest, networkNack):
+            self._handleNetworkNack(
+              interest, networkNack, timeSlot, onEncryptedKeys)
+
+        self._face.expressInterest(interest, onKey, onTimeout, onNetworkNack)
 
     def _handleTimeout(self, interest, timeSlot, onEncryptedKeys, onError):
         """
@@ -283,6 +287,26 @@ class Producer(object):
         else:
             # No more retrials.
             self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
+
+    def _handleNetworkNack(self, interest, networkNack, timeSlot, onEncryptedKeys):
+        """
+        This is called from an expressInterest OnNetworkNack to handle a network
+        Nack for the E-KEY requested through the Interest. Decrease the
+        outstanding E-KEY interest count for the C-KEY corresponding to the
+        timeSlot.
+
+        :param Interest interest: The interest given to expressInterest.
+        :param NetworkNack networkNack: The returned NetworkNack (unused).
+        :param float timeSlot: The time slot as milliseconds since Jan 1, 1970 UTC.
+        :param onEncryptedKeys: When there are no more interests to process,
+          this calls onEncryptedKeys(keys) where keys is a list of encrypted
+          content key Data packets. If onEncryptedKeys is None, this does not
+          use it.
+        :type onEncryptedKeys: function object
+        """
+        timeCount = round(timeSlot)
+        self._updateKeyRequest(
+          self._keyRequests[timeCount], timeCount, onEncryptedKeys)
 
     def _updateKeyRequest(self, keyRequest, timeCount, onEncryptedKeys):
         """

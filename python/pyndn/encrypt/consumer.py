@@ -173,7 +173,7 @@ class Consumer(object):
           where errorCode is from EncryptError.ErrorCode and message is a str.
         :type onError: function object
         """
-        if type(encryptedContent) is Blob:
+        if isinstance(encryptedContent, Blob):
             # Decode as EncryptedContent.
             encryptedBlob = encryptedContent
             encryptedContent = EncryptedContent()
@@ -217,7 +217,7 @@ class Consumer(object):
         """
         Decrypt the data packet.
 
-        :param Data data: The data packet.
+        :param Data data: The data packet. This does not verify the packet.
         :param onPlainText: When the data packet is decrypted, this calls
           onPlainText(decryptedBlob) with the decrypted blob.
         :type onPlainText: function object
@@ -436,6 +436,7 @@ class Consumer(object):
                   "The data packet does not satisfy the D-KEY packet format")
             except:
                 logging.exception("Error in onError")
+            return
 
         # Decrypt the D-KEY.
         Consumer._decrypt(
