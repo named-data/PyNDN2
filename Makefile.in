@@ -183,9 +183,6 @@ am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo \
 	src/lite/lp/_pyndn_la-incoming-face-id-lite.lo \
 	src/lite/lp/_pyndn_la-lp-packet-lite.lo \
-	src/lite/transport/_pyndn_la-tcp-transport-lite.lo \
-	src/lite/transport/_pyndn_la-udp-transport-lite.lo \
-	src/lite/transport/_pyndn_la-unix-transport-lite.lo \
 	src/lite/util/_pyndn_la-blob-lite.lo \
 	src/lite/util/_pyndn_la-crypto-lite.lo \
 	src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo \
@@ -488,9 +485,6 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
   include/ndn-cpp/lite/lp/lp-packet-lite.hpp \
-  include/ndn-cpp/lite/transport/tcp-transport-lite.hpp \
-  include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
-  include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
   include/ndn-cpp/lite/util/crypto-lite.hpp \
   include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp \
@@ -561,9 +555,6 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
   src/lite/lp/lp-packet-lite.cpp \
-  src/lite/transport/tcp-transport-lite.cpp \
-  src/lite/transport/udp-transport-lite.cpp \
-  src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
   src/lite/util/crypto-lite.cpp \
   src/lite/util/dynamic-uint8-array-lite.cpp \
@@ -839,21 +830,6 @@ src/lite/lp/_pyndn_la-incoming-face-id-lite.lo:  \
 	src/lite/lp/$(DEPDIR)/$(am__dirstamp)
 src/lite/lp/_pyndn_la-lp-packet-lite.lo: src/lite/lp/$(am__dirstamp) \
 	src/lite/lp/$(DEPDIR)/$(am__dirstamp)
-src/lite/transport/$(am__dirstamp):
-	@$(MKDIR_P) src/lite/transport
-	@: > src/lite/transport/$(am__dirstamp)
-src/lite/transport/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/lite/transport/$(DEPDIR)
-	@: > src/lite/transport/$(DEPDIR)/$(am__dirstamp)
-src/lite/transport/_pyndn_la-tcp-transport-lite.lo:  \
-	src/lite/transport/$(am__dirstamp) \
-	src/lite/transport/$(DEPDIR)/$(am__dirstamp)
-src/lite/transport/_pyndn_la-udp-transport-lite.lo:  \
-	src/lite/transport/$(am__dirstamp) \
-	src/lite/transport/$(DEPDIR)/$(am__dirstamp)
-src/lite/transport/_pyndn_la-unix-transport-lite.lo:  \
-	src/lite/transport/$(am__dirstamp) \
-	src/lite/transport/$(DEPDIR)/$(am__dirstamp)
 src/lite/util/$(am__dirstamp):
 	@$(MKDIR_P) src/lite/util
 	@: > src/lite/util/$(am__dirstamp)
@@ -909,8 +885,6 @@ mostlyclean-compile:
 	-rm -f src/lite/encrypt/algo/*.lo
 	-rm -f src/lite/lp/*.$(OBJEXT)
 	-rm -f src/lite/lp/*.lo
-	-rm -f src/lite/transport/*.$(OBJEXT)
-	-rm -f src/lite/transport/*.lo
 	-rm -f src/lite/util/*.$(OBJEXT)
 	-rm -f src/lite/util/*.lo
 
@@ -965,9 +939,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/lp/$(DEPDIR)/_pyndn_la-incoming-face-id-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/lp/$(DEPDIR)/_pyndn_la-lp-packet-lite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-crypto-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array-lite.Plo@am__quote@
@@ -1351,27 +1322,6 @@ src/lite/lp/_pyndn_la-lp-packet-lite.lo: src/lite/lp/lp-packet-lite.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/lp/_pyndn_la-lp-packet-lite.lo `test -f 'src/lite/lp/lp-packet-lite.cpp' || echo '$(srcdir)/'`src/lite/lp/lp-packet-lite.cpp
 
-src/lite/transport/_pyndn_la-tcp-transport-lite.lo: src/lite/transport/tcp-transport-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-tcp-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-tcp-transport-lite.lo `test -f 'src/lite/transport/tcp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/tcp-transport-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Tpo src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/transport/tcp-transport-lite.cpp' object='src/lite/transport/_pyndn_la-tcp-transport-lite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/transport/_pyndn_la-tcp-transport-lite.lo `test -f 'src/lite/transport/tcp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/tcp-transport-lite.cpp
-
-src/lite/transport/_pyndn_la-udp-transport-lite.lo: src/lite/transport/udp-transport-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-udp-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-udp-transport-lite.lo `test -f 'src/lite/transport/udp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/udp-transport-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Tpo src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/transport/udp-transport-lite.cpp' object='src/lite/transport/_pyndn_la-udp-transport-lite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/transport/_pyndn_la-udp-transport-lite.lo `test -f 'src/lite/transport/udp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/udp-transport-lite.cpp
-
-src/lite/transport/_pyndn_la-unix-transport-lite.lo: src/lite/transport/unix-transport-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-unix-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-unix-transport-lite.lo `test -f 'src/lite/transport/unix-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/unix-transport-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Tpo src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/transport/unix-transport-lite.cpp' object='src/lite/transport/_pyndn_la-unix-transport-lite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/transport/_pyndn_la-unix-transport-lite.lo `test -f 'src/lite/transport/unix-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/unix-transport-lite.cpp
-
 src/lite/util/_pyndn_la-blob-lite.lo: src/lite/util/blob-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/util/_pyndn_la-blob-lite.lo -MD -MP -MF src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Tpo -c -o src/lite/util/_pyndn_la-blob-lite.lo `test -f 'src/lite/util/blob-lite.cpp' || echo '$(srcdir)/'`src/lite/util/blob-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Tpo src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Plo
@@ -1430,7 +1380,6 @@ clean-libtool:
 	-rm -rf src/lite/encrypt/.libs src/lite/encrypt/_libs
 	-rm -rf src/lite/encrypt/algo/.libs src/lite/encrypt/algo/_libs
 	-rm -rf src/lite/lp/.libs src/lite/lp/_libs
-	-rm -rf src/lite/transport/.libs src/lite/transport/_libs
 	-rm -rf src/lite/util/.libs src/lite/util/_libs
 
 distclean-libtool:
@@ -1713,8 +1662,6 @@ distclean-generic:
 	-rm -f src/lite/encrypt/algo/$(am__dirstamp)
 	-rm -f src/lite/lp/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/lite/lp/$(am__dirstamp)
-	-rm -f src/lite/transport/$(DEPDIR)/$(am__dirstamp)
-	-rm -f src/lite/transport/$(am__dirstamp)
 	-rm -f src/lite/util/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/lite/util/$(am__dirstamp)
 
@@ -1728,7 +1675,7 @@ clean-am: clean-generic clean-libtool clean-pyexecLTLIBRARIES \
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/transport/$(DEPDIR) src/lite/util/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/util/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -1776,7 +1723,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/transport/$(DEPDIR) src/lite/util/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/util/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

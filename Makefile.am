@@ -53,9 +53,6 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
   include/ndn-cpp/lite/lp/lp-packet-lite.hpp \
-  include/ndn-cpp/lite/transport/tcp-transport-lite.hpp \
-  include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
-  include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
   include/ndn-cpp/lite/util/crypto-lite.hpp \
   include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp \
@@ -124,9 +121,6 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
   src/lite/lp/lp-packet-lite.cpp \
-  src/lite/transport/tcp-transport-lite.cpp \
-  src/lite/transport/udp-transport-lite.cpp \
-  src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
   src/lite/util/crypto-lite.cpp \
   src/lite/util/dynamic-uint8-array-lite.cpp \
