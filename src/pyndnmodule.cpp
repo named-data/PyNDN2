@@ -89,6 +89,8 @@ public:
 };
 
 static strClass str;
+static PyObjectRef PYNDN_MODULE(PyImport_ImportModule("pyndn"));
+static PyObjectRef PYNDN_UTIL_MODULE(PyImport_ImportModule("pyndn.util"));
 
 /**
  * Get a long value by calling obj.methodName() and using PyInt_AsLong.
@@ -192,8 +194,7 @@ toBlobLiteByMethod(PyObject* obj, PyObject* methodName)
 static PyObject*
 makeBlob(const BlobLite& blobLite)
 {
-  PyObjectRef util(PyImport_ImportModule("pyndn.util"));
-  PyObjectRef Blob(PyObject_GetAttr(util, str.Blob));
+  PyObjectRef Blob(PyObject_GetAttr(PYNDN_UTIL_MODULE, str.Blob));
   // TODO: Will this raw string work in Python 3?
   PyObjectRef array(PyByteArray_FromStringAndSize
     ((const char*)blobLite.buf(), (Py_ssize_t)blobLite.size()));
@@ -437,8 +438,7 @@ setData(PyObject* data, const DataLite& dataLite)
     // TODO: Handle the error "Unrecognized signature type".
     return;
 
-  PyObjectRef pyndnModule(PyImport_ImportModule("pyndn"));
-  PyObjectRef signatureClass(PyObject_GetAttr(pyndnModule, signatureName));
+  PyObjectRef signatureClass(PyObject_GetAttr(PYNDN_MODULE, signatureName));
   PyObjectRef tempSignature(PyObject_CallObject(signatureClass, NULL));
   PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
     (data, str.setSignature, tempSignature.obj, NULL));
