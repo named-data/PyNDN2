@@ -65,12 +65,17 @@ class Blob(object):
                 else:
                     self._array = memoryview(bytearray(array))
             else:
-                if type(array) is bytearray:
-                    # We always use a memoryview so that slicing is efficient.
-                    self._array = memoryview(array)
+                # We always use a memoryview so that slicing is efficient.
+                if type(array) is _memoryviewWrapper:
+                    # Use the underlying memoryview directly. (When we only
+                    # support Python 3.3 or later, this check is not necessary.)
+                    self._array = array._view
                 else:
-                    # Can't take a memoryview, so use as-is.
-                    self._array = array
+                    try:
+                        self._array = memoryview(array)
+                    except TypeError:
+                        # Can't take a memoryview, so create a bytearray first.
+                        self._array = memoryview(bytearray(array))
 
             if not _memoryviewUsesInt and type(self._array) is memoryview:
                 # memoryview elements are not int (Python versions before 3.3)
