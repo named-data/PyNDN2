@@ -15,6 +15,59 @@ public:
   PyObject* obj;
 };
 
+/**
+ * A DynamicBytearray extends DynamicUInt8ArrayLite to hold a Python bytearray
+ * object and provide a realloc function for use with C functions which need an
+ * ndn_DynamicUInt8Array.
+ */
+class DynamicBytearray : public DynamicUInt8ArrayLite {
+public:
+  DynamicBytearray(size_t initialLength)
+  : DynamicUInt8ArrayLite(0, 0, (ndn_ReallocFunction)&DynamicBytearray::realloc),
+    bytearray_(PyByteArray_FromStringAndSize("", 0))
+  {
+    // Now that bytearray_ is constructed, we can set array in the base class.
+    setArrayAndLength(realloc
+      (this, (uint8_t*)PyByteArray_AS_STRING(bytearray_.obj), initialLength),
+      initialLength);
+  }
+
+  /**
+   * Resize the bytearray to the given size, and return the bytearray object.
+   * @param size The final size of the allocated vector.
+   * @return The Python bytearray object.
+   */
+  PyObject*
+  finish(size_t size)
+  {
+    PyByteArray_Resize(bytearray_.obj, size);
+    return bytearray_.obj;
+  }
+
+private:
+  /**
+   * Implement the static realloc function using PyByteArray_Resize.
+   * @param self A pointer to this object.
+   * @param array Should be PyByteArray_AS_STRING(bytearray_).
+   * @param length The new length for the vector.
+   * @return The new PyByteArray_AS_STRING(bytearray_) or 0 if can't resize.
+   */
+  static uint8_t*
+  realloc(DynamicBytearray *self, uint8_t *array, size_t length)
+  {
+    if ((char*)array != PyByteArray_AS_STRING(self->bytearray_.obj))
+      // We don't expect this to ever happen. The caller didn't pass the array
+      // from this object.
+      return 0;
+
+    if (PyByteArray_Resize(self->bytearray_.obj, length) != 0)
+      return 0;
+    return (uint8_t*)PyByteArray_AS_STRING(self->bytearray_.obj);
+  }
+
+  PyObjectRef bytearray_;
+};
+
 // Static Python string objects.
 class strClass {
 public:
@@ -483,9 +536,7 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
 
   toDataLite(data, dataLite);
 
-  // TODO: Make this a dynamic buffer.
-  uint8_t debugEncoding[2000];
-  DynamicUInt8ArrayLite output(debugEncoding, sizeof(debugEncoding), 0);
+  DynamicBytearray output(1500);
   size_t signedPortionBeginOffset, signedPortionEndOffset, encodingLength;
 
   ndn_Error error;
@@ -496,10 +547,8 @@ _pyndn_Tlv0_1_1WireFormat_encodeData(PyObject *self, PyObject *args)
     return NULL;
   }
 
-  PyObjectRef encoding(PyByteArray_FromStringAndSize
-    ((const char*)debugEncoding, encodingLength));
   return Py_BuildValue
-    ("(O,i,i)", encoding.obj, (int)signedPortionBeginOffset,
+    ("(O,i,i)", output.finish(encodingLength), (int)signedPortionBeginOffset,
      (int)signedPortionEndOffset);
 }
 
