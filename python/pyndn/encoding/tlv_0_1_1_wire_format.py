@@ -96,6 +96,11 @@ class Tlv0_1_1WireFormat(WireFormat):
           for a signed interest).
         :rtype: (Blob, int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeInterest(interest)
+            return (Blob(result[0], False), result[1], result[2])
+
         encoder = TlvEncoder(256)
         saveLength = len(encoder)
 
