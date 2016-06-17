@@ -34,6 +34,7 @@ public:
     getKeyData = Py_BuildValue("s", "getKeyData");
     getKeyLocator = Py_BuildValue("s", "getKeyLocator");
     getKeyName = Py_BuildValue("s", "getKeyName");
+    getLinkWireEncoding = Py_BuildValue("s", "getLinkWireEncoding");
     getMaxSuffixComponents = Py_BuildValue("s", "getMaxSuffixComponents");
     getMetaInfo = Py_BuildValue("s", "getMetaInfo");
     getMinSuffixComponents = Py_BuildValue("s", "getMinSuffixComponents");
@@ -47,14 +48,23 @@ public:
     getType = Py_BuildValue("s", "getType");
     getTypeCode = Py_BuildValue("s", "getTypeCode");
     getValue = Py_BuildValue("s", "getValue");
+    setChildSelector = Py_BuildValue("s", "setChildSelector");
     setContent = Py_BuildValue("s", "setContent");
     setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
     setFreshnessPeriod = Py_BuildValue("s", "setFreshnessPeriod");
+    setInterestLifetimeMilliseconds = Py_BuildValue("s", "setInterestLifetimeMilliseconds");
     setKeyData = Py_BuildValue("s", "setKeyData");
+    setLinkWireEncoding = Py_BuildValue("s", "setLinkWireEncoding");
+    setMaxSuffixComponents = Py_BuildValue("s", "setMaxSuffixComponents");
+    setMinSuffixComponents = Py_BuildValue("s", "setMinSuffixComponents");
+    setMustBeFresh = Py_BuildValue("s", "setMustBeFresh");
+    setNonce = Py_BuildValue("s", "setNonce");
     setOtherTypeCode = Py_BuildValue("s", "setOtherTypeCode");
+    setSelectedDelegationIndex = Py_BuildValue("s", "setSelectedDelegationIndex");
     setSignature = Py_BuildValue("s", "setSignature");
     setSignatureInfoEncoding = Py_BuildValue("s", "setSignatureInfoEncoding");
     setType = Py_BuildValue("s", "setType");
+    unsetLink = Py_BuildValue("s", "unsetLink");
   }
   PyObject* _array;
   PyObject* _components;
@@ -80,6 +90,7 @@ public:
   PyObject* getKeyData;
   PyObject* getKeyLocator;
   PyObject* getKeyName;
+  PyObject* getLinkWireEncoding;
   PyObject* getMaxSuffixComponents;
   PyObject* getMetaInfo;
   PyObject* getMinSuffixComponents;
@@ -93,14 +104,23 @@ public:
   PyObject* getType;
   PyObject* getTypeCode;
   PyObject* getValue;
+  PyObject* setChildSelector;
   PyObject* setContent;
   PyObject* setFinalBlockId;
   PyObject* setFreshnessPeriod;
+  PyObject* setInterestLifetimeMilliseconds;
   PyObject* setKeyData;
+  PyObject* setLinkWireEncoding;
+  PyObject* setMaxSuffixComponents;
+  PyObject* setMinSuffixComponents;
+  PyObject* setMustBeFresh;
+  PyObject* setNonce;
   PyObject* setOtherTypeCode;
+  PyObject* setSelectedDelegationIndex;
   PyObject* setSignature;
   PyObject* setSignatureInfoEncoding;
   PyObject* setType;
+  PyObject* unsetLink;
 };
 
 static strClass str;
@@ -177,6 +197,22 @@ void
 callMethodFromDouble(PyObject* obj, PyObject* methodName, double value)
 {
   PyObjectRef valueObj(PyFloat_FromDouble(value));
+  PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+    (obj, methodName, valueObj.obj, NULL));
+}
+
+/**
+ * Call PyObject_CallMethodObjArgs(obj, methodName, valueObj, NULL) where
+ * valueObj is the Py_True or Py_False depending on Value. Ignore the result
+ * from CallMethodObjArgs.
+ * @param obj The object with the method to call.
+ * @param methodName A Python string object of the method name to call.
+ * @param value The bool value for the method call.
+ */
+void
+callMethodFromBool(PyObject* obj, PyObject* methodName, bool value)
+{
+  PyObjectRef valueObj(PyBool_FromLong(value ? 1 : 0));
   PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
     (obj, methodName, valueObj.obj, NULL));
 }
@@ -378,9 +414,16 @@ setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
     PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs(keyName, str.clear, NULL));
 }
 
-// Imitate Interest::get(InterestLite& interestLite).
+/**
+ * Imitate Interest::get(InterestLite& interestLite).
+ * @param interest The Python Interest object to get from.
+ * @param interestLite The InterestLite to update.
+ * @param pool1 This calls pool1.reset to store a temporary value which must
+ * remain valid while interestLite is used.
+ */
 static void
-toInterestLite(PyObject* interest, InterestLite& interestLite)
+toInterestLite
+  (PyObject* interest, InterestLite& interestLite, PyObjectRef& pool1)
 {
   PyObjectRef name(PyObject_CallMethodObjArgs(interest, str.getName, NULL));
   toNameLite(name, interestLite.getName());
@@ -403,9 +446,65 @@ toInterestLite(PyObject* interest, InterestLite& interestLite)
   interestLite.setInterestLifetimeMilliseconds
     ((int)toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
 
-  // TODO: setLinkWireEncoding
+  // TODO: Support the wireFormat param.
+  // TODO: Catch exceptions from getLinkWireEncoding.
+  pool1.reset(PyObject_CallMethodObjArgs(interest, str.getLinkWireEncoding, NULL));
+  PyObjectRef linkWireEncodingArray(PyObject_GetAttr(pool1, str._array));
+  if (linkWireEncodingArray.obj == Py_None)
+    interestLite.setLinkWireEncoding(BlobLite());
+  else
+    interestLite.setLinkWireEncoding(toBlobLiteFromArray(linkWireEncodingArray));
   interestLite.setSelectedDelegationIndex
     ((int)toLongByMethod(interest, str.getSelectedDelegationIndex));
+}
+
+// Imitate Interest::set(const InterestLite& interestLite).
+static void
+setInterest(PyObject* interest, const InterestLite& interestLite)
+{
+  PyObjectRef name(PyObject_CallMethodObjArgs(interest, str.getName, NULL));
+  setName(name, interestLite.getName());
+
+  // If the value is -1, Interest.setMinSuffixComponents will set to None as desired.
+  callMethodFromLong
+    (interest, str.setMinSuffixComponents, interestLite.getMinSuffixComponents());
+  callMethodFromLong
+    (interest, str.setMaxSuffixComponents, interestLite.getMaxSuffixComponents());
+
+  PyObjectRef keyLocator(PyObject_CallMethodObjArgs
+    (interest, str.getKeyLocator, NULL));
+  setKeyLocator(keyLocator, interestLite.getKeyLocator());
+
+  PyObjectRef exclude(PyObject_CallMethodObjArgs
+    (interest, str.getExclude, NULL));
+  setExclude(exclude, interestLite.getExclude());
+
+  callMethodFromLong
+    (interest, str.setChildSelector, interestLite.getChildSelector());
+  callMethodFromBool
+    (interest, str.setMustBeFresh, interestLite.getMustBeFresh());
+  callMethodFromDouble
+    (interest, str.setInterestLifetimeMilliseconds,
+     interestLite.getInterestLifetimeMilliseconds());
+
+  if (interestLite.getLinkWireEncoding().buf()) {
+    PyObjectRef linkWireEncoding(makeBlob(interestLite.getLinkWireEncoding()));
+    // TODO: Support the wireFormat param.
+    PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+      (interest, str.setLinkWireEncoding, linkWireEncoding.obj, NULL));
+  }
+  else
+    PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
+      (interest, str.unsetLink, NULL));
+
+  callMethodFromLong
+    (interest, str.setSelectedDelegationIndex,
+     interestLite.getSelectedDelegationIndex());
+
+  // Set the nonce last so that getNonceChangeCount_ is set correctly.
+  PyObjectRef nonce(makeBlob(interestLite.getNonce()));
+  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+    (interest, str.setNonce, nonce.obj, NULL));
 }
 
 // Imitate Sha256WithRsaSignature::get(SignatureLite& signatureLite),
@@ -597,9 +696,9 @@ setData(PyObject* data, const DataLite& dataLite)
   PyObjectRef metaInfo(PyObject_CallMethodObjArgs(data, str.getMetaInfo, NULL));
   setMetaInfo(metaInfo, dataLite.getMetaInfo());
 
-  PyObjectRef blob(makeBlob(dataLite.getContent()));
+  PyObjectRef content(makeBlob(dataLite.getContent()));
   PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
-    (data, str.setContent, blob.obj, NULL));
+    (data, str.setContent, content.obj, NULL));
 }
 
 static PyObject *
@@ -617,7 +716,8 @@ _pyndn_Tlv0_1_1WireFormat_encodeInterest(PyObject *self, PyObject *args)
      excludeEntries, sizeof(excludeEntries) / sizeof(excludeEntries[0]),
      keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
 
-  toInterestLite(interest, interestLite);
+  PyObjectRef pool1;
+  toInterestLite(interest, interestLite, pool1);
 
   DynamicBytearray output(256);
   size_t signedPortionBeginOffset, signedPortionEndOffset, encodingLength;
@@ -633,6 +733,39 @@ _pyndn_Tlv0_1_1WireFormat_encodeInterest(PyObject *self, PyObject *args)
   return Py_BuildValue
     ("(O,i,i)", output.finish(encodingLength), (int)signedPortionBeginOffset,
      (int)signedPortionEndOffset);
+}
+
+static PyObject *
+_pyndn_Tlv0_1_1WireFormat_decodeInterest(PyObject *self, PyObject *args)
+{
+  PyObject* interest;
+  PyObject* input;
+  if (!PyArg_ParseTuple(args, "OO", &interest, &input))
+    return NULL;
+
+  BlobLite inputLite = toBlobLiteFromArray(input);
+
+  struct ndn_NameComponent nameComponents[100];
+  struct ndn_ExcludeEntry excludeEntries[100];
+  struct ndn_NameComponent keyNameComponents[100];
+  InterestLite interestLite
+    (nameComponents, sizeof(nameComponents) / sizeof(nameComponents[0]),
+     excludeEntries, sizeof(excludeEntries) / sizeof(excludeEntries[0]),
+     keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
+
+  size_t signedPortionBeginOffset, signedPortionEndOffset;
+  ndn_Error error;
+  if ((error = Tlv0_1_1WireFormatLite::decodeInterest
+       (interestLite, inputLite.buf(), inputLite.size(), &signedPortionBeginOffset,
+        &signedPortionEndOffset))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  setInterest(interest, interestLite);
+
+  return Py_BuildValue
+    ("(i,i)", (int)signedPortionBeginOffset, (int)signedPortionEndOffset);
 }
 
 static PyObject *
@@ -713,6 +846,21 @@ extern "C" {
   name component (which is assumed to be a signature for a signed interest).\n\
   If r is the result Tuple, the encoding Blob is Blob(r[0], False).\n\
 :rtype: (str, int, int)"},
+    {"Tlv0_1_1WireFormat_decodeInterest",
+     _pyndn_Tlv0_1_1WireFormat_decodeInterest, METH_VARARGS,
+"Decode input as an NDN-TLV interest packet, set the fields in the interest\n\
+object, and return the signed offsets.\n\
+\n\
+:param Interest interest: The Interest object whose fields are updated.\n\
+:param input: The array with the bytes to decode.\n\
+:type input: An array type with int elements\n\
+:return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)\n\
+  where signedPortionBeginOffset is the offset in the encoding of\n\
+  the beginning of the signed portion, and signedPortionEndOffset is\n\
+  the offset in the encoding of the end of the signed portion. The signed\n\
+  portion starts from the first name component and ends just before the final\n\
+  name component (which is assumed to be a signature for a signed interest).\n\
+:rtype: (int, int)"},
     {"Tlv0_1_1WireFormat_encodeData",  _pyndn_Tlv0_1_1WireFormat_encodeData,
      METH_VARARGS,
 "Encode data in NDN-TLV and return the encoding and signed offsets.\n\
