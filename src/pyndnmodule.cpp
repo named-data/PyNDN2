@@ -112,7 +112,8 @@ static const long Exclude_COMPONENT = 1;
  * Get a long value by calling obj.methodName() and using PyInt_AsLong.
  * @param obj The object with the method to call.
  * @param methodName A Python string object of the method name to call.
- * @return The long value.
+ * @return The long value, or -1 if the value returned by the method call is not
+ * a Python float (such as None).
  */
 static long
 toLongByMethod(PyObject* obj, PyObject* methodName)
@@ -125,7 +126,8 @@ toLongByMethod(PyObject* obj, PyObject* methodName)
  * Get a double value by calling obj.methodName() and using PyFloat_AsDouble.
  * @param obj The object with the method to call.
  * @param methodName A Python string object of the method name to call.
- * @return The double value.
+ * @return The double value, or -1.0 if the value returned by the method call is
+ * not a Python float (such as None).
  */
 static double
 toDoubleByMethod(PyObject* obj, PyObject* methodName)
@@ -145,6 +147,38 @@ toBoolByMethod(PyObject* obj, PyObject* methodName)
 {
   PyObjectRef val(PyObject_CallMethodObjArgs(obj, methodName, NULL));
   return val.obj == Py_True;
+}
+
+/**
+ * Call PyObject_CallMethodObjArgs(obj, methodName, valueObj, NULL) where
+ * valueObj is the PyLong for the long value. Ignore the result from
+ * CallMethodObjArgs.
+ * @param obj The object with the method to call.
+ * @param methodName A Python string object of the method name to call.
+ * @param value The long value for the method call.
+ */
+void
+callMethodFromLong(PyObject* obj, PyObject* methodName, long value)
+{
+  PyObjectRef valueObj(PyLong_FromLong(value));
+  PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+    (obj, methodName, valueObj.obj, NULL));
+}
+
+/**
+ * Call PyObject_CallMethodObjArgs(obj, methodName, valueObj, NULL) where
+ * valueObj is the PyFloat for the double value. Ignore the result from
+ * CallMethodObjArgs.
+ * @param obj The object with the method to call.
+ * @param methodName A Python string object of the method name to call.
+ * @param value The double value for the method call.
+ */
+void
+callMethodFromDouble(PyObject* obj, PyObject* methodName, double value)
+{
+  PyObjectRef valueObj(PyFloat_FromDouble(value));
+  PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+    (obj, methodName, valueObj.obj, NULL));
 }
 
 /**
@@ -330,10 +364,8 @@ toKeyLocatorLite(PyObject* keyLocator, KeyLocatorLite& keyLocatorLite)
 static void
 setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
 {
-  PyObjectRef type(PyLong_FromLong(keyLocatorLite.getType()));
   // If type is -1, KeyLocator.setType will set to None as desired.
-  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
-    (keyLocator, str.setType, type.obj, NULL));
+  callMethodFromLong(keyLocator, str.setType, keyLocatorLite.getType());
 
   PyObjectRef keyData(makeBlob(keyLocatorLite.getKeyData()));
   PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
@@ -474,20 +506,14 @@ toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
 static void
 setMetaInfo(PyObject* metaInfo, const MetaInfoLite& metaInfoLite)
 {
-  PyObjectRef type(PyLong_FromLong(metaInfoLite.getType()));
-  PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
-    (metaInfo, str.setType, type.obj, NULL));
-
-  PyObjectRef otherTypeCode(PyLong_FromLong(metaInfoLite.getOtherTypeCode()));
-  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
-    (metaInfo, str.setOtherTypeCode, otherTypeCode.obj, NULL));
-
-  PyObjectRef freshnessPeriod(PyFloat_FromDouble(metaInfoLite.getFreshnessPeriod()));
-  PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
-    (metaInfo, str.setFreshnessPeriod, freshnessPeriod.obj, NULL));
+  callMethodFromLong(metaInfo, str.setType, metaInfoLite.getType());
+  callMethodFromLong
+    (metaInfo, str.setOtherTypeCode, metaInfoLite.getOtherTypeCode());
+  callMethodFromDouble
+    (metaInfo, str.setFreshnessPeriod, metaInfoLite.getFreshnessPeriod());
 
   PyObjectRef finalBlockId(makeBlob(metaInfoLite.getFinalBlockId().getValue()));
-  PyObjectRef ignoreResult4(PyObject_CallMethodObjArgs
+  PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
     (metaInfo, str.setFinalBlockId, finalBlockId.obj, NULL));
 }
 
