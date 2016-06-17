@@ -118,6 +118,30 @@ class Common(object):
             else:
                 return input
 
+    @staticmethod
+    def nonNegativeFloatOrNone(value):
+        """
+        If value is None or negative, return None, otherwise return float(value).
+        This is used in "setter" methods to ensure the correct type.
+
+        :param float value: The value to check.
+        :return: value or None.
+        :rtype: float
+        """
+        return None if value == None or value < 0 else float(value)
+
+    @staticmethod
+    def nonNegativeIntOrNone(value):
+        """
+        If value is None or negative, return None, otherwise return int(value).
+        This is used in "setter" methods to ensure the correct type.
+
+        :param int value: The value to check.
+        :return: value or None.
+        :rtype: int
+        """
+        return None if value == None or value < 0 else int(value)
+
     """
     The practical limit of the size of a network-layer packet. If a packet is
     larger than this, the library or application MAY drop it. This constant is
