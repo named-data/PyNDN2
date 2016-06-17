@@ -23,6 +23,7 @@ the fields of an NDN MetaInfo.
 """
 
 from pyndn.name import Name
+from pyndn.util.common import Common
 
 class MetaInfo(object):
     """
@@ -131,7 +132,7 @@ class MetaInfo(object):
         :param float freshnessPeriod: The freshness period in milliseconds, or
           None for not specified.
         """
-        self._freshnessPeriod = freshnessPeriod
+        self._freshnessPeriod = Common.nonNegativeFloatOrNone(freshnessPeriod)
         self._changeCount += 1
 
     def setFinalBlockId(self, finalBlockId):
