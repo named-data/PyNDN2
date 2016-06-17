@@ -173,6 +173,10 @@ class Tlv0_1_1WireFormat(WireFormat):
           for a signed interest).
         :rtype: (int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
+
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
