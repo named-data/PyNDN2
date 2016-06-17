@@ -413,7 +413,7 @@ class Interest(object):
         Set the interest lifetime.
 
         :param float interestLifetimeMilliseconds: The interest lifetime in
-          milliseconds. If not specified, set to -1.
+          milliseconds. If not specified, set to None.
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
