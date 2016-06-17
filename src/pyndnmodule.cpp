@@ -13,6 +13,10 @@ public:
   ~PyObjectRef() { if (obj) Py_DECREF(obj); }
   operator PyObject*() { return obj; }
   PyObject* obj;
+private:
+  // Don't allow copying.
+  PyObjectRef(const PyObjectRef& other);
+  PyObjectRef& operator=(const PyObjectRef& other);
 };
 
 /**
