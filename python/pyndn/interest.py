@@ -24,6 +24,7 @@ This module defines the NDN Interest class.
 from random import SystemRandom
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
+from pyndn.util.common import Common
 from pyndn.util.signed_blob import SignedBlob
 from pyndn.util.change_counter import ChangeCounter
 from pyndn.name import Name
@@ -271,7 +272,7 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._minSuffixComponents = minSuffixComponents
+        self._minSuffixComponents = Common.nonNegativeIntOrNone(minSuffixComponents)
         self._changeCount += 1
         return self
 
@@ -284,7 +285,7 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._maxSuffixComponents = maxSuffixComponents
+        self._maxSuffixComponents = Common.nonNegativeIntOrNone(maxSuffixComponents)
         self._changeCount += 1
         return self
 
@@ -367,7 +368,7 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._selectedDelegationIndex = selectedDelegationIndex
+        self._selectedDelegationIndex = Common.nonNegativeIntOrNone(selectedDelegationIndex)
         self._changeCount += 1
         return self
 
@@ -379,7 +380,7 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._childSelector = childSelector
+        self._childSelector = Common.nonNegativeIntOrNone(childSelector)
         self._changeCount += 1
         return self
 
@@ -417,9 +418,8 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._interestLifetimeMilliseconds = (None
-           if interestLifetimeMilliseconds == None
-           else float(interestLifetimeMilliseconds))
+        self._interestLifetimeMilliseconds = Common.nonNegativeFloatOrNone(
+          interestLifetimeMilliseconds)
         self._changeCount += 1
         return self
 
