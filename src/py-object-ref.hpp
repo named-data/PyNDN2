@@ -30,6 +30,10 @@
  */
 class PyObjectRef {
 public:
+  PyObjectRef()
+  : obj(0)
+  {}
+
   PyObjectRef(PyObject* obj)
   : obj(obj)
   {}
@@ -38,6 +42,14 @@ public:
   {
     if (obj)
       Py_DECREF(obj);
+  }
+
+  void
+  reset(PyObject* obj)
+  {
+    if (this->obj)
+      Py_DECREF(this->obj);
+    this->obj = obj;
   }
 
   operator PyObject*() { return obj; }
