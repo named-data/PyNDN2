@@ -288,6 +288,4 @@ class SegmentFetcher(object):
         :return: True if the name ends with a segment number, otherwise False.
         :rtype: bool
         """
-        return (name.size() >= 1 and
-                name.get(-1).getValue().size() >= 1 and
-                name.get(-1).getValue().buf()[0] == 0)
+        return (name.size() >= 1 and name.get(-1).isSegment())
