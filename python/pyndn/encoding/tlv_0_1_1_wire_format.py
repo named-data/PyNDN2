@@ -321,6 +321,11 @@ class Tlv0_1_1WireFormat(WireFormat):
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeSignatureInfo(signature)
+            return Blob(result, False)
+
         encoder = TlvEncoder(256)
         self._encodeSignatureInfo(signature, encoder)
 
@@ -409,6 +414,11 @@ class Tlv0_1_1WireFormat(WireFormat):
         :return: A new object which is a subclass of Signature.
         :rtype: a subclass of Signature
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeSignatureInfoAndValue(
+              signatureInfo, signatureValue)
+
         # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
         signatureHolder = self.SignatureHolder()
         decoder = TlvDecoder(signatureInfo)
@@ -431,6 +441,11 @@ class Tlv0_1_1WireFormat(WireFormat):
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeSignatureValue(signature)
+            return Blob(result, False)
+
         encoder = TlvEncoder(256)
         encoder.writeBlobTlv(Tlv.SignatureValue, signature.getSignature().buf())
 
