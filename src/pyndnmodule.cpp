@@ -572,6 +572,30 @@ toGenericSignatureLite(PyObject* signature, SignatureLite& signatureLite)
      (int)toLongByMethod(signature, str.getTypeCode));
 }
 
+// Check what signature is an instance of and imitate 
+//   Sha256WithRsaSignature::set(const SignatureLite& signatureLite), etc.
+static void
+toSignatureLite(PyObject* signature, SignatureLite& signatureLite)
+{
+  if (isInstance(signature, "pyndn", str.Sha256WithRsaSignature))
+    toSignatureLiteWithKeyLocator
+      (signature, ndn_SignatureType_Sha256WithRsaSignature, signatureLite);
+  else if (isInstance(signature, "pyndn", str.Sha256WithEcdsaSignature))
+    toSignatureLiteWithKeyLocator
+      (signature, ndn_SignatureType_Sha256WithEcdsaSignature, signatureLite);
+  else if (isInstance(signature, "pyndn", str.HmacWithSha256Signature))
+    toSignatureLiteWithKeyLocator
+      (signature, ndn_SignatureType_HmacWithSha256Signature, signatureLite);
+  else if (isInstance(signature, "pyndn", str.DigestSha256Signature))
+    toSignatureLiteWithSignatureOnly
+      (signature, ndn_SignatureType_DigestSha256Signature, signatureLite);
+  else if (isInstance(signature, "pyndn", str.GenericSignature))
+    toGenericSignatureLite(signature, signatureLite);
+  else
+    // TODO: Handle the error "Unrecognized signature type".
+    return;
+}
+
 // Imitate GenericSignature::set(const SignatureLite& signatureLite).
 static void
 setGenericSignature(PyObject* signature, const SignatureLite& signatureLite)
@@ -621,27 +645,7 @@ static void
 toDataLite(PyObject* data, DataLite& dataLite)
 {
   PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
-  if (isInstance(signature, "pyndn", str.Sha256WithRsaSignature))
-    toSignatureLiteWithKeyLocator
-      (signature, ndn_SignatureType_Sha256WithRsaSignature,
-       dataLite.getSignature());
-  else if (isInstance(signature, "pyndn", str.Sha256WithEcdsaSignature))
-    toSignatureLiteWithKeyLocator
-      (signature, ndn_SignatureType_Sha256WithEcdsaSignature,
-       dataLite.getSignature());
-  else if (isInstance(signature, "pyndn", str.HmacWithSha256Signature))
-    toSignatureLiteWithKeyLocator
-      (signature, ndn_SignatureType_HmacWithSha256Signature,
-       dataLite.getSignature());
-  else if (isInstance(signature, "pyndn", str.DigestSha256Signature))
-    toSignatureLiteWithSignatureOnly
-      (signature, ndn_SignatureType_DigestSha256Signature,
-       dataLite.getSignature());
-  else if (isInstance(signature, "pyndn", str.GenericSignature))
-    toGenericSignatureLite(signature, dataLite.getSignature());
-  else
-    // TODO: Handle the error "Unrecognized signature type".
-    return;
+  toSignatureLite(signature, dataLite.getSignature());
 
   PyObjectRef name(PyObject_CallMethodObjArgs(data, str.getName, NULL));
   toNameLite(name, dataLite.getName());
@@ -830,6 +834,58 @@ _pyndn_Tlv0_1_1WireFormat_decodeData(PyObject *self, PyObject *args)
     ("(i,i)", (int)signedPortionBeginOffset, (int)signedPortionEndOffset);
 }
 
+static PyObject *
+_pyndn_Tlv0_1_1WireFormat_encodeSignatureInfo(PyObject *self, PyObject *args)
+{
+  PyObject* signature;
+  if (!PyArg_ParseTuple(args, "O", &signature))
+    return NULL;
+
+  struct ndn_NameComponent keyNameComponents[100];
+  SignatureLite signatureLite
+    (keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
+
+  toSignatureLite(signature, signatureLite);
+
+  DynamicBytearray output(256);
+  size_t encodingLength;
+
+  ndn_Error error;
+  if ((error = Tlv0_1_1WireFormatLite::encodeSignatureInfo
+       (signatureLite, output, &encodingLength))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  return Py_BuildValue("O", output.finish(encodingLength));
+}
+
+static PyObject *
+_pyndn_Tlv0_1_1WireFormat_encodeSignatureValue(PyObject *self, PyObject *args)
+{
+  PyObject* signature;
+  if (!PyArg_ParseTuple(args, "O", &signature))
+    return NULL;
+
+  struct ndn_NameComponent keyNameComponents[100];
+  SignatureLite signatureLite
+    (keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
+
+  toSignatureLite(signature, signatureLite);
+
+  DynamicBytearray output(300);
+  size_t encodingLength;
+
+  ndn_Error error;
+  if ((error = Tlv0_1_1WireFormatLite::encodeSignatureValue
+       (signatureLite, output, &encodingLength))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  return Py_BuildValue("O", output.finish(encodingLength));
+}
+
 extern "C" {
   static PyMethodDef PyndnMethods[] = {
     {"Tlv0_1_1WireFormat_encodeInterest",  
@@ -886,6 +942,26 @@ object, and return the signed offsets.\n\
   the beginning of the signed portion, and signedPortionEndOffset is\n\
   the offset in the encoding of the end of the signed portion.\n\
 :rtype: (int, int)"},
+    {"Tlv0_1_1WireFormat_encodeSignatureInfo",
+     _pyndn_Tlv0_1_1WireFormat_encodeSignatureInfo, METH_VARARGS,
+"Encode signature in NDN-TLV and return the encoding.\n\
+\n\
+:param signature: An object of a subclass of Signature to encode.\n\
+:type signature: An object of a subclass of Signature\n\
+:return: A bytearray (not Blob) containing the encoding. If r is the result,\n\
+the encoding Blob is Blob(r, False).\n\
+:rtype: str"},
+    {"Tlv0_1_1WireFormat_encodeSignatureValue",
+     _pyndn_Tlv0_1_1WireFormat_encodeSignatureValue, METH_VARARGS,
+"Encode the signatureValue in the Signature object as an NDN-TLV\n\
+SignatureValue (the signature bits) and return the encoding.\n\
+\n\
+:param signature: An object of a subclass of Signature with the signature\n\
+value to encode.\n\
+:type signature: An object of a subclass of Signature\n\
+:return: A bytearray (not Blob) containing the encoding. If r is the result,\n\
+the encoding Blob is Blob(r, False).\n\
+:rtype: str"},
     {NULL, NULL, 0, NULL} // sentinel
   };
 
