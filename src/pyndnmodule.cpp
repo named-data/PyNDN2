@@ -612,6 +612,46 @@ setGenericSignature(PyObject* signature, const SignatureLite& signatureLite)
      typeCode.obj, NULL));
 }
 
+/**
+ * Get the class name for signatureLite.getType().
+ * @param signatureLite The SignatureLite to check.
+ * @return A PyObject of the string of the class name, or 0 if not recognized.
+ */
+static PyObject*
+getSignatureClassName(const SignatureLite& signatureLite)
+{
+  if (signatureLite.getType() == ndn_SignatureType_Sha256WithRsaSignature)
+    return str.Sha256WithRsaSignature;
+  else if (signatureLite.getType() == ndn_SignatureType_Sha256WithEcdsaSignature)
+    return str.Sha256WithEcdsaSignature;
+  else if (signatureLite.getType() == ndn_SignatureType_HmacWithSha256Signature)
+    return str.HmacWithSha256Signature;
+  else if (signatureLite.getType() == ndn_SignatureType_DigestSha256Signature)
+    return str.DigestSha256Signature;
+  else if (signatureLite.getType() == ndn_SignatureType_Generic)
+    return str.GenericSignature;
+  else
+    return 0;
+}
+
+// Check signatureLite.getType() and imitate 
+//   Sha256WithRsaSignature::set(const SignatureLite& signatureLite), etc.
+static void
+setSignature(PyObject* signature, const SignatureLite& signatureLite)
+{
+  if (signatureLite.getType() == ndn_SignatureType_Sha256WithRsaSignature ||
+      signatureLite.getType() == ndn_SignatureType_Sha256WithEcdsaSignature ||
+      signatureLite.getType() == ndn_SignatureType_HmacWithSha256Signature)
+    setSignatureWithKeyLocator(signature, signatureLite);
+  else if (signatureLite.getType() == ndn_SignatureType_DigestSha256Signature)
+    setSignatureWithSignatureOnly(signature, signatureLite);
+  else if (signatureLite.getType() == ndn_SignatureType_Generic)
+    setGenericSignature(signature, signatureLite);
+  else
+    // We don't expect this to happen if the caller used getSignatureClassName.
+    return;
+}
+
 // Imitate MetaInfo::get(MetaInfoLite& metaInfoLite).
 static void
 toMetaInfoLite(PyObject* metaInfo, MetaInfoLite& metaInfoLite)
@@ -660,39 +700,18 @@ toDataLite(PyObject* data, DataLite& dataLite)
 static void
 setData(PyObject* data, const DataLite& dataLite)
 {
-  PyObject* signatureName;
-  if (dataLite.getSignature().getType() == ndn_SignatureType_Sha256WithRsaSignature)
-    signatureName = str.Sha256WithRsaSignature;
-  else if (dataLite.getSignature().getType() == ndn_SignatureType_Sha256WithEcdsaSignature)
-    signatureName = str.Sha256WithEcdsaSignature;
-  else if (dataLite.getSignature().getType() == ndn_SignatureType_HmacWithSha256Signature)
-    signatureName = str.HmacWithSha256Signature;
-  else if (dataLite.getSignature().getType() == ndn_SignatureType_DigestSha256Signature)
-    signatureName = str.DigestSha256Signature;
-  else if (dataLite.getSignature().getType() == ndn_SignatureType_Generic)
-    signatureName = str.GenericSignature;
-  else
+  PyObject* signatureClassName = getSignatureClassName(dataLite.getSignature());
+  if (!signatureClassName)
     // TODO: Handle the error "Unrecognized signature type".
     return;
 
-  PyObjectRef signatureClass(PyObject_GetAttr(PYNDN_MODULE, signatureName));
+  PyObjectRef signatureClass(PyObject_GetAttr(PYNDN_MODULE, signatureClassName));
   PyObjectRef tempSignature(PyObject_CallObject(signatureClass, NULL));
   PyObjectRef ignoreResult1(PyObject_CallMethodObjArgs
     (data, str.setSignature, tempSignature.obj, NULL));
-
   // Now use the signature object that was copied into data.
   PyObjectRef signature(PyObject_CallMethodObjArgs(data, str.getSignature, NULL));
-  if (dataLite.getSignature().getType() == ndn_SignatureType_Sha256WithRsaSignature ||
-      dataLite.getSignature().getType() == ndn_SignatureType_Sha256WithEcdsaSignature ||
-      dataLite.getSignature().getType() == ndn_SignatureType_HmacWithSha256Signature)
-    setSignatureWithKeyLocator(signature, dataLite.getSignature());
-  else if (dataLite.getSignature().getType() == ndn_SignatureType_DigestSha256Signature)
-    setSignatureWithSignatureOnly(signature, dataLite.getSignature());
-  else if (dataLite.getSignature().getType() == ndn_SignatureType_Generic)
-    setGenericSignature(signature, dataLite.getSignature());
-  else
-    // We don't expect this to happen since we just checked above.
-    return;
+  setSignature(signature, dataLite.getSignature());
 
   PyObjectRef name(PyObject_CallMethodObjArgs(data, str.getName, NULL));
   setName(name, dataLite.getName());
