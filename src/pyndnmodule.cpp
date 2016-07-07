@@ -905,6 +905,42 @@ _pyndn_Tlv0_1_1WireFormat_encodeSignatureValue(PyObject *self, PyObject *args)
   return Py_BuildValue("O", output.finish(encodingLength));
 }
 
+static PyObject *
+_pyndn_Tlv0_1_1WireFormat_decodeSignatureInfoAndValue(PyObject *self, PyObject *args)
+{
+  PyObject* signatureInfo;
+  PyObject* signatureValue;
+  if (!PyArg_ParseTuple(args, "OO", &signatureInfo, &signatureValue))
+    return NULL;
+
+  BlobLite signatureInfoLite = toBlobLiteFromArray(signatureInfo);
+  BlobLite signatureValueLite = toBlobLiteFromArray(signatureValue);
+
+  struct ndn_NameComponent keyNameComponents[100];
+  SignatureLite signatureLite
+    (keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
+
+  ndn_Error error;
+  if ((error = Tlv0_1_1WireFormatLite::decodeSignatureInfoAndValue
+       (signatureLite, signatureInfoLite.buf(), signatureInfoLite.size(),
+        signatureValueLite.buf(), signatureValueLite.size()))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  PyObject* signatureClassName = getSignatureClassName(signatureLite);
+  if (!signatureClassName)
+    // TODO: Handle the error "Unrecognized signature type".
+    return NULL;
+
+  PyObjectRef signatureClass(PyObject_GetAttr(PYNDN_MODULE, signatureClassName));
+  // Make a PyObject instead of PyObjectRef since we will give it to Py_BuildValue.
+  PyObject* result = PyObject_CallObject(signatureClass, NULL);
+  setSignature(result, signatureLite);
+
+  return Py_BuildValue("O", result);
+}
+
 extern "C" {
   static PyMethodDef PyndnMethods[] = {
     {"Tlv0_1_1WireFormat_encodeInterest",  
@@ -981,6 +1017,17 @@ value to encode.\n\
 :return: A bytearray (not Blob) containing the encoding. If r is the result,\n\
 the encoding Blob is Blob(r, False).\n\
 :rtype: str"},
+    {"Tlv0_1_1WireFormat_decodeSignatureInfoAndValue",
+     _pyndn_Tlv0_1_1WireFormat_decodeSignatureInfoAndValue, METH_VARARGS,
+"Decode signatureInfo as a signature info and signatureValue as the related\n\
+SignatureValue, and return a new object which is a subclass of Signature.\n\
+\n\
+:param signatureInfo: The array with the signature info input buffer to decode.\n\
+:type signatureInfo: An array type with int elements\n\
+:param signatureValue: The array with the signature value input buffer to decode.\n\
+:type signatureValue: An array type with int elements\n\
+:return: A new object which is a subclass of Signature.\n\
+:rtype: a subclass of Signature"},
     {NULL, NULL, 0, NULL} // sentinel
   };
 
