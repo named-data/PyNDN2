@@ -183,6 +183,7 @@ class SegmentFetcher(object):
         interest = Interest(originalInterest)
         # Changing a field clears the nonce so that the library will
         #   generate a new one.
+        interest.setChildSelector(0)
         interest.setMustBeFresh(False)
         interest.setName(dataName.getPrefix(-1).appendSegment(segment))
         self._face.expressInterest(interest, self._onData, self._onTimeout)
@@ -288,6 +289,4 @@ class SegmentFetcher(object):
         :return: True if the name ends with a segment number, otherwise False.
         :rtype: bool
         """
-        return (name.size() >= 1 and
-                name.get(-1).getValue().size() >= 1 and
-                name.get(-1).getValue().buf()[0] == 0)
+        return (name.size() >= 1 and name.get(-1).isSegment())

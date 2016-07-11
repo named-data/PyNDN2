@@ -2,6 +2,8 @@
 #
 # Copyright (C) 2014-2016 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
+# From ndn-cxx unit tests:
+# https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/name.t.cpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -20,7 +22,17 @@
 import unittest as ut
 from pyndn import Name
 from pyndn.util import Blob
+from pyndn.encoding import TlvWireFormat
 
+TEST_NAME = Blob(bytearray([
+  0x7,  0x14, # Name
+    0x8,  0x5, # NameComponent
+        0x6c,  0x6f,  0x63,  0x61,  0x6c,
+    0x8,  0x3, # NameComponent
+        0x6e,  0x64,  0x6e,
+    0x8,  0x6, # NameComponent
+        0x70,  0x72,  0x65,  0x66,  0x69,  0x78
+  ]))
 
 class TestNameComponentMethods(ut.TestCase):
     def setUp(self):
@@ -216,6 +228,16 @@ class TestNameMethods(ut.TestCase):
         self.assertEqual(Name("ndn:/%00%01/%00%00%00"), Name("ndn:/%00%01/%FF%FF").getSuccessor())
         self.assertEqual(Name("/%00"), Name().getSuccessor())
         self.assertEqual(Name("/%00%01/%00"), Name("/%00%01/...").getSuccessor())
+
+    def test_encode_decode(self):
+        name = Name("/local/ndn/prefix")
+
+        encoding = name.wireEncode(TlvWireFormat.get())
+        self.assertTrue(encoding.equals(Blob(TEST_NAME)))
+
+        decodedName = Name()
+        decodedName.wireDecode(Blob(TEST_NAME), TlvWireFormat.get())
+        self.assertEqual(decodedName, name)
 
 #   def test_component_constructor(self):
 #       name1 = Name([self.entree, self.comp1, self.comp2])
