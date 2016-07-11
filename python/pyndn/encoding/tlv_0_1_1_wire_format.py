@@ -65,6 +65,11 @@ class Tlv0_1_1WireFormat(WireFormat):
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeName(name)
+            return Blob(result, False)
+
         encoder = TlvEncoder(256)
         self._encodeName(name, encoder)
         return Blob(encoder.getOutput(), False)
@@ -78,6 +83,11 @@ class Tlv0_1_1WireFormat(WireFormat):
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            _pyndn.Tlv0_1_1WireFormat_decodeName(name, input)
+            return
+
         decoder = TlvDecoder(input)
         self._decodeName(name, decoder)
 
