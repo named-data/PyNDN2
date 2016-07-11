@@ -725,6 +725,60 @@ setData(PyObject* data, const DataLite& dataLite)
 }
 
 static PyObject *
+_pyndn_Tlv0_1_1WireFormat_encodeName(PyObject *self, PyObject *args)
+{
+  PyObject* name;
+  if (!PyArg_ParseTuple(args, "O", &name))
+    return NULL;
+
+  struct ndn_NameComponent nameComponents[100];
+  NameLite nameLite
+    (nameComponents, sizeof(nameComponents) / sizeof(nameComponents[0]));
+
+  toNameLite(name, nameLite);
+
+  DynamicBytearray output(256);
+  size_t dummyBeginOffset, dummyEndOffset, encodingLength;
+
+  ndn_Error error;
+  if ((error = Tlv0_1_1WireFormatLite::encodeName
+       (nameLite, &dummyBeginOffset, &dummyEndOffset, output, &encodingLength))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  return Py_BuildValue("O", output.finish(encodingLength));
+}
+
+static PyObject *
+_pyndn_Tlv0_1_1WireFormat_decodeName(PyObject *self, PyObject *args)
+{
+  PyObject* name;
+  PyObject* input;
+  if (!PyArg_ParseTuple(args, "OO", &name, &input))
+    return NULL;
+
+  BlobLite inputLite = toBlobLiteFromArray(input);
+
+  struct ndn_NameComponent nameComponents[100];
+  NameLite nameLite
+    (nameComponents, sizeof(nameComponents) / sizeof(nameComponents[0]));
+
+  ndn_Error error;
+  size_t dummyBeginOffset, dummyEndOffset;
+  if ((error = Tlv0_1_1WireFormatLite::decodeName
+       (nameLite, inputLite.buf(), inputLite.size(), &dummyBeginOffset,
+        &dummyEndOffset))) {
+    PyErr_SetString(PyExc_RuntimeError, ndn_getErrorString(error));
+    return NULL;
+  }
+
+  setName(name, nameLite);
+
+  return Py_BuildValue("");
+}
+
+static PyObject *
 _pyndn_Tlv0_1_1WireFormat_encodeInterest(PyObject *self, PyObject *args)
 {
   PyObject* interest;
@@ -943,6 +997,21 @@ _pyndn_Tlv0_1_1WireFormat_decodeSignatureInfoAndValue(PyObject *self, PyObject *
 
 extern "C" {
   static PyMethodDef PyndnMethods[] = {
+    {"Tlv0_1_1WireFormat_encodeName",
+     _pyndn_Tlv0_1_1WireFormat_encodeName, METH_VARARGS,
+"Encode name in NDN-TLV and return the encoding.\n\
+\n\
+:param Name name: The Name object to encode.\n\
+:return: A bytearray (not Blob) containing the encoding. If r is the result,\n\
+the encoding Blob is Blob(r, False).\n\
+:rtype: str"},
+    {"Tlv0_1_1WireFormat_decodeName",
+     _pyndn_Tlv0_1_1WireFormat_decodeName, METH_VARARGS,
+"Decode input as an NDN-TLV name and set the fields of the Name object.\n\
+\n\
+:param Name name: The Name object whose fields are updated.\n\
+:param input: The array with the bytes to decode.\n\
+:type input: An array type with int elements"},
     {"Tlv0_1_1WireFormat_encodeInterest",  
      _pyndn_Tlv0_1_1WireFormat_encodeInterest, METH_VARARGS,
 "Encode interest in NDN-TLV and return the encoding and signed offsets.\n\
