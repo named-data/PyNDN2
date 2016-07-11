@@ -156,13 +156,18 @@ am__objects_2 = $(am__objects_1) \
 	src/c/encoding/tlv/_pyndn_la-tlv-name.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo \
+	src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo \
 	src/c/lp/_pyndn_la-incoming-face-id_c.lo \
-	src/c/util/_pyndn_la-crypto.lo \
+	src/c/security/_pyndn_la-ec-private-key.lo \
+	src/c/security/_pyndn_la-ec-public-key.lo \
+	src/c/security/_pyndn_la-rsa-private-key.lo \
+	src/c/security/_pyndn_la-rsa-public-key.lo \
+	src/c/transport/_pyndn_la-socket-transport.lo \
+	src/c/transport/_pyndn_la-tcp-transport_c.lo \
+	src/c/util/_pyndn_la-blob_c.lo src/c/util/_pyndn_la-crypto.lo \
 	src/c/util/_pyndn_la-dynamic-uint8-array.lo \
-	src/c/util/_pyndn_la-ec-private-key.lo \
 	src/c/util/_pyndn_la-ndn_memory.lo \
 	src/c/util/_pyndn_la-ndn_realloc.lo \
-	src/c/util/_pyndn_la-rsa-private-key.lo \
 	src/c/util/_pyndn_la-time.lo
 am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/_pyndn_la-control-parameters-lite.lo \
@@ -180,14 +185,20 @@ am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/encoding/_pyndn_la-element-listener-lite.lo \
 	src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo \
 	src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo \
+	src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo \
 	src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo \
 	src/lite/lp/_pyndn_la-incoming-face-id-lite.lo \
 	src/lite/lp/_pyndn_la-lp-packet-lite.lo \
+	src/lite/security/_pyndn_la-ec-private-key-lite.lo \
+	src/lite/security/_pyndn_la-ec-public-key-lite.lo \
+	src/lite/security/_pyndn_la-rsa-private-key-lite.lo \
+	src/lite/security/_pyndn_la-rsa-public-key-lite.lo \
+	src/lite/transport/_pyndn_la-tcp-transport-lite.lo \
+	src/lite/transport/_pyndn_la-udp-transport-lite.lo \
+	src/lite/transport/_pyndn_la-unix-transport-lite.lo \
 	src/lite/util/_pyndn_la-blob-lite.lo \
 	src/lite/util/_pyndn_la-crypto-lite.lo \
-	src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo \
-	src/lite/util/_pyndn_la-ec-private-key-lite.lo \
-	src/lite/util/_pyndn_la-rsa-private-key-lite.lo
+	src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo
 nodist__pyndn_la_OBJECTS = $(am__objects_3) \
 	src/_pyndn_la-pyndnmodule.lo
 _pyndn_la_OBJECTS = $(nodist__pyndn_la_OBJECTS)
@@ -457,16 +468,17 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/encrypt/algo/encrypt-params-types.h \
   include/ndn-cpp/c/lp/incoming-face-id-types.h \
   include/ndn-cpp/c/lp/lp-packet-types.h \
+  include/ndn-cpp/c/security/ec-private-key-types.h \
+  include/ndn-cpp/c/security/ec-public-key-types.h \
+  include/ndn-cpp/c/security/rsa-private-key-types.h \
+  include/ndn-cpp/c/security/rsa-public-key-types.h \
   include/ndn-cpp/c/transport/transport-types.h \
   include/ndn-cpp/c/util/blob-types.h \
-  include/ndn-cpp/c/util/dynamic-uint8-array-types.h \
-  include/ndn-cpp/c/util/ec-private-key-types.h \
-  include/ndn-cpp/c/util/rsa-private-key-types.h
+  include/ndn-cpp/c/util/dynamic-uint8-array-types.h
 
 
 # Public C++ headers.
 ndn_cpp_cpp_headers = \
-  include/ndn-cpp/lite/common-lite.hpp \
   include/ndn-cpp/lite/control-parameters-lite.hpp \
   include/ndn-cpp/lite/control-response-lite.hpp \
   include/ndn-cpp/lite/data-lite.hpp \
@@ -482,14 +494,20 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
+  include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
   include/ndn-cpp/lite/lp/lp-packet-lite.hpp \
+  include/ndn-cpp/lite/security/ec-private-key-lite.hpp \
+  include/ndn-cpp/lite/security/ec-public-key-lite.hpp \
+  include/ndn-cpp/lite/security/rsa-private-key-lite.hpp \
+  include/ndn-cpp/lite/security/rsa-public-key-lite.hpp \
+  include/ndn-cpp/lite/transport/tcp-transport-lite.hpp \
+  include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
+  include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
   include/ndn-cpp/lite/util/crypto-lite.hpp \
-  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp \
-  include/ndn-cpp/lite/util/ec-private-key-lite.hpp \
-  include/ndn-cpp/lite/util/rsa-private-key-lite.hpp
+  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp
 
 
 # Just the C code.
@@ -522,16 +540,23 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/encoding/tlv/tlv-structure-decoder.c src/c/encoding/tlv/tlv-structure-decoder.h \
   src/c/encoding/tlv/tlv.h \
   src/c/encrypt/encrypted-content.h \
+  src/c/encrypt/algo/aes-algorithm_c.c src/c/encrypt/algo/aes-algorithm.h \
   src/c/encrypt/algo/encrypt-params.h \
   src/c/lp/incoming-face-id_c.c src/c/lp/incoming-face-id.h \
   src/c/lp/lp-packet.h \
-  src/c/util/blob.h \
+  src/c/security/ec-private-key.c src/c/util/ec-private-key.h \
+  src/c/security/ec-public-key.c src/c/util/ec-public-key.h \
+  src/c/security/rsa-private-key.c src/c/util/rsa-private-key.h \
+  src/c/security/rsa-public-key.c src/c/util/rsa-public-key.h \
+  src/c/transport/socket-transport.c src/c/transport/socket-transport.h \
+  src/c/transport/tcp-transport_c.c src/c/transport/tcp-transport.h \
+  src/c/transport/udp-transport.h \
+  src/c/transport/unix-transport.h \
+  src/c/util/blob_c.c src/c/util/blob.h \
   src/c/util/crypto.c src/c/util/crypto.h \
   src/c/util/dynamic-uint8-array.c src/c/util/dynamic-uint8-array.h \
-  src/c/util/ec-private-key.c src/c/util/ec-private-key.h \
   src/c/util/ndn_memory.c src/c/util/ndn_memory.h \
   src/c/util/ndn_realloc.c src/c/util/ndn_realloc.h \
-  src/c/util/rsa-private-key.c src/c/util/rsa-private-key.h \
   src/c/util/time.c src/c/util/time.h
 
 
@@ -552,14 +577,20 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/encoding/element-listener-lite.cpp \
   src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp \
   src/lite/encrypt/encrypted-content-lite.cpp \
+  src/lite/encrypt/algo/aes-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
   src/lite/lp/lp-packet-lite.cpp \
+  src/lite/security/ec-private-key-lite.cpp \
+  src/lite/security/ec-public-key-lite.cpp \
+  src/lite/security/rsa-private-key-lite.cpp \
+  src/lite/security/rsa-public-key-lite.cpp \
+  src/lite/transport/tcp-transport-lite.cpp \
+  src/lite/transport/udp-transport-lite.cpp \
+  src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
   src/lite/util/crypto-lite.cpp \
-  src/lite/util/dynamic-uint8-array-lite.cpp \
-  src/lite/util/ec-private-key-lite.cpp \
-  src/lite/util/rsa-private-key-lite.cpp
+  src/lite/util/dynamic-uint8-array-lite.cpp
 
 pyexec_LTLIBRARIES = _pyndn.la
 _pyndn_la_CFLAGS = $(PYTHON_CFLAGS)
@@ -730,6 +761,15 @@ src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo:  \
 src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo:  \
 	src/c/encoding/tlv/$(am__dirstamp) \
 	src/c/encoding/tlv/$(DEPDIR)/$(am__dirstamp)
+src/c/encrypt/algo/$(am__dirstamp):
+	@$(MKDIR_P) src/c/encrypt/algo
+	@: > src/c/encrypt/algo/$(am__dirstamp)
+src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/c/encrypt/algo/$(DEPDIR)
+	@: > src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
+src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo:  \
+	src/c/encrypt/algo/$(am__dirstamp) \
+	src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
 src/c/lp/$(am__dirstamp):
 	@$(MKDIR_P) src/c/lp
 	@: > src/c/lp/$(am__dirstamp)
@@ -738,24 +778,52 @@ src/c/lp/$(DEPDIR)/$(am__dirstamp):
 	@: > src/c/lp/$(DEPDIR)/$(am__dirstamp)
 src/c/lp/_pyndn_la-incoming-face-id_c.lo: src/c/lp/$(am__dirstamp) \
 	src/c/lp/$(DEPDIR)/$(am__dirstamp)
+src/c/security/$(am__dirstamp):
+	@$(MKDIR_P) src/c/security
+	@: > src/c/security/$(am__dirstamp)
+src/c/security/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/c/security/$(DEPDIR)
+	@: > src/c/security/$(DEPDIR)/$(am__dirstamp)
+src/c/security/_pyndn_la-ec-private-key.lo:  \
+	src/c/security/$(am__dirstamp) \
+	src/c/security/$(DEPDIR)/$(am__dirstamp)
+src/c/security/_pyndn_la-ec-public-key.lo:  \
+	src/c/security/$(am__dirstamp) \
+	src/c/security/$(DEPDIR)/$(am__dirstamp)
+src/c/security/_pyndn_la-rsa-private-key.lo:  \
+	src/c/security/$(am__dirstamp) \
+	src/c/security/$(DEPDIR)/$(am__dirstamp)
+src/c/security/_pyndn_la-rsa-public-key.lo:  \
+	src/c/security/$(am__dirstamp) \
+	src/c/security/$(DEPDIR)/$(am__dirstamp)
+src/c/transport/$(am__dirstamp):
+	@$(MKDIR_P) src/c/transport
+	@: > src/c/transport/$(am__dirstamp)
+src/c/transport/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/c/transport/$(DEPDIR)
+	@: > src/c/transport/$(DEPDIR)/$(am__dirstamp)
+src/c/transport/_pyndn_la-socket-transport.lo:  \
+	src/c/transport/$(am__dirstamp) \
+	src/c/transport/$(DEPDIR)/$(am__dirstamp)
+src/c/transport/_pyndn_la-tcp-transport_c.lo:  \
+	src/c/transport/$(am__dirstamp) \
+	src/c/transport/$(DEPDIR)/$(am__dirstamp)
 src/c/util/$(am__dirstamp):
 	@$(MKDIR_P) src/c/util
 	@: > src/c/util/$(am__dirstamp)
 src/c/util/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/c/util/$(DEPDIR)
 	@: > src/c/util/$(DEPDIR)/$(am__dirstamp)
+src/c/util/_pyndn_la-blob_c.lo: src/c/util/$(am__dirstamp) \
+	src/c/util/$(DEPDIR)/$(am__dirstamp)
 src/c/util/_pyndn_la-crypto.lo: src/c/util/$(am__dirstamp) \
 	src/c/util/$(DEPDIR)/$(am__dirstamp)
 src/c/util/_pyndn_la-dynamic-uint8-array.lo:  \
 	src/c/util/$(am__dirstamp) \
 	src/c/util/$(DEPDIR)/$(am__dirstamp)
-src/c/util/_pyndn_la-ec-private-key.lo: src/c/util/$(am__dirstamp) \
-	src/c/util/$(DEPDIR)/$(am__dirstamp)
 src/c/util/_pyndn_la-ndn_memory.lo: src/c/util/$(am__dirstamp) \
 	src/c/util/$(DEPDIR)/$(am__dirstamp)
 src/c/util/_pyndn_la-ndn_realloc.lo: src/c/util/$(am__dirstamp) \
-	src/c/util/$(DEPDIR)/$(am__dirstamp)
-src/c/util/_pyndn_la-rsa-private-key.lo: src/c/util/$(am__dirstamp) \
 	src/c/util/$(DEPDIR)/$(am__dirstamp)
 src/c/util/_pyndn_la-time.lo: src/c/util/$(am__dirstamp) \
 	src/c/util/$(DEPDIR)/$(am__dirstamp)
@@ -816,6 +884,9 @@ src/lite/encrypt/algo/$(am__dirstamp):
 src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/lite/encrypt/algo/$(DEPDIR)
 	@: > src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
+src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo:  \
+	src/lite/encrypt/algo/$(am__dirstamp) \
+	src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
 src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo:  \
 	src/lite/encrypt/algo/$(am__dirstamp) \
 	src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
@@ -830,6 +901,39 @@ src/lite/lp/_pyndn_la-incoming-face-id-lite.lo:  \
 	src/lite/lp/$(DEPDIR)/$(am__dirstamp)
 src/lite/lp/_pyndn_la-lp-packet-lite.lo: src/lite/lp/$(am__dirstamp) \
 	src/lite/lp/$(DEPDIR)/$(am__dirstamp)
+src/lite/security/$(am__dirstamp):
+	@$(MKDIR_P) src/lite/security
+	@: > src/lite/security/$(am__dirstamp)
+src/lite/security/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/lite/security/$(DEPDIR)
+	@: > src/lite/security/$(DEPDIR)/$(am__dirstamp)
+src/lite/security/_pyndn_la-ec-private-key-lite.lo:  \
+	src/lite/security/$(am__dirstamp) \
+	src/lite/security/$(DEPDIR)/$(am__dirstamp)
+src/lite/security/_pyndn_la-ec-public-key-lite.lo:  \
+	src/lite/security/$(am__dirstamp) \
+	src/lite/security/$(DEPDIR)/$(am__dirstamp)
+src/lite/security/_pyndn_la-rsa-private-key-lite.lo:  \
+	src/lite/security/$(am__dirstamp) \
+	src/lite/security/$(DEPDIR)/$(am__dirstamp)
+src/lite/security/_pyndn_la-rsa-public-key-lite.lo:  \
+	src/lite/security/$(am__dirstamp) \
+	src/lite/security/$(DEPDIR)/$(am__dirstamp)
+src/lite/transport/$(am__dirstamp):
+	@$(MKDIR_P) src/lite/transport
+	@: > src/lite/transport/$(am__dirstamp)
+src/lite/transport/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/lite/transport/$(DEPDIR)
+	@: > src/lite/transport/$(DEPDIR)/$(am__dirstamp)
+src/lite/transport/_pyndn_la-tcp-transport-lite.lo:  \
+	src/lite/transport/$(am__dirstamp) \
+	src/lite/transport/$(DEPDIR)/$(am__dirstamp)
+src/lite/transport/_pyndn_la-udp-transport-lite.lo:  \
+	src/lite/transport/$(am__dirstamp) \
+	src/lite/transport/$(DEPDIR)/$(am__dirstamp)
+src/lite/transport/_pyndn_la-unix-transport-lite.lo:  \
+	src/lite/transport/$(am__dirstamp) \
+	src/lite/transport/$(DEPDIR)/$(am__dirstamp)
 src/lite/util/$(am__dirstamp):
 	@$(MKDIR_P) src/lite/util
 	@: > src/lite/util/$(am__dirstamp)
@@ -841,12 +945,6 @@ src/lite/util/_pyndn_la-blob-lite.lo: src/lite/util/$(am__dirstamp) \
 src/lite/util/_pyndn_la-crypto-lite.lo: src/lite/util/$(am__dirstamp) \
 	src/lite/util/$(DEPDIR)/$(am__dirstamp)
 src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo:  \
-	src/lite/util/$(am__dirstamp) \
-	src/lite/util/$(DEPDIR)/$(am__dirstamp)
-src/lite/util/_pyndn_la-ec-private-key-lite.lo:  \
-	src/lite/util/$(am__dirstamp) \
-	src/lite/util/$(DEPDIR)/$(am__dirstamp)
-src/lite/util/_pyndn_la-rsa-private-key-lite.lo:  \
 	src/lite/util/$(am__dirstamp) \
 	src/lite/util/$(DEPDIR)/$(am__dirstamp)
 src/$(am__dirstamp):
@@ -871,8 +969,14 @@ mostlyclean-compile:
 	-rm -f src/c/encoding/*.lo
 	-rm -f src/c/encoding/tlv/*.$(OBJEXT)
 	-rm -f src/c/encoding/tlv/*.lo
+	-rm -f src/c/encrypt/algo/*.$(OBJEXT)
+	-rm -f src/c/encrypt/algo/*.lo
 	-rm -f src/c/lp/*.$(OBJEXT)
 	-rm -f src/c/lp/*.lo
+	-rm -f src/c/security/*.$(OBJEXT)
+	-rm -f src/c/security/*.lo
+	-rm -f src/c/transport/*.$(OBJEXT)
+	-rm -f src/c/transport/*.lo
 	-rm -f src/c/util/*.$(OBJEXT)
 	-rm -f src/c/util/*.lo
 	-rm -f src/lite/*.$(OBJEXT)
@@ -885,6 +989,10 @@ mostlyclean-compile:
 	-rm -f src/lite/encrypt/algo/*.lo
 	-rm -f src/lite/lp/*.$(OBJEXT)
 	-rm -f src/lite/lp/*.lo
+	-rm -f src/lite/security/*.$(OBJEXT)
+	-rm -f src/lite/security/*.lo
+	-rm -f src/lite/transport/*.$(OBJEXT)
+	-rm -f src/lite/transport/*.lo
 	-rm -f src/lite/util/*.$(OBJEXT)
 	-rm -f src/lite/util/*.lo
 
@@ -913,13 +1021,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-name.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/security/$(DEPDIR)/_pyndn_la-ec-public-key.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/security/$(DEPDIR)/_pyndn_la-rsa-private-key.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/security/$(DEPDIR)/_pyndn_la-rsa-public-key.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/transport/$(DEPDIR)/_pyndn_la-socket-transport.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/transport/$(DEPDIR)/_pyndn_la-tcp-transport_c.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-blob_c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-crypto.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-ec-private-key.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-ndn_realloc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-rsa-private-key.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/util/$(DEPDIR)/_pyndn_la-time.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-control-parameters-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-control-response-lite.Plo@am__quote@
@@ -936,14 +1050,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-element-listener-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/lp/$(DEPDIR)/_pyndn_la-incoming-face-id-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/lp/$(DEPDIR)/_pyndn_la-lp-packet-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-ec-public-key-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-rsa-public-key-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-crypto-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array-lite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -1116,12 +1236,68 @@ src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo: src/c/encoding/tlv/tlv-st
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo `test -f 'src/c/encoding/tlv/tlv-structure-decoder.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-structure-decoder.c
 
+src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo: src/c/encrypt/algo/aes-algorithm_c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo -MD -MP -MF src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Tpo -c -o src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo `test -f 'src/c/encrypt/algo/aes-algorithm_c.c' || echo '$(srcdir)/'`src/c/encrypt/algo/aes-algorithm_c.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Tpo src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encrypt/algo/aes-algorithm_c.c' object='src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo `test -f 'src/c/encrypt/algo/aes-algorithm_c.c' || echo '$(srcdir)/'`src/c/encrypt/algo/aes-algorithm_c.c
+
 src/c/lp/_pyndn_la-incoming-face-id_c.lo: src/c/lp/incoming-face-id_c.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/lp/_pyndn_la-incoming-face-id_c.lo -MD -MP -MF src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Tpo -c -o src/c/lp/_pyndn_la-incoming-face-id_c.lo `test -f 'src/c/lp/incoming-face-id_c.c' || echo '$(srcdir)/'`src/c/lp/incoming-face-id_c.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Tpo src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/lp/incoming-face-id_c.c' object='src/c/lp/_pyndn_la-incoming-face-id_c.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/lp/_pyndn_la-incoming-face-id_c.lo `test -f 'src/c/lp/incoming-face-id_c.c' || echo '$(srcdir)/'`src/c/lp/incoming-face-id_c.c
+
+src/c/security/_pyndn_la-ec-private-key.lo: src/c/security/ec-private-key.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/security/_pyndn_la-ec-private-key.lo -MD -MP -MF src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Tpo -c -o src/c/security/_pyndn_la-ec-private-key.lo `test -f 'src/c/security/ec-private-key.c' || echo '$(srcdir)/'`src/c/security/ec-private-key.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Tpo src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/security/ec-private-key.c' object='src/c/security/_pyndn_la-ec-private-key.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/security/_pyndn_la-ec-private-key.lo `test -f 'src/c/security/ec-private-key.c' || echo '$(srcdir)/'`src/c/security/ec-private-key.c
+
+src/c/security/_pyndn_la-ec-public-key.lo: src/c/security/ec-public-key.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/security/_pyndn_la-ec-public-key.lo -MD -MP -MF src/c/security/$(DEPDIR)/_pyndn_la-ec-public-key.Tpo -c -o src/c/security/_pyndn_la-ec-public-key.lo `test -f 'src/c/security/ec-public-key.c' || echo '$(srcdir)/'`src/c/security/ec-public-key.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/security/$(DEPDIR)/_pyndn_la-ec-public-key.Tpo src/c/security/$(DEPDIR)/_pyndn_la-ec-public-key.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/security/ec-public-key.c' object='src/c/security/_pyndn_la-ec-public-key.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/security/_pyndn_la-ec-public-key.lo `test -f 'src/c/security/ec-public-key.c' || echo '$(srcdir)/'`src/c/security/ec-public-key.c
+
+src/c/security/_pyndn_la-rsa-private-key.lo: src/c/security/rsa-private-key.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/security/_pyndn_la-rsa-private-key.lo -MD -MP -MF src/c/security/$(DEPDIR)/_pyndn_la-rsa-private-key.Tpo -c -o src/c/security/_pyndn_la-rsa-private-key.lo `test -f 'src/c/security/rsa-private-key.c' || echo '$(srcdir)/'`src/c/security/rsa-private-key.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/security/$(DEPDIR)/_pyndn_la-rsa-private-key.Tpo src/c/security/$(DEPDIR)/_pyndn_la-rsa-private-key.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/security/rsa-private-key.c' object='src/c/security/_pyndn_la-rsa-private-key.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/security/_pyndn_la-rsa-private-key.lo `test -f 'src/c/security/rsa-private-key.c' || echo '$(srcdir)/'`src/c/security/rsa-private-key.c
+
+src/c/security/_pyndn_la-rsa-public-key.lo: src/c/security/rsa-public-key.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/security/_pyndn_la-rsa-public-key.lo -MD -MP -MF src/c/security/$(DEPDIR)/_pyndn_la-rsa-public-key.Tpo -c -o src/c/security/_pyndn_la-rsa-public-key.lo `test -f 'src/c/security/rsa-public-key.c' || echo '$(srcdir)/'`src/c/security/rsa-public-key.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/security/$(DEPDIR)/_pyndn_la-rsa-public-key.Tpo src/c/security/$(DEPDIR)/_pyndn_la-rsa-public-key.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/security/rsa-public-key.c' object='src/c/security/_pyndn_la-rsa-public-key.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/security/_pyndn_la-rsa-public-key.lo `test -f 'src/c/security/rsa-public-key.c' || echo '$(srcdir)/'`src/c/security/rsa-public-key.c
+
+src/c/transport/_pyndn_la-socket-transport.lo: src/c/transport/socket-transport.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/transport/_pyndn_la-socket-transport.lo -MD -MP -MF src/c/transport/$(DEPDIR)/_pyndn_la-socket-transport.Tpo -c -o src/c/transport/_pyndn_la-socket-transport.lo `test -f 'src/c/transport/socket-transport.c' || echo '$(srcdir)/'`src/c/transport/socket-transport.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/transport/$(DEPDIR)/_pyndn_la-socket-transport.Tpo src/c/transport/$(DEPDIR)/_pyndn_la-socket-transport.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/transport/socket-transport.c' object='src/c/transport/_pyndn_la-socket-transport.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/transport/_pyndn_la-socket-transport.lo `test -f 'src/c/transport/socket-transport.c' || echo '$(srcdir)/'`src/c/transport/socket-transport.c
+
+src/c/transport/_pyndn_la-tcp-transport_c.lo: src/c/transport/tcp-transport_c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/transport/_pyndn_la-tcp-transport_c.lo -MD -MP -MF src/c/transport/$(DEPDIR)/_pyndn_la-tcp-transport_c.Tpo -c -o src/c/transport/_pyndn_la-tcp-transport_c.lo `test -f 'src/c/transport/tcp-transport_c.c' || echo '$(srcdir)/'`src/c/transport/tcp-transport_c.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/transport/$(DEPDIR)/_pyndn_la-tcp-transport_c.Tpo src/c/transport/$(DEPDIR)/_pyndn_la-tcp-transport_c.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/transport/tcp-transport_c.c' object='src/c/transport/_pyndn_la-tcp-transport_c.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/transport/_pyndn_la-tcp-transport_c.lo `test -f 'src/c/transport/tcp-transport_c.c' || echo '$(srcdir)/'`src/c/transport/tcp-transport_c.c
+
+src/c/util/_pyndn_la-blob_c.lo: src/c/util/blob_c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-blob_c.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-blob_c.Tpo -c -o src/c/util/_pyndn_la-blob_c.lo `test -f 'src/c/util/blob_c.c' || echo '$(srcdir)/'`src/c/util/blob_c.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-blob_c.Tpo src/c/util/$(DEPDIR)/_pyndn_la-blob_c.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/blob_c.c' object='src/c/util/_pyndn_la-blob_c.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-blob_c.lo `test -f 'src/c/util/blob_c.c' || echo '$(srcdir)/'`src/c/util/blob_c.c
 
 src/c/util/_pyndn_la-crypto.lo: src/c/util/crypto.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-crypto.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-crypto.Tpo -c -o src/c/util/_pyndn_la-crypto.lo `test -f 'src/c/util/crypto.c' || echo '$(srcdir)/'`src/c/util/crypto.c
@@ -1137,13 +1313,6 @@ src/c/util/_pyndn_la-dynamic-uint8-array.lo: src/c/util/dynamic-uint8-array.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-dynamic-uint8-array.lo `test -f 'src/c/util/dynamic-uint8-array.c' || echo '$(srcdir)/'`src/c/util/dynamic-uint8-array.c
 
-src/c/util/_pyndn_la-ec-private-key.lo: src/c/util/ec-private-key.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-ec-private-key.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-ec-private-key.Tpo -c -o src/c/util/_pyndn_la-ec-private-key.lo `test -f 'src/c/util/ec-private-key.c' || echo '$(srcdir)/'`src/c/util/ec-private-key.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-ec-private-key.Tpo src/c/util/$(DEPDIR)/_pyndn_la-ec-private-key.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/ec-private-key.c' object='src/c/util/_pyndn_la-ec-private-key.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-ec-private-key.lo `test -f 'src/c/util/ec-private-key.c' || echo '$(srcdir)/'`src/c/util/ec-private-key.c
-
 src/c/util/_pyndn_la-ndn_memory.lo: src/c/util/ndn_memory.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-ndn_memory.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Tpo -c -o src/c/util/_pyndn_la-ndn_memory.lo `test -f 'src/c/util/ndn_memory.c' || echo '$(srcdir)/'`src/c/util/ndn_memory.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Tpo src/c/util/$(DEPDIR)/_pyndn_la-ndn_memory.Plo
@@ -1157,13 +1326,6 @@ src/c/util/_pyndn_la-ndn_realloc.lo: src/c/util/ndn_realloc.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/ndn_realloc.c' object='src/c/util/_pyndn_la-ndn_realloc.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-ndn_realloc.lo `test -f 'src/c/util/ndn_realloc.c' || echo '$(srcdir)/'`src/c/util/ndn_realloc.c
-
-src/c/util/_pyndn_la-rsa-private-key.lo: src/c/util/rsa-private-key.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-rsa-private-key.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-rsa-private-key.Tpo -c -o src/c/util/_pyndn_la-rsa-private-key.lo `test -f 'src/c/util/rsa-private-key.c' || echo '$(srcdir)/'`src/c/util/rsa-private-key.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/util/$(DEPDIR)/_pyndn_la-rsa-private-key.Tpo src/c/util/$(DEPDIR)/_pyndn_la-rsa-private-key.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/util/rsa-private-key.c' object='src/c/util/_pyndn_la-rsa-private-key.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/util/_pyndn_la-rsa-private-key.lo `test -f 'src/c/util/rsa-private-key.c' || echo '$(srcdir)/'`src/c/util/rsa-private-key.c
 
 src/c/util/_pyndn_la-time.lo: src/c/util/time.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/util/_pyndn_la-time.lo -MD -MP -MF src/c/util/$(DEPDIR)/_pyndn_la-time.Tpo -c -o src/c/util/_pyndn_la-time.lo `test -f 'src/c/util/time.c' || echo '$(srcdir)/'`src/c/util/time.c
@@ -1301,6 +1463,13 @@ src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo: src/lite/encrypt/encrypted
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo `test -f 'src/lite/encrypt/encrypted-content-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/encrypted-content-lite.cpp
 
+src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo: src/lite/encrypt/algo/aes-algorithm-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo -MD -MP -MF src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Tpo -c -o src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo `test -f 'src/lite/encrypt/algo/aes-algorithm-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/aes-algorithm-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Tpo src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/encrypt/algo/aes-algorithm-lite.cpp' object='src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo `test -f 'src/lite/encrypt/algo/aes-algorithm-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/aes-algorithm-lite.cpp
+
 src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo: src/lite/encrypt/algo/encrypt-params-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo -MD -MP -MF src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Tpo -c -o src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo `test -f 'src/lite/encrypt/algo/encrypt-params-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/encrypt-params-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Tpo src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo
@@ -1321,6 +1490,55 @@ src/lite/lp/_pyndn_la-lp-packet-lite.lo: src/lite/lp/lp-packet-lite.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/lp/lp-packet-lite.cpp' object='src/lite/lp/_pyndn_la-lp-packet-lite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/lp/_pyndn_la-lp-packet-lite.lo `test -f 'src/lite/lp/lp-packet-lite.cpp' || echo '$(srcdir)/'`src/lite/lp/lp-packet-lite.cpp
+
+src/lite/security/_pyndn_la-ec-private-key-lite.lo: src/lite/security/ec-private-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/security/_pyndn_la-ec-private-key-lite.lo -MD -MP -MF src/lite/security/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Tpo -c -o src/lite/security/_pyndn_la-ec-private-key-lite.lo `test -f 'src/lite/security/ec-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/ec-private-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/security/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Tpo src/lite/security/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/security/ec-private-key-lite.cpp' object='src/lite/security/_pyndn_la-ec-private-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/security/_pyndn_la-ec-private-key-lite.lo `test -f 'src/lite/security/ec-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/ec-private-key-lite.cpp
+
+src/lite/security/_pyndn_la-ec-public-key-lite.lo: src/lite/security/ec-public-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/security/_pyndn_la-ec-public-key-lite.lo -MD -MP -MF src/lite/security/$(DEPDIR)/_pyndn_la-ec-public-key-lite.Tpo -c -o src/lite/security/_pyndn_la-ec-public-key-lite.lo `test -f 'src/lite/security/ec-public-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/ec-public-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/security/$(DEPDIR)/_pyndn_la-ec-public-key-lite.Tpo src/lite/security/$(DEPDIR)/_pyndn_la-ec-public-key-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/security/ec-public-key-lite.cpp' object='src/lite/security/_pyndn_la-ec-public-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/security/_pyndn_la-ec-public-key-lite.lo `test -f 'src/lite/security/ec-public-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/ec-public-key-lite.cpp
+
+src/lite/security/_pyndn_la-rsa-private-key-lite.lo: src/lite/security/rsa-private-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/security/_pyndn_la-rsa-private-key-lite.lo -MD -MP -MF src/lite/security/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Tpo -c -o src/lite/security/_pyndn_la-rsa-private-key-lite.lo `test -f 'src/lite/security/rsa-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/rsa-private-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/security/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Tpo src/lite/security/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/security/rsa-private-key-lite.cpp' object='src/lite/security/_pyndn_la-rsa-private-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/security/_pyndn_la-rsa-private-key-lite.lo `test -f 'src/lite/security/rsa-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/rsa-private-key-lite.cpp
+
+src/lite/security/_pyndn_la-rsa-public-key-lite.lo: src/lite/security/rsa-public-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/security/_pyndn_la-rsa-public-key-lite.lo -MD -MP -MF src/lite/security/$(DEPDIR)/_pyndn_la-rsa-public-key-lite.Tpo -c -o src/lite/security/_pyndn_la-rsa-public-key-lite.lo `test -f 'src/lite/security/rsa-public-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/rsa-public-key-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/security/$(DEPDIR)/_pyndn_la-rsa-public-key-lite.Tpo src/lite/security/$(DEPDIR)/_pyndn_la-rsa-public-key-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/security/rsa-public-key-lite.cpp' object='src/lite/security/_pyndn_la-rsa-public-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/security/_pyndn_la-rsa-public-key-lite.lo `test -f 'src/lite/security/rsa-public-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/rsa-public-key-lite.cpp
+
+src/lite/transport/_pyndn_la-tcp-transport-lite.lo: src/lite/transport/tcp-transport-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-tcp-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-tcp-transport-lite.lo `test -f 'src/lite/transport/tcp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/tcp-transport-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Tpo src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/transport/tcp-transport-lite.cpp' object='src/lite/transport/_pyndn_la-tcp-transport-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/transport/_pyndn_la-tcp-transport-lite.lo `test -f 'src/lite/transport/tcp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/tcp-transport-lite.cpp
+
+src/lite/transport/_pyndn_la-udp-transport-lite.lo: src/lite/transport/udp-transport-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-udp-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-udp-transport-lite.lo `test -f 'src/lite/transport/udp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/udp-transport-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Tpo src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/transport/udp-transport-lite.cpp' object='src/lite/transport/_pyndn_la-udp-transport-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/transport/_pyndn_la-udp-transport-lite.lo `test -f 'src/lite/transport/udp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/udp-transport-lite.cpp
+
+src/lite/transport/_pyndn_la-unix-transport-lite.lo: src/lite/transport/unix-transport-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-unix-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-unix-transport-lite.lo `test -f 'src/lite/transport/unix-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/unix-transport-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Tpo src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/transport/unix-transport-lite.cpp' object='src/lite/transport/_pyndn_la-unix-transport-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/transport/_pyndn_la-unix-transport-lite.lo `test -f 'src/lite/transport/unix-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/unix-transport-lite.cpp
 
 src/lite/util/_pyndn_la-blob-lite.lo: src/lite/util/blob-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/util/_pyndn_la-blob-lite.lo -MD -MP -MF src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Tpo -c -o src/lite/util/_pyndn_la-blob-lite.lo `test -f 'src/lite/util/blob-lite.cpp' || echo '$(srcdir)/'`src/lite/util/blob-lite.cpp
@@ -1343,20 +1561,6 @@ src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo: src/lite/util/dynamic-uint8
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo `test -f 'src/lite/util/dynamic-uint8-array-lite.cpp' || echo '$(srcdir)/'`src/lite/util/dynamic-uint8-array-lite.cpp
 
-src/lite/util/_pyndn_la-ec-private-key-lite.lo: src/lite/util/ec-private-key-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/util/_pyndn_la-ec-private-key-lite.lo -MD -MP -MF src/lite/util/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Tpo -c -o src/lite/util/_pyndn_la-ec-private-key-lite.lo `test -f 'src/lite/util/ec-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/util/ec-private-key-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/util/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Tpo src/lite/util/$(DEPDIR)/_pyndn_la-ec-private-key-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/util/ec-private-key-lite.cpp' object='src/lite/util/_pyndn_la-ec-private-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/util/_pyndn_la-ec-private-key-lite.lo `test -f 'src/lite/util/ec-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/util/ec-private-key-lite.cpp
-
-src/lite/util/_pyndn_la-rsa-private-key-lite.lo: src/lite/util/rsa-private-key-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/util/_pyndn_la-rsa-private-key-lite.lo -MD -MP -MF src/lite/util/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Tpo -c -o src/lite/util/_pyndn_la-rsa-private-key-lite.lo `test -f 'src/lite/util/rsa-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/util/rsa-private-key-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/util/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Tpo src/lite/util/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/util/rsa-private-key-lite.cpp' object='src/lite/util/_pyndn_la-rsa-private-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/util/_pyndn_la-rsa-private-key-lite.lo `test -f 'src/lite/util/rsa-private-key-lite.cpp' || echo '$(srcdir)/'`src/lite/util/rsa-private-key-lite.cpp
-
 src/_pyndn_la-pyndnmodule.lo: src/pyndnmodule.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/_pyndn_la-pyndnmodule.lo -MD -MP -MF src/$(DEPDIR)/_pyndn_la-pyndnmodule.Tpo -c -o src/_pyndn_la-pyndnmodule.lo `test -f 'src/pyndnmodule.cpp' || echo '$(srcdir)/'`src/pyndnmodule.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/_pyndn_la-pyndnmodule.Tpo src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
@@ -1373,13 +1577,18 @@ clean-libtool:
 	-rm -rf src/c/.libs src/c/_libs
 	-rm -rf src/c/encoding/.libs src/c/encoding/_libs
 	-rm -rf src/c/encoding/tlv/.libs src/c/encoding/tlv/_libs
+	-rm -rf src/c/encrypt/algo/.libs src/c/encrypt/algo/_libs
 	-rm -rf src/c/lp/.libs src/c/lp/_libs
+	-rm -rf src/c/security/.libs src/c/security/_libs
+	-rm -rf src/c/transport/.libs src/c/transport/_libs
 	-rm -rf src/c/util/.libs src/c/util/_libs
 	-rm -rf src/lite/.libs src/lite/_libs
 	-rm -rf src/lite/encoding/.libs src/lite/encoding/_libs
 	-rm -rf src/lite/encrypt/.libs src/lite/encrypt/_libs
 	-rm -rf src/lite/encrypt/algo/.libs src/lite/encrypt/algo/_libs
 	-rm -rf src/lite/lp/.libs src/lite/lp/_libs
+	-rm -rf src/lite/security/.libs src/lite/security/_libs
+	-rm -rf src/lite/transport/.libs src/lite/transport/_libs
 	-rm -rf src/lite/util/.libs src/lite/util/_libs
 
 distclean-libtool:
@@ -1648,8 +1857,14 @@ distclean-generic:
 	-rm -f src/c/encoding/$(am__dirstamp)
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/c/encoding/tlv/$(am__dirstamp)
+	-rm -f src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/c/encrypt/algo/$(am__dirstamp)
 	-rm -f src/c/lp/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/c/lp/$(am__dirstamp)
+	-rm -f src/c/security/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/c/security/$(am__dirstamp)
+	-rm -f src/c/transport/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/c/transport/$(am__dirstamp)
 	-rm -f src/c/util/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/c/util/$(am__dirstamp)
 	-rm -f src/lite/$(DEPDIR)/$(am__dirstamp)
@@ -1662,6 +1877,10 @@ distclean-generic:
 	-rm -f src/lite/encrypt/algo/$(am__dirstamp)
 	-rm -f src/lite/lp/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/lite/lp/$(am__dirstamp)
+	-rm -f src/lite/security/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/lite/security/$(am__dirstamp)
+	-rm -f src/lite/transport/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/lite/transport/$(am__dirstamp)
 	-rm -f src/lite/util/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/lite/util/$(am__dirstamp)
 
@@ -1675,7 +1894,7 @@ clean-am: clean-generic clean-libtool clean-pyexecLTLIBRARIES \
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/util/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/encrypt/algo/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/security/$(DEPDIR) src/c/transport/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/security/$(DEPDIR) src/lite/transport/$(DEPDIR) src/lite/util/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -1723,7 +1942,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/util/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/c/$(DEPDIR) src/c/encoding/$(DEPDIR) src/c/encoding/tlv/$(DEPDIR) src/c/encrypt/algo/$(DEPDIR) src/c/lp/$(DEPDIR) src/c/security/$(DEPDIR) src/c/transport/$(DEPDIR) src/c/util/$(DEPDIR) src/lite/$(DEPDIR) src/lite/encoding/$(DEPDIR) src/lite/encrypt/$(DEPDIR) src/lite/encrypt/algo/$(DEPDIR) src/lite/lp/$(DEPDIR) src/lite/security/$(DEPDIR) src/lite/transport/$(DEPDIR) src/lite/util/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 /**
  * Copyright (C) 2016 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
@@ -19,35 +18,25 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#include "../../c/util/rsa-private-key.h"
-#include <ndn-cpp/lite/util/rsa-private-key-lite.hpp>
+#ifndef NDN_EC_PUBLIC_KEY_TYPES_H
+#define NDN_EC_PUBLIC_KEY_TYPES_H
 
-namespace ndn {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-RsaPrivateKeyLite::RsaPrivateKeyLite()
-{
-  ndn_RsaPrivateKey_initialize(this);
+struct ec_key_st;
+
+/**
+ * A struct ndn_EcPublicKey holds a decoded EC public key for use in crypto
+ * operations.
+ */
+struct ndn_EcPublicKey {
+  struct ec_key_st *publicKey;
+};
+
+#ifdef __cplusplus
 }
+#endif
 
-RsaPrivateKeyLite::~RsaPrivateKeyLite()
-{
-  ndn_RsaPrivateKey_finalize(this);
-}
-
-ndn_Error
-RsaPrivateKeyLite::decode
-  (const uint8_t* privateKeyDer, size_t privateKeyDerLength)
-{
-  return ndn_RsaPrivateKey_decode(this, privateKeyDer, privateKeyDerLength);
-}
-
-ndn_Error
-RsaPrivateKeyLite::signWithSha256
-  (const uint8_t* data, size_t dataLength, const uint8_t* signature,
-   size_t& signatureLength) const
-{
-  return ndn_RsaPrivateKey_signWithSha256
-    (this, data, dataLength, signature, &signatureLength);
-}
-
-}
+#endif

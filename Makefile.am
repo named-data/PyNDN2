@@ -26,15 +26,16 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/encrypt/algo/encrypt-params-types.h \
   include/ndn-cpp/c/lp/incoming-face-id-types.h \
   include/ndn-cpp/c/lp/lp-packet-types.h \
+  include/ndn-cpp/c/security/ec-private-key-types.h \
+  include/ndn-cpp/c/security/ec-public-key-types.h \
+  include/ndn-cpp/c/security/rsa-private-key-types.h \
+  include/ndn-cpp/c/security/rsa-public-key-types.h \
   include/ndn-cpp/c/transport/transport-types.h \
   include/ndn-cpp/c/util/blob-types.h \
-  include/ndn-cpp/c/util/dynamic-uint8-array-types.h \
-  include/ndn-cpp/c/util/ec-private-key-types.h \
-  include/ndn-cpp/c/util/rsa-private-key-types.h
+  include/ndn-cpp/c/util/dynamic-uint8-array-types.h
 
 # Public C++ headers.
 ndn_cpp_cpp_headers = \
-  include/ndn-cpp/lite/common-lite.hpp \
   include/ndn-cpp/lite/control-parameters-lite.hpp \
   include/ndn-cpp/lite/control-response-lite.hpp \
   include/ndn-cpp/lite/data-lite.hpp \
@@ -50,14 +51,20 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
+  include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
   include/ndn-cpp/lite/lp/lp-packet-lite.hpp \
+  include/ndn-cpp/lite/security/ec-private-key-lite.hpp \
+  include/ndn-cpp/lite/security/ec-public-key-lite.hpp \
+  include/ndn-cpp/lite/security/rsa-private-key-lite.hpp \
+  include/ndn-cpp/lite/security/rsa-public-key-lite.hpp \
+  include/ndn-cpp/lite/transport/tcp-transport-lite.hpp \
+  include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
+  include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
   include/ndn-cpp/lite/util/crypto-lite.hpp \
-  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp \
-  include/ndn-cpp/lite/util/ec-private-key-lite.hpp \
-  include/ndn-cpp/lite/util/rsa-private-key-lite.hpp
+  include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp
 
 # Just the C code.
 ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
@@ -89,16 +96,23 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/encoding/tlv/tlv-structure-decoder.c src/c/encoding/tlv/tlv-structure-decoder.h \
   src/c/encoding/tlv/tlv.h \
   src/c/encrypt/encrypted-content.h \
+  src/c/encrypt/algo/aes-algorithm_c.c src/c/encrypt/algo/aes-algorithm.h \
   src/c/encrypt/algo/encrypt-params.h \
   src/c/lp/incoming-face-id_c.c src/c/lp/incoming-face-id.h \
   src/c/lp/lp-packet.h \
-  src/c/util/blob.h \
+  src/c/security/ec-private-key.c src/c/util/ec-private-key.h \
+  src/c/security/ec-public-key.c src/c/util/ec-public-key.h \
+  src/c/security/rsa-private-key.c src/c/util/rsa-private-key.h \
+  src/c/security/rsa-public-key.c src/c/util/rsa-public-key.h \
+  src/c/transport/socket-transport.c src/c/transport/socket-transport.h \
+  src/c/transport/tcp-transport_c.c src/c/transport/tcp-transport.h \
+  src/c/transport/udp-transport.h \
+  src/c/transport/unix-transport.h \
+  src/c/util/blob_c.c src/c/util/blob.h \
   src/c/util/crypto.c src/c/util/crypto.h \
   src/c/util/dynamic-uint8-array.c src/c/util/dynamic-uint8-array.h \
-  src/c/util/ec-private-key.c src/c/util/ec-private-key.h \
   src/c/util/ndn_memory.c src/c/util/ndn_memory.h \
   src/c/util/ndn_realloc.c src/c/util/ndn_realloc.h \
-  src/c/util/rsa-private-key.c src/c/util/rsa-private-key.h \
   src/c/util/time.c src/c/util/time.h
 
 # C++ code and also the C code.
@@ -118,14 +132,20 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/encoding/element-listener-lite.cpp \
   src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp \
   src/lite/encrypt/encrypted-content-lite.cpp \
+  src/lite/encrypt/algo/aes-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
   src/lite/lp/lp-packet-lite.cpp \
+  src/lite/security/ec-private-key-lite.cpp \
+  src/lite/security/ec-public-key-lite.cpp \
+  src/lite/security/rsa-private-key-lite.cpp \
+  src/lite/security/rsa-public-key-lite.cpp \
+  src/lite/transport/tcp-transport-lite.cpp \
+  src/lite/transport/udp-transport-lite.cpp \
+  src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
   src/lite/util/crypto-lite.cpp \
-  src/lite/util/dynamic-uint8-array-lite.cpp \
-  src/lite/util/ec-private-key-lite.cpp \
-  src/lite/util/rsa-private-key-lite.cpp
+  src/lite/util/dynamic-uint8-array-lite.cpp
 
 pyexec_LTLIBRARIES = _pyndn.la
 _pyndn_la_CFLAGS = $(PYTHON_CFLAGS)

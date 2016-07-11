@@ -19,8 +19,8 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#include "../../c/util/ec-private-key.h"
-#include <ndn-cpp/lite/util/ec-private-key-lite.hpp>
+#include "../../c/security/ec-private-key.h"
+#include <ndn-cpp/lite/security/ec-private-key-lite.hpp>
 
 namespace ndn {
 
@@ -49,8 +49,30 @@ EcPrivateKeyLite::setByCurve
 }
 
 ndn_Error
+EcPrivateKeyLite::generate(uint32_t keySize)
+{
+  return ndn_EcPrivateKey_generate(this, keySize);
+}
+
+ndn_Error
+EcPrivateKeyLite::encodePrivateKey
+  (bool includeParameters, uint8_t* encoding, size_t& encodingLength) const
+{
+  return ndn_EcPrivateKey_encodePrivateKey
+    (this, includeParameters ? 1 : 0, encoding, &encodingLength);
+}
+
+ndn_Error
+EcPrivateKeyLite::encodePublicKey
+  (bool includeParameters, uint8_t* encoding, size_t& encodingLength) const
+{
+  return ndn_EcPrivateKey_encodePublicKey
+    (this, includeParameters ? 1 : 0. , encoding, &encodingLength);
+}
+
+ndn_Error
 EcPrivateKeyLite::signWithSha256
-  (const uint8_t* data, size_t dataLength, const uint8_t* signature,
+  (const uint8_t* data, size_t dataLength, uint8_t* signature,
    size_t& signatureLength) const
 {
   return ndn_EcPrivateKey_signWithSha256
