@@ -235,13 +235,9 @@ def processRegisterResponse(encodedControlResponse):
 
     # Success. Print the ControlParameters response.
     controlParameters = controlResponse.control_parameters[0]
-    name = ""
-    for component in controlParameters.name.component:
-        # component may be a bytes type, so use Blob to convert to str.
-        name += "/" + Blob(component, False).toRawStr()
-
     dump(
-      "Successful in name registration: ControlParameters(Name: " + name +
+      "Successful in name registration: ControlParameters(Name: " +
+      ProtobufTlv.toName(controlParameters.name.component).toUri() +
       ", FaceId: " + str(controlParameters.face_id) +
       ", Origin: " + str(controlParameters.origin) +
       ", Cost: " + str(controlParameters.cost) +

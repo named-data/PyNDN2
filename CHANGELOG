@@ -6,6 +6,7 @@ Changes
   to allow unrecognized content type codes in the packet.
 * In FilePrivateKeyStorage.generateKeyPair, update mapping.txt for the generated key.
 * In ProtobufTlv, added utility method toName.
+* Examples: In test_encode_decode_fib_entry, etc, use ProtobufTlv.toName.
 
 Bug fixes
 * http://redmine.named-data.net/issues/2760 Respect tpm= setting in client.conf.
