@@ -44,6 +44,14 @@ pyndn.util.common module
     :undoc-members:
     :show-inheritance:
 
+pyndn.util.config_file module
+-----------------------------
+
+.. automodule:: pyndn.util.config_file
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.util.dynamic_byte_array module
 ------------------------------------
 
