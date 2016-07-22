@@ -603,6 +603,40 @@ class Tlv0_1_1WireFormat(WireFormat):
         return self._instance
 
     @staticmethod
+    def _encodeNameComponent(component, encoder):
+        """
+        Encode the name component to the encoder as NDN-TLV. This handles
+        different component types such as ImplicitSha256DigestComponent.
+
+        :param Name.Component component: The name component to encode.
+        :param TlvEncoder encoder: The encoder to receive the encoding.
+        """
+        type = (Tlv.ImplicitSha256DigestComponent if
+          component.isImplicitSha256Digest() else Tlv.NameComponent)
+        encoder.writeBlobTlv(type, component.getValue().buf())
+
+    @staticmethod
+    def _decodeNameComponent(decoder):
+        """
+        Decode the name component as NDN-TLV and return the component. This
+        handles different component types such as ImplicitSha256DigestComponent.
+
+        :param TlvDecoder decode: The decoder with the input.
+        :return: A new Name.Component.
+        :rtype: Name.Component
+        """
+        savePosition = decoder.getOffset()
+        type = decoder.readVarNumber()
+        # Restore the position.
+        decoder.seek(savePosition)
+
+        value = Blob(decoder.readBlobTlv(type), True)
+        if type == Tlv.ImplicitSha256DigestComponent:
+          return Name.Component.fromImplicitSha256Digest(value)
+        else:
+          return Name.Component(value)
+
+    @staticmethod
     def _encodeName(name, encoder):
         """
         Encode the name to the encoder.
@@ -622,7 +656,7 @@ class Tlv0_1_1WireFormat(WireFormat):
 
         # Encode the components backwards.
         for i in range(len(name) - 1, -1, -1):
-            encoder.writeBlobTlv(Tlv.NameComponent, name[i].getValue().buf())
+            Tlv0_1_1WireFormat._encodeNameComponent(name[i], encoder)
             if i == len(name) - 1:
                 signedPortionEndOffsetFromBack = len(encoder)
 
@@ -666,7 +700,7 @@ class Tlv0_1_1WireFormat(WireFormat):
 
         while decoder.getOffset() < endOffset:
             signedPortionEndOffset = decoder.getOffset()
-            name.append(decoder.readBlobTlv(Tlv.NameComponent))
+            name.append(Tlv0_1_1WireFormat._decodeNameComponent(decoder))
 
         decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
@@ -738,8 +772,7 @@ class Tlv0_1_1WireFormat(WireFormat):
             entry = exclude[i]
 
             if entry.getType() == Exclude.COMPONENT:
-                encoder.writeBlobTlv(Tlv.NameComponent,
-                                     entry.getComponent().getValue().buf())
+                Tlv0_1_1WireFormat._encodeNameComponent(entry.getComponent(), encoder)
             elif entry.getType() == Exclude.ANY:
                 encoder.writeTypeAndLength(Tlv.Any, 0)
             else:
@@ -754,14 +787,14 @@ class Tlv0_1_1WireFormat(WireFormat):
         endOffset = decoder.readNestedTlvsStart(Tlv.Exclude)
 
         exclude.clear()
-        while True:
-            if decoder.peekType(Tlv.NameComponent, endOffset):
-                exclude.appendComponent(decoder.readBlobTlv(Tlv.NameComponent))
-            elif decoder.readBooleanTlv(Tlv.Any, endOffset):
+        while decoder.getOffset() < endOffset:
+            if decoder.peekType(Tlv.Any, endOffset):
+                # Read past the Any TLV.
+                decoder.readBooleanTlv(Tlv.Any, endOffset);
                 exclude.appendAny()
             else:
-                # Else no more entries.
-                break
+                exclude.appendComponent(
+                  Tlv0_1_1WireFormat._decodeNameComponent(decoder))
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -774,7 +807,8 @@ class Tlv0_1_1WireFormat(WireFormat):
         if finalBlockIdBuf != None and len(finalBlockIdBuf) > 0:
             # FinalBlockId has an inner NameComponent.
             finalBlockIdSaveLength = len(encoder)
-            encoder.writeBlobTlv(Tlv.NameComponent, finalBlockIdBuf)
+            Tlv0_1_1WireFormat._encodeNameComponent(
+              metaInfo.getFinalBlockId(), encoder)
             encoder.writeTypeAndLength(
               Tlv.FinalBlockId, len(encoder) - finalBlockIdSaveLength)
 
@@ -823,7 +857,7 @@ class Tlv0_1_1WireFormat(WireFormat):
             Tlv.FreshnessPeriod, endOffset))
         if decoder.peekType(Tlv.FinalBlockId, endOffset):
             finalBlockIdEndOffset = decoder.readNestedTlvsStart(Tlv.FinalBlockId)
-            metaInfo.setFinalBlockId(decoder.readBlobTlv(Tlv.NameComponent))
+            metaInfo.setFinalBlockId(Tlv0_1_1WireFormat._decodeNameComponent(decoder))
             decoder.finishNestedTlvs(finalBlockIdEndOffset)
         else:
             metaInfo.setFinalBlockId(None)
