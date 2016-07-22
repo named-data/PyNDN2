@@ -21,6 +21,8 @@
 This module defines the NDN Data class.
 """
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
 from pyndn.util.signed_blob import SignedBlob
@@ -39,6 +41,7 @@ class Data(object):
             self._signature = ChangeCounter(value.getSignature().clone())
             self._content = value._content
             self._defaultWireEncoding = value.getDefaultWireEncoding()
+            self._defaultFullName = value._defaultFullName
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
             self._name = ChangeCounter(Name(value) if type(value) is Name
@@ -47,6 +50,7 @@ class Data(object):
             self._signature = ChangeCounter(Sha256WithRsaSignature())
             self._content = Blob()
             self._defaultWireEncoding = SignedBlob()
+            self._defaultFullName = Name()
             self._defaultWireEncodingFormat = None
 
         self._getDefaultWireEncodingChangeCount = 0
@@ -192,6 +196,43 @@ class Data(object):
         field = (None if self._lpPacket == None
                  else IncomingFaceId.getFirstHeader(self._lpPacket))
         return None if field == None else field.getFaceId()
+
+    def getFullName(self, wireFormat = None):
+        """
+        Get the Data packet's full name, which includes the final
+        ImplicitSha256Digest component based on the wire encoding for a
+        particular wire format.
+
+        :param wireFormat: (optional) A WireFormat object used to encode
+           this object. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: The full name. You must not change the Name object - if you
+          need to change it then make a copy.
+        :rtype: Name
+        """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        # The default full name depends on the default wire encoding.
+        if (not self.getDefaultWireEncoding().isNull() and
+            self._defaultFullName.size() > 0 and
+            self.getDefaultWireEncodingFormat() == wireFormat):
+            # We already have a full name. A non-null default wire encoding
+            # means that the Data packet fields have not changed.
+            return self._defaultFullName
+
+        fullName = Name(self.getName())
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(self.wireEncode(wireFormat).toBytes())
+        fullName.appendImplicitSha256Digest(
+          Blob(bytearray(sha256.finalize()), False))
+
+        if wireFormat == WireFormat.getDefaultWireFormat():
+          # wireEncode has already set defaultWireEncodingFormat_.
+          self._defaultFullName = fullName
+
+        return fullName
 
     def setName(self, name):
         """
