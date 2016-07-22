@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.3beta1 (2016-07-20)
+Interim changes since PyNDN v2.3beta1 (2016-07-22)
 --------------------------------------------------
 
 Changes
@@ -6,6 +6,9 @@ Changes
   to allow unrecognized content type codes in the packet.
 * In FilePrivateKeyStorage.generateKeyPair, update mapping.txt for the generated key.
 * In ProtobufTlv, added utility method toName.
+* Added support for the Name component type ImplicitSha256Digest, and methods:
+  Name.Component.fromImplicitSha256Digest, isGeneric and isImplicitSha256Digest.
+  Name.appendImplicitSha256Digest.
 * Examples: In test_encode_decode_fib_entry, etc, use ProtobufTlv.toName.
 
 Bug fixes
