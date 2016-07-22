@@ -156,14 +156,13 @@ class PendingInterestTable(object):
         self._table.append(entry)
         return entry
 
-    def extractEntriesForExpressedInterest(self, name, entries):
+    def extractEntriesForExpressedInterest(self, data, entries):
         """
-        Find all entries from the pending interest table where the name conforms
+        Find all entries from the pending interest table where data conforms
         to the entry's interest selectors, remove the entries from the table,
         set each entry's isRemoved flag, and add to the entries list.
 
-        :param Name name: The name to find the interest for (from the incoming
-          data packet).
+        :param Data data: The incoming Data packet to find the interest for.
         :param List<PendingInterestTable.Entry> entries: Add matching
           PendingInterestTable.Entry from the pending interest table. The caller
           should pass in an empty list.
@@ -173,7 +172,7 @@ class PendingInterestTable(object):
         while i >= 0:
             pendingInterest = self._table[i]
 
-            if pendingInterest.getInterest().matchesName(name):
+            if pendingInterest.getInterest().matchesData(data):
                 entries.append(pendingInterest)
                 # We let the callback from callLater call _processInterestTimeout,
                 # but for efficiency, mark this as removed so that it returns
