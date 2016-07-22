@@ -300,18 +300,27 @@ class Blob(object):
             return 1
         return 0
 
-    def toHex(self):
+    def toHex(self, result = None):
         """
         Return the hex representation of the bytes in array.
 
-        :return: The hex string.
+        :param BytesIO result: (optional) The BytesIO stream to write to. If
+          omitted, return a str with the result.
+        :return: The hex string (only if result is omitted).
         :rtype: str
         """
+        if result == None:
+            if self._array == None:
+                return ""
+
+            result = BytesIO()
+            self.toHex(result)
+            return Common.getBytesIOString(result)
+
         if self._array == None:
-            return ""
+            return
 
         array = self.buf()
-        result = BytesIO()
         hexBuffer = bytearray(2)
         for i in range(len(array)):
             # Get the hex string and transfer to hexBuffer for writing.
@@ -319,8 +328,6 @@ class Blob(object):
             hexBuffer[0] = ord(hex[0])
             hexBuffer[1] = ord(hex[1])
             result.write(hexBuffer)
-
-        return Common.getBytesIOString(result)
 
 # Set this up once at the module level for the constructor to use.
 # Expect that this is True for Python version 3.3 or later.
