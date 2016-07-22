@@ -14,6 +14,7 @@ Changes
 * Examples: In test_encode_decode_fib_entry, etc, use ProtobufTlv.toName.
 * Unit tests: In test_name_methods, added test_implicit_sha256_digest.
 * Unit tests: In test_interest_methods, added test_matches_data.
+* Unit tests: In test_data_methods, added test_full_name.
 
 Bug fixes
 * http://redmine.named-data.net/issues/2760 Respect tpm= setting in client.conf.
