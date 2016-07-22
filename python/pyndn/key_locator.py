@@ -190,11 +190,27 @@ class KeyLocator(object):
     def equals(self, other):
         if self is None and other is None: return True
         if other is None: return False
-        if self._type != other._type: return False
-        if self._keyName.get() != None and not self._keyName.get().equals(other._keyName.get()): return False
-        if self._keyData != None and not self._keyData.equals(other._keyData): return False
+
+        if self._type != other._type:
+            return False
+
+        if self._type == KeyLocatorType.KEYNAME:
+            if not self.getKeyName().equals(other.getKeyName()):
+                return False
+
+        if self._type == KeyLocatorType.KEY_LOCATOR_DIGEST:
+            if not self.getKeyData().equals(other.getKeyData()):
+                return False
+
         return True
 
+    # Python operators
+
+    def __eq__(self, other):
+        return type(other) is KeyLocator and self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
 
 class KeyLocatorType(object):
     """
