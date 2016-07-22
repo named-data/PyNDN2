@@ -79,7 +79,7 @@ class ProtobufTlv(object):
         Return a Name made from the component array in a Protobuf message object,
         assuming that it was defined with "repeated bytes". For example:
         message Name {
-          repeated bytes component = 8;
+        repeated bytes component = 8;
         }
 
         :param Array componentArray: The array from the Protobuf message object
