@@ -10,6 +10,7 @@ Changes
   Name.Component.fromImplicitSha256Digest, isGeneric and isImplicitSha256Digest.
   Name.appendImplicitSha256Digest.
 * Examples: In test_encode_decode_fib_entry, etc, use ProtobufTlv.toName.
+* Unit tests: In test_interest_methods, added test_matches_data.
 
 Bug fixes
 * http://redmine.named-data.net/issues/2760 Respect tpm= setting in client.conf.

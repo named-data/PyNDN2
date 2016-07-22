@@ -21,10 +21,10 @@
 # dump method taken from test_encode_decode_interest
 #####
 import unittest as ut
-from pyndn import Name
+from pyndn import Name, Data, Sha256WithRsaSignature, DigestSha256Signature
 from pyndn import Interest
 from pyndn import Exclude
-from pyndn import KeyLocatorType
+from pyndn import KeyLocator, KeyLocatorType
 from pyndn import InterestFilter
 from pyndn.util import Blob
 from pyndn.security import KeyChain
@@ -150,6 +150,20 @@ class TestInterestDump(ut.TestCase):
         redecodedDump = dumpInterest(reDecodedInterest)
         self.assertEqual(initialDump, redecodedDump, 'Re-decoded interest does not match original')
 
+    def test_redecode_implicit_digest_exclude(self):
+        # Check that we encode and decode correctly with an implicit digest exclude.
+        interest = Interest(Name("/A"))
+        interest.getExclude().appendComponent(Name("/sha256digest=" +
+          "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f").get(0))
+        dump = dumpInterest(interest)
+
+        encoding = interest.wireEncode()
+        reDecodedInterest = Interest()
+        reDecodedInterest.wireDecode(encoding)
+        redecodedDump = dumpInterest(reDecodedInterest)
+        self.assertTrue(interestDumpsEqual(dump, redecodedDump),
+          "Re-decoded interest does not match original")
+
     def test_create_fresh(self):
         freshInterest = createFreshInterest()
         freshDump = dumpInterest(freshInterest)
@@ -228,6 +242,96 @@ class TestInterestMethods(ut.TestCase):
         keyChain.verifyInterest(interest, verifiedCallback, failedCallback)
         self.assertEqual(failedCallback.call_count, 0, 'Signature verification failed')
         self.assertEqual(verifiedCallback.call_count, 1, 'Verification callback was not used.')
+
+    def test_matches_data(self):
+        interest = Interest(Name("/A"))
+        interest.setMinSuffixComponents(2)
+        interest.setMaxSuffixComponents(2)
+        interest.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+        interest.getKeyLocator().setKeyName(Name("/B"))
+        interest.getExclude().appendComponent(Name.Component("J"))
+        interest.getExclude().appendAny()
+
+        data = Data(Name("/A/D"))
+        signature = Sha256WithRsaSignature()
+        signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+        signature.getKeyLocator().setKeyName(Name("/B"))
+        data.setSignature(signature)
+        self.assertEqual(interest.matchesData(data), True)
+
+        # Check violating MinSuffixComponents.
+        data1 = Data(data)
+        data1.setName(Name("/A"))
+        self.assertEqual(interest.matchesData(data1), False)
+
+        interest1 = Interest(interest)
+        interest1.setMinSuffixComponents(1)
+        self.assertEqual(interest1.matchesData(data1), True)
+
+        # Check violating MaxSuffixComponents.
+        data2 = Data(data)
+        data2.setName(Name("/A/E/F"))
+        self.assertEqual(interest.matchesData(data2), False)
+
+        interest2 = Interest(interest)
+        interest2.setMaxSuffixComponents(3)
+        self.assertEqual(interest2.matchesData(data2), True)
+
+        # Check violating PublisherPublicKeyLocator.
+        data3 = Data(data)
+        signature3 = Sha256WithRsaSignature()
+        signature3.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+        signature3.getKeyLocator().setKeyName(Name("/G"))
+        data3.setSignature(signature3)
+        self.assertEqual(interest.matchesData(data3), False)
+
+        interest3 = Interest(interest)
+        interest3.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+        interest3.getKeyLocator().setKeyName(Name("/G"))
+        self.assertEqual(interest3.matchesData(data3), True)
+
+        data4 = Data(data)
+        data4.setSignature(DigestSha256Signature())
+        self.assertEqual(interest.matchesData(data4), False)
+
+        interest4 = Interest(interest)
+        interest4.setKeyLocator(KeyLocator())
+        self.assertEqual(interest4.matchesData(data4), True)
+
+        # Check violating Exclude.
+        data5 = Data(data)
+        data5.setName(Name("/A/J"))
+        self.assertEqual(interest.matchesData(data5), False)
+
+        interest5 = Interest(interest)
+        interest5.getExclude().clear()
+        interest5.getExclude().appendComponent(Name.Component("K"))
+        interest5.getExclude().appendAny()
+        self.assertEqual(interest5.matchesData(data5), True)
+
+        # Check violating Name.
+        data6 = Data(data)
+        data6.setName(Name("/H/I"))
+        self.assertEqual(interest.matchesData(data6), False)
+
+        data7 = Data(data)
+        data7.setName(Name("/A/B"))
+
+        interest7 = Interest(
+          Name("/A/B/sha256digest=" +
+               "54008e240a7eea2714a161dfddf0dd6ced223b3856e9da96792151e180f3b128"))
+        self.assertEqual(interest7.matchesData(data7), True)
+
+        # Check violating the implicit digest.
+        interest7b = Interest(
+          Name("/A/B/%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00" +
+               "%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00"))
+        self.assertEqual(interest7b.matchesData(data7), False)
+
+        # Check excluding the implicit digest.
+        interest8 = Interest(Name("/A/B"))
+        interest8.getExclude().appendComponent(interest7.getName().get(2))
+        self.assertEqual(interest8.matchesData(data7), False)
 
     def test_interest_filter_matching(self):
         self.assertEqual(True,  InterestFilter("/a").doesMatch(Name("/a/b")))
