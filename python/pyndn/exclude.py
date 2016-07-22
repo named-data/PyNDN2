@@ -168,37 +168,6 @@ class Exclude(object):
 
         return Common.getBytesIOString(result)
 
-    @staticmethod
-    def compareComponents(component1, component2):
-        """
-        Compare the components using NDN component ordering. A component is less
-        if it is shorter, otherwise if equal length do a byte comparison.
-
-        :param Name.Component component1: The first name component.
-        :param Name.Component component2: The first name component.
-        :return: -1 if component1 is less than component2, 1 if greater or 0
-          if equal.
-        :rtype: int
-        """
-        buf1 = component1.getValue().buf()
-        buf2 = component2.getValue().buf()
-        if len(buf1) < len(buf2):
-            return -1
-        if len(buf1) > len(buf2):
-            return 1
-
-        # The components are equal length.  Just do a byte compare.
-        # The Blob buf() is a memoryview which we can't compare.  We could copy
-        #   into a bytearray for comparison but that is inefficient.  So, just
-        #   directly use normal loop.
-        for i in range(len(buf1)):
-            if buf1[i] < buf2[i]:
-                return -1
-            if buf1[i] > buf2[i]:
-                return 1
-
-        return 0
-
     def matches(self, component):
         """
         Check if the component matches any of the exclude criteria.
@@ -230,29 +199,24 @@ class Exclude(object):
                 #   on the next pass.
                 if upperBound != None:
                     if lowerBound != None:
-                        if (self.compareComponents(
-                                component, lowerBound.getComponent()) > 0 and
-                              self.compareComponents(
-                                component, upperBound.getComponent()) < 0):
+                        if (component.compare(lowerBound.getComponent()) > 0 and
+                            component.compare(upperBound.getComponent()) < 0):
                             return True
                     else:
-                        if (self.compareComponents(
-                              component, upperBound.getComponent()) < 0):
+                        if component.compare(upperBound.getComponent()) < 0:
                             return True
 
                     # Make i equal iUpperBound on the next pass.
                     i = iUpperBound - 1
                 else:
                     if lowerBound != None:
-                        if (self.compareComponents(
-                              component, lowerBound.getComponent()) > 0):
+                        if component.compare(lowerBound.getComponent()) > 0:
                             return True
                     else:
                         # this.values has only ANY.
                         return True
             else:
-                if (self.compareComponents(
-                      component, self._entries[i].getComponent()) == 0):
+                if component.equals(self._entries[i].getComponent()):
                     return True
 
             i +=1
