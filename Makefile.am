@@ -36,6 +36,7 @@ ndn_cpp_c_headers = \
 
 # Public C++ headers.
 ndn_cpp_cpp_headers = \
+  include/ndn-cpp/lite/common-lite.hpp \
   include/ndn-cpp/lite/control-parameters-lite.hpp \
   include/ndn-cpp/lite/control-response-lite.hpp \
   include/ndn-cpp/lite/data-lite.hpp \
@@ -50,6 +51,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/signature-lite.hpp \
   include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
+  include/ndn-cpp/lite/encoding/tlv-0_2-wire-format-lite.hpp \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
@@ -80,7 +82,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/network-nack_c.c src/c/network-nack.h \
   src/c/encoding/element-listener.h \
   src/c/encoding/element-reader.c src/c/encoding/element-reader.h \
-  src/c/encoding/tlv-0_1_1-wire-format_c.c src/c/encoding/tlv-0_1_1-wire-format.h \
+  src/c/encoding/tlv-0_2-wire-format_c.c src/c/encoding/tlv-0_2-wire-format.h \
   src/c/encoding/tlv/tlv-control-parameters.c src/c/encoding/tlv/tlv-control-parameters.h \
   src/c/encoding/tlv/tlv-control-response.c src/c/encoding/tlv/tlv-control-response.h \
   src/c/encoding/tlv/tlv-data.c src/c/encoding/tlv/tlv-data.h \
@@ -130,7 +132,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/network-nack-lite.cpp \
   src/lite/signature-lite.cpp \
   src/lite/encoding/element-listener-lite.cpp \
-  src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp \
+  src/lite/encoding/tlv-0_2-wire-format-lite.cpp \
   src/lite/encrypt/encrypted-content-lite.cpp \
   src/lite/encrypt/algo/aes-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \

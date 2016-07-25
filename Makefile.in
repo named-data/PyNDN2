@@ -91,6 +91,7 @@ host_triplet = @host@
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_prefix_config_h.m4 \
+	$(top_srcdir)/m4/ax_python_devel.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
@@ -142,7 +143,7 @@ am__objects_2 = $(am__objects_1) \
 	src/c/_pyndn_la-interest_c.lo src/c/_pyndn_la-name_c.lo \
 	src/c/_pyndn_la-network-nack_c.lo \
 	src/c/encoding/_pyndn_la-element-reader.lo \
-	src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo \
+	src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-control-response.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-data.lo \
@@ -183,7 +184,7 @@ am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/_pyndn_la-network-nack-lite.lo \
 	src/lite/_pyndn_la-signature-lite.lo \
 	src/lite/encoding/_pyndn_la-element-listener-lite.lo \
-	src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo \
+	src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo \
 	src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo \
 	src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo \
 	src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo \
@@ -378,9 +379,12 @@ PYTHON = @PYTHON@
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 PYTHON_CPPFLAGS = @PYTHON_CPPFLAGS@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_EXTRA_LDFLAGS = @PYTHON_EXTRA_LDFLAGS@
+PYTHON_EXTRA_LIBS = @PYTHON_EXTRA_LIBS@
 PYTHON_LIBS = @PYTHON_LIBS@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
@@ -479,6 +483,7 @@ ndn_cpp_c_headers = \
 
 # Public C++ headers.
 ndn_cpp_cpp_headers = \
+  include/ndn-cpp/lite/common-lite.hpp \
   include/ndn-cpp/lite/control-parameters-lite.hpp \
   include/ndn-cpp/lite/control-response-lite.hpp \
   include/ndn-cpp/lite/data-lite.hpp \
@@ -493,6 +498,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/signature-lite.hpp \
   include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
+  include/ndn-cpp/lite/encoding/tlv-0_2-wire-format-lite.hpp \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
@@ -524,7 +530,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/network-nack_c.c src/c/network-nack.h \
   src/c/encoding/element-listener.h \
   src/c/encoding/element-reader.c src/c/encoding/element-reader.h \
-  src/c/encoding/tlv-0_1_1-wire-format_c.c src/c/encoding/tlv-0_1_1-wire-format.h \
+  src/c/encoding/tlv-0_2-wire-format_c.c src/c/encoding/tlv-0_2-wire-format.h \
   src/c/encoding/tlv/tlv-control-parameters.c src/c/encoding/tlv/tlv-control-parameters.h \
   src/c/encoding/tlv/tlv-control-response.c src/c/encoding/tlv/tlv-control-response.h \
   src/c/encoding/tlv/tlv-data.c src/c/encoding/tlv/tlv-data.h \
@@ -575,7 +581,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/network-nack-lite.cpp \
   src/lite/signature-lite.cpp \
   src/lite/encoding/element-listener-lite.cpp \
-  src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp \
+  src/lite/encoding/tlv-0_2-wire-format-lite.cpp \
   src/lite/encrypt/encrypted-content-lite.cpp \
   src/lite/encrypt/algo/aes-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
@@ -713,7 +719,7 @@ src/c/encoding/$(DEPDIR)/$(am__dirstamp):
 src/c/encoding/_pyndn_la-element-reader.lo:  \
 	src/c/encoding/$(am__dirstamp) \
 	src/c/encoding/$(DEPDIR)/$(am__dirstamp)
-src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo:  \
+src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo:  \
 	src/c/encoding/$(am__dirstamp) \
 	src/c/encoding/$(DEPDIR)/$(am__dirstamp)
 src/c/encoding/tlv/$(am__dirstamp):
@@ -866,7 +872,7 @@ src/lite/encoding/$(DEPDIR)/$(am__dirstamp):
 src/lite/encoding/_pyndn_la-element-listener-lite.lo:  \
 	src/lite/encoding/$(am__dirstamp) \
 	src/lite/encoding/$(DEPDIR)/$(am__dirstamp)
-src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo:  \
+src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo:  \
 	src/lite/encoding/$(am__dirstamp) \
 	src/lite/encoding/$(DEPDIR)/$(am__dirstamp)
 src/lite/encrypt/$(am__dirstamp):
@@ -1007,7 +1013,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-name_c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-network-nack_c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format_c.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-response.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-data.Plo@am__quote@
@@ -1048,7 +1054,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-network-nack-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-element-listener-lite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo@am__quote@
@@ -1138,12 +1144,12 @@ src/c/encoding/_pyndn_la-element-reader.lo: src/c/encoding/element-reader.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-element-reader.lo `test -f 'src/c/encoding/element-reader.c' || echo '$(srcdir)/'`src/c/encoding/element-reader.c
 
-src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo: src/c/encoding/tlv-0_1_1-wire-format_c.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format_c.Tpo -c -o src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo `test -f 'src/c/encoding/tlv-0_1_1-wire-format_c.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_1_1-wire-format_c.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format_c.Tpo src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format_c.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv-0_1_1-wire-format_c.c' object='src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo' libtool=yes @AMDEPBACKSLASH@
+src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo: src/c/encoding/tlv-0_2-wire-format_c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Tpo -c -o src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo `test -f 'src/c/encoding/tlv-0_2-wire-format_c.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_2-wire-format_c.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Tpo src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encoding/tlv-0_2-wire-format_c.c' object='src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-tlv-0_1_1-wire-format_c.lo `test -f 'src/c/encoding/tlv-0_1_1-wire-format_c.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_1_1-wire-format_c.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo `test -f 'src/c/encoding/tlv-0_2-wire-format_c.c' || echo '$(srcdir)/'`src/c/encoding/tlv-0_2-wire-format_c.c
 
 src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo: src/c/encoding/tlv/tlv-control-parameters.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo -MD -MP -MF src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Tpo -c -o src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo `test -f 'src/c/encoding/tlv/tlv-control-parameters.c' || echo '$(srcdir)/'`src/c/encoding/tlv/tlv-control-parameters.c
@@ -1449,12 +1455,12 @@ src/lite/encoding/_pyndn_la-element-listener-lite.lo: src/lite/encoding/element-
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encoding/_pyndn_la-element-listener-lite.lo `test -f 'src/lite/encoding/element-listener-lite.cpp' || echo '$(srcdir)/'`src/lite/encoding/element-listener-lite.cpp
 
-src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo: src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo -MD -MP -MF src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format-lite.Tpo -c -o src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo `test -f 'src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp' || echo '$(srcdir)/'`src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format-lite.Tpo src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_1_1-wire-format-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp' object='src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo' libtool=yes @AMDEPBACKSLASH@
+src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo: src/lite/encoding/tlv-0_2-wire-format-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo -MD -MP -MF src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Tpo -c -o src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo `test -f 'src/lite/encoding/tlv-0_2-wire-format-lite.cpp' || echo '$(srcdir)/'`src/lite/encoding/tlv-0_2-wire-format-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Tpo src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/encoding/tlv-0_2-wire-format-lite.cpp' object='src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encoding/_pyndn_la-tlv-0_1_1-wire-format-lite.lo `test -f 'src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp' || echo '$(srcdir)/'`src/lite/encoding/tlv-0_1_1-wire-format-lite.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo `test -f 'src/lite/encoding/tlv-0_2-wire-format-lite.cpp' || echo '$(srcdir)/'`src/lite/encoding/tlv-0_2-wire-format-lite.cpp
 
 src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo: src/lite/encrypt/encrypted-content-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo -MD -MP -MF src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Tpo -c -o src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo `test -f 'src/lite/encrypt/encrypted-content-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/encrypted-content-lite.cpp
