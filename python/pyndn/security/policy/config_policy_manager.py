@@ -308,7 +308,7 @@ class ConfigPolicyManager(PolicyManager):
             else:
                 certData = b64decode(certID)
                 cert = IdentityCertificate()
-                cert.wireDecode(certData)
+                cert.wireDecode(Blob(certData, False))
 
             certUri = cert.getName()[:-1].toUri()
             self._fixedCertificateCache[certID] = certUri
