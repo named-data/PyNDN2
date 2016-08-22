@@ -107,10 +107,12 @@ class Data(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        (signedPortionBeginOffset, signedPortionEndOffset) = \
-          wireFormat.decodeData(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          result = wireFormat.decodeData(self, input.buf(), False)
+        else:
+          result = wireFormat.decodeData(self, input, True)
+        (signedPortionBeginOffset, signedPortionEndOffset) = result
 
         if wireFormat == WireFormat.getDefaultWireFormat():
             # This is the default wire encoding.  In the Blob constructor, set

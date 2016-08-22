@@ -399,7 +399,7 @@ class ConfigPolicyManager(PolicyManager):
             try:
                 signature = wireFormat.decodeSignatureInfoAndValue(
                    dataOrInterest.getName().get(-2).getValue().buf(),
-                   dataOrInterest.getName().get(-1).getValue().buf())
+                   dataOrInterest.getName().get(-1).getValue().buf(), False)
             except (IndexError, ValueError):
                 return None
             return signature

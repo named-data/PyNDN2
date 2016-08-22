@@ -86,9 +86,11 @@ class ControlResponse(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        wireFormat.decodeControlResponse(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          wireFormat.decodeControlResponse(self, input.buf(), False)
+        else:
+          wireFormat.decodeControlResponse(self, input, True)
 
     def getStatusCode(self):
         """

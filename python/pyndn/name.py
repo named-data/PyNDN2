@@ -949,9 +949,11 @@ class Name(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a Blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        wireFormat.decodeName(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          wireFormat.decodeName(self, input.buf(), False)
+        else:
+          wireFormat.decodeName(self, input, True)
 
     def getChangeCount(self):
         """

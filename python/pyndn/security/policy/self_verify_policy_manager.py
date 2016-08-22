@@ -122,7 +122,7 @@ class SelfVerifyPolicyManager(PolicyManager):
             # Decode the last two name components of the signed interest
             signature = wireFormat.decodeSignatureInfoAndValue(
                interest.getName().get(-2).getValue().buf(),
-               interest.getName().get(-1).getValue().buf())
+               interest.getName().get(-1).getValue().buf(), False)
 
             # wireEncode returns the cached encoding if available.
             if self._verify(signature, interest.wireEncode()):

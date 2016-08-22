@@ -221,6 +221,8 @@ class DelegationSet(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a Blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        wireFormat.decodeDelegationSet(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          wireFormat.decodeDelegationSet(self, input.buf(), False)
+        else:
+          wireFormat.decodeDelegationSet(self, input, True)
