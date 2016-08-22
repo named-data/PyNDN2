@@ -64,7 +64,7 @@ class Tlv0_2WireFormat(WireFormat):
         self._encodeName(name, encoder)
         return Blob(encoder.getOutput(), False)
 
-    def decodeName(self, name, input):
+    def decodeName(self, name, input, copy = True):
         """
         Decode input as an NDN-TLV name and set the fields of the Name
         object.
@@ -72,9 +72,13 @@ class Tlv0_2WireFormat(WireFormat):
         :param Name name: The Name object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         """
         decoder = TlvDecoder(input)
-        self._decodeName(name, decoder)
+        self._decodeName(name, decoder, copy)
 
     def encodeInterest(self, interest):
         """
@@ -146,7 +150,7 @@ class Tlv0_2WireFormat(WireFormat):
         return (Blob(encoder.getOutput(), False), signedPortionBeginOffset,
                 signedPortionEndOffset)
 
-    def decodeInterest(self, interest, input):
+    def decodeInterest(self, interest, input, copy = True):
         """
         Decode input as an NDN-TLV interest and set the fields of the interest
         object.
@@ -154,6 +158,10 @@ class Tlv0_2WireFormat(WireFormat):
         :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)
           where signedPortionBeginOffset is the offset in the encoding of
           the beginning of the signed portion, and signedPortionEndOffset is
@@ -166,11 +174,11 @@ class Tlv0_2WireFormat(WireFormat):
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
-        offsets = self._decodeName(interest.getName(), decoder)
+        offsets = self._decodeName(interest.getName(), decoder, copy)
         if decoder.peekType(Tlv.Selectors, endOffset):
-            self._decodeSelectors(interest, decoder)
+            self._decodeSelectors(interest, decoder, copy)
         # Require a Nonce, but don't force it to be 4 bytes.
-        nonce = Blob(decoder.readBlobTlv(Tlv.Nonce))
+        nonce = Blob(decoder.readBlobTlv(Tlv.Nonce), copy)
         interest.setInterestLifetimeMilliseconds(
            decoder.readOptionalNonNegativeIntegerTlvAsFloat
            (Tlv.InterestLifetime, endOffset))
@@ -182,7 +190,7 @@ class Tlv0_2WireFormat(WireFormat):
             decoder.seek(linkEndOffset)
 
             interest.setLinkWireEncoding(
-              Blob(decoder.getSlice(linkBeginOffset, linkEndOffset), True), self)
+              Blob(decoder.getSlice(linkBeginOffset, linkEndOffset), copy), self)
         else:
             interest.unsetLink()
         interest.setSelectedDelegationIndex(
@@ -233,7 +241,7 @@ class Tlv0_2WireFormat(WireFormat):
         return (Blob(encoder.getOutput(), False), signedPortionBeginOffset,
                 signedPortionEndOffset)
 
-    def decodeData(self, data, input):
+    def decodeData(self, data, input, copy = True):
         """
         Decode input as an NDN-TLV data packet, set the fields in the data
         object, and return the signed offsets.
@@ -241,6 +249,10 @@ class Tlv0_2WireFormat(WireFormat):
         :param Data data: The Data object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)
           where signedPortionBeginOffset is the offset in the encoding of
           the beginning of the signed portion, and signedPortionEndOffset is
@@ -252,13 +264,14 @@ class Tlv0_2WireFormat(WireFormat):
         endOffset = decoder.readNestedTlvsStart(Tlv.Data)
         signedPortionBeginOffset = decoder.getOffset()
 
-        self._decodeName(data.getName(), decoder)
-        self._decodeMetaInfo(data.getMetaInfo(), decoder)
-        data.setContent(Blob(decoder.readBlobTlv(Tlv.Content)))
-        self._decodeSignatureInfo(data, decoder)
+        self._decodeName(data.getName(), decoder, copy)
+        self._decodeMetaInfo(data.getMetaInfo(), decoder, copy)
+        data.setContent(Blob(decoder.readBlobTlv(Tlv.Content), copy))
+        self._decodeSignatureInfo(data, decoder, copy)
 
         signedPortionEndOffset = decoder.getOffset()
-        data.getSignature().setSignature(Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
+        data.getSignature().setSignature(
+          Blob(decoder.readBlobTlv(Tlv.SignatureValue), copy))
 
         decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
@@ -276,7 +289,7 @@ class Tlv0_2WireFormat(WireFormat):
         self._encodeControlParameters(controlParameters, encoder)
         return Blob(encoder.getOutput(), False)
 
-    def decodeControlParameters(self, controlParameters, input):
+    def decodeControlParameters(self, controlParameters, input, copy = True):
         """
         Decode input as an NDN-TLV ControlParameters and set the fields of the
         controlParameters object.
@@ -285,9 +298,13 @@ class Tlv0_2WireFormat(WireFormat):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         """
         decoder = TlvDecoder(input)
-        self._decodeControlParameters(controlParameters, decoder)
+        self._decodeControlParameters(controlParameters, decoder, copy)
 
     def encodeSignatureInfo(self, signature):
         """
@@ -332,7 +349,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         return Blob(encoder.getOutput(), False)
 
-    def decodeControlResponse(self, controlResponse, input):
+    def decodeControlResponse(self, controlResponse, input, copy = True):
         """
         Decode input as an NDN-TLV ControlResponse and set the fields of the
         controlResponse object.
@@ -341,6 +358,10 @@ class Tlv0_2WireFormat(WireFormat):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         """
         controlResponse.clear()
 
@@ -351,6 +372,7 @@ class Tlv0_2WireFormat(WireFormat):
         # decode face ID
         controlResponse.setStatusCode(decoder.readNonNegativeIntegerTlv
             (Tlv.NfdCommand_StatusCode))
+        # Set copy False since we just immediately get a string.
         statusText = Blob(
           decoder.readBlobTlv(Tlv.NfdCommand_StatusText), False)
         controlResponse.setStatusText(str(statusText))
@@ -360,7 +382,7 @@ class Tlv0_2WireFormat(WireFormat):
             controlResponse.setBodyAsControlParameters(ControlParameters())
             # Decode into the existing ControlParameters to avoid copying.
             self._decodeControlParameters(
-              controlResponse.getBodyAsControlParameters(), decoder)
+              controlResponse.getBodyAsControlParameters(), decoder, copy)
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -371,7 +393,7 @@ class Tlv0_2WireFormat(WireFormat):
         def getSignature(self):
             return self._signature
 
-    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue):
+    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue, copy = True):
         """
         Decode signatureInfo as a signature info and signatureValue as the
         related SignatureValue, and return a new object which is a subclass of
@@ -383,17 +405,21 @@ class Tlv0_2WireFormat(WireFormat):
         :param signatureValue: The array with the signature value input buffer
           to decode.
         :type signatureValue: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :return: A new object which is a subclass of Signature.
         :rtype: a subclass of Signature
         """
         # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
         signatureHolder = self.SignatureHolder()
         decoder = TlvDecoder(signatureInfo)
-        self._decodeSignatureInfo(signatureHolder, decoder)
+        self._decodeSignatureInfo(signatureHolder, decoder, copy)
 
         decoder = TlvDecoder(signatureValue)
         signatureHolder.getSignature().setSignature(
-          Blob(decoder.readBlobTlv(Tlv.SignatureValue)))
+          Blob(decoder.readBlobTlv(Tlv.SignatureValue), copy))
 
         return signatureHolder.getSignature()
 
@@ -413,7 +439,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         return Blob(encoder.getOutput(), False)
 
-    def decodeLpPacket(self, lpPacket, input):
+    def decodeLpPacket(self, lpPacket, input, copy = True):
         """
         Decode input as an NDN-TLV LpPacket and set the fields of the lpPacket
         object.
@@ -421,6 +447,10 @@ class Tlv0_2WireFormat(WireFormat):
         :param LpPacket lpPacket: The LpPacket object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         """
         lpPacket.clear()
 
@@ -438,7 +468,7 @@ class Tlv0_2WireFormat(WireFormat):
             if fieldType == Tlv.LpPacket_Fragment:
                 # Set the fragment to the bytes of the TLV value.
                 lpPacket.setFragmentWireEncoding(
-                  Blob(decoder.getSlice(decoder.getOffset(), fieldEndOffset), True))
+                  Blob(decoder.getSlice(decoder.getOffset(), fieldEndOffset), copy))
                 decoder.seek(fieldEndOffset)
 
                 # The fragment is supposed to be the last field.
@@ -509,7 +539,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         return Blob(encoder.getOutput(), False)
 
-    def decodeDelegationSet(self, delegationSet, input):
+    def decodeDelegationSet(self, delegationSet, input, copy = True):
         """
         Decode input as a DelegationSet in NDN-TLV and set the fields of the
         delegationSet object. Note that the sequence of Delegation does not have
@@ -521,6 +551,10 @@ class Tlv0_2WireFormat(WireFormat):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         """
         decoder = TlvDecoder(input)
         endOffset = len(input)
@@ -530,7 +564,7 @@ class Tlv0_2WireFormat(WireFormat):
             decoder.readTypeAndLength(Tlv.Link_Delegation)
             preference = decoder.readNonNegativeIntegerTlv(Tlv.Link_Preference)
             name = Name()
-            Tlv0_2WireFormat._decodeName(name, decoder)
+            Tlv0_2WireFormat._decodeName(name, decoder, copy)
 
             # Add unsorted to preserve the order so that Interest selected
             # delegation index will work.
@@ -564,7 +598,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         return Blob(encoder.getOutput(), False)
 
-    def decodeEncryptedContent(self, encryptedContent, input):
+    def decodeEncryptedContent(self, encryptedContent, input, copy = True):
         """
         Decode input as an EncryptedContent in NDN-TLV and set the fields of the
         encryptedContent object.
@@ -573,19 +607,23 @@ class Tlv0_2WireFormat(WireFormat):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         """
         decoder = TlvDecoder(input)
         endOffset = decoder.readNestedTlvsStart(Tlv.Encrypt_EncryptedContent)
 
         Tlv0_2WireFormat._decodeKeyLocator(
-          Tlv.KeyLocator, encryptedContent.getKeyLocator(), decoder)
+          Tlv.KeyLocator, encryptedContent.getKeyLocator(), decoder, copy)
         encryptedContent.setAlgorithmType(
           decoder.readNonNegativeIntegerTlv(Tlv.Encrypt_EncryptionAlgorithm))
         encryptedContent.setInitialVector(
           Blob(decoder.readOptionalBlobTlv
-           (Tlv.Encrypt_InitialVector, endOffset), True))
+           (Tlv.Encrypt_InitialVector, endOffset), copy))
         encryptedContent.setPayload(
-          Blob(decoder.readBlobTlv(Tlv.Encrypt_EncryptedPayload), True))
+          Blob(decoder.readBlobTlv(Tlv.Encrypt_EncryptedPayload), copy))
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -616,12 +654,15 @@ class Tlv0_2WireFormat(WireFormat):
         encoder.writeBlobTlv(type, component.getValue().buf())
 
     @staticmethod
-    def _decodeNameComponent(decoder):
+    def _decodeNameComponent(decoder, copy):
         """
         Decode the name component as NDN-TLV and return the component. This
         handles different component types such as ImplicitSha256DigestComponent.
 
         :param TlvDecoder decode: The decoder with the input.
+        :param bool copy: If True, copy from the input when making new Blob
+          values. If False, then Blob values share memory with the input, which
+          must remain unchanged while the Blob values are used.
         :return: A new Name.Component.
         :rtype: Name.Component
         """
@@ -630,7 +671,7 @@ class Tlv0_2WireFormat(WireFormat):
         # Restore the position.
         decoder.seek(savePosition)
 
-        value = Blob(decoder.readBlobTlv(type), True)
+        value = Blob(decoder.readBlobTlv(type), copy)
         if type == Tlv.ImplicitSha256DigestComponent:
           return Name.Component.fromImplicitSha256Digest(value)
         else:
@@ -675,13 +716,16 @@ class Tlv0_2WireFormat(WireFormat):
         return (signedPortionBeginOffset, signedPortionEndOffset)
 
     @staticmethod
-    def _decodeName(name, decoder):
+    def _decodeName(name, decoder, copy):
         """
         Clear the name, decode a Name from the decoder and set the fields of
         the name object.
 
         :param Name name: The name object whose fields are updated.
         :param TlvDecoder decode: The decoder with the input.
+        :param bool copy: If True, copy from the input when making new Blob
+          values. If False, then Blob values share memory with the input, which
+          must remain unchanged while the Blob values are used.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)
           where signedPortionBeginOffset is the offset in the encoding of
           the beginning of the signed portion, and signedPortionEndOffset is
@@ -700,7 +744,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         while decoder.getOffset() < endOffset:
             signedPortionEndOffset = decoder.getOffset()
-            name.append(Tlv0_2WireFormat._decodeNameComponent(decoder))
+            name.append(Tlv0_2WireFormat._decodeNameComponent(decoder, copy))
 
         decoder.finishNestedTlvs(endOffset)
         return (signedPortionBeginOffset, signedPortionEndOffset)
@@ -733,7 +777,7 @@ class Tlv0_2WireFormat(WireFormat):
             encoder.writeTypeAndLength(Tlv.Selectors, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeSelectors(interest, decoder):
+    def _decodeSelectors(interest, decoder, copy):
         endOffset = decoder.readNestedTlvsStart(Tlv.Selectors)
 
         interest.setMinSuffixComponents(
@@ -745,12 +789,13 @@ class Tlv0_2WireFormat(WireFormat):
 
         if decoder.peekType(Tlv.PublisherPublicKeyLocator, endOffset):
             Tlv0_2WireFormat._decodeKeyLocator(
-              Tlv.PublisherPublicKeyLocator, interest.getKeyLocator(), decoder)
+              Tlv.PublisherPublicKeyLocator, interest.getKeyLocator(), decoder,
+              copy)
         else:
             interest.getKeyLocator().clear()
 
         if decoder.peekType(Tlv.Exclude, endOffset):
-            Tlv0_2WireFormat._decodeExclude(interest.getExclude(), decoder)
+            Tlv0_2WireFormat._decodeExclude(interest.getExclude(), decoder, copy)
         else:
             interest.getExclude().clear()
 
@@ -783,7 +828,7 @@ class Tlv0_2WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.Exclude, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeExclude(exclude, decoder):
+    def _decodeExclude(exclude, decoder, copy):
         endOffset = decoder.readNestedTlvsStart(Tlv.Exclude)
 
         exclude.clear()
@@ -794,7 +839,7 @@ class Tlv0_2WireFormat(WireFormat):
                 exclude.appendAny()
             else:
                 exclude.appendComponent(
-                  Tlv0_2WireFormat._decodeNameComponent(decoder))
+                  Tlv0_2WireFormat._decodeNameComponent(decoder, copy))
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -833,7 +878,7 @@ class Tlv0_2WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.MetaInfo, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeMetaInfo(metaInfo, decoder):
+    def _decodeMetaInfo(metaInfo, decoder, copy):
         endOffset = decoder.readNestedTlvsStart(Tlv.MetaInfo)
 
         typeCode = decoder.readOptionalNonNegativeIntegerTlv(
@@ -857,7 +902,8 @@ class Tlv0_2WireFormat(WireFormat):
             Tlv.FreshnessPeriod, endOffset))
         if decoder.peekType(Tlv.FinalBlockId, endOffset):
             finalBlockIdEndOffset = decoder.readNestedTlvsStart(Tlv.FinalBlockId)
-            metaInfo.setFinalBlockId(Tlv0_2WireFormat._decodeNameComponent(decoder))
+            metaInfo.setFinalBlockId(
+              Tlv0_2WireFormat._decodeNameComponent(decoder, copy))
             decoder.finishNestedTlvs(finalBlockIdEndOffset)
         else:
             metaInfo.setFinalBlockId(None)
@@ -920,7 +966,7 @@ class Tlv0_2WireFormat(WireFormat):
         encoder.writeTypeAndLength(Tlv.SignatureInfo, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeSignatureInfo(signatureHolder, decoder):
+    def _decodeSignatureInfo(signatureHolder, decoder, copy):
         beginOffset = decoder.getOffset()
         endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
 
@@ -932,18 +978,18 @@ class Tlv0_2WireFormat(WireFormat):
             signatureInfo = signatureHolder.getSignature()
             Tlv0_2WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),
-              decoder)
+              decoder, copy)
         elif signatureType == Tlv.SignatureType_SignatureSha256WithEcdsa:
             signatureHolder.setSignature(Sha256WithEcdsaSignature())
             signatureInfo = signatureHolder.getSignature()
             Tlv0_2WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),
-              decoder)
+              decoder, copy)
         elif signatureType == Tlv.SignatureType_SignatureHmacWithSha256:
             signatureHolder.setSignature(HmacWithSha256Signature())
             Tlv0_2WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureHolder.getSignature().getKeyLocator(),
-              decoder)
+              decoder, copy)
         elif signatureType == Tlv.SignatureType_DigestSha256:
             signatureHolder.setSignature(DigestSha256Signature())
         else:
@@ -952,7 +998,7 @@ class Tlv0_2WireFormat(WireFormat):
 
             # Get the bytes of the SignatureInfo TLV.
             signatureInfo.setSignatureInfoEncoding(
-              Blob(decoder.getSlice(beginOffset, endOffset), True), signatureType)
+              Blob(decoder.getSlice(beginOffset, endOffset), copy), signatureType)
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -975,7 +1021,7 @@ class Tlv0_2WireFormat(WireFormat):
         encoder.writeTypeAndLength(type, len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeKeyLocator(expectedType, keyLocator, decoder):
+    def _decodeKeyLocator(expectedType, keyLocator, decoder, copy):
         endOffset = decoder.readNestedTlvsStart(expectedType)
 
         keyLocator.clear()
@@ -987,12 +1033,12 @@ class Tlv0_2WireFormat(WireFormat):
         if decoder.peekType(Tlv.Name, endOffset):
             # KeyLocator is a Name.
             keyLocator.setType(KeyLocatorType.KEYNAME)
-            Tlv0_2WireFormat._decodeName(keyLocator.getKeyName(), decoder)
+            Tlv0_2WireFormat._decodeName(keyLocator.getKeyName(), decoder, copy)
         elif decoder.peekType(Tlv.KeyLocatorDigest, endOffset):
             # KeyLocator is a KeyLocatorDigest.
             keyLocator.setType(KeyLocatorType.KEY_LOCATOR_DIGEST)
             keyLocator.setKeyData(
-              Blob(decoder.readBlobTlv(Tlv.KeyLocatorDigest)))
+              Blob(decoder.readBlobTlv(Tlv.KeyLocatorDigest), copy))
         else:
             raise RuntimeError("decodeKeyLocator: Unrecognized key locator type")
 
@@ -1041,7 +1087,7 @@ class Tlv0_2WireFormat(WireFormat):
                                    len(encoder) - saveLength)
 
     @staticmethod
-    def _decodeControlParameters(controlParameters, decoder):
+    def _decodeControlParameters(controlParameters, decoder, copy):
         controlParameters.clear()
 
         endOffset = decoder.readNestedTlvsStart(
@@ -1050,7 +1096,7 @@ class Tlv0_2WireFormat(WireFormat):
         # decode name
         if decoder.peekType(Tlv.Name, endOffset):
             name = Name()
-            Tlv0_2WireFormat._decodeName(name, decoder)
+            Tlv0_2WireFormat._decodeName(name, decoder, copy)
             controlParameters.setName(name)
 
         # decode face ID
@@ -1059,6 +1105,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         # decode URI
         if decoder.peekType(Tlv.ControlParameters_Uri, endOffset):
+            # Set copy False since we just immediately get a string.
             uri = Blob(
               decoder.readOptionalBlobTlv(Tlv.ControlParameters_Uri, endOffset),
               False)
@@ -1086,7 +1133,8 @@ class Tlv0_2WireFormat(WireFormat):
         if decoder.peekType(Tlv.ControlParameters_Strategy, endOffset):
             strategyEndOffset = decoder.readNestedTlvsStart(
               Tlv.ControlParameters_Strategy)
-            Tlv0_2WireFormat._decodeName(controlParameters.getStrategy(), decoder)
+            Tlv0_2WireFormat._decodeName(
+              controlParameters.getStrategy(), decoder, copy)
             decoder.finishNestedTlvs(strategyEndOffset)
 
         # decode expiration period
