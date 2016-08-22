@@ -51,7 +51,7 @@ class Name(object):
 
     class Component(object):
         """
-        Create a new Name.Component.
+        Create a new GENERIC Name.Component.
 
         :param value: (optional) If value is already a Blob or Name.Component,
           then take another pointer to the value.  Otherwise, create a new
@@ -60,13 +60,26 @@ class Name(object):
         """
         def __init__(self, value = None):
             if type(value) is Name.Component:
-                # Use the existing Blob in the other Component.
+                # Copy constructor. Use the existing Blob in the other Component.
                 self._value = value._value
-            elif value == None:
+                self._type = value._type
+                return
+
+            if value == None:
                 self._value = Blob([])
             else:
                 # Blob will make a copy.
                 self._value = value if isinstance(value, Blob) else Blob(value)
+
+            self._type = Name.Component.ComponentType.GENERIC
+
+        class ComponentType(object):
+            """
+            A Name.Component.ComponentType specifies the recognized types of a
+            name component.
+            """
+            IMPLICIT_SHA256_DIGEST = 1
+            GENERIC                = 8
 
         def getValue(self):
             """
@@ -81,7 +94,8 @@ class Name(object):
             """
             Convert this component to a string, escaping characters according
             to the NDN URI Scheme. This also adds "..." to a value with zero or
-            more ".".
+            more ".". This adds a type code prefix as needed, such as
+            "sha256digest=".
 
             :param BytesIO result: (optional) The BytesIO stream to write to.
               If omitted, return a str with the result.
@@ -89,9 +103,15 @@ class Name(object):
             :rtype: str
             """
             if result == None:
-                return Name.toEscapedString(self._value.buf())
+                result = BytesIO()
+                self.toEscapedString(result)
+                return Common.getBytesIOString(result)
             else:
-                Name.toEscapedString(self._value.buf(), result)
+                if self._type == Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST:
+                    result.write("sha256digest=".encode('utf-8'))
+                    self._value.toHex(result)
+                else:
+                    Name.toEscapedString(self._value.buf(), result)
 
         def isSegment(self):
             """
@@ -102,7 +122,8 @@ class Name(object):
             :return: True if this is a segment number.
             :rtype: bool
             """
-            return self._value.size() >= 1 and self._value.buf()[0] == 0x00
+            return (self._value.size() >= 1 and self._value.buf()[0] == 0x00 and
+                    self.isGeneric())
 
         def isSegmentOffset(self):
             """
@@ -113,7 +134,8 @@ class Name(object):
             :return: True if this is a segment byte offset.
             :rtype: bool
             """
-            return self._value.size() >= 1 and self._value.buf()[0] == 0xFB
+            return (self._value.size() >= 1 and self._value.buf()[0] == 0xFB and
+                    self.isGeneric())
 
         def isVersion(self):
             """
@@ -124,7 +146,8 @@ class Name(object):
             :return: True if this is a version number.
             :rtype: bool
             """
-            return self._value.size() >= 1 and self._value.buf()[0] == 0xFD
+            return (self._value.size() >= 1 and self._value.buf()[0] == 0xFD and
+                    self.isGeneric())
 
         def isTimestamp(self):
             """
@@ -135,7 +158,8 @@ class Name(object):
             :return: True if this is a timestamp.
             :rtype: bool
             """
-            return self._value.size() >= 1 and self._value.buf()[0] == 0xFC
+            return (self._value.size() >= 1 and self._value.buf()[0] == 0xFC and
+                    self.isGeneric())
 
         def isSequenceNumber(self):
             """
@@ -146,7 +170,26 @@ class Name(object):
             :return: True if this is a sequence number.
             :rtype: bool
             """
-            return self._value.size() >= 1 and self._value.buf()[0] == 0xFE
+            return (self._value.size() >= 1 and self._value.buf()[0] == 0xFE and
+                    self.isGeneric())
+
+        def isGeneric(self):
+            """
+            Check if this component is a generic component.
+
+            :return: True if this is an generic component.
+            :rtype: bool
+            """
+            return self._type == Name.Component.ComponentType.GENERIC
+
+        def isImplicitSha256Digest(self):
+            """
+            Check if this component is an ImplicitSha256Digest component.
+
+            :return: True if this is an ImplicitSha256Digest component.
+            :rtype: bool
+            """
+            return self._type == Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST
 
         def toNumber(self):
             """
@@ -259,7 +302,7 @@ class Name(object):
             :return: True if the components are equal, otherwise False.
             :rtype: bool
             """
-            return self._value.equals(other._value)
+            return self._value.equals(other._value) and self._type == other._type
 
         def compare(self, other):
             """
@@ -272,6 +315,11 @@ class Name(object):
             :rtype: int
             :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
             """
+            if self._type < other._type:
+                return -1
+            if self._type > other._type:
+                return 1
+
             if self._value.size() < other._value.size():
                 return -1
             if self._value.size() > other._value.size():
@@ -380,6 +428,27 @@ class Name(object):
             """
             return Name.Component.fromNumberWithMarker(sequenceNumber, 0xFE)
 
+        @staticmethod
+        def fromImplicitSha256Digest(digest):
+            """
+            Create a component of type ImplicitSha256DigestComponent, so that
+            isImplicitSha256Digest() is true.
+
+            :param digest: The SHA-256 digest value.
+            :type digest: Blob or value for Blob constructor
+            :return: The new Component.
+            :rtype: Name.Component
+            :raises RuntimeError: If the digest length is not 32 bytes.
+            """
+            digestBlob = digest if isinstance(digest, Blob) else Blob(digest)
+            if digestBlob.size() != 32:
+              raise RuntimeError(
+                "Name.Component.fromImplicitSha256Digest: The digest length must be 32 bytes")
+
+            result = Name.Component(digestBlob)
+            result._type = Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST
+            return result
+
         def getSuccessor(self):
             """
             Get the successor of this component, as described in
@@ -476,22 +545,30 @@ class Name(object):
         iComponentStart = 0
 
         # Unescape the components.
+        sha256digestPrefix = "sha256digest="
         while iComponentStart < len(uri):
             iComponentEnd = uri.find('/', iComponentStart)
             if iComponentEnd < 0:
                 iComponentEnd = len(uri)
 
-            component = Name.fromEscapedString(uri, iComponentStart,
-                                               iComponentEnd)
+            if (uri[iComponentStart:iComponentStart + len(sha256digestPrefix)] ==
+                sha256digestPrefix):
+              hexString = uri[iComponentStart + len(sha256digestPrefix):].strip()
+              component = Name.Component.fromImplicitSha256Digest(
+                Blob(bytearray.fromhex(hexString), False))
+            else:
+                component = Name.Component(
+                  Name.fromEscapedString(uri, iComponentStart, iComponentEnd))
+
             # Ignore illegal components.  This also gets rid of a trailing '/'.
-            if not component.isNull():
+            if not component.getValue().isNull():
                 self.append(component)
 
             iComponentStart = iComponentEnd + 1
 
     def append(self, value):
         """
-        Append a new component.
+        Append a new GENERIC component.
 
         :param value: If value is another Name, append all its components.
           If value is another Name.Component, use its value.
@@ -594,7 +671,7 @@ class Name(object):
 
         result = BytesIO()
         if includeScheme:
-            result.write("ndn:")
+            result.write("ndn:".encode('utf-8'))
         for component in self._components:
             # write is required to take a byte buffer.
             result.write(Name._slash)
@@ -664,6 +741,19 @@ class Name(object):
         :rtype: Name
         """
         return self.append(Name.Component.fromSequenceNumber(sequenceNumber))
+
+    def appendImplicitSha256Digest(self, digest):
+        """
+        Append a component of type ImplicitSha256DigestComponent, so that
+        isImplicitSha256Digest() is true.
+
+        :param digest: The SHA-256 digest value.
+        :type digest: Blob or value for Blob constructor
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        :raises RuntimeError: If the digest length is not 32 bytes.
+        """
+        return self.append(Name.Component.fromImplicitSha256Digest(digest))
 
     def equals(self, name):
         """
@@ -859,9 +949,11 @@ class Name(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a Blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        wireFormat.decodeName(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          wireFormat.decodeName(self, input.buf(), False)
+        else:
+          wireFormat.decodeName(self, input, True)
 
     def getChangeCount(self):
         """
@@ -881,6 +973,7 @@ class Name(object):
         then decode the whole string.)  If the escaped string is "", "." or ".."
         then return a Blob with a null pointer, which means the component should
         be skipped in a URI name.
+        This does not check for a type code prefix such as "sha256digest=".
 
         :param str escapedString: The escaped string.
         :return: The unescaped Blob value. If the escapedString is not a valid
@@ -912,6 +1005,7 @@ class Name(object):
         """
         Convert value to a string, escaping characters according to the NDN URI
         Scheme. This also adds "..." to a value with zero or more ".".
+        This does not add a type code prefix such as "sha256digest=".
 
         :param value: The buffer with the value to escape.
         :type value: An array type with int elements

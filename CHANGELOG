@@ -1,10 +1,20 @@
-Interim changes since PyNDN v2.3beta1 (2016-05-13)
+Interim changes since PyNDN v2.3beta1 (2016-07-22)
 --------------------------------------------------
 
 Changes
 * http://redmine.named-data.net/issues/3337 In MetaInfo, added get/setOtherTypeCode
   to allow unrecognized content type codes in the packet.
 * In FilePrivateKeyStorage.generateKeyPair, update mapping.txt for the generated key.
+* In ProtobufTlv, added utility method toName.
+* Added support for the Name component type ImplicitSha256Digest, and methods:
+  Name.Component.fromImplicitSha256Digest, isGeneric and isImplicitSha256Digest.
+  Name.appendImplicitSha256Digest.
+* https://redmine.named-data.net/issues/3447 In Data, added getFullName, and
+  in Interest added matchesData to use it.
+* Examples: In test_encode_decode_fib_entry, etc, use ProtobufTlv.toName.
+* Unit tests: In test_name_methods, added test_implicit_sha256_digest.
+* Unit tests: In test_interest_methods, added test_matches_data.
+* Unit tests: In test_data_methods, added test_full_name.
 
 Bug fixes
 * http://redmine.named-data.net/issues/2760 Respect tpm= setting in client.conf.

@@ -473,10 +473,12 @@ class Interest(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a Blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        (signedPortionBeginOffset, signedPortionEndOffset) = \
-          wireFormat.decodeInterest(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          result = wireFormat.decodeInterest(self, input.buf(), False)
+        else:
+          result = wireFormat.decodeInterest(self, input, True)
+        (signedPortionBeginOffset, signedPortionEndOffset) = result
 
         if wireFormat == WireFormat.getDefaultWireFormat():
             # This is the default wire encoding.  In the Blob constructor, set
@@ -576,6 +578,82 @@ class Interest(object):
               name.size() > self.getName().size() and
               self.getExclude().matches(name[self.getName().size()])):
             return False
+
+        return True
+
+    def matchesData(self, data, wireFormat = None):
+        """
+        Check if the given Data packet can satisfy this Interest. This method
+        considers the Name, MinSuffixComponents, MaxSuffixComponents,
+        PublisherPublicKeyLocator, and Exclude. It does not consider the
+        ChildSelector or MustBeFresh. This uses the given wireFormat to get the
+        Data packet encoding for the full Name.
+
+        :param Data data: The Data packet to check.
+        :param wireFormat: (optional) A WireFormat object used to encode the
+          Data packet to get its full Name. If omitted, use
+          WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: True if the given Data packet can satisfy this Interest.
+        :rtype: bool
+        """
+        # Imitate ndn-cxx Interest::matchesData.
+        interestNameLength = self.getName().size()
+        dataName = data.getName()
+        fullNameLength = dataName.size() + 1
+
+        # Check MinSuffixComponents.
+        hasMinSuffixComponents = (self.getMinSuffixComponents() != None)
+        minSuffixComponents = (self.getMinSuffixComponents() if
+          hasMinSuffixComponents else 0)
+        if not (interestNameLength + minSuffixComponents <= fullNameLength):
+            return False
+
+        # Check MaxSuffixComponents.
+        hasMaxSuffixComponents = (self.getMaxSuffixComponents() != None)
+        if (hasMaxSuffixComponents and
+             not (interestNameLength + self.getMaxSuffixComponents() >= fullNameLength)):
+            return False
+
+        # Check the prefix.
+        if interestNameLength == fullNameLength:
+            if self.getName().get(-1).isImplicitSha256Digest():
+                if not self.getName().equals(data.getFullName(wireFormat)):
+                    return False
+            else:
+                # The Interest Name is the same length as the Data full Name,
+                #   but the last component isn't a digest so there's no
+                #   possibility of matching.
+                return False
+        else:
+            # The Interest Name should be a strict prefix of the Data full Name.
+            if not self.getName().isPrefixOf(dataName):
+                return False
+
+        # Check the Exclude.
+        # The Exclude won't be violated if the Interest Name is the same as the
+        #   Data full Name.
+        if self.getExclude().size() > 0 and fullNameLength > interestNameLength:
+            if interestNameLength == fullNameLength - 1:
+                # The component to exclude is the digest.
+                if self.getExclude().matches(
+                     data.getFullName(wireFormat).get(interestNameLength)):
+                    return False
+            else:
+                # The component to exclude is not the digest.
+                if self.getExclude().matches(dataName.get(interestNameLength)):
+                    return False
+
+        # Check the KeyLocator.
+        publisherPublicKeyLocator = self.getKeyLocator()
+        if publisherPublicKeyLocator.getType() != None:
+            signature = data.getSignature()
+            if not KeyLocator.canGetFromSignature(signature):
+                # No KeyLocator in the Data packet.
+                return False
+            if not publisherPublicKeyLocator.equals(
+                  (KeyLocator.getFromSignature(signature))):
+                return False
 
         return True
 

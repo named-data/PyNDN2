@@ -39,7 +39,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeName is not implemented")
 
-    def decodeName(self, name, input):
+    def decodeName(self, name, input, copy = True):
         """
         Decode input as a name and set the fields of the Name object.
         Your derived class should override.
@@ -47,6 +47,10 @@ class WireFormat(object):
         :param Name name: The Name object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -72,7 +76,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeInterest is not implemented")
 
-    def decodeInterest(self, interest, input):
+    def decodeInterest(self, interest, input, copy = True):
         """
         Decode input as an interest and set the fields of the interest object.
         Your derived class should override.
@@ -80,6 +84,10 @@ class WireFormat(object):
         :param Interest interest: The Interest object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)
           where signedPortionBeginOffset is the offset in the encoding of
           the beginning of the signed portion, and signedPortionEndOffset is
@@ -110,7 +118,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeData is not implemented")
 
-    def decodeData(self, data, input):
+    def decodeData(self, data, input, copy = True):
         """
         Decode input as a data packet, set the fields in the data object, and
         return the signed offsets.  Your derived class should override.
@@ -118,6 +126,10 @@ class WireFormat(object):
         :param Data data: The Data object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)
           where signedPortionBeginOffset is the offset in the encoding of
           the beginning of the signed portion, and signedPortionEndOffset is
@@ -142,7 +154,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeControlParameters is not implemented")
 
-    def decodeControlParameters(self, controlParameters, input):
+    def decodeControlParameters(self, controlParameters, input, copy = True):
         """
         Decode input as a controlParameters and set the fields of the
         controlParameters object. Your derived class should override.
@@ -151,6 +163,10 @@ class WireFormat(object):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -170,7 +186,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeControlResponse is not implemented")
 
-    def decodeControlResponse(self, controlResponse, input):
+    def decodeControlResponse(self, controlResponse, input, copy = True):
         """
         Decode input as a controlResponse and set the fields of the
         controlResponse object. Your derived class should override.
@@ -179,6 +195,10 @@ class WireFormat(object):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -198,7 +218,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeSignatureInfo is not implemented")
 
-    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue):
+    def decodeSignatureInfoAndValue(self, signatureInfo, signatureValue, copy = True):
         """
         Decode signatureInfo as a signature info and signatureValue as the
         related SignatureValue, and return a new object which is a subclass of
@@ -210,6 +230,10 @@ class WireFormat(object):
         :param signatureValue: The array with the signature value input buffer
           to decode.
         :type signatureValue: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :return: A new object which is a subclass of Signature.
         :rtype: a subclass of Signature
         :raises RuntimeError: for unimplemented if the derived class does not
@@ -233,7 +257,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeSignatureInfo is not implemented")
 
-    def decodeLpPacket(self, lpPacket, input):
+    def decodeLpPacket(self, lpPacket, input, copy = True):
         """
         Decode input as an LpPacket and set the fields of the lpPacket object.
         Your derived class should override.
@@ -241,6 +265,10 @@ class WireFormat(object):
         :param LpPacket lpPacket: The LpPacket object whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -260,7 +288,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeDelegationSet is not implemented")
 
-    def decodeDelegationSet(self, delegationSet, input):
+    def decodeDelegationSet(self, delegationSet, input, copy = True):
         """
         Decode input as a DelegationSet and set the fields of the delegationSet
         object.
@@ -270,6 +298,10 @@ class WireFormat(object):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """
@@ -289,7 +321,7 @@ class WireFormat(object):
         """
         raise RuntimeError("encodeEncryptedContent is not implemented")
 
-    def decodeEncryptedContent(self, encryptedContent, input):
+    def decodeEncryptedContent(self, encryptedContent, input, copy = True):
         """
         Decode input as an EncryptedContent and set the fields of the
         encryptedContent object.
@@ -299,6 +331,10 @@ class WireFormat(object):
           whose fields are updated.
         :param input: The array with the bytes to decode.
         :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
         :raises RuntimeError: for unimplemented if the derived class does not
           override.
         """

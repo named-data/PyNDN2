@@ -36,6 +36,7 @@ from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
+from pyndn.name import Name
 
 class ProtobufTlv(object):
     @staticmethod
@@ -71,6 +72,26 @@ class ProtobufTlv(object):
         decodeBuffer = input.buf() if isinstance(input, Blob) else input
         decoder = TlvDecoder(decodeBuffer)
         ProtobufTlv._decodeMessageValue(message, decoder, len(input))
+
+    @staticmethod
+    def toName(componentArray):
+        """
+        Return a Name made from the component array in a Protobuf message object,
+        assuming that it was defined with "repeated bytes". For example:
+        message Name {
+        repeated bytes component = 8;
+        }
+
+        :param Array componentArray: The array from the Protobuf message object
+          representing the "repeated bytes" component array.
+        :return: A new Name.
+        :rtype: Name
+        """
+        name = Name()
+        for component in componentArray:
+            name.append(Blob(component, True))
+
+        return name
 
     @staticmethod
     def _encodeMessageValue(message, encoder):

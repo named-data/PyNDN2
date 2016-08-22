@@ -52,6 +52,14 @@ pyndn.encoding.tlv_0_1_wire_format module
     :undoc-members:
     :show-inheritance:
 
+pyndn.encoding.tlv_0_2_wire_format module
+-----------------------------------------
+
+.. automodule:: pyndn.encoding.tlv_0_2_wire_format
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.encoding.tlv_wire_format module
 -------------------------------------
 

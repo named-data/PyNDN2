@@ -171,6 +171,8 @@ class EncryptedContent(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # If input is a Blob, get its buf().
-        decodeBuffer = input.buf() if isinstance(input, Blob) else input
-        wireFormat.decodeEncryptedContent(self, decodeBuffer)
+        if isinstance(input, Blob):
+          # Input is a blob, so get its buf() and set copy False.
+          wireFormat.decodeEncryptedContent(self, input.buf(), False)
+        else:
+          wireFormat.decodeEncryptedContent(self, input, True)

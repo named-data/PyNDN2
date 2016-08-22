@@ -80,9 +80,7 @@ def printRibEntries(encodedMessage):
     dump("RIB:");
     for ribEntry in ribEntryMessage.rib_entry:
         line = ""
-        for component in ribEntry.name.component:
-            # component may be a bytes type, so use Blob to convert to str.
-            line += "/" + Blob(component, False).toRawStr()
+        line += ProtobufTlv.toName(ribEntry.name.component).toUri()
 
         # Show the routes.
         for route in ribEntry.routes:

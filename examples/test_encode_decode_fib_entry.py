@@ -47,9 +47,7 @@ def main():
     dump("Re-decoded FibEntry:")
     # This should print the same values that we put in message above.
     value = ""
-    for component in decodedMessage.fib_entry.name.component:
-      # component may be a bytes type, so use Blob to convert to str.
-      value += "/" + Blob(component, False).toRawStr()
+    value += ProtobufTlv.toName(decodedMessage.fib_entry.name.component).toUri()
     value += " nexthops = {"
     for next_hop_record in decodedMessage.fib_entry.next_hop_records:
       value += ("faceid=" + repr(next_hop_record.face_id)

@@ -433,7 +433,7 @@ class Node(object):
         elif data != None:
             pendingInterests = []
             self._pendingInterestTable.extractEntriesForExpressedInterest(
-              data.getName(), pendingInterests)
+              data, pendingInterests)
             for pendingInterest in pendingInterests:
                 try:
                     pendingInterest.getOnData()(pendingInterest.getInterest(), data)

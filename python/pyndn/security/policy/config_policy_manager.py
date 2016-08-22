@@ -308,7 +308,7 @@ class ConfigPolicyManager(PolicyManager):
             else:
                 certData = b64decode(certID)
                 cert = IdentityCertificate()
-                cert.wireDecode(certData)
+                cert.wireDecode(Blob(certData, False))
 
             certUri = cert.getName()[:-1].toUri()
             self._fixedCertificateCache[certID] = certUri
@@ -399,7 +399,7 @@ class ConfigPolicyManager(PolicyManager):
             try:
                 signature = wireFormat.decodeSignatureInfoAndValue(
                    dataOrInterest.getName().get(-2).getValue().buf(),
-                   dataOrInterest.getName().get(-1).getValue().buf())
+                   dataOrInterest.getName().get(-1).getValue().buf(), False)
             except (IndexError, ValueError):
                 return None
             return signature

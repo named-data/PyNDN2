@@ -17,6 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from pyndn import Name
 from pyndn import Data
 from pyndn import ContentType
@@ -265,6 +267,31 @@ class TestDataDump(ut.TestCase):
             pass
         if not gotError:
           self.fail("Expected encoding error for experimentalSignatureInfoBadTlv")
+
+    def test_full_name(self):
+        data = Data()
+        data.wireDecode(codedData)
+
+        # Check the full name format.
+        self.assertEqual(data.getFullName().size(), data.getName().size() + 1)
+        self.assertEqual(data.getName(), data.getFullName().getPrefix(-1))
+        self.assertEqual(data.getFullName().get(-1).getValue().size(), 32)
+
+        # Check the independent digest calculation.
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(Blob(codedData).toBytes())
+        newDigest = Blob(bytearray(sha256.finalize()), False)
+        self.assertTrue(newDigest.equals(data.getFullName().get(-1).getValue()))
+
+        # Check the expected URI.
+        self.assertEqual(
+          data.getFullName().toUri(), "/ndn/abc/sha256digest=" +
+            "96556d685dcb1af04be4ae57f0e7223457d4055ea9b3d07c0d337bef4a8b3ee9")
+
+        # Changing the Data packet should change the full name.
+        saveFullName = Name(data.getFullName())
+        data.setContent(Blob())
+        self.assertNotEqual(data.getFullName().get(-1), saveFullName.get(-1))
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
