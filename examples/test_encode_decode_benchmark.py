@@ -249,6 +249,8 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
       verify.
     :param KeyType keyType: KeyType.RSA or EC, used if useCrypto is True.
     :param Blob encoding: The wire encoding to decode.
+    :return: The number of seconds for all iterations.
+    :rtype: float
     """
     # Initialize the private key storage in case useCrypto is true.
     identityStorage = MemoryIdentityStorage()
