@@ -23,6 +23,7 @@ public:
     append = Py_BuildValue("s", "append");
     appendAny = Py_BuildValue("s", "appendAny");
     appendComponent = Py_BuildValue("s", "appendComponent");
+    appendImplicitSha256Digest = Py_BuildValue("s", "appendImplicitSha256Digest");
     clear = Py_BuildValue("s", "clear");
     getChildSelector = Py_BuildValue("s", "getChildSelector");
     getContent = Py_BuildValue("s", "getContent");
@@ -48,6 +49,7 @@ public:
     getType = Py_BuildValue("s", "getType");
     getTypeCode = Py_BuildValue("s", "getTypeCode");
     getValue = Py_BuildValue("s", "getValue");
+    isImplicitSha256Digest = Py_BuildValue("s", "isImplicitSha256Digest");
     setChildSelector = Py_BuildValue("s", "setChildSelector");
     setContent = Py_BuildValue("s", "setContent");
     setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
@@ -79,6 +81,7 @@ public:
   PyObject* append;
   PyObject* appendAny;
   PyObject* appendComponent;
+  PyObject* appendImplicitSha256Digest;
   PyObject* getChildSelector;
   PyObject* clear;
   PyObject* getComponent;
@@ -104,6 +107,7 @@ public:
   PyObject* getType;
   PyObject* getTypeCode;
   PyObject* getValue;
+  PyObject* isImplicitSha256Digest;
   PyObject* setChildSelector;
   PyObject* setContent;
   PyObject* setFinalBlockId;
@@ -162,7 +166,7 @@ toDoubleByMethod(PyObject* obj, PyObject* methodName)
  * @param methodName A Python string object of the method name to call.
  * @return True if the object is Py_True, otherwise false.
  */
-static long
+static bool
 toBoolByMethod(PyObject* obj, PyObject* methodName)
 {
   PyObjectRef val(PyObject_CallMethodObjArgs(obj, methodName, NULL));
@@ -303,6 +307,18 @@ makeBlob(const BlobLite& blobLite)
   return PyObject_CallObject(Blob, args);
 }
 
+// Imitate Name::Component::get(NameLite::Component& componentLite).
+static void
+toNameComponentLite(PyObject* nameComponent, NameLite::Component& componentLite)
+{
+  if (toBoolByMethod(nameComponent, str.isImplicitSha256Digest))
+    componentLite.setImplicitSha256Digest
+      (toBlobLiteByMethod(nameComponent, str.getValue));
+  else
+    componentLite = NameLite::Component
+      (toBlobLiteByMethod(nameComponent, str.getValue));
+}
+
 // Imitate Name::get(NameLite& nameLite).
 static void
 toNameLite(PyObject* name, NameLite& nameLite)
@@ -311,9 +327,9 @@ toNameLite(PyObject* name, NameLite& nameLite)
   PyObjectRef components(PyObject_GetAttr(name, str._components));
   for (size_t i = 0; i < PyList_GET_SIZE(components.obj); ++i) {
     ndn_Error error;
-    if ((error = nameLite.append
-         (toBlobLiteByMethod
-          (PyList_GET_ITEM(components.obj, i), str.getValue))))
+    NameLite::Component componentLite;
+    toNameComponentLite(PyList_GET_ITEM(components.obj, i), componentLite);
+    if ((error = nameLite.append(componentLite)))
       // TODO: Handle the error!
       return;
   }
@@ -327,8 +343,13 @@ setName(PyObject* name, const NameLite& nameLite)
 
   for (size_t i = 0; i < nameLite.size(); ++i) {
     PyObjectRef blob(makeBlob(nameLite.get(i).getValue()));
-    PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
-      (name, str.append, blob.obj, NULL));
+    // Imitate Name::Component::set(const NameLite::Component& componentLite).
+    if (nameLite.get(i).isImplicitSha256Digest())
+      PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+        (name, str.appendImplicitSha256Digest, blob.obj, NULL));
+    else
+      PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
+        (name, str.append, blob.obj, NULL));
   }
 }
 
@@ -344,8 +365,9 @@ toExcludeLite(PyObject* exclude, ExcludeLite& excludeLite)
     if (toLongByMethod(entry, str.getType) == Exclude_COMPONENT) {
       PyObjectRef component(PyObject_CallMethodObjArgs
         (entry, str.getComponent, NULL));
-      if ((error = excludeLite.appendComponent
-           (toBlobLiteByMethod(component, str.getValue))))
+      NameLite::Component componentLite;
+      toNameComponentLite(component, componentLite);
+      if ((error = excludeLite.appendComponent(componentLite)))
         // TODO: Handle the error!
         return;
     }
@@ -368,8 +390,13 @@ setExclude(PyObject* exclude, const ExcludeLite& excludeLite)
 
     if (entry.getType() == ndn_Exclude_COMPONENT) {
       PyObjectRef blob(makeBlob(entry.getComponent().getValue()));
-      PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
-        (exclude, str.appendComponent, blob.obj, NULL));
+      // Imitate Name::Component::set(const NameLite::Component& componentLite).
+      if (entry.getComponent().isImplicitSha256Digest())
+        PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+          (exclude, str.appendImplicitSha256Digest, blob.obj, NULL));
+      else
+        PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
+          (exclude, str.appendComponent, blob.obj, NULL));
     }
     else if (entry.getType() == ndn_Exclude_ANY)
       PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
