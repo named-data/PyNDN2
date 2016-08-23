@@ -56,7 +56,7 @@ class Exclude(object):
           type Exclude.ANY.  Otherwise creat an Exclude.Entry of type
           Exclude.COMPONENT with the value.
         :type value: Name.Component or a value for the Name.Component
-          constructor
+          constructor which makes a GENERIC name component.
         """
         def __init__(self, value = None):
             if value == None:
@@ -120,16 +120,32 @@ class Exclude(object):
 
     def appendComponent(self, component):
         """
-        Append a new entry of type Exclude.COMPONENT with the give component.
+        Append a new entry of type Exclude.COMPONENT with the given component.
 
         :param component: The new exclude component.
         :type component: Exclude.Entry, Name.Component or a value for the
-          Name.Component constructor
+          Name.Component constructor which makes a GENERIC name component.
         :return: This Exclude so that you can chain calls to append.
         :rtype: Exclude
         """
         self._entries.append(component if type(component) is Exclude.Entry
                              else Exclude.Entry(component))
+        self._changeCount += 1
+        return self
+
+    def appendImplicitSha256Digest(self, digest):
+        """
+        Append a new entry of type Exclude.COMPONENT with a component of type
+        ImplicitSha256DigestComponent using
+        Name.Component.fromImplicitSha256Digest.
+
+        :param digest: The SHA-256 digest value.
+        :type digest: Blob or value for Blob constructor
+        :return: This Exclude so that you can chain calls to append.
+        :rtype: Exclude
+        """
+        self._entries.append(
+          Exclude.Entry(Name.Component.fromImplicitSha256Digest(digest)))
         self._changeCount += 1
         return self
 
