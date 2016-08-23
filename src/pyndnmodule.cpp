@@ -428,7 +428,7 @@ static void
 setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
 {
   // If type is -1, KeyLocator.setType will set to None as desired.
-  callMethodFromLong(keyLocator, str.setType, keyLocatorLite.getType());
+  callMethodFromLong(keyLocator, str.setType, (int)keyLocatorLite.getType());
 
   PyObjectRef keyData(makeBlob(keyLocatorLite.getKeyData()));
   PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
