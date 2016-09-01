@@ -393,7 +393,7 @@ class Node(object):
                     except:
                         logging.exception("Error in onNetworkNack")
 
-                # We have process the network Nack packet.
+                # We have processed the network Nack packet.
                 return
 
         # Now process as Interest or Data.
