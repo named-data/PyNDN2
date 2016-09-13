@@ -352,7 +352,10 @@ class Node(object):
         if element[0] == Tlv.LpPacket_LpPacket:
             # Decode the LpPacket and replace element with the fragment.
             lpPacket = LpPacket()
-            TlvWireFormat.get().decodeLpPacket(lpPacket, element)
+            # Set copy False so that the fragment is a slice which will be
+            # copied below. The header fields are all integers and don't need to
+            # be copied.
+            TlvWireFormat.get().decodeLpPacket(lpPacket, element, False)
             element = lpPacket.getFragmentWireEncoding().buf()
 
         # First, decode as Interest or Data.
