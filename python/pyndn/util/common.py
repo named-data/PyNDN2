@@ -21,7 +21,7 @@
 This module defines the Common class which has static utility functions.
 """
 
-import time
+import datetime
 from io import BytesIO
 
 # _BytesIOValueIsStr is True if BytesIO.getvalue would return a str.
@@ -56,11 +56,11 @@ class Common(object):
         """
         Get the current time in milliseconds.
 
-        :return: The current time in milliseconds since 1/1/1970, including
+        :return: The current time in milliseconds since 1/1/1970 UTC, including
           fractions of a millisecond.
         :rtype: float
         """
-        return time.time() * 1000.0
+        return (datetime.datetime.utcnow() - Common.epoch_).total_seconds() * 1000.0
 
     @staticmethod
     def getBytesIOString(bytesIO):
@@ -150,3 +150,5 @@ class Common(object):
     Face.getMaxNdnPacketSize() which is equivalent.
     """
     MAX_NDN_PACKET_SIZE = 8800
+
+    epoch_ = datetime.datetime.utcfromtimestamp(0)
