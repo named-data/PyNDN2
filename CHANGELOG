@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.3beta1 (2016-09-16)
+Interim changes since PyNDN v2.3beta1 (2016-09-20)
 --------------------------------------------------
 
 Changes
@@ -19,6 +19,7 @@ Changes
 Bug fixes
 * http://redmine.named-data.net/issues/2760 Respect tpm= setting in client.conf.
 * https://redmine.named-data.net/issues/3785 getNowMilliseconds() doesn't return UTC.
+* Fix bug in OSXPrivateKeyStorage.sign for Python 3.
 
 PyNDN v2.3beta1 (2016-05-06)
 ----------------------------
