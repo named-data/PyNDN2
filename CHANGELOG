@@ -11,6 +11,7 @@ Changes
   Name.appendImplicitSha256Digest.
 * https://redmine.named-data.net/issues/3447 In Data, added getFullName, and
   in Interest added matchesData to use it.
+* INSTALL: Added MacOS 10.12.
 * Examples: In test_encode_decode_fib_entry, etc, use ProtobufTlv.toName.
 * Unit tests: In test_name_methods, added test_implicit_sha256_digest.
 * Unit tests: In test_interest_methods, added test_matches_data.
