@@ -326,8 +326,9 @@ class DerStructure(DerNode):
         accSize = 0
         while accSize < self._size:
             node = self.parse(inputBuf, idx)
-            idx += node.getSize()
-            accSize += node.getSize()
+            size = node.getSize()
+            idx += size
+            accSize += size
             self.addChild(node, False)
 
 ########
