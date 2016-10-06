@@ -24,6 +24,7 @@ from pyndn.util import Blob
 from pyndn.encrypt.algo import EncryptParams, EncryptAlgorithmType
 from pyndn.encrypt.algo import AesAlgorithm
 from pyndn.encrypt import DecryptKey
+from pyndn.security import AesKeyParams
 
 KEY = bytearray([
     0xdd, 0x60, 0x77, 0xec, 0xa9, 0x6b, 0x23, 0x1b,
@@ -95,6 +96,21 @@ class TestAesAlgorithm(ut.TestCase):
         self.assertTrue(cipherBlob.equals(Blob(CIPHERTEXT_CBC_IV, False)))
 
         # Decrypt data in AES_CBC with specified IV.
+        receivedBlob = AesAlgorithm.decrypt(
+          decryptKey.getKeyBits(), cipherBlob, encryptParams)
+        self.assertTrue(receivedBlob.equals(plainBlob))
+
+    def test_key_generation(self):
+        keyParams = AesKeyParams(128)
+        decryptKey = AesAlgorithm.generateKey(keyParams)
+        encryptKey = AesAlgorithm.deriveEncryptKey(decryptKey.getKeyBits())
+
+        plainBlob = Blob(PLAINTEXT, False)
+
+        # Encrypt/decrypt data in AES_CBC with auto-generated IV.
+        encryptParams = EncryptParams(EncryptAlgorithmType.AesCbc, 16)
+        cipherBlob = AesAlgorithm.encrypt(
+          encryptKey.getKeyBits(), plainBlob, encryptParams)
         receivedBlob = AesAlgorithm.decrypt(
           decryptKey.getKeyBits(), cipherBlob, encryptParams)
         self.assertTrue(receivedBlob.equals(plainBlob))

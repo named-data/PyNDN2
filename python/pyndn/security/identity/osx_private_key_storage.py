@@ -238,8 +238,8 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             if error.value != None:
                 raise SecurityException("Failed to create the signer")
 
-            # we need a str. Use Blob to convert data.
-            dataStr = Blob(data, False).toRawStr()
+            # We need a str (Python 2) or bytes (Python 3). Use Blob to convert data.
+            dataStr = Blob(data, False).toBytes()
             dataRef = c_void_p(cf.CFDataCreate(None, dataStr, len(data)))
 
             self._security.SecTransformSetAttribute(
