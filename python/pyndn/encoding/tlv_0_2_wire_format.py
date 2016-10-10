@@ -37,6 +37,11 @@ from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv.tlv import Tlv
+haveModule_pyndn = True
+try:
+    import _pyndn
+except ImportError:
+    haveModule_pyndn = False
 
 # The Python documentation says "Use SystemRandom if you require a
 #   cryptographically secure pseudo-random number generator."
@@ -60,6 +65,11 @@ class Tlv0_2WireFormat(WireFormat):
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeName(name)
+            return Blob(result, False)
+
         encoder = TlvEncoder(256)
         self._encodeName(name, encoder)
         return Blob(encoder.getOutput(), False)
@@ -77,6 +87,11 @@ class Tlv0_2WireFormat(WireFormat):
           input, which must remain unchanged while the Blob values are used.
           If omitted, use True.
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            _pyndn.Tlv0_1_1WireFormat_decodeName(name, input)
+            return
+
         decoder = TlvDecoder(input)
         self._decodeName(name, decoder, copy)
 
@@ -95,6 +110,11 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (Blob, int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeInterest(interest)
+            return (Blob(result[0], False), result[1], result[2])
+
         encoder = TlvEncoder(256)
         saveLength = len(encoder)
 
@@ -171,6 +191,10 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
+
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
@@ -219,6 +243,11 @@ class Tlv0_2WireFormat(WireFormat):
           the offset in the encoding of the end of the signed portion.
         :rtype: (Blob, int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeData(data)
+            return (Blob(result[0], False), result[1], result[2])
+
         encoder = TlvEncoder(1500)
         saveLength = len(encoder)
 
@@ -259,6 +288,10 @@ class Tlv0_2WireFormat(WireFormat):
           the offset in the encoding of the end of the signed portion.
         :rtype: (int, int)
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeData(data, input)
+
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Data)
@@ -315,6 +348,11 @@ class Tlv0_2WireFormat(WireFormat):
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeSignatureInfo(signature)
+            return Blob(result, False)
+
         encoder = TlvEncoder(256)
         self._encodeSignatureInfo(signature, encoder)
 
@@ -412,6 +450,11 @@ class Tlv0_2WireFormat(WireFormat):
         :return: A new object which is a subclass of Signature.
         :rtype: a subclass of Signature
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeSignatureInfoAndValue(
+              signatureInfo, signatureValue)
+
         # Use a SignatureHolder to imitate a Data object for _decodeSignatureInfo.
         signatureHolder = self.SignatureHolder()
         decoder = TlvDecoder(signatureInfo)
@@ -434,6 +477,11 @@ class Tlv0_2WireFormat(WireFormat):
         :return: A Blob containing the encoding.
         :rtype: Blob
         """
+        if haveModule_pyndn:
+            # Use the C bindings.
+            result = _pyndn.Tlv0_1_1WireFormat_encodeSignatureValue(signature)
+            return Blob(result, False)
+
         encoder = TlvEncoder(256)
         encoder.writeBlobTlv(Tlv.SignatureValue, signature.getSignature().buf())
 

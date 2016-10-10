@@ -256,6 +256,16 @@ class PendingInterestTable(object):
                 # Not already requested, so add the request.
                 self._removeRequests.append(pendingInterestId)
 
+        if count == 0:
+            # The pendingInterestId was not found. Perhaps this has been called before
+            #   the callback in expressInterest can add to the PIT. Add this
+            #   removal request which will be checked before adding to the PIT.
+            try:
+                self._removeRequests.index(pendingInterestId)
+            except ValueError:
+                # Not already requested, so add the request.
+                self._removeRequests.append(pendingInterestId)
+
     def removeEntry(self, pendingInterest):
         """
         Remove the specific pendingInterest entry from the table and set its

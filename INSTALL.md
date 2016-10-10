@@ -13,6 +13,7 @@ Prerequisites
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
 * Optional: Sphinx (to make documentation)
 * Optional: pytest and mock (for running unit tests)
+* Optional: python-dev, libcrypto (for the _pyndn C module)
 
 ### Option to use easy_install
 
@@ -39,7 +40,7 @@ to the PyNDN root and enter:
 
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
-## OS X 10.9.5, OS X 10.10.2, OS X 10.11, macOS 10.12
+## OS X 10.10.2, OS X 10.11, macOS 10.12
 Install Xcode.  (Xcode seems to already have the Command Line Tools.)
 To install the cryptography package, in a terminal enter:
 
@@ -66,6 +67,13 @@ Optional: To install pytest and mock, in a terminal enter:
 
     sudo CFLAGS=-Qunused-arguments pip install pytest mock
 
+Optional: To install libcrypto, install Xcode and install MacPorts from
+http://www.macports.org/install.php . In a new terminal, enter:
+
+    sudo port install openssl
+
+The python-dev headers are already installed.
+
 ## Ubuntu 12.04 (64 bit and 32 bit)
 To install the cryptography package, in a terminal enter:
 
@@ -86,6 +94,10 @@ Optional: To install pytest and mock, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install pytest mock
+
+Optional: To install libcrypto, in a terminal enter:
+
+    sudo apt-get install build-essential libssl-dev
 
 (Protobuf is already installed.)
 
@@ -119,6 +131,10 @@ Optional: To install pytest and mock, in a terminal enter:
 
     sudo apt-get install python-pip
     sudo pip install pytest mock
+
+Optional: To install python-dev and libcrypto, in a terminal enter:
+
+    sudo apt-get install build-essential python-dev libssl-dev
 
 ## Raspbian Jessie (Raspberry Pi)
 (pip is already installed.) To install the cryptography package, in a terminal, enter:
@@ -220,6 +236,22 @@ To make the Sphinx documentation, in a terminal change to the doc subdirectory. 
     make html
 
 The documentation output is in `doc/_build/html/index.html`.
+
+### _pyndn C module
+
+To install the optional _pyndn C module, you need the prerequisites python-dev
+and libcrypto. To build in a terminal, change directory to the PyNDN2 root.  Enter:
+
+    ./configure
+    make
+    sudo make install
+
+Notice where the modules are installed. On the Mac, depending on your installation
+you may need to link the files from the correct packages folder:
+
+    cd /Library/Python/2.7/site-packages/
+    sudo ln -s /usr/local/lib/python2.7/site-packages/_pyndn.la
+    sudo ln -s /usr/local/lib/python2.7/site-packages/_pyndn.so
 
 Files
 =====
