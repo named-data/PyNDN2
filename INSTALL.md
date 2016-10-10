@@ -67,6 +67,10 @@ Optional: To install pytest and mock, in a terminal enter:
 
     sudo CFLAGS=-Qunused-arguments pip install pytest mock
 
+If you get an error like "Uninstalling six-1.4.1. Operation not permitted", try this instead:
+
+    sudo CFLAGS=-Qunused-arguments pip install pytest mock --ignore-installed six
+
 Optional: To install libcrypto, install Xcode and install MacPorts from
 http://www.macports.org/install.php . In a new terminal, enter:
 
