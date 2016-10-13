@@ -59,12 +59,11 @@ with a proper error code.  The following errors are possible:
 - `DATA_HAS_NO_SEGMENT`: if any of the retrieved Data packets don't have a segment
   as the last component of the name (not counting the implicit digest)
 - `SEGMENT_VERIFICATION_FAILED`: if any retrieved segment fails
-  the user-provided VerifySegment callback
+  the user-provided VerifySegment callback or KeyChain verifyData.
 
-In order to validate individual segments, a verifySegment callback needs to
-be specified. If the callback returns False, the fetching process is aborted
-with SEGMENT_VERIFICATION_FAILED. If data validation is not required, the
-provided DontVerifySegment object can be used.
+In order to validate individual segments, a KeyChain needs to be supplied. If
+verifyData fails, the fetching process is aborted with
+SEGMENT_VERIFICATION_FAILED. If data validation is not required, pass None.
 
 Example:
     def onComplete(content):
@@ -76,13 +75,13 @@ Example:
     interest = Interest(Name("/data/prefix"))
     interest.setInterestLifetimeMilliseconds(1000)
 
-    SegmentFetcher.fetch(
-      face, interest, SegmentFetcher.DontVerifySegment, onComplete, onError)
+    SegmentFetcher.fetch(face, interest, None, onComplete, onError)
 """
 
 import logging
 from pyndn.interest import Interest
 from pyndn.util.blob import Blob
+from pyndn.security.key_chain import KeyChain
 
 class SegmentFetcher(object):
     """
@@ -140,10 +139,14 @@ class SegmentFetcher(object):
         return True
 
     @staticmethod
-    def fetch(face, baseInterest, verifySegment, onComplete, onError):
+    def fetch(face, baseInterest, validatorKeyChainOrVerifySegment, onComplete,
+              onError):
         """
         Initiate segment fetching. For more details, see the documentation for
-        the module.
+        the module. There are two forms of fetch:
+        fetch(face, baseInterest, validatorKeyChain, onComplete, onError)
+        and
+        fetch(face, baseInterest, verifySegment, onComplete, onError)
 
         :param Face face: This calls face.expressInterest to fetch more segments.
         :param Interest baseInterest: An Interest for the initial segment of the
@@ -153,6 +156,12 @@ class SegmentFetcher(object):
           the initial Interest will be forced to include selectors
           "ChildSelector=1" and "MustBeFresh=true" which will be turned off in
           subsequent Interests.
+        :param KeyChain validatorKeyChain: When a Data packet is received this
+          calls validatorKeyChain.verifyData(data). If validation fails then
+          abort fetching and call onError with SEGMENT_VERIFICATION_FAILED. This
+          does not make a copy of the KeyChain; the object must remain valid
+          while fetching. If validatorKeyChain is None, this does not validate
+          the data packet.
         :param verifySegment: When a Data packet is received this calls
           verifySegment(data) where data is a Data object. If it returns False then
           abort fetching and call onError with
@@ -174,8 +183,15 @@ class SegmentFetcher(object):
           handle any exceptions.
         :type onError: function object
         """
-        SegmentFetcher(face, None, verifySegment, onComplete,
-          onError)._fetchFirstSegment(baseInterest)
+        if (validatorKeyChainOrVerifySegment == None or
+            isinstance(validatorKeyChainOrVerifySegment, KeyChain)):
+            SegmentFetcher(
+              face, validatorKeyChainOrVerifySegment,
+              SegmentFetcher.DontVerifySegment, onComplete,
+              onError)._fetchFirstSegment(baseInterest)
+        else:
+            SegmentFetcher(face, None, validatorKeyChainOrVerifySegment,
+              onComplete, onError)._fetchFirstSegment(baseInterest)
 
     def _fetchFirstSegment(self, baseInterest):
         interest = Interest(baseInterest)
@@ -194,16 +210,27 @@ class SegmentFetcher(object):
         self._face.expressInterest(interest, self._onData, self._onTimeout)
 
     def _onData(self, originalInterest, data):
-        if not self._verifySegment(data):
+        if self._validatorKeyChain != None:
             try:
-                self._onError(
-                  self.ErrorCode.SEGMENT_VERIFICATION_FAILED,
-                  "Segment verification failed")
+                self._validatorKeyChain.verifyData(
+                  data,
+                  lambda localData:
+                    self._onVerified(localData, originalInterest),
+                  self._onVerifyFailed)
             except:
-                logging.exception("Error in onError")
+                logging.exception("Error in KeyChain.verifyData")
             return
+        else:
+            if not self._verifySegment(data):
+                try:
+                    self._onError(
+                      self.ErrorCode.SEGMENT_VERIFICATION_FAILED,
+                      "Segment verification failed")
+                except:
+                    logging.exception("Error in onError")
+                return
 
-        self._onVerified(data, originalInterest)
+            self._onVerified(data, originalInterest)
 
     def _onVerified(self, data, originalInterest):
         if not self._endsWithSegmentNumber(data.getName()):
@@ -279,6 +306,14 @@ class SegmentFetcher(object):
                 # Fetch the next segment.
                 self._fetchNextSegment(
                   originalInterest, data.getName(), expectedSegmentNumber + 1)
+
+    def _onVerifyFailed(self, data):
+        try:
+            self._onError(
+              self.ErrorCode.SEGMENT_VERIFICATION_FAILED,
+               "Segment verification failed for " + data.getName().toUri())
+        except:
+            logging.exception("Error in onError")
 
     def _onTimeout(self, interest):
         try:

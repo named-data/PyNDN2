@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.3beta1 (2016-10-10)
+Interim changes since PyNDN v2.3beta1 (2016-10-13)
 --------------------------------------------------
 
 Changes
@@ -9,6 +9,7 @@ Changes
 * Added support for the Name component type ImplicitSha256Digest, and methods:
   Name.Component.fromImplicitSha256Digest, isGeneric and isImplicitSha256Digest.
   Name.appendImplicitSha256Digest.
+* In SegmentFetcher.fetch, allow a validatorKeyChain for asynchronous Data validation.
 * https://redmine.named-data.net/issues/3447 In Data, added getFullName, and
   in Interest added matchesData to use it.
 * INSTALL: Added instructions to build the optional _pyndn C module for faster
