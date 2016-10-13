@@ -87,9 +87,13 @@ from pyndn.util.blob import Blob
 class SegmentFetcher(object):
     """
     A private constructor to create a new SegmentFetcher to use the Face. An
-    application should use SegmentFetcher.fetch.
+    application should use SegmentFetcher.fetch. If validatorKeyChain is not
+    None, use it and ignore verifySegment. After creating the SegmentFetcher,
+    call fetchFirstSegment.
 
     :param Face face: This calls face.expressInterest to fetch more segments.
+    :param KeyChain validatorKeyChain: If this is not None, use its verifyData
+      instead of the verifySegment callback.
     :param verifySegment: When a Data packet is received this calls
       verifySegment(data) where data is a Data object. If it returns False then
       abort fetching and call onError with
@@ -110,8 +114,9 @@ class SegmentFetcher(object):
       handle any exceptions.
     :type onError: function object
     """
-    def __init__(self, face, verifySegment, onComplete, onError):
+    def __init__(self, face, validatorKeyChain, verifySegment, onComplete, onError):
         self._face = face
+        self._validatorKeyChain = validatorKeyChain
         self._verifySegment = verifySegment
         self._onComplete = onComplete
         self._onError = onError
@@ -169,8 +174,8 @@ class SegmentFetcher(object):
           handle any exceptions.
         :type onError: function object
         """
-        SegmentFetcher(face, verifySegment, onComplete, onError)._fetchFirstSegment(
-          baseInterest)
+        SegmentFetcher(face, None, verifySegment, onComplete,
+          onError)._fetchFirstSegment(baseInterest)
 
     def _fetchFirstSegment(self, baseInterest):
         interest = Interest(baseInterest)
@@ -198,6 +203,9 @@ class SegmentFetcher(object):
                 logging.exception("Error in onError")
             return
 
+        self._onVerified(data, originalInterest)
+
+    def _onVerified(self, data, originalInterest):
         if not self._endsWithSegmentNumber(data.getName()):
             # We don't expect a name without a segment number.  Treat it as
             # a bad packet.
