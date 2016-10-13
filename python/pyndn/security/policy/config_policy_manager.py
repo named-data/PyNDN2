@@ -23,7 +23,10 @@ import re
 import logging
 from base64 import b64decode
 
-from pyndn import Name, Data, Interest, KeyLocator
+from pyndn.name import Name
+from pyndn.data import Data
+from pyndn.interest import Interest
+from pyndn.key_locator import KeyLocator
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.policy.certificate_cache import CertificateCache
 from pyndn.security.policy.validation_request import ValidationRequest

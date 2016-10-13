@@ -27,7 +27,8 @@ identity, public keys and certificates using SQLite.
 import os
 import math
 import sqlite3
-from pyndn import Name, KeyLocator
+from pyndn.name import Name
+from pyndn.key_locator import KeyLocator
 from pyndn.util.blob import Blob
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.identity.identity_storage import IdentityStorage
