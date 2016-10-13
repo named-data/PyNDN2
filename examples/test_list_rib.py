@@ -57,8 +57,7 @@ def main():
         enabled[0] = False
         dump(message)
 
-    SegmentFetcher.fetch(
-        face, interest, SegmentFetcher.DontVerifySegment, onComplete, onError)
+    SegmentFetcher.fetch(face, interest, None, onComplete, onError)
 
     # Loop calling processEvents until a callback sets enabled[0] = False.
     while enabled[0]:
