@@ -409,7 +409,7 @@ class Node(object):
                 includeFilter = True
                 # Use getcallargs to test if onInterest accepts 5 args.
                 try:
-                    inspect.getcallargs(entry.getOnInterest(),
+                    inspect.getcallargs(entry.getOnInterest().__call__,
                       None, None, None, None, None)
                 except TypeError:
                     # Assume onInterest is old-style with 4 arguments.
