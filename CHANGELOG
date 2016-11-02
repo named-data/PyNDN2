@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.3beta1 (2016-10-13)
---------------------------------------------------
+PyNDN v2.4beta1 (2016-11-02)
+----------------------------
 
 Changes
 * http://redmine.named-data.net/issues/3337 In MetaInfo, added get/setOtherTypeCode
