@@ -105,7 +105,7 @@ Optional: To install libcrypto, in a terminal enter:
 
 (Protobuf is already installed.)
 
-## Ubuntu 14.04 (64 bit and 32 bit), 15.04 (64 bit) and 16.04 (64 bit and 32 bit)
+## Ubuntu 14.04 (64 bit and 32 bit), 15.04 (64 bit), 16.04 (64 bit and 32 bit) and 16.10 (64 bit)
 To install the cryptography package, in a terminal enter:
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
