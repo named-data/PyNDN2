@@ -26,6 +26,7 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
+import inspect
 import logging
 from random import SystemRandom
 from cryptography.hazmat.backends import default_backend
@@ -417,10 +418,10 @@ class KeyChain(object):
         else:
             self._identityManager.signWithSha256(target, wireFormat)
 
-    def verifyData(self, data, onVerified, onVerifyFailed, stepCount = 0):
+    def verifyData(self, data, onVerified, onValidationFailed, stepCount = 0):
         """
         Check the signature on the Data object and call either onVerify or
-        onVerifyFailed. We use callback functions because verify may fetch
+        onValidationFailed. We use callback functions because verify may fetch
         information to check the signature.
 
         :param Data data: The Data object with the signature to check.
@@ -430,23 +431,24 @@ class KeyChain(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onVerified: function object
-        :param onVerifyFailed: If the signature check fails or can't find the
-          public key, this calls onVerifyFailed(data).
+        :param onValidationFailed: If the signature check fails or can't find
+          the public key, this calls onValidationFailed(data, reason) with the
+          Data object and reason string.
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
-        :type onVerifyFailed: function object
+        :type onValidationFailed: function object
         :param int stepCount: (optional) The number of verification steps that
           have been done. If omitted, use 0.
         """
         if self._policyManager.requireVerify(data):
             nextStep = self._policyManager.checkVerificationPolicy(
-              data, stepCount, onVerified, onVerifyFailed)
+              data, stepCount, onVerified, onValidationFailed)
             if nextStep != None:
                 self._face.expressInterest(
                   nextStep.interest, self._makeOnCertificateData(nextStep),
                   self._makeOnCertificateInterestTimeout(
-                    nextStep.retry, onVerifyFailed, data, nextStep))
+                    nextStep.retry, onValidationFailed, data, nextStep))
         elif self._policyManager.skipVerifyAndTrust(data):
             try:
                 onVerified(data)
@@ -454,9 +456,11 @@ class KeyChain(object):
                 logging.exception("Error in onVerified")
         else:
             try:
-                onVerifyFailed(data)
+                onValidationFailed(
+                  data,
+                  "The packet has no verify rule but skipVerifyAndTrust is false")
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
 
     def verifyInterest(
       self, interest, onVerified, onVerifyFailed, stepCount = 0,
@@ -503,7 +507,7 @@ class KeyChain(object):
             try:
                 onVerifyFailed(interest)
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
 
     def setFace(self, face):
         """
@@ -589,12 +593,12 @@ class KeyChain(object):
         def onData(interest, data):
             # Try to verify the certificate (data) according to the parameters
             #   in nextStep.
-            self.verifyData(data, nextStep.onVerified, nextStep.onVerifyFailed,
+            self.verifyData(data, nextStep.onVerified, nextStep.onValidationFailed,
                             nextStep.stepCount)
         return onData
 
-    def _makeOnCertificateInterestTimeout(self, retry, onVerifyFailed, data,
-                                          nextStep):
+    def _makeOnCertificateInterestTimeout(self, retry, onValidationFailed,
+          originalDataOrInterest, nextStep):
         """
         Make and return an onTimeout callback to use in expressInterest.
         """
@@ -605,12 +609,16 @@ class KeyChain(object):
                 self._face.expressInterest(
                   interest, self._makeOnCertificateData(nextStep),
                      self._makeOnCertificateInterestTimeout(
-                       retry, onVerifyFailed, data, nextStep))
+                       retry - 1, onValidationFailed, originalDataOrInterest,
+                       nextStep))
             else:
                 try:
-                    onVerifyFailed(data)
+                    onValidationFailed(
+                      originalDataOrInterest,
+                      "The retry count is zero after timeout for fetching " +
+                        interest.getName().toUri())
                 except:
-                    logging.exception("Error in onVerifyFailed")
+                    logging.exception("Error in onValidationFailed")
         return onTimeout
 
     def _prepareDefaultCertificateName(self):
