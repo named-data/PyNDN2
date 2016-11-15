@@ -99,8 +99,9 @@ class Consumer(object):
                     self._decryptContent(validData, onPlainText, onError)
                 self._keyChain.verifyData(
                     contentData, onVerified,
-                    lambda d: Consumer._callOnError(onError, EncryptError.ErrorCode.Validation,
-                                      "verifyData failed"))
+                    lambda d, reason: Consumer._callOnError(
+                      onError, EncryptError.ErrorCode.Validation,
+                      "verifyData failed. Reason: " + reason))
             except Exception as ex:
                 try:
                     onError(EncryptError.ErrorCode.General, "verifyData error: " + repr(ex))
@@ -261,8 +262,9 @@ class Consumer(object):
                         self._decryptCKey(validCKeyData, localOnPlainText, onError)
                     self._keyChain.verifyData(
                         cKeyData, onVerified,
-                        lambda d: Consumer._callOnError(onError, EncryptError.ErrorCode.Validation,
-                                          "verifyData failed"))
+                        lambda d, reason: Consumer._callOnError(
+                          onError, EncryptError.ErrorCode.Validation,
+                          "verifyData failed. Reason: " + reason))
                 except Exception as ex:
                     try:
                         onError(EncryptError.ErrorCode.General,
@@ -349,8 +351,9 @@ class Consumer(object):
                         self._decryptDKey(validDKeyData, localOnPlainText, onError)
                     self._keyChain.verifyData(
                         dKeyData, onVerified,
-                        lambda d: Consumer._callOnError(onError, EncryptError.ErrorCode.Validation,
-                                          "verifyData failed"))
+                        lambda d, reason: Consumer._callOnError(
+                          onError, EncryptError.ErrorCode.Validation,
+                          "verifyData failed. Reason: " + reason))
                 except Exception as ex:
                     try:
                         onError(EncryptError.ErrorCode.General,
