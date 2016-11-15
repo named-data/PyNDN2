@@ -216,7 +216,7 @@ class SegmentFetcher(object):
                   data,
                   lambda localData:
                     self._onVerified(localData, originalInterest),
-                  self._onVerifyFailed)
+                  self._onValidationFailed)
             except:
                 logging.exception("Error in KeyChain.verifyData")
             return
@@ -307,11 +307,12 @@ class SegmentFetcher(object):
                 self._fetchNextSegment(
                   originalInterest, data.getName(), expectedSegmentNumber + 1)
 
-    def _onVerifyFailed(self, data):
+    def _onValidationFailed(self, data, reason):
         try:
             self._onError(
               self.ErrorCode.SEGMENT_VERIFICATION_FAILED,
-               "Segment verification failed for " + data.getName().toUri())
+               "Segment verification failed for " + data.getName().toUri() +
+               " . Reason: " + reason)
         except:
             logging.exception("Error in onError")
 
