@@ -247,10 +247,10 @@ def makeOnVerified(prefix):
         dump(prefix, "signature verification: VERIFIED")
     return onVerified
 
-def makeOnVerifyFailed(prefix):
-    def onVerifyFailed(data):
-        dump(prefix, "signature verification: FAILED")
-    return onVerifyFailed
+def makeOnValidationFailed(prefix):
+    def onValidationFailed(data, reason):
+        dump(prefix, "signature verification: FAILED. Reason: " + reason)
+    return onValidationFailed
 
 def main():
     data = Data()
@@ -282,7 +282,7 @@ def main():
       keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
 
     keyChain.verifyData(reDecodedData, makeOnVerified("Re-decoded Data"),
-                        makeOnVerifyFailed("Re-decoded Data"))
+                        makeOnValidationFailed("Re-decoded Data"))
 
     freshData = Data(Name("/ndn/abc"))
     freshData.setContent("SUCCESS!")
@@ -294,6 +294,6 @@ def main():
     dumpData(freshData)
 
     keyChain.verifyData(freshData, makeOnVerified("Freshly-signed Data"),
-                        makeOnVerifyFailed("Freshly-signed Data"))
+                        makeOnValidationFailed("Freshly-signed Data"))
 
 main()

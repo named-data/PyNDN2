@@ -237,8 +237,8 @@ def onVerified(data):
     # Do nothing since we expect it to verify.
     pass
 
-def onVerifyFailed(data):
-    print("Signature verification: FAILED")
+def onValidationFailed(data, reason):
+    print("Signature verification: FAILED. Reason: " + reason)
 
 def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
     """
@@ -268,7 +268,7 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
         data.wireDecode(encoding)
 
         if useCrypto:
-            keyChain.verifyData(data, onVerified, onVerifyFailed)
+            keyChain.verifyData(data, onVerified, onValidationFailed)
 
     finish = getNowSeconds()
 
