@@ -433,7 +433,9 @@ class KeyChain(object):
         :type onVerified: function object
         :param onValidationFailed: If the signature check fails or can't find
           the public key, this calls onValidationFailed(data, reason) with the
-          Data object and reason string.
+          Data object and reason string. This also supports the deprecated
+          callback onValidationFailed(data) but you should use the callback with
+          the reason string.
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
@@ -441,6 +443,15 @@ class KeyChain(object):
         :param int stepCount: (optional) The number of verification steps that
           have been done. If omitted, use 0.
         """
+        # Use getcallargs to test if onValidationFailed accepts 2 args.
+        try:
+            inspect.getcallargs(onValidationFailed, None, None)
+        except TypeError:
+            # Assume onValidationFailed is old-style with 1 argument. Wrap it
+            # with a function that takes and ignores the reason string.
+            oldValidationFailed = onValidationFailed
+            onValidationFailed = lambda d, reason: oldValidationFailed(d)
+
         if self._policyManager.requireVerify(data):
             nextStep = self._policyManager.checkVerificationPolicy(
               data, stepCount, onVerified, onValidationFailed)
@@ -479,7 +490,9 @@ class KeyChain(object):
         :type onVerified: function object
         :param onValidationFailed: If the signature check fails or can't find
           the  public key, this calls onValidationFailed(interest, reason) with
-          the Interest object and reason string.
+          the Interest object and reason string. This also supports the
+          deprecated callback onValidationFailed(interest) but you should use
+          the callback with the reason string.
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
@@ -490,6 +503,15 @@ class KeyChain(object):
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
+
+        # Use getcallargs to test if onValidationFailed accepts 2 args.
+        try:
+            inspect.getcallargs(onValidationFailed, None, None)
+        except TypeError:
+            # Assume onValidationFailed is old-style with 1 argument. Wrap it
+            # with a function that takes and ignores the reason string.
+            oldValidationFailed = onValidationFailed
+            onValidationFailed = lambda i, reason: oldValidationFailed(i)
 
         if self._policyManager.requireVerify(interest):
             nextStep = self._policyManager.checkVerificationPolicy(
