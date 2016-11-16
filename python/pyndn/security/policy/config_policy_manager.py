@@ -461,13 +461,15 @@ class ConfigPolicyManager(PolicyManager):
             return signature
         return None
 
-    def _interestTimestampIsFresh(self, keyName, timestamp):
+    def _interestTimestampIsFresh(self, keyName, timestamp, failureReason):
         """
         Determine whether the timestamp from the interest is newer than the last use
         of this key, or within the grace interval on first use.
 
         :param Name keyName: The name of the public key used to sign the interest.
         :paramt int timestamp: The timestamp extracted from the interest name.
+        :param Array<str> failureReason: If verification fails, set
+          failureReason[0] to the failure reason string.
         """
         try:
             lastTimestamp = self._keyTimestamps[keyName.toUri()]
@@ -475,9 +477,20 @@ class ConfigPolicyManager(PolicyManager):
             now = Common.getNowMilliseconds()
             notBefore = now - self._keyGraceInterval
             notAfter = now + self._keyGraceInterval
-            return timestamp > notBefore and timestamp < notAfter
+            if not (timestamp > notBefore and timestamp < notAfter):
+                return False
+                failureReason[0] = (
+                  "The command interest timestamp is not within the first use grace period of " +
+                  str(self._keyGraceInterval) + " milliseconds.")
+            else:
+                return True
         else:
-            return timestamp > lastTimestamp
+            if timestamp <= lastTimestamp:
+                failureReason[0] = (
+                  "The command interest timestamp is not newer than the previous timestamp")
+                return False
+            else:
+                return True
 
     def _updateTimestampForKey(self, keyName, timestamp):
         """
@@ -509,9 +522,6 @@ class ConfigPolicyManager(PolicyManager):
             if len(self._keyTimestamps) > self._maxTrackedKeys:
                 # have not removed enough
                 del self._keyTimestamps[oldestKey]
-
-
-
 
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
                                 onValidationFailed, wireFormat = None):
@@ -669,7 +679,7 @@ class ConfigPolicyManager(PolicyManager):
             timestamp = dataOrInterest.getName().get(-4).toNumber()
 
             if not self._interestTimestampIsFresh(
-                     keyName, timestamp):
+                     keyName, timestamp, failureReason):
                 try:
                     onValidationFailed(dataOrInterest, failureReason[0])
                 except:
