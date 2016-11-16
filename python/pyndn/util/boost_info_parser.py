@@ -161,6 +161,24 @@ class BoostInfoTree(object):
             foundVals.extend(t.__getitem__(newPath))
         return foundVals
 
+    def getFirstValue(self, key):
+        """
+        Look up using the key and return string value of the first subtree.
+
+        :param str key: The key which may be a path separated with '/'.
+        :return: The string value or None if not found.
+        :rtype: str
+        """
+        try:
+            list = self[key]
+        except KeyError:
+            return None
+
+        if len(list) >= 1:
+            return list[0].value
+        else:
+            return None
+
     def getValue(self):
         """
         :return: The value associated with this tree.
