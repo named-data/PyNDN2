@@ -317,18 +317,31 @@ class ConfigPolicyManager(PolicyManager):
             except KeyError:
                 pass
             else:
-                try:
-                    keyRegex = hyperRelation['k-regex'][0].getValue()
+                keyRegex = hyperRelation.getFirstValue('k-regex')
+                keyExpansion = hyperRelation.getFirstValue('k-expand')
+                nameRegex = hyperRelation.getFirstValue('p-regex')
+                nameExpansion = hyperRelation.getFirstValue('p-expand')
+                relationType = hyperRelation.getFirstValue('h-relation')
+                if (keyRegex != None and keyExpansion != None and
+                      nameRegex != None and nameExpansion != None and
+                      relationType != None):
                     keyMatch = NdnRegexMatcher.match(keyRegex, signatureName)
-                    keyExpansion = hyperRelation['k-expand'][0].getValue()
+                    if keyMatch == None:
+                        failureReason[0] = (
+                          "The custom hyper-relation signatureName \"" +
+                          signatureName.toUri() +
+                          "\" does not match the keyRegex \"" + keyRegex + "\"")
+                        return False
                     keyMatchPrefix = keyMatch.expand(keyExpansion)
 
-                    nameRegex = hyperRelation['p-regex'][0].getValue()
                     nameMatch = NdnRegexMatcher.match(nameRegex, objectName)
-                    nameExpansion = hyperRelation['p-expand'][0].getValue()
+                    if nameMatch == None:
+                        failureReason[0] = (
+                          "The custom hyper-relation objectName \"" +
+                          objectName.toUri() +
+                          "\" does not match the nameRegex \"" + nameRegex + "\"")
+                        return False
                     nameMatchStr = nameMatch.expand(nameExpansion)
-
-                    relationType = hyperRelation['h-relation'][0].getValue()
 
                     if self._matchesRelation(
                           Name(nameMatchStr), Name(keyMatchPrefix), relationType):
@@ -339,9 +352,7 @@ class ConfigPolicyManager(PolicyManager):
                           nameMatchStr + "\" does not match the keyMatchPrefix \"" +
                           keyMatchPrefix + "\" using relation " + relationType)
                         return False
-                except:
-                    pass
-
+    
         failureReason[0] = "Unrecognized checkerType: " + checkerType
         return False
 
