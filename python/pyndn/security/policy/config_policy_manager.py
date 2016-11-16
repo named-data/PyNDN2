@@ -209,7 +209,7 @@ class ConfigPolicyManager(PolicyManager):
 
             self._lookupCertificate(certID, isPath)
 
-    def _checkSignatureMatch(self, signatureName, objectName, rule):
+    def _checkSignatureMatch(self, signatureName, objectName, rule, failureReason):
         """
         Once a rule is found to match data or a signed interest, the name in the
         KeyLocator must satisfy the condition in the 'checker' section of the rule,
@@ -221,6 +221,10 @@ class ConfigPolicyManager(PolicyManager):
           components.
         :param BoostInfoTree rule: The rule from the configuration file that matches
           the data or interest.
+        :param Array<str> failureReason: If verification fails, set
+          failureReason[0] to the failure reason string.
+        :return: True if matches.
+        :rtype: bool
 
         """
         checker = rule['checker'][0]
@@ -230,14 +234,30 @@ class ConfigPolicyManager(PolicyManager):
             signerType = signerInfo['type'][0].getValue()
             if signerType == 'file':
                 cert = self._lookupCertificate(signerInfo['file-name'][0].getValue(), True)
+                if cert is None:
+                    failureReason[0] = (
+                      "Can't find fixed-signer certificate file: " +
+                      signerInfo['file-name'][0].getValue())
+                    return False
             elif signerType == 'base64':
                 cert = self._lookupCertificate(signerInfo['base64-string'][0].getValue(), False)
+                if cert is None:
+                    failureReason[0] = (
+                      "Can't find fixed-signer certificate base64: " +
+                      signerInfo['base64-string'][0].getValue())
+                    return False
             else:
+                failureReason[0] = ("Unrecognized fixed-signer signerType: " +
+                  signerType)
                 return False
-            if cert is None:
-                return False
+
+            if cert.getName().equals(signatureName):
+                return True
             else:
-                return cert.getName().equals(signatureName)
+                failureReason[0] = ("fixed-signer cert name \"" +
+                  cert.getName().toUri() + "\" does not equal signatureName \"" +
+                  signatureName.toUri() + "\"")
+                return False
         elif checkerType == 'hierarchical':
             # this just means the data/interest name has the signing identity as a prefix
             # that means everything before 'ksk-?' in the key name
@@ -245,8 +265,17 @@ class ConfigPolicyManager(PolicyManager):
             identityMatch = NdnRegexMatcher.match(identityRegex, signatureName)
             if identityMatch is not None:
                 identityPrefix = Name(identityMatch.group(1)).append(Name(identityMatch.group(2)))
-                return self._matchesRelation(objectName, identityPrefix, 'is-prefix-of')
+                if self._matchesRelation(objectName, identityPrefix, 'is-prefix-of'):
+                    return True
+                else:
+                    failureReason[0] = ("The hierarchical objectName \"" +
+                      objectName.toUri() + "\" is not a prefix of \"" +
+                      identityPrefix.toUri() + "\"")
+                    return False
             else:
+                failureReason[0] = ("The hierarchical identityRegex \"" +
+                  identityRegex + "\" does not match signatureName \"" +
+                  signatureName.toUri() + "\"")
                 return False
         elif checkerType == 'customized':
             keyLocatorInfo = checker['key-locator'][0]
@@ -259,7 +288,13 @@ class ConfigPolicyManager(PolicyManager):
                 pass
             else:
                 matchName = Name(keyLocatorInfo['name'][0].getValue())
-                return self._matchesRelation(signatureName, matchName, relationType)
+                if self._matchesRelation(signatureName, matchName, relationType):
+                    return True
+                else:
+                    failureReason[0] = ("The custom signatureName \"" +
+                      signatureName.toUri() + "\" does not match matchName \"" +
+                      matchName.toUri() + "\" using relation " + relationType)
+                    return False
 
             # is this a simple regex?
             try:
@@ -267,7 +302,14 @@ class ConfigPolicyManager(PolicyManager):
             except KeyError:
                 pass
             else:
-                return NdnRegexMatcher.match(keyRegex, signatureName) is not None
+                if NdnRegexMatcher.match(keyRegex, signatureName) is not None:
+                    return True
+                else:
+                    failureReason[0] = ("The custom signatureName \"" +
+                      signatureName.toUri() +
+                      "\" does not regex match simpleKeyRegex \"" + keyRegex +
+                      "\"")
+                    return False
 
             # is this a hyper-relation?
             try:
@@ -288,11 +330,19 @@ class ConfigPolicyManager(PolicyManager):
 
                     relationType = hyperRelation['h-relation'][0].getValue()
 
-                    return self._matchesRelation(Name(nameMatchStr), Name(keyMatchPrefix), relationType)
+                    if self._matchesRelation(
+                          Name(nameMatchStr), Name(keyMatchPrefix), relationType):
+                        return True
+                    else:
+                        failureReason[0] = (
+                          "The custom hyper-relation nameMatch \"" +
+                          nameMatchStr + "\" does not match the keyMatchPrefix \"" +
+                          keyMatchPrefix + "\" using relation " + relationType)
+                        return False
                 except:
                     pass
 
-        # unknown type
+        failureReason[0] = "Unrecognized checkerType: " + checkerType
         return False
 
     def _lookupCertificate(self, certID, isPath):
@@ -300,6 +350,9 @@ class ConfigPolicyManager(PolicyManager):
         This looks up certificates specified as base64-encoded data or file names.
         These are cached by filename or encoding to avoid repeated reading of files
         or decoding.
+
+        :return: The certificate object, or None if not found.
+        :rtype: IdentityCertificate
         """
         try:
             certUri = self._fixedCertificateCache[certID]
@@ -408,13 +461,15 @@ class ConfigPolicyManager(PolicyManager):
             return signature
         return None
 
-    def _interestTimestampIsFresh(self, keyName, timestamp):
+    def _interestTimestampIsFresh(self, keyName, timestamp, failureReason):
         """
         Determine whether the timestamp from the interest is newer than the last use
         of this key, or within the grace interval on first use.
 
         :param Name keyName: The name of the public key used to sign the interest.
         :paramt int timestamp: The timestamp extracted from the interest name.
+        :param Array<str> failureReason: If verification fails, set
+          failureReason[0] to the failure reason string.
         """
         try:
             lastTimestamp = self._keyTimestamps[keyName.toUri()]
@@ -422,9 +477,20 @@ class ConfigPolicyManager(PolicyManager):
             now = Common.getNowMilliseconds()
             notBefore = now - self._keyGraceInterval
             notAfter = now + self._keyGraceInterval
-            return timestamp > notBefore and timestamp < notAfter
+            if not (timestamp > notBefore and timestamp < notAfter):
+                return False
+                failureReason[0] = (
+                  "The command interest timestamp is not within the first use grace period of " +
+                  str(self._keyGraceInterval) + " milliseconds.")
+            else:
+                return True
         else:
-            return timestamp > lastTimestamp
+            if timestamp <= lastTimestamp:
+                failureReason[0] = (
+                  "The command interest timestamp is not newer than the previous timestamp")
+                return False
+            else:
+                return True
 
     def _updateTimestampForKey(self, keyName, timestamp):
         """
@@ -457,11 +523,8 @@ class ConfigPolicyManager(PolicyManager):
                 # have not removed enough
                 del self._keyTimestamps[oldestKey]
 
-
-
-
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
-                                onVerifyFailed, wireFormat = None):
+                                onValidationFailed, wireFormat = None):
         """
         If there is a rule matching the data or interest, and the matching
         certificate is missing, download it. If there is no matching rule,
@@ -479,57 +542,67 @@ class ConfigPolicyManager(PolicyManager):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onVerified: function object
-        :param onVerifyFailed: If the signature check fails, this calls
-          onVerifyFailed(dataOrInterest).
+        :param onValidationFailed: If the signature check fails, this calls
+          onValidationFailed(dataOrInterest, reason).
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
-        :type onVerifyFailed: function object
+        :type onValidationFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
         if stepCount > self._maxDepth:
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(
+                  dataOrInterest, "The verification stepCount " + stepCount +
+                  " exceeded the maxDepth " + self._maxDepth)
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
         signature = self._extractSignature(dataOrInterest, wireFormat)
         # no signature -> fail
         if signature is None:
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(
+                  dataOrInterest, "Cannot extract the signature from " +
+                  dataOrInterest.getName().toUri())
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
         if not KeyLocator.canGetFromSignature(signature):
             # We only support signature types with key locators.
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(
+                  dataOrInterest,
+                  "The signature type does not support a KeyLocator")
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
         keyLocator = None
         try:
             keyLocator = KeyLocator.getFromSignature(signature)
-        except:
+        except Exception as ex:
             # No key locator -> fail.
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(
+                  dataOrInterest, "Error in KeyLocator.getFromSignature: " +
+                  str(ex))
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
         signatureName = keyLocator.getKeyName()
         # no key name in KeyLocator -> fail
         if signatureName.size() == 0:
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(
+                  dataOrInterest,
+                  "The signature KeyLocator doesn't have a key name")
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
         objectName = dataOrInterest.getName()
@@ -549,18 +622,21 @@ class ConfigPolicyManager(PolicyManager):
         # no matching rule -> fail
         if matchedRule is None:
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(
+                  dataOrInterest, "No matching rule found for " +
+                  objectName.toUri())
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
-        signatureMatches = self._checkSignatureMatch(signatureName, objectName,
-                matchedRule)
+        failureReason = ["unknown"]
+        signatureMatches = self._checkSignatureMatch(
+          signatureName, objectName, matchedRule, failureReason)
         if not signatureMatches:
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(dataOrInterest, failureReason[0])
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
             return None
 
         # before we look up keys, refresh any certificate directories
@@ -574,14 +650,23 @@ class ConfigPolicyManager(PolicyManager):
             foundCert = self._certificateCache.getCertificate(signatureName)
         if foundCert is None:
             certificateInterest = Interest(signatureName)
-            def onCertificateDownloadComplete(certificate):
-                certificate = IdentityCertificate(certificate)
+            def onCertificateDownloadComplete(data):
+                try:
+                    certificate = IdentityCertificate(data)
+                except:
+                    try:
+                        onValidationFailed(
+                          dataOrInterest, "Cannot decode certificate " +
+                          data.getName().toUri())
+                    except:
+                        logging.exception("Error in onValidationFailed")
+                    return None
                 self._certificateCache.insertCertificate(certificate)
                 self.checkVerificationPolicy(dataOrInterest, stepCount+1,
-                        onVerified, onVerifyFailed)
+                        onVerified, onValidationFailed)
 
             nextStep = ValidationRequest(certificateInterest,
-                    onCertificateDownloadComplete, onVerifyFailed,
+                    onCertificateDownloadComplete, onValidationFailed,
                     2, stepCount+1)
 
             return nextStep
@@ -593,15 +678,16 @@ class ConfigPolicyManager(PolicyManager):
             keyName = foundCert.getPublicKeyName()
             timestamp = dataOrInterest.getName().get(-4).toNumber()
 
-            if not self._interestTimestampIsFresh(keyName, timestamp):
+            if not self._interestTimestampIsFresh(
+                     keyName, timestamp, failureReason):
                 try:
-                    onVerifyFailed(dataOrInterest)
+                    onValidationFailed(dataOrInterest, failureReason[0])
                 except:
-                    logging.exception("Error in onVerifyFailed")
+                    logging.exception("Error in onValidationFailed")
                 return None
 
         # certificate is known, verify the signature
-        if self._verify(signature, dataOrInterest.wireEncode()):
+        if self._verify(signature, dataOrInterest.wireEncode(), failureReason):
             try:
                 onVerified(dataOrInterest)
             except:
@@ -610,11 +696,11 @@ class ConfigPolicyManager(PolicyManager):
                 self._updateTimestampForKey(keyName, timestamp)
         else:
             try:
-                onVerifyFailed(dataOrInterest)
+                onValidationFailed(dataOrInterest, failureReason[0])
             except:
-                logging.exception("Error in onVerifyFailed")
+                logging.exception("Error in onValidationFailed")
 
-    def _verify(self, signatureInfo, signedBlob):
+    def _verify(self, signatureInfo, signedBlob, failureReason):
         """
         Check the type of signatureInfo to get the KeyLocator. Look in the
         IdentityStorage for the public key with the name in the KeyLocator and
@@ -626,6 +712,8 @@ class ConfigPolicyManager(PolicyManager):
           e.g. Sha256WithRsaSignature.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
           verify.
+        :param Array<str> failureReason: If verification fails, set
+          failureReason[0] to the failure reason string.
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         """
@@ -639,16 +727,26 @@ class ConfigPolicyManager(PolicyManager):
             if certificate is None:
                 certificate = self._certificateCache.getCertificate(signatureName)
             if certificate is None:
+                failureReason[0] = ("Cannot find a certificate with name " +
+                  signatureName.toUri())
                 return False
 
             publicKeyDer = certificate.getPublicKeyInfo().getKeyDer()
             if publicKeyDer.isNull():
-                # Can't find the public key with the name.
+                # We don't expect this to happen.
+                failureReason[0] = (
+                  "There is no public key in the certificate with name " +
+                  certificate.getName().toUri())
                 return False
 
-            return self.verifySignature(signatureInfo, signedBlob, publicKeyDer)
+            if self.verifySignature(signatureInfo, signedBlob, publicKeyDer):
+                return True
+            else:
+                failureReason[0] = (
+                  "The signature did not verify with the given public key")
+                return False
         else:
-            # Can't find a key to verify.
+            failureReason[0] = "The KeyLocator does not have a key name"
             return False
 
 class TrustAnchorRefreshManager(object):

@@ -192,14 +192,14 @@ def dumpInterest(interest):
                   else interest.getInterestLifetimeMilliseconds())
 
 def makeOnVerified(prefix):
-    def onVerified(data):
+    def onVerified(interest):
         dump(prefix, "signature verification: VERIFIED")
     return onVerified
 
-def makeOnVerifyFailed(prefix):
-    def onVerifyFailed(data):
-        dump(prefix, "signature verification: FAILED")
-    return onVerifyFailed
+def makeOnValidationFailed(prefix):
+    def onValidationFailed(interest, reason):
+        dump(prefix, "signature verification: FAILED. Reason: " + reason)
+    return onValidationFailed
 
 def main():
     interest = Interest()
@@ -258,6 +258,6 @@ def main():
 
     keyChain.verifyInterest(
       reDecodedFreshInterest, makeOnVerified("Freshly-signed Interest"),
-      makeOnVerifyFailed("Freshly-signed Interest"))
+      makeOnValidationFailed("Freshly-signed Interest"))
 
 main()

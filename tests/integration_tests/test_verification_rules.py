@@ -242,12 +242,13 @@ class TestRegexMatching(ut.TestCase):
         signatureName1 = data1.getSignature().getKeyLocator().getKeyName()
         signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
 
+        failureReason = ["unknown"]
         self.assertFalse(policyManager._checkSignatureMatch(signatureName1,
-            dataName1, matchedRule),
+            dataName1, matchedRule, failureReason),
             "Hierarchical matcher matched short data name to long key name")
 
         self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
-            dataName2, matchedRule))
+            dataName2, matchedRule, failureReason))
 
         self.keyChain.sign(data1, self.shortCertName)
         self.keyChain.sign(data2, self.shortCertName)
@@ -256,9 +257,9 @@ class TestRegexMatching(ut.TestCase):
         signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
 
         self.assertTrue(policyManager._checkSignatureMatch(signatureName1,
-            dataName1, matchedRule))
+            dataName1, matchedRule, failureReason))
         self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
-            dataName2, matchedRule))
+            dataName2, matchedRule, failureReason))
 
 
     def test_hyperrelation(self):
@@ -275,10 +276,11 @@ class TestRegexMatching(ut.TestCase):
         signatureName1 = data1.getSignature().getKeyLocator().getKeyName()
         signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
 
+        failureReason = ["unknown"]
         self.assertTrue(policyManager._checkSignatureMatch(signatureName1,
-            dataName, matchedRule))
+            dataName, matchedRule, failureReason))
         self.assertFalse(policyManager._checkSignatureMatch(signatureName2,
-            dataName, matchedRule))
+            dataName, matchedRule, failureReason))
 
         dataName = Name('/SecurityTestSecRule/Basic/Other/Data1')
         data1 = Data(dataName)
@@ -292,9 +294,9 @@ class TestRegexMatching(ut.TestCase):
         signatureName2 = data2.getSignature().getKeyLocator().getKeyName()
 
         self.assertFalse(policyManager._checkSignatureMatch(signatureName1,
-            dataName, matchedRule))
+            dataName, matchedRule, failureReason))
         self.assertTrue(policyManager._checkSignatureMatch(signatureName2,
-            dataName, matchedRule))
+            dataName, matchedRule, failureReason))
 
     def test_interest_matching(self):
         # make sure we chop off timestamp, nonce, and signature info from

@@ -67,11 +67,11 @@ class PolicyManager(object):
         raise RuntimeError("requireVerify is not implemented")
 
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
-                                onVerifyFailed, wireFormat = None):
+                                onValidationFailed, wireFormat = None):
         """
-        Check whether the received data packet complies with the verification
-        policy, and get the indication of the next verification step.
-        Your derived class should override.
+        Check whether the received data packet or interest complies with the
+        verification policy, and get the indication of the next verification
+        step. Your derived class should override.
 
         :param dataOrInterest: The Data object or interest with the signature to
           check.
@@ -84,12 +84,12 @@ class PolicyManager(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onVerified: function object
-        :param onVerifyFailed: If the signature check fails, this calls
-          onVerifyFailed(dataOrInterest).
+        :param onValidationFailed: If the signature check fails, this calls
+          onValidationFailed(dataOrInterest, reason).
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
-        :type onVerifyFailed: function object
+        :type onValidationFailed: function object
         :return: The indication of next verification step, or None if there is
           no further step.
         :rtype: ValidationRequest

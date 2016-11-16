@@ -74,11 +74,12 @@ class SelfVerifyPolicyManager(PolicyManager):
         return True
 
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
-                                onVerifyFailed, wireFormat = None):
+                                onValidationFailed, wireFormat = None):
         """
         Look in the IdentityStorage for the public key with the name in the
         KeyLocator (if available) and use it to verify the data packet or
-        signed interest. If the public key can't be found, call onVerifyFailed.
+        signed interest. If the public key can't be found, call
+        onValidationFailed.
 
         :param dataOrInterest: The Data object or interest with the signature to
           check.
@@ -91,12 +92,12 @@ class SelfVerifyPolicyManager(PolicyManager):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onVerified: function object
-        :param onVerifyFailed: If the signature check fails, this calls
-          onVerifyFailed(dataOrInterest).
+        :param onValidationFailed: If the signature check fails, this calls
+          onValidationFailed(dataOrInterest, reason).
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
-        :type onVerifyFailed: function object
+        :type onValidationFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
@@ -104,37 +105,56 @@ class SelfVerifyPolicyManager(PolicyManager):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
+        failureReason = ["unknown"]
         if isinstance(dataOrInterest, Data):
             data = dataOrInterest
             # wireEncode returns the cached encoding if available.
-            if self._verify(data.getSignature(), data.wireEncode()):
+            if self._verify(data.getSignature(), data.wireEncode(), failureReason):
                 try:
                     onVerified(data)
                 except:
                     logging.exception("Error in onVerified")
             else:
                 try:
-                    onVerifyFailed(data)
+                    onValidationFailed(data, failureReason[0])
                 except:
-                    logging.exception("Error in onVerifyFailed")
+                    logging.exception("Error in onValidationFailed")
         elif isinstance(dataOrInterest, Interest):
             interest = dataOrInterest
+
+            if interest.getName().size() < 2:
+                try:
+                    onValidationFailed(interest,
+                      "The signed interest has less than 2 components: " +
+                      interest.getName().toUri())
+                except:
+                    logging.exception("Error in onValidationFailed")
+                return
+
             # Decode the last two name components of the signed interest
-            signature = wireFormat.decodeSignatureInfoAndValue(
-               interest.getName().get(-2).getValue().buf(),
-               interest.getName().get(-1).getValue().buf(), False)
+            try:
+                signature = wireFormat.decodeSignatureInfoAndValue(
+                   interest.getName().get(-2).getValue().buf(),
+                   interest.getName().get(-1).getValue().buf(), False)
+            except Exception as ex:
+                try:
+                    onValidationFailed(interest,
+                      "Error decoding the signed interest signature: " + str(ex))
+                except:
+                    logging.exception("Error in onValidationFailed")
+                return
 
             # wireEncode returns the cached encoding if available.
-            if self._verify(signature, interest.wireEncode()):
+            if self._verify(signature, interest.wireEncode(), failureReason):
                 try:
                     onVerified(interest)
                 except:
                     logging.exception("Error in onVerified")
             else:
                 try:
-                    onVerifyFailed(interest)
+                    onValidationFailed(interest, failureReason[0])
                 except:
-                    logging.exception("Error in onVerifyFailed")
+                    logging.exception("Error in onValidationFailed")
         else:
             raise RuntimeError(
               "checkVerificationPolicy: unrecognized type for dataOrInterest")
@@ -165,7 +185,7 @@ class SelfVerifyPolicyManager(PolicyManager):
         """
         return Name()
 
-    def _verify(self, signatureInfo, signedBlob):
+    def _verify(self, signatureInfo, signedBlob, failureReason):
         """
         Check the type of signatureInfo to get the KeyLocator. Look in the
         IdentityStorage for the public key with the name in the KeyLocator and
@@ -177,37 +197,56 @@ class SelfVerifyPolicyManager(PolicyManager):
           e.g. Sha256WithRsaSignature.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
           verify.
+        :param Array<str> failureReason: If verification fails, set
+          failureReason[0] to the failure reason string.
         :return: True if the signature verifies, False if not.
         :rtype: boolean
         """
         publicKeyDer = None
         if KeyLocator.canGetFromSignature(signatureInfo):
             publicKeyDer = self._getPublicKeyDer(
-              KeyLocator.getFromSignature(signatureInfo))
+              KeyLocator.getFromSignature(signatureInfo), failureReason)
             if publicKeyDer.isNull():
                 return False
 
-        return self.verifySignature(
-          signatureInfo, signedBlob, publicKeyDer)
+        if self.verifySignature(
+              signatureInfo, signedBlob, publicKeyDer):
+            return True
+        else:
+            failureReason[0] = (
+              "The signature did not verify with the given public key")
+            return False
 
-    def _getPublicKeyDer(self, keyLocator):
+    def _getPublicKeyDer(self, keyLocator, failureReason):
         """
         Look in the IdentityStorage for the public key with the name in the
         KeyLocator. If the public key can't be found, return and empty Blob.
 
         :param KeyLocator keyLocator: The KeyLocator.
+        :param Array<str> failureReason: If can't find the public key, set
+          failureReason[0] to the failure reason string.
         :return: The public key DER or an empty Blob if not found.
         :rtype: Blob
         """
         if (keyLocator.getType() == KeyLocatorType.KEYNAME and
             self._identityStorage != None):
             try:
-              # Assume the key name is a certificate name.
-              return self._identityStorage.getKey(
-                IdentityCertificate.certificateNameToPublicKeyName(
-                  keyLocator.getKeyName()))
-            except SecurityException as ex:
-              # The storage doesn't have the key.
-              return Blob()
+                # Assume the key name is a certificate name.
+                keyName = IdentityCertificate.certificateNameToPublicKeyName(
+                  keyLocator.getKeyName())
+            except Exception:
+                failureReason[0] = (
+                  "Cannot get a public key name from the certificate named: " +
+                  keyLocator.getKeyName().toUri())
+                return Blob()
+            try:
+                return self._identityStorage.getKey(keyName)
+            except SecurityException:
+                failureReason[0] = (
+                  "The identityStorage doesn't have the key named " +
+                  keyName.toUri())
+                return Blob()
         else:
+            # Can't find a key to verify.
+            failureReason[0] = "The signature KeyLocator doesn't have a key name"
             return Blob()

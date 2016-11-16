@@ -48,7 +48,7 @@ class NoVerifyPolicyManager(PolicyManager):
         return False
 
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
-                                onVerifyFailed, wireFormat = None):
+                                onValidationFailed, wireFormat = None):
         """
         Override to call onVerified(dataOrInterest) and to indicate no further
         verification step.
@@ -63,8 +63,8 @@ class NoVerifyPolicyManager(PolicyManager):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onVerified: function object
-        :param onVerifyFailed: Override to ignore this.
-        :type onVerifyFailed: function object
+        :param onValidationFailed: Override to ignore this.
+        :type onValidationFailed: function object
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
