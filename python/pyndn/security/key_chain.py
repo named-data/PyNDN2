@@ -463,11 +463,11 @@ class KeyChain(object):
                 logging.exception("Error in onValidationFailed")
 
     def verifyInterest(
-      self, interest, onVerified, onVerifyFailed, stepCount = 0,
+      self, interest, onVerified, onValidationFailed, stepCount = 0,
       wireFormat = None):
         """
         Check the signature on the signed interest and call either onVerify or
-        onVerifyFailed. We use callback functions because verify may fetch
+        onValidationFailed. We use callback functions because verify may fetch
         information to check the signature.
 
         :param Interest interest: The interest with the signature to check.
@@ -477,12 +477,13 @@ class KeyChain(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onVerified: function object
-        :param onVerifyFailed: If the signature check fails or can't find the
-          public key, this calls onVerifyFailed(interest).
+        :param onValidationFailed: If the signature check fails or can't find
+          the  public key, this calls onValidationFailed(interest, reason) with
+          the Interest object and reason string.
           NOTE: The library will log any exceptions raised by this callback, but
           for better error handling the callback should catch and properly
           handle any exceptions.
-        :type onVerifyFailed: function object
+        :type onValidationFailed: function object
         :param int stepCount: (optional) The number of verification steps that
           have been done. If omitted, use 0.
         """
@@ -492,12 +493,12 @@ class KeyChain(object):
 
         if self._policyManager.requireVerify(interest):
             nextStep = self._policyManager.checkVerificationPolicy(
-              interest, stepCount, onVerified, onVerifyFailed, wireFormat)
+              interest, stepCount, onVerified, onValidationFailed, wireFormat)
             if nextStep != None:
                 self._face.expressInterest(
                   nextStep.interest, self._makeOnCertificateData(nextStep),
                   self._makeOnCertificateInterestTimeout(
-                    nextStep.retry, onVerifyFailed, interest, nextStep))
+                    nextStep.retry, onValidationFailed, interest, nextStep))
         elif self._policyManager.skipVerifyAndTrust(interest):
             try:
                 onVerified(interest)
@@ -505,7 +506,8 @@ class KeyChain(object):
                 logging.exception("Error in onVerified")
         else:
             try:
-                onVerifyFailed(interest)
+                onValidationFailed(interest,
+                  "The packet has no verify rule but skipVerifyAndTrust is false")
             except:
                 logging.exception("Error in onValidationFailed")
 
