@@ -121,10 +121,28 @@ class SelfVerifyPolicyManager(PolicyManager):
                     logging.exception("Error in onValidationFailed")
         elif isinstance(dataOrInterest, Interest):
             interest = dataOrInterest
+
+            if interest.getName().size() < 2:
+                try:
+                    onValidationFailed(interest,
+                      "The signed interest has less than 2 components: " +
+                      interest.getName().toUri())
+                except:
+                    logging.exception("Error in onValidationFailed")
+                return
+
             # Decode the last two name components of the signed interest
-            signature = wireFormat.decodeSignatureInfoAndValue(
-               interest.getName().get(-2).getValue().buf(),
-               interest.getName().get(-1).getValue().buf(), False)
+            try:
+                signature = wireFormat.decodeSignatureInfoAndValue(
+                   interest.getName().get(-2).getValue().buf(),
+                   interest.getName().get(-1).getValue().buf(), False)
+            except Exception as ex:
+                try:
+                    onValidationFailed(interest,
+                      "Error decoding the signed interest signature: " + str(ex))
+                except:
+                    logging.exception("Error in onValidationFailed")
+                return
 
             # wireEncode returns the cached encoding if available.
             if self._verify(signature, interest.wireEncode(), failureReason):
