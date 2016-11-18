@@ -1,9 +1,11 @@
-Interim changes since PyNDN v2.4beta1 (2016-11-16)
+Interim changes since PyNDN v2.4beta1 (2016-11-18)
 --------------------------------------------------
 
 Changes
 * https://redmine.named-data.net/issues/3798 In KeyChain.verifyData and verifyInterest,
   use onValidationFailed callbacks which include a reason string.
+* https://github.com/named-data/PyNDN2/pull/3 In Node, support a callable object
+  for onInterest. (Thanks Pedro!)
 
 Deprecated
 * In KeyChain, deprecated verifyData that takes an onValidationFailed(data)
