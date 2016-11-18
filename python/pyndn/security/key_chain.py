@@ -443,6 +443,11 @@ class KeyChain(object):
         :param int stepCount: (optional) The number of verification steps that
           have been done. If omitted, use 0.
         """
+        # If onValidationFailed is not a function nor a method assumes it is a
+        # calleable object
+        if (not inspect.isfunction(onValidationFailed) and
+            not inspect.ismethod(onValidationFailed)):
+            onValidationFailed = onValidationFailed.__call__
         # Use getcallargs to test if onValidationFailed accepts 2 args.
         try:
             inspect.getcallargs(onValidationFailed, None, None)
@@ -504,6 +509,11 @@ class KeyChain(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
+        # If onValidationFailed is not a function nor a method assumes it is a
+        # calleable object
+        if (not inspect.isfunction(onValidationFailed) and
+            not inspect.ismethod(onValidationFailed)):
+            onValidationFailed = onValidationFailed.__call__
         # Use getcallargs to test if onValidationFailed accepts 2 args.
         try:
             inspect.getcallargs(onValidationFailed, None, None)
