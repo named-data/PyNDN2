@@ -407,9 +407,15 @@ class Node(object):
             for i in range(len(matchedFilters)):
                 entry = matchedFilters[i]
                 includeFilter = True
+                onInterestCall = entry.getOnInterest()
+                # If onInterest is not a function nor a method assumes it is a
+                # calleable object
+                if (not inspect.isfunction(onInterestCall) and
+                    not inspect.ismethod(onInterestCall)):
+                    onInterestCall = onInterestCall.__call__
                 # Use getcallargs to test if onInterest accepts 5 args.
                 try:
-                    inspect.getcallargs(entry.getOnInterest(),
+                    inspect.getcallargs(onInterestCall,
                       None, None, None, None, None)
                 except TypeError:
                     # Assume onInterest is old-style with 4 arguments.
