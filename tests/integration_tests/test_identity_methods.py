@@ -40,6 +40,12 @@ import unittest as ut
 import base64
 import time
 
+# use Python 3's mock library if it's available
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
+
 class TestSqlIdentityStorage(ut.TestCase):
     def setUp(self):
         # Reuse the policy_config subdirectory for the temporary SQLite file.
@@ -169,6 +175,7 @@ class TestSqlIdentityStorage(ut.TestCase):
 
         self.keyChain.deleteIdentity(identityName)
         self.assertFalse(self.identityStorage.doesCertificateExist(certName2))
+
     def test_stress(self):
         # ndn-cxx/tests/unit-tests/security/test-sec-public-info-sqlite3.cpp
         identityName = Name("/TestSecPublicInfoSqlite3/Delete").appendVersion(
@@ -228,6 +235,21 @@ class TestSqlIdentityStorage(ut.TestCase):
         self.assertFalse(self.identityStorage.doesKeyExist(keyName1))
         self.assertFalse(self.identityStorage.doesIdentityExist(identityName))
 
+    def test_ecdsa_identity(self):
+        identityName = Name("/TestSqlIdentityStorage/KeyType/ECDSA")
+        keyName = self.identityManager.generateEcdsaKeyPairAsDefault(identityName)
+        cert = self.identityManager.selfSign(keyName)
+        self.identityManager.addCertificateAsIdentityDefault(cert)
+
+        # Check the self-signature.
+        failedCallback = Mock()
+        verifiedCallback = Mock()
+        self.keyChain.verifyData(cert, verifiedCallback, failedCallback)
+        self.assertEqual(verifiedCallback.call_count, 1,
+                         "Verification callback was not used.")
+
+        self.keyChain.deleteIdentity(identityName)
+        self.assertFalse(self.identityStorage.doesKeyExist(keyName))
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
