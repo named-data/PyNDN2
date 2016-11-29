@@ -209,7 +209,7 @@ class IdentityManager(object):
         keyName = self._generateKeyPair(identityName, isKsk, RsaKeyParams(keySize))
         return keyName
 
-    def generateEcdsaKeyPair(self, identityName, isKsk = False, keySize = 2048):
+    def generateEcdsaKeyPair(self, identityName, isKsk = False, keySize = 256):
         """
         Generate a pair of ECDSA keys for the specified identity.
 
@@ -269,7 +269,7 @@ class IdentityManager(object):
         return newKeyName
 
     def generateEcdsaKeyPairAsDefault(
-          self, identityName, isKsk = False, keySize = 2048):
+          self, identityName, isKsk = False, keySize = 256):
         """
         Generate a pair of ECDSA keys for the specified identity and set it as
         default key for the identity.
