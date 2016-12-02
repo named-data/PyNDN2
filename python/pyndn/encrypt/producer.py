@@ -264,7 +264,7 @@ class Producer(object):
 
         def onNetworkNack(interest, networkNack):
             self._handleNetworkNack(
-              interest, networkNack, timeSlot, onEncryptedKeys)
+              interest, networkNack, timeSlot, onEncryptedKeys, onError)
 
         if self._keyRetrievalLink.getDelegations().size() == 0:
             # We can use the supplied interest without copying.
@@ -304,7 +304,8 @@ class Producer(object):
             # No more retrials.
             self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
 
-    def _handleNetworkNack(self, interest, networkNack, timeSlot, onEncryptedKeys):
+    def _handleNetworkNack(self, interest, networkNack, timeSlot,
+          onEncryptedKeys, onError):
         """
         This is called from an expressInterest OnNetworkNack to handle a network
         Nack for the E-KEY requested through the Interest. Decrease the
