@@ -33,6 +33,7 @@ from pyndn.interest import Interest
 from pyndn.data import Data
 from pyndn.link import Link
 from pyndn.exclude import Exclude
+from pyndn.network_nack import NetworkNack
 from pyndn.security.key_params import AesKeyParams
 from pyndn.encrypt.schedule import Schedule
 from pyndn.encrypt.encrypt_error import EncryptError
@@ -301,8 +302,9 @@ class Producer(object):
             keyRequest.repeatAttempts[interestName] += 1
             self._sendKeyInterest(interest, timeSlot, onEncryptedKeys, onError)
         else:
-            # No more retrials.
-            self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
+            # Treat an eventual timeout as a network Nack.
+            self._handleNetworkNack(
+              interest, NetworkNack(), timeSlot, onEncryptedKeys, onError)
 
     def _handleNetworkNack(self, interest, networkNack, timeSlot,
           onEncryptedKeys, onError):
@@ -321,6 +323,7 @@ class Producer(object):
           use it.
         :type onEncryptedKeys: function object
         """
+        # We have run out of options....
         timeCount = round(timeSlot)
         self._updateKeyRequest(
           self._keyRequests[timeCount], timeCount, onEncryptedKeys)
