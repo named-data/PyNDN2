@@ -21,7 +21,7 @@
 
 import unittest as ut
 import os
-from pyndn import Name, Data
+from pyndn import Name, Data, Link
 from pyndn.util import Blob
 from pyndn.encrypt import Consumer, Sqlite3ConsumerDb
 from pyndn.encrypt.algo import EncryptParams, EncryptAlgorithmType
@@ -305,6 +305,79 @@ class TestConsumer(ut.TestCase):
           self.contentName, onConsumeComplete,
           lambda code, message:
             self.fail("consume error " + repr(code) + ": " + message))
+
+        self.assertEqual(1, contentCount[0], "contentCount")
+        self.assertEqual(1, cKeyCount[0], "cKeyCount")
+        self.assertEqual(1, dKeyCount[0], "dKeyCount")
+        self.assertEqual(1, finalCount[0], "finalCount")
+
+    def test_consumer_with_link(self):
+        contentData = self.createEncryptedContent()
+        cKeyData = self.createEncryptedCKey()
+        dKeyData = self.createEncryptedDKey()
+
+        contentCount = [0]
+        cKeyCount = [0]
+        dKeyCount = [0]
+
+        # Prepare a TestFace to instantly answer calls to expressInterest.
+        class TestFace(object):
+            def __init__(self, handleExpressInterest):
+                self.handleExpressInterest = handleExpressInterest
+            def expressInterest(self, interest, onData, onTimeout, onNetworkNack):
+                return self.handleExpressInterest(
+                  interest, onData, onTimeout, onNetworkNack)
+
+        def handleExpressInterest(interest, onData, onTimeout, onNetworkNack):
+            self.assertEqual(3, interest.getLink().getDelegations().size())
+
+            if interest.matchesName(contentData.getName()):
+              contentCount[0] = 1
+              onData(interest, contentData)
+            elif interest.matchesName(cKeyData.getName()):
+              cKeyCount[0] = 1
+              onData(interest, cKeyData)
+            elif interest.matchesName(dKeyData.getName()):
+              dKeyCount[0] = 1
+              onData(interest, dKeyData)
+            else:
+              onTimeout(interest)
+
+            return 0
+        face = TestFace(handleExpressInterest)
+
+        # Create the consumer.
+        ckeyLink = Link()
+        ckeyLink.addDelegation(10,  Name("/ckey1"))
+        ckeyLink.addDelegation(20,  Name("/ckey2"))
+        ckeyLink.addDelegation(100, Name("/ckey3"))
+        dkeyLink = Link()
+        dkeyLink.addDelegation(10,  Name("/dkey1"))
+        dkeyLink.addDelegation(20,  Name("/dkey2"))
+        dkeyLink.addDelegation(100, Name("/dkey3"))
+        dataLink = Link()
+        dataLink.addDelegation(10,  Name("/data1"))
+        dataLink.addDelegation(20,  Name("/data2"))
+        dataLink.addDelegation(100, Name("/data3"))
+        self.keyChain.sign(ckeyLink, self.certificateName)
+        self.keyChain.sign(dkeyLink, self.certificateName)
+        self.keyChain.sign(dataLink, self.certificateName)
+
+        consumer = Consumer(
+          face, self.keyChain, self.groupName, self.uName,
+          Sqlite3ConsumerDb(self.databaseFilePath), ckeyLink, dkeyLink)
+        consumer.addDecryptionKey(self.uKeyName, self.fixtureUDKeyBlob)
+
+        finalCount = [0]
+        def onConsumeComplete(data, result):
+            finalCount[0] = 1
+            self.assertTrue("consumeComplete",
+                            result.equals(Blob(DATA_CONTENT, False)))
+        consumer.consume(
+          self.contentName, onConsumeComplete,
+          lambda code, message:
+            self.fail("consume error " + repr(code) + ": " + message),
+          dataLink)
 
         self.assertEqual(1, contentCount[0], "contentCount")
         self.assertEqual(1, cKeyCount[0], "cKeyCount")
