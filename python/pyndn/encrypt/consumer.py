@@ -396,7 +396,7 @@ class Consumer(object):
 
         def onTimeout(interest):
             if nRetrials > 0:
-                self._sendInterest(interest, nRetrials - 1, onVerified, onError)
+                self._sendInterest(interest, nRetrials - 1, link, onVerified, onError)
             else:
                 onNetworkNack(interest, NetworkNack())
 
