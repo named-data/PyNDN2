@@ -82,56 +82,15 @@ class Consumer(object):
         :type onError: function object
         """
         interest = Interest(contentName)
-
-        # Prepare the callback functions.
-        def onData(contentInterest, contentData):
-            # The Interest has no selectors, so assume the library correctly
-            # matched with the Data name before calling onData.
-
-            try:
-                def onVerified(validData):
-                    # Decrypt the content.
-                    def onPlainText(plainText):
-                        try:
-                            onConsumeComplete(contentData, plainText)
-                        except:
-                            logging.exception("Error in onConsumeComplete")
-                    self._decryptContent(validData, onPlainText, onError)
-                self._keyChain.verifyData(
-                    contentData, onVerified,
-                    lambda d, reason: Consumer._callOnError(
-                      onError, EncryptError.ErrorCode.Validation,
-                      "verifyData failed. Reason: " + reason))
-            except Exception as ex:
+        def onVerified(validData):
+            # Decrypt the content.
+            def onPlainText(plainText):
                 try:
-                    onError(EncryptError.ErrorCode.General, "verifyData error: " + repr(ex))
+                    onConsumeComplete(validData, plainText)
                 except:
-                    logging.exception("Error in onError")
-
-        def onTimeout(contentInterest):
-            # We should re-try at least once.
-            try:
-                self._face.expressInterest(
-                  interest, onData,
-                  lambda contentInterest:
-                    Consumer._callOnError(onError,
-                      EncryptError.ErrorCode.Timeout, interest.getName().toUri()))
-            except Exception as ex:
-                try:
-                    onError(EncryptError.ErrorCode.General,
-                            "expressInterest error: " + repr(ex))
-                except:
-                    logging.exception("Error in onError")
-
-        # Express the Interest.
-        try:
-            self._face.expressInterest(interest, onData, onTimeout)
-        except Exception as ex:
-            try:
-                onError(EncryptError.ErrorCode.General,
-                        "expressInterest error: " + repr(ex))
-            except:
-                logging.exception("Error in onError")
+                    logging.exception("Error in onConsumeComplete")
+            self._decryptContent(validData, onPlainText, onError)
+        self._sendInterest(interest, onVerified, onError)
 
     def setGroup(self, groupName):
         """
@@ -246,56 +205,15 @@ class Consumer(object):
             interestName.append(Encryptor.NAME_COMPONENT_FOR).append(self._groupName)
             interest = Interest(interestName)
 
-            # Prepare the callback functions.
-            def onData(cKeyInterest, cKeyData):
-                # The Interest has no selectors, so assume the library correctly
-                # matched with the Data name before calling onData.
-
-                try:
-                    def onVerified(validCKeyData):
-                        def localOnPlainText(cKeyBits):
-                           # cKeyName is already a copy inside the local
-                           #   dataEncryptedContent.
-                           self._cKeyMap[cKeyName] = cKeyBits
-                           Consumer._decrypt(
-                             dataEncryptedContent, cKeyBits, onPlainText, onError)
-                        self._decryptCKey(validCKeyData, localOnPlainText, onError)
-                    self._keyChain.verifyData(
-                        cKeyData, onVerified,
-                        lambda d, reason: Consumer._callOnError(
-                          onError, EncryptError.ErrorCode.Validation,
-                          "verifyData failed. Reason: " + reason))
-                except Exception as ex:
-                    try:
-                        onError(EncryptError.ErrorCode.General,
-                                "verifyData error: " + repr(ex))
-                    except:
-                        logging.exception("Error in onError")
-
-            def onTimeout(dKeyInterest):
-                # We should re-try at least once.
-                try:
-                    self._face.expressInterest(
-                      interest, onData,
-                      lambda contentInterest:
-                        Consumer._callOnError(onError,
-                          EncryptError.ErrorCode.Timeout, interest.getName().toUri()))
-                except Exception as ex:
-                    try:
-                        onError(EncryptError.ErrorCode.General,
-                                "expressInterest error: " + repr(ex))
-                    except:
-                        logging.exception("Error in onError")
-
-            # Express the Interest.
-            try:
-                self._face.expressInterest(interest, onData, onTimeout)
-            except Exception as ex:
-                try:
-                    onError(EncryptError.ErrorCode.General,
-                            "expressInterest error: " + repr(ex))
-                except:
-                    logging.exception("Error in onError")
+            def onVerified(validCKeyData):
+                def localOnPlainText(cKeyBits):
+                   # cKeyName is already a copy inside the local
+                   #   dataEncryptedContent.
+                   self._cKeyMap[cKeyName] = cKeyBits
+                   Consumer._decrypt(
+                     dataEncryptedContent, cKeyBits, onPlainText, onError)
+                self._decryptCKey(validCKeyData, localOnPlainText, onError)
+            self._sendInterest(interest, onVerified, onError)
 
     def _decryptCKey(self, cKeyData, onPlainText, onError):
         """
@@ -336,55 +254,14 @@ class Consumer(object):
               self._consumerName)
             interest = Interest(interestName)
 
-            # Prepare the callback functions.
-            def onData(dKeyInterest, dKeyData):
-                # The Interest has no selectors, so assume the library correctly
-                # matched with the Data name before calling onData.
-
-                try:
-                    def onVerified(validDKeyData):
-                        def localOnPlainText(dKeyBits):
-                            # dKeyName is already a local copy.
-                            self._dKeyMap[dKeyName] = dKeyBits
-                            Consumer._decrypt(
-                              cKeyEncryptedContent, dKeyBits, onPlainText, onError)
-                        self._decryptDKey(validDKeyData, localOnPlainText, onError)
-                    self._keyChain.verifyData(
-                        dKeyData, onVerified,
-                        lambda d, reason: Consumer._callOnError(
-                          onError, EncryptError.ErrorCode.Validation,
-                          "verifyData failed. Reason: " + reason))
-                except Exception as ex:
-                    try:
-                        onError(EncryptError.ErrorCode.General,
-                                "verifyData error: " + repr(ex))
-                    except:
-                        logging.exception("Error in onError")
-
-            def onTimeout(dKeyInterest):
-                # We should re-try at least once.
-                try:
-                    self._face.expressInterest(
-                      interest, onData,
-                      lambda contentInterest:
-                        Consumer._callOnError(onError,
-                          EncryptError.ErrorCode.Timeout, interest.getName().toUri()))
-                except Exception as ex:
-                    try:
-                        onError(EncryptError.ErrorCode.General,
-                                "expressInterest error: " + repr(ex))
-                    except:
-                        logging.exception("Error in onError")
-
-            # Express the Interest.
-            try:
-                self._face.expressInterest(interest, onData, onTimeout)
-            except Exception as ex:
-                try:
-                    onError(EncryptError.ErrorCode.General,
-                            "expressInterest error: " + repr(ex))
-                except:
-                    logging.exception("Error in onError")
+            def onVerified(validDKeyData):
+                def localOnPlainText(dKeyBits):
+                    # dKeyName is already a local copy.
+                    self._dKeyMap[dKeyName] = dKeyBits
+                    Consumer._decrypt(
+                      cKeyEncryptedContent, dKeyBits, onPlainText, onError)
+                self._decryptDKey(validDKeyData, localOnPlainText, onError)
+            self._sendInterest(interest, onVerified, onError)
 
     def _decryptDKey(self, dKeyData, onPlainText, onError):
         """
@@ -447,6 +324,61 @@ class Consumer(object):
           lambda nonceKeyBits: Consumer._decrypt(
             encryptedPayloadBlob, nonceKeyBits, onPlainText, onError),
           onError)
+
+    def _sendInterest(self, interest, onVerified, onError):
+        """
+        Express the interest, call verifyData for the fetched Data packet and
+        call onVerified if verify succeeds. If verify fails, call
+        onError(EncryptError.ErrorCode.Validation, "verifyData failed").
+
+        :param Interest interest: The Interest to express.
+        :param onVerified: When the fetched Data packet validation succeeds,
+          this calls onVerified(data).
+        :type onVerified: function object
+        :param onError: This calls onError(errorCode, message) for an error,
+          where errorCode is from EncryptError.ErrorCode and message is a str.
+        :type onError: function object
+        """
+        # Prepare the callback functions.
+        def onData(contentInterest, contentData):
+            # The Interest has no selectors, so assume the library correctly
+            # matched with the Data name before calling onData.
+
+            try:
+                self._keyChain.verifyData(
+                    contentData, onVerified,
+                    lambda d, reason: Consumer._callOnError(
+                      onError, EncryptError.ErrorCode.Validation,
+                      "verifyData failed. Reason: " + reason))
+            except Exception as ex:
+                try:
+                    onError(EncryptError.ErrorCode.General, "verifyData error: " + repr(ex))
+                except:
+                    logging.exception("Error in onError")
+
+        def onTimeout(contentInterest):
+            # We should re-try at least once.
+            try:
+                self._face.expressInterest(
+                  interest, onData,
+                  lambda contentInterest:
+                    Consumer._callOnError(onError,
+                      EncryptError.ErrorCode.Timeout, interest.getName().toUri()))
+            except Exception as ex:
+                try:
+                    onError(EncryptError.ErrorCode.General,
+                            "expressInterest error: " + repr(ex))
+                except:
+                    logging.exception("Error in onError")
+
+        try:
+            self._face.expressInterest(interest, onData, onTimeout)
+        except Exception as ex:
+            try:
+                onError(EncryptError.ErrorCode.General,
+                        "expressInterest error: " + repr(ex))
+            except:
+                logging.exception("Error in onError")
 
     def _getDecryptionKey(self, decryptionKeyName):
         """
