@@ -21,7 +21,7 @@
 
 import unittest as ut
 import os
-from pyndn import Name, Data
+from pyndn import Name, Data, Link
 from pyndn.util import Blob
 from pyndn.encrypt import Producer, Schedule, Sqlite3ProducerDb, EncryptedContent
 from pyndn.encrypt.algo import Encryptor, AesAlgorithm, RsaAlgorithm
@@ -314,6 +314,49 @@ class TestProducer(ut.TestCase):
         # out. The result vector should not contain elements that have timed out.
         testDb = Sqlite3ProducerDb(self.databaseFilePath)
         producer = Producer(prefix, suffix, face, self.keyChain, testDb)
+        def onEncryptedKeys(result):
+            self.assertEqual(4, timeoutCount[0])
+            self.assertEqual(0, len(result))
+        producer.createContentKey(testTime, onEncryptedKeys)
+
+    def test_producer_with_link(self):
+        prefix = Name("/prefix")
+        suffix = Name("/suffix")
+        expectedInterest = Name(prefix)
+        expectedInterest.append(Encryptor.NAME_COMPONENT_READ)
+        expectedInterest.append(suffix)
+        expectedInterest.append(Encryptor.NAME_COMPONENT_E_KEY)
+
+        testTime = Schedule.fromIsoString("20150101T100001")
+
+        timeoutCount = [0]
+
+        # Prepare a TestFace to instantly answer calls to expressInterest.
+        class TestFace(object):
+            def __init__(self, handleExpressInterest):
+                self.handleExpressInterest = handleExpressInterest
+            def expressInterest(self, interest, onData, onTimeout, onNetworkNack):
+                return self.handleExpressInterest(
+                  interest, onData, onTimeout, onNetworkNack)
+
+        def handleExpressInterest(interest, onData, onTimeout, onNetworkNack):
+            self.assertEqual(expectedInterest, interest.getName())
+            self.assertEqual(3, interest.getLink().getDelegations().size())
+            timeoutCount[0] += 1
+            onTimeout(interest)
+
+            return 0
+        face = TestFace(handleExpressInterest)
+
+        # Verify that if no response is received, the producer appropriately times
+        # out. The result vector should not contain elements that have timed out.
+        link = Link()
+        link.addDelegation(10,  Name("/test1"))
+        link.addDelegation(20,  Name("/test2"))
+        link.addDelegation(100, Name("/test3"))
+        self.keyChain.sign(link, self.certificateName)
+        testDb = Sqlite3ProducerDb(self.databaseFilePath)
+        producer = Producer(prefix, suffix, face, self.keyChain, testDb, 3, link)
         def onEncryptedKeys(result):
             self.assertEqual(4, timeoutCount[0])
             self.assertEqual(0, len(result))

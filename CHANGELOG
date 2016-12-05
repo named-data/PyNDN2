@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.4beta1 (2016-11-18)
+Interim changes since PyNDN v2.4beta1 (2016-12-05)
 --------------------------------------------------
 
 Changes
@@ -6,6 +6,8 @@ Changes
   use onValidationFailed callbacks which include a reason string.
 * https://github.com/named-data/PyNDN2/pull/3 In Node, support a callable object
   for onInterest. (Thanks Pedro!)
+* https://redmine.named-data.net/issues/3543 Support for Link objects in the
+  encrypt package Producer and Consumer.
 
 Deprecated
 * In KeyChain, deprecated verifyData that takes an onValidationFailed(data)

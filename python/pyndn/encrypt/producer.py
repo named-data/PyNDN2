@@ -31,7 +31,9 @@ from pyndn.name import Name
 from pyndn.exclude import Exclude
 from pyndn.interest import Interest
 from pyndn.data import Data
+from pyndn.link import Link
 from pyndn.exclude import Exclude
+from pyndn.network_nack import NetworkNack
 from pyndn.security.key_params import AesKeyParams
 from pyndn.encrypt.schedule import Schedule
 from pyndn.encrypt.encrypt_error import EncryptError
@@ -61,13 +63,19 @@ class Producer(object):
     :param ProducerDb database: The ProducerDb database for storing keys.
     :param int repeatAttempts: (optional) The maximum retry for retrieving
       keys. If omitted, use a default value of 3.
+    :param Link keyRetrievalLink: (optional) The Link object to use in Interests
+      for key retrieval. This makes a copy of the Link object. If the Link
+      object's getDelegations().size() is zero, don't use it. If omitted, don't
+      use a Link object.
     """
     def __init__(self, prefix, dataType, face, keyChain, database,
-                 repeatAttempts = None):
+                 repeatAttempts = None, keyRetrievalLink = None):
         self._face = face
         self._keyChain = keyChain
         self._database = database
         self._maxRepeatAttempts = (3 if repeatAttempts == None else repeatAttempts)
+        self._keyRetrievalLink = (Producer.NO_LINK if keyRetrievalLink == None
+                                  else Link(keyRetrievalLink))
 
         # The dictionary key is the key Name The value is a Producer._KeyInfo.
         self._eKeyInfo = {}
@@ -257,9 +265,18 @@ class Producer(object):
 
         def onNetworkNack(interest, networkNack):
             self._handleNetworkNack(
-              interest, networkNack, timeSlot, onEncryptedKeys)
+              interest, networkNack, timeSlot, onEncryptedKeys, onError)
 
-        self._face.expressInterest(interest, onKey, onTimeout, onNetworkNack)
+        if self._keyRetrievalLink.getDelegations().size() == 0:
+            # We can use the supplied interest without copying.
+            request = interest
+        else:
+            # Copy the supplied interest and add the Link.
+            request = Interest(interest)
+            # This will use a cached encoding if available.
+            request.setLinkWireEncoding(self._keyRetrievalLink.wireEncode())
+
+        self._face.expressInterest(request, onKey, onTimeout, onNetworkNack)
 
     def _handleTimeout(self, interest, timeSlot, onEncryptedKeys, onError):
         """
@@ -285,10 +302,12 @@ class Producer(object):
             keyRequest.repeatAttempts[interestName] += 1
             self._sendKeyInterest(interest, timeSlot, onEncryptedKeys, onError)
         else:
-            # No more retrials.
-            self._updateKeyRequest(keyRequest, timeCount, onEncryptedKeys)
+            # Treat an eventual timeout as a network Nack.
+            self._handleNetworkNack(
+              interest, NetworkNack(), timeSlot, onEncryptedKeys, onError)
 
-    def _handleNetworkNack(self, interest, networkNack, timeSlot, onEncryptedKeys):
+    def _handleNetworkNack(self, interest, networkNack, timeSlot,
+          onEncryptedKeys, onError):
         """
         This is called from an expressInterest OnNetworkNack to handle a network
         Nack for the E-KEY requested through the Interest. Decrease the
@@ -304,6 +323,7 @@ class Producer(object):
           use it.
         :type onEncryptedKeys: function object
         """
+        # We have run out of options....
         timeCount = round(timeSlot)
         self._updateKeyRequest(
           self._keyRequests[timeCount], timeCount, onEncryptedKeys)
@@ -632,3 +652,4 @@ class Producer(object):
 
     START_TIME_STAMP_INDEX = -2
     END_TIME_STAMP_INDEX = -1
+    NO_LINK = Link()
