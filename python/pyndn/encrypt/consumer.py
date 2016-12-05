@@ -27,6 +27,7 @@ Note: This class is an experimental feature. The API may change.
 import logging
 from pyndn.name import Name
 from pyndn.interest import Interest
+from pyndn.network_nack import NetworkNack
 from pyndn.util.blob import Blob
 from pyndn.encrypt.encrypted_content import EncryptedContent
 from pyndn.encrypt.encrypt_error import EncryptError
@@ -90,7 +91,7 @@ class Consumer(object):
                 except:
                     logging.exception("Error in onConsumeComplete")
             self._decryptContent(validData, onPlainText, onError)
-        self._sendInterest(interest, onVerified, onError)
+        self._sendInterest(interest, 1, onVerified, onError)
 
     def setGroup(self, groupName):
         """
@@ -213,7 +214,7 @@ class Consumer(object):
                    Consumer._decrypt(
                      dataEncryptedContent, cKeyBits, onPlainText, onError)
                 self._decryptCKey(validCKeyData, localOnPlainText, onError)
-            self._sendInterest(interest, onVerified, onError)
+            self._sendInterest(interest, 1, onVerified, onError)
 
     def _decryptCKey(self, cKeyData, onPlainText, onError):
         """
@@ -261,7 +262,7 @@ class Consumer(object):
                     Consumer._decrypt(
                       cKeyEncryptedContent, dKeyBits, onPlainText, onError)
                 self._decryptDKey(validDKeyData, localOnPlainText, onError)
-            self._sendInterest(interest, onVerified, onError)
+            self._sendInterest(interest, 1, onVerified, onError)
 
     def _decryptDKey(self, dKeyData, onPlainText, onError):
         """
@@ -325,13 +326,17 @@ class Consumer(object):
             encryptedPayloadBlob, nonceKeyBits, onPlainText, onError),
           onError)
 
-    def _sendInterest(self, interest, onVerified, onError):
+    def _sendInterest(self, interest, nRetrials, onVerified, onError):
         """
         Express the interest, call verifyData for the fetched Data packet and
         call onVerified if verify succeeds. If verify fails, call
-        onError(EncryptError.ErrorCode.Validation, "verifyData failed").
+        onError(EncryptError.ErrorCode.Validation, "verifyData failed"). If the
+        interest times out, re-express nRetrials times. If the interest times
+        out nRetrials times, or for a network Nack, call
+        onError(EncryptError.ErrorCode.DataRetrievalFailure, interest.getName().toUri()).
 
         :param Interest interest: The Interest to express.
+        :param int nRetrials: The number of retrials left after a timeout.
         :param onVerified: When the fetched Data packet validation succeeds,
           this calls onVerified(data).
         :type onVerified: function object
@@ -356,23 +361,22 @@ class Consumer(object):
                 except:
                     logging.exception("Error in onError")
 
-        def onTimeout(contentInterest):
-            # We should re-try at least once.
+        def onNetworkNack(interest, networkNack):
+            # We have run out of options. Report a retrieval failure.
             try:
-                self._face.expressInterest(
-                  interest, onData,
-                  lambda contentInterest:
-                    Consumer._callOnError(onError,
-                      EncryptError.ErrorCode.Timeout, interest.getName().toUri()))
-            except Exception as ex:
-                try:
-                    onError(EncryptError.ErrorCode.General,
-                            "expressInterest error: " + repr(ex))
-                except:
-                    logging.exception("Error in onError")
+                onError(EncryptError.ErrorCode.DataRetrievalFailure,
+                        interest.getName().toUri())
+            except:
+                logging.exception("Error in onError")
+
+        def onTimeout(interest):
+            if nRetrials > 0:
+                self._sendInterest_(interest, nRetrials - 1, onVerified, onError)
+            else:
+                onNetworkNack(interest, NetworkNack())
 
         try:
-            self._face.expressInterest(interest, onData, onTimeout)
+            self._face.expressInterest(interest, onData, onTimeout, onNetworkNack)
         except Exception as ex:
             try:
                 onError(EncryptError.ErrorCode.General,

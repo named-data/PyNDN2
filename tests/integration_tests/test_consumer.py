@@ -270,10 +270,11 @@ class TestConsumer(ut.TestCase):
         class TestFace(object):
             def __init__(self, handleExpressInterest):
                 self.handleExpressInterest = handleExpressInterest
-            def expressInterest(self, interest, onData, onTimeout):
-                return self.handleExpressInterest(interest, onData, onTimeout)
+            def expressInterest(self, interest, onData, onTimeout, onNetworkNack):
+                return self.handleExpressInterest(
+                  interest, onData, onTimeout, onNetworkNack)
 
-        def handleExpressInterest(interest, onData, onTimeout):
+        def handleExpressInterest(interest, onData, onTimeout, onNetworkNack):
             if interest.matchesName(contentData.getName()):
               contentCount[0] = 1
               onData(interest, contentData)
