@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2016 Regents of the University of California.
+# Copyright (C) 2014-2017 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From ndn-cxx security by Yingdi Yu <yingdi@cs.ucla.edu>.
 # This uses cocoapy in pyglet http://www.pyglet.org/. See contrib/cocoapy/LICENSE

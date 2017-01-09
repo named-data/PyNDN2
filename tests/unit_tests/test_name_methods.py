@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2016 Regents of the University of California.
+# Copyright (C) 2014-2017 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
 # From ndn-cxx unit tests:
 # https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/name.t.cpp

@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2016 Regents of the University of California.
+# Copyright (C) 2016-2017 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From ndn-cxx unit tests:
 # https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/link.t.cpp
