@@ -25,7 +25,7 @@
 #include "tlv-interest.h"
 
 /**
- * This private function is called by ndn_TlvEncoder_writeTlv to write the TLVs in the body of the Exclude value.
+ * This private function is called by ndn_TlvEncoder_writeNestedTlv to write the TLVs in the body of the Exclude value.
  * @param context This is the ndn_Exclude struct pointer which was passed to writeTlv.
  * @param encoder the ndn_TlvEncoder which is calling this.
  * @return 0 for success, else an error code.
@@ -57,7 +57,7 @@ encodeExcludeValue(const void *context, struct ndn_TlvEncoder *encoder)
 }
 
 /**
- * This private function is called by ndn_TlvEncoder_writeTlv to write the TLVs in the body of the Selectors value.
+ * This private function is called by ndn_TlvEncoder_writeNestedTlv to write the TLVs in the body of the Selectors value.
  * @param context This is the ndn_Interest struct pointer which was passed to writeTlv.
  * @param encoder the ndn_TlvEncoder which is calling this.
  * @return 0 for success, else an error code.
@@ -80,9 +80,10 @@ encodeSelectorsValue(const void *context, struct ndn_TlvEncoder *encoder)
         &interest->keyLocator, 1)))
     return error;
 
-  if (interest->exclude.nEntries > 0)
+  if (interest->exclude.nEntries > 0) {
     if ((error = ndn_TlvEncoder_writeNestedTlv(encoder, ndn_Tlv_Exclude, encodeExcludeValue, &interest->exclude, 0)))
       return error;
+  }
 
   if ((error = ndn_TlvEncoder_writeOptionalNonNegativeIntegerTlv
       (encoder, ndn_Tlv_ChildSelector, interest->childSelector)))
@@ -107,7 +108,7 @@ struct InterestValueContext {
 };
 
 /**
- * This private function is called by ndn_TlvEncoder_writeTlv to write the TLVs in the body of the Interest value.
+ * This private function is called by ndn_TlvEncoder_writeNestedTlv to write the TLVs in the body of the Interest value.
  * @param context This is the InterestValueContext struct pointer which was passed to writeTlv.
  * @param encoder the ndn_TlvEncoder which is calling this.
  * @return 0 for success, else an error code.
@@ -134,13 +135,17 @@ encodeInterestValue(const void *context, struct ndn_TlvEncoder *encoder)
   nonceBlob.length = sizeof(nonceBuffer);
   if (interest->nonce.length == 0) {
     // Generate a random nonce.
-    ndn_generateRandomBytes(nonceBuffer, sizeof(nonceBuffer));
+    if ((error = ndn_generateRandomBytes(nonceBuffer, sizeof(nonceBuffer))))
+      return error;
     nonceBlob.value = nonceBuffer;
   }
   else if (interest->nonce.length < 4) {
     // TLV encoding requires 4 bytes, so pad out to 4 using random bytes.
     ndn_memcpy(nonceBuffer, interest->nonce.value, interest->nonce.length);
-    ndn_generateRandomBytes(nonceBuffer + interest->nonce.length, sizeof(nonceBuffer) - interest->nonce.length);
+    if ((error = ndn_generateRandomBytes
+         (nonceBuffer + interest->nonce.length,
+          sizeof(nonceBuffer) - interest->nonce.length)))
+      return error;
     nonceBlob.value = nonceBuffer;
   }
   else
