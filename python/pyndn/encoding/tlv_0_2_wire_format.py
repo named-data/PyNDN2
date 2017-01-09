@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from datetime import datetime
 from random import SystemRandom
 from pyndn.name import Name
 from pyndn.exclude import Exclude
@@ -989,12 +990,18 @@ class Tlv0_2WireFormat(WireFormat):
 
         if isinstance(signature, Sha256WithRsaSignature):
             # Encode backwards.
+            if signature.getValidityPeriod().hasPeriod():
+                Tlv0_2WireFormat._encodeValidityPeriod(
+                  signature.getValidityPeriod(), encoder)
             Tlv0_2WireFormat._encodeKeyLocator(
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
               Tlv.SignatureType, Tlv.SignatureType_SignatureSha256WithRsa)
         elif isinstance(signature, Sha256WithEcdsaSignature):
             # Encode backwards.
+            if signature.getValidityPeriod().hasPeriod():
+                Tlv0_2WireFormat._encodeValidityPeriod(
+                  signature.getValidityPeriod(), encoder)
             Tlv0_2WireFormat._encodeKeyLocator(
               Tlv.KeyLocator, signature.getKeyLocator(), encoder)
             encoder.writeNonNegativeIntegerTlv(
@@ -1027,12 +1034,18 @@ class Tlv0_2WireFormat(WireFormat):
             Tlv0_2WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),
               decoder, copy)
+            if decoder.peekType(Tlv.ValidityPeriod_ValidityPeriod, endOffset):
+                Tlv0_2WireFormat._decodeValidityPeriod(
+                  signatureInfo.getValidityPeriod(), decoder)
         elif signatureType == Tlv.SignatureType_SignatureSha256WithEcdsa:
             signatureHolder.setSignature(Sha256WithEcdsaSignature())
             signatureInfo = signatureHolder.getSignature()
             Tlv0_2WireFormat._decodeKeyLocator(
               Tlv.KeyLocator, signatureInfo.getKeyLocator(),
               decoder, copy)
+            if decoder.peekType(Tlv.ValidityPeriod_ValidityPeriod, endOffset):
+                Tlv0_2WireFormat._decodeValidityPeriod(
+                  signatureInfo.getValidityPeriod(), decoder)
         elif signatureType == Tlv.SignatureType_SignatureHmacWithSha256:
             signatureHolder.setSignature(HmacWithSha256Signature())
             Tlv0_2WireFormat._decodeKeyLocator(
@@ -1089,6 +1102,38 @@ class Tlv0_2WireFormat(WireFormat):
               Blob(decoder.readBlobTlv(Tlv.KeyLocatorDigest), copy))
         else:
             raise RuntimeError("decodeKeyLocator: Unrecognized key locator type")
+
+        decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeValidityPeriod(validityPeriod, encoder):
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        encoder.writeBlobTlv(Tlv.ValidityPeriod_NotAfter,
+          Blob(Tlv0_2WireFormat.toIsoString(validityPeriod.getNotAfter())).buf())
+        encoder.writeBlobTlv(Tlv.ValidityPeriod_NotBefore,
+          Blob(Tlv0_2WireFormat.toIsoString(validityPeriod.getNotBefore())).buf())
+
+        encoder.writeTypeAndLength(
+          Tlv.ValidityPeriod_ValidityPeriod, len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeValidityPeriod(validityPeriod, decoder):
+        endOffset = decoder.readNestedTlvsStart(
+          Tlv.ValidityPeriod_ValidityPeriod)
+
+        validityPeriod.clear()
+
+        # Set copy false since we just immediately get the string.
+        isoString = Blob(
+          decoder.readBlobTlv(Tlv.ValidityPeriod_NotBefore), False)
+        notBefore = Tlv0_2WireFormat.fromIsoString(str(isoString))
+        isoString = Blob(
+          decoder.readBlobTlv(Tlv.ValidityPeriod_NotAfter), False)
+        notAfter = Tlv0_2WireFormat.fromIsoString(str(isoString))
+
+        validityPeriod.setPeriod(notBefore, notAfter)
 
         decoder.finishNestedTlvs(endOffset)
 
@@ -1191,3 +1236,41 @@ class Tlv0_2WireFormat(WireFormat):
             Tlv.ControlParameters_ExpirationPeriod, endOffset))
 
         decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def toIsoString(msSince1970):
+        """
+        Convert a UNIX timestamp to ISO time representation with the "T" in the
+        middle.
+
+        :param float msSince1970: Timestamp as milliseconds since Jan 1, 1970 UTC.
+        :return: The string representation.
+        :rtype: str
+        """
+        dateFormat = "%Y%m%dT%H%M%S"
+        return datetime.utcfromtimestamp(
+          round(msSince1970 / 1000.0)).strftime(dateFormat)
+
+    @staticmethod
+    def fromIsoString(timeString):
+        """
+        Convert an ISO time representation with the "T" in the middle to a UNIX
+        timestamp.
+
+        :param str timeString: The ISO time representation.
+        :return: The timestamp as milliseconds since Jan 1, 1970 UTC.
+        :rtype: float
+        """
+        if len(timeString) != 15 or timeString[8:9] != 'T':
+            raise RuntimeError("fromIsoString: Format is not the expected yyyymmddThhmmss")
+
+        utc = datetime(
+          int(timeString[0:4]),
+          int(timeString[4:6]),
+          int(timeString[6:8]),
+          int(timeString[9:11]),
+          int(timeString[11:13]),
+          int(timeString[13:15]))
+        return (utc - Tlv0_2WireFormat._posixEpoch).total_seconds() * 1000.0
+
+    _posixEpoch = datetime.utcfromtimestamp(0)

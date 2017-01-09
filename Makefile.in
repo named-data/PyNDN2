@@ -194,6 +194,7 @@ am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/security/_pyndn_la-ec-public-key-lite.lo \
 	src/lite/security/_pyndn_la-rsa-private-key-lite.lo \
 	src/lite/security/_pyndn_la-rsa-public-key-lite.lo \
+	src/lite/security/_pyndn_la-validity-period-lite.lo \
 	src/lite/transport/_pyndn_la-tcp-transport-lite.lo \
 	src/lite/transport/_pyndn_la-udp-transport-lite.lo \
 	src/lite/transport/_pyndn_la-unix-transport-lite.lo \
@@ -476,6 +477,7 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/security/ec-public-key-types.h \
   include/ndn-cpp/c/security/rsa-private-key-types.h \
   include/ndn-cpp/c/security/rsa-public-key-types.h \
+  include/ndn-cpp/c/security/validity-period-types.h \
   include/ndn-cpp/c/transport/transport-types.h \
   include/ndn-cpp/c/util/blob-types.h \
   include/ndn-cpp/c/util/dynamic-uint8-array-types.h
@@ -508,6 +510,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/security/ec-public-key-lite.hpp \
   include/ndn-cpp/lite/security/rsa-private-key-lite.hpp \
   include/ndn-cpp/lite/security/rsa-public-key-lite.hpp \
+  include/ndn-cpp/lite/security/validity-period-lite.hpp \
   include/ndn-cpp/lite/transport/tcp-transport-lite.hpp \
   include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
   include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
@@ -554,6 +557,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/security/ec-public-key.c src/c/util/ec-public-key.h \
   src/c/security/rsa-private-key.c src/c/util/rsa-private-key.h \
   src/c/security/rsa-public-key.c src/c/util/rsa-public-key.h \
+  src/c/security/validity-period.h \
   src/c/transport/socket-transport.c src/c/transport/socket-transport.h \
   src/c/transport/tcp-transport_c.c src/c/transport/tcp-transport.h \
   src/c/transport/udp-transport.h \
@@ -591,6 +595,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/security/ec-public-key-lite.cpp \
   src/lite/security/rsa-private-key-lite.cpp \
   src/lite/security/rsa-public-key-lite.cpp \
+  src/lite/security/validity-period-lite.cpp \
   src/lite/transport/tcp-transport-lite.cpp \
   src/lite/transport/udp-transport-lite.cpp \
   src/lite/transport/unix-transport-lite.cpp \
@@ -925,6 +930,9 @@ src/lite/security/_pyndn_la-rsa-private-key-lite.lo:  \
 src/lite/security/_pyndn_la-rsa-public-key-lite.lo:  \
 	src/lite/security/$(am__dirstamp) \
 	src/lite/security/$(DEPDIR)/$(am__dirstamp)
+src/lite/security/_pyndn_la-validity-period-lite.lo:  \
+	src/lite/security/$(am__dirstamp) \
+	src/lite/security/$(DEPDIR)/$(am__dirstamp)
 src/lite/transport/$(am__dirstamp):
 	@$(MKDIR_P) src/lite/transport
 	@: > src/lite/transport/$(am__dirstamp)
@@ -1064,6 +1072,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-ec-public-key-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-rsa-private-key-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-rsa-public-key-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/security/$(DEPDIR)/_pyndn_la-validity-period-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-udp-transport-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Plo@am__quote@
@@ -1524,6 +1533,13 @@ src/lite/security/_pyndn_la-rsa-public-key-lite.lo: src/lite/security/rsa-public
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/security/rsa-public-key-lite.cpp' object='src/lite/security/_pyndn_la-rsa-public-key-lite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/security/_pyndn_la-rsa-public-key-lite.lo `test -f 'src/lite/security/rsa-public-key-lite.cpp' || echo '$(srcdir)/'`src/lite/security/rsa-public-key-lite.cpp
+
+src/lite/security/_pyndn_la-validity-period-lite.lo: src/lite/security/validity-period-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/security/_pyndn_la-validity-period-lite.lo -MD -MP -MF src/lite/security/$(DEPDIR)/_pyndn_la-validity-period-lite.Tpo -c -o src/lite/security/_pyndn_la-validity-period-lite.lo `test -f 'src/lite/security/validity-period-lite.cpp' || echo '$(srcdir)/'`src/lite/security/validity-period-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/security/$(DEPDIR)/_pyndn_la-validity-period-lite.Tpo src/lite/security/$(DEPDIR)/_pyndn_la-validity-period-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/security/validity-period-lite.cpp' object='src/lite/security/_pyndn_la-validity-period-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/security/_pyndn_la-validity-period-lite.lo `test -f 'src/lite/security/validity-period-lite.cpp' || echo '$(srcdir)/'`src/lite/security/validity-period-lite.cpp
 
 src/lite/transport/_pyndn_la-tcp-transport-lite.lo: src/lite/transport/tcp-transport-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/transport/_pyndn_la-tcp-transport-lite.lo -MD -MP -MF src/lite/transport/$(DEPDIR)/_pyndn_la-tcp-transport-lite.Tpo -c -o src/lite/transport/_pyndn_la-tcp-transport-lite.lo `test -f 'src/lite/transport/tcp-transport-lite.cpp' || echo '$(srcdir)/'`src/lite/transport/tcp-transport-lite.cpp

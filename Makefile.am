@@ -30,6 +30,7 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/security/ec-public-key-types.h \
   include/ndn-cpp/c/security/rsa-private-key-types.h \
   include/ndn-cpp/c/security/rsa-public-key-types.h \
+  include/ndn-cpp/c/security/validity-period-types.h \
   include/ndn-cpp/c/transport/transport-types.h \
   include/ndn-cpp/c/util/blob-types.h \
   include/ndn-cpp/c/util/dynamic-uint8-array-types.h
@@ -61,6 +62,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/security/ec-public-key-lite.hpp \
   include/ndn-cpp/lite/security/rsa-private-key-lite.hpp \
   include/ndn-cpp/lite/security/rsa-public-key-lite.hpp \
+  include/ndn-cpp/lite/security/validity-period-lite.hpp \
   include/ndn-cpp/lite/transport/tcp-transport-lite.hpp \
   include/ndn-cpp/lite/transport/udp-transport-lite.hpp \
   include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
@@ -106,6 +108,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/security/ec-public-key.c src/c/util/ec-public-key.h \
   src/c/security/rsa-private-key.c src/c/util/rsa-private-key.h \
   src/c/security/rsa-public-key.c src/c/util/rsa-public-key.h \
+  src/c/security/validity-period.h \
   src/c/transport/socket-transport.c src/c/transport/socket-transport.h \
   src/c/transport/tcp-transport_c.c src/c/transport/tcp-transport.h \
   src/c/transport/udp-transport.h \
@@ -142,6 +145,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/security/ec-public-key-lite.cpp \
   src/lite/security/rsa-private-key-lite.cpp \
   src/lite/security/rsa-public-key-lite.cpp \
+  src/lite/security/validity-period-lite.cpp \
   src/lite/transport/tcp-transport-lite.cpp \
   src/lite/transport/udp-transport-lite.cpp \
   src/lite/transport/unix-transport-lite.cpp \

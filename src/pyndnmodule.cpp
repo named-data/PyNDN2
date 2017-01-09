@@ -42,13 +42,17 @@ public:
     getMustBeFresh = Py_BuildValue("s", "getMustBeFresh");
     getName = Py_BuildValue("s", "getName");
     getNonce = Py_BuildValue("s", "getNonce");
+    getNotAfter = Py_BuildValue("s", "getNotAfter");
+    getNotBefore = Py_BuildValue("s", "getNotBefore");
     getOtherTypeCode = Py_BuildValue("s", "getOtherTypeCode");
     getSelectedDelegationIndex = Py_BuildValue("s", "getSelectedDelegationIndex");
     getSignature = Py_BuildValue("s", "getSignature");
     getSignatureInfoEncoding = Py_BuildValue("s", "getSignatureInfoEncoding");
     getType = Py_BuildValue("s", "getType");
     getTypeCode = Py_BuildValue("s", "getTypeCode");
+    getValidityPeriod = Py_BuildValue("s", "getValidityPeriod");
     getValue = Py_BuildValue("s", "getValue");
+    hasPeriod = Py_BuildValue("s", "hasPeriod");
     isImplicitSha256Digest = Py_BuildValue("s", "isImplicitSha256Digest");
     setChildSelector = Py_BuildValue("s", "setChildSelector");
     setContent = Py_BuildValue("s", "setContent");
@@ -62,6 +66,7 @@ public:
     setMustBeFresh = Py_BuildValue("s", "setMustBeFresh");
     setNonce = Py_BuildValue("s", "setNonce");
     setOtherTypeCode = Py_BuildValue("s", "setOtherTypeCode");
+    setPeriod = Py_BuildValue("s", "setPeriod");
     setSelectedDelegationIndex = Py_BuildValue("s", "setSelectedDelegationIndex");
     setSignature = Py_BuildValue("s", "setSignature");
     setSignatureInfoEncoding = Py_BuildValue("s", "setSignatureInfoEncoding");
@@ -100,13 +105,17 @@ public:
   PyObject* getMustBeFresh;
   PyObject* getName;
   PyObject* getNonce;
+  PyObject* getNotAfter;
+  PyObject* getNotBefore;
   PyObject* getOtherTypeCode;
   PyObject* getSelectedDelegationIndex;
   PyObject* getSignature;
   PyObject* getSignatureInfoEncoding;
   PyObject* getType;
   PyObject* getTypeCode;
+  PyObject* getValidityPeriod;
   PyObject* getValue;
+  PyObject* hasPeriod;
   PyObject* isImplicitSha256Digest;
   PyObject* setChildSelector;
   PyObject* setContent;
@@ -120,6 +129,7 @@ public:
   PyObject* setMustBeFresh;
   PyObject* setNonce;
   PyObject* setOtherTypeCode;
+  PyObject* setPeriod;
   PyObject* setSelectedDelegationIndex;
   PyObject* setSignature;
   PyObject* setSignatureInfoEncoding;
@@ -203,6 +213,25 @@ callMethodFromDouble(PyObject* obj, PyObject* methodName, double value)
   PyObjectRef valueObj(PyFloat_FromDouble(value));
   PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
     (obj, methodName, valueObj.obj, NULL));
+}
+
+/**
+ * Call PyObject_CallMethodObjArgs(obj, methodName, valueObj1, valueObj2, NULL)
+ * where valueObj1 and valueObj2 are the PyFloat for the double value1 and
+ * value2. Ignore the result from CallMethodObjArgs.
+ * @param obj The object with the method to call.
+ * @param methodName A Python string object of the method name to call.
+ * @param value1 The double value for arg 1 of the method call.
+ * @param value2 The double value for arg 2 of the method call.
+ */
+void
+callMethodFromDouble_Double
+  (PyObject* obj, PyObject* methodName, double value1, double value2)
+{
+  PyObjectRef valueObj1(PyFloat_FromDouble(value1));
+  PyObjectRef valueObj2(PyFloat_FromDouble(value2));
+  PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+    (obj, methodName, valueObj1.obj, valueObj2.obj, NULL));
 }
 
 /**
@@ -441,6 +470,33 @@ setKeyLocator(PyObject* keyLocator, const KeyLocatorLite& keyLocatorLite)
     PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs(keyName, str.clear, NULL));
 }
 
+// Imitate ValidityPeriod::get(ValidityPeriodLite& validityPeriodLite).
+static void
+toValidityPeriodLite
+  (PyObject* validityPeriod, ValidityPeriodLite& validityPeriodLite)
+{
+  if (toBoolByMethod(validityPeriod, str.hasPeriod))
+    validityPeriodLite.setPeriod
+      (toDoubleByMethod(validityPeriod, str.getNotBefore),
+       toDoubleByMethod(validityPeriod, str.getNotAfter));
+  else
+    validityPeriodLite.clear();
+}
+
+// Imitate ValidityPeriod::set(const ValidityPeriodLite& validityPeriodLite).
+static void
+setValidityPeriod
+  (PyObject* validityPeriod, const ValidityPeriodLite& validityPeriodLite)
+{
+  if (validityPeriodLite.hasPeriod())
+    callMethodFromDouble_Double
+      (validityPeriod, str.setPeriod, validityPeriodLite.getNotBefore(),
+       validityPeriodLite.getNotAfter());
+  else
+    PyObjectRef ignoreResult
+      (PyObject_CallMethodObjArgs(validityPeriod, str.clear, NULL));
+}
+
 /**
  * Imitate Interest::get(InterestLite& interestLite).
  * @param interest The Python Interest object to get from.
@@ -471,7 +527,7 @@ toInterestLite
     ((int)toLongByMethod(interest, str.getChildSelector));
   interestLite.setMustBeFresh(toBoolByMethod(interest, str.getMustBeFresh));
   interestLite.setInterestLifetimeMilliseconds
-    ((int)toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
+    (toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
 
   // TODO: Support the wireFormat param.
   // TODO: Catch exceptions from getLinkWireEncoding.
@@ -604,12 +660,20 @@ toGenericSignatureLite(PyObject* signature, SignatureLite& signatureLite)
 static void
 toSignatureLite(PyObject* signature, SignatureLite& signatureLite)
 {
-  if (isInstance(signature, "pyndn", str.Sha256WithRsaSignature))
+  if (isInstance(signature, "pyndn", str.Sha256WithRsaSignature)) {
     toSignatureLiteWithKeyLocator
       (signature, ndn_SignatureType_Sha256WithRsaSignature, signatureLite);
-  else if (isInstance(signature, "pyndn", str.Sha256WithEcdsaSignature))
+    PyObjectRef validityPeriod
+      (PyObject_CallMethodObjArgs(signature, str.getValidityPeriod, NULL));
+    toValidityPeriodLite(validityPeriod, signatureLite.getValidityPeriod());
+  }
+  else if (isInstance(signature, "pyndn", str.Sha256WithEcdsaSignature)) {
     toSignatureLiteWithKeyLocator
       (signature, ndn_SignatureType_Sha256WithEcdsaSignature, signatureLite);
+    PyObjectRef validityPeriod
+      (PyObject_CallMethodObjArgs(signature, str.getValidityPeriod, NULL));
+    toValidityPeriodLite(validityPeriod, signatureLite.getValidityPeriod());
+  }
   else if (isInstance(signature, "pyndn", str.HmacWithSha256Signature))
     toSignatureLiteWithKeyLocator
       (signature, ndn_SignatureType_HmacWithSha256Signature, signatureLite);
@@ -667,8 +731,13 @@ static void
 setSignature(PyObject* signature, const SignatureLite& signatureLite)
 {
   if (signatureLite.getType() == ndn_SignatureType_Sha256WithRsaSignature ||
-      signatureLite.getType() == ndn_SignatureType_Sha256WithEcdsaSignature ||
-      signatureLite.getType() == ndn_SignatureType_HmacWithSha256Signature)
+      signatureLite.getType() == ndn_SignatureType_Sha256WithEcdsaSignature) {
+    setSignatureWithKeyLocator(signature, signatureLite);
+    PyObjectRef validityPeriod(PyObject_CallMethodObjArgs
+      (signature, str.getValidityPeriod, NULL));
+    setValidityPeriod(validityPeriod, signatureLite.getValidityPeriod());
+  }
+  else if (signatureLite.getType() == ndn_SignatureType_HmacWithSha256Signature)
     setSignatureWithKeyLocator(signature, signatureLite);
   else if (signatureLite.getType() == ndn_SignatureType_DigestSha256Signature)
     setSignatureWithSignatureOnly(signature, signatureLite);
