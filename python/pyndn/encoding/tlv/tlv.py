@@ -121,3 +121,7 @@ class Tlv(object):
     Encrypt_WhiteIntervalList = 141
     Encrypt_BlackIntervalList = 142
     Encrypt_Schedule = 143
+
+    ValidityPeriod_ValidityPeriod = 253
+    ValidityPeriod_NotBefore = 254
+    ValidityPeriod_NotAfter = 255
