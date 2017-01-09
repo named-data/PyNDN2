@@ -27,6 +27,7 @@ from pyndn.util.change_counter import ChangeCounter
 from pyndn.util.blob import Blob
 from pyndn.signature import Signature
 from pyndn.key_locator import KeyLocator
+from pyndn.validity_period import ValidityPeriod
 
 class Sha256WithEcdsaSignature(Signature):
     """
@@ -41,10 +42,12 @@ class Sha256WithEcdsaSignature(Signature):
     def __init__(self, value = None):
         if value == None:
             self._keyLocator = ChangeCounter(KeyLocator())
+            self._validityPeriod = ChangeCounter(ValidityPeriod())
             self._signature = Blob()
         elif type(value) is Sha256WithEcdsaSignature:
             # Copy its values.
             self._keyLocator = ChangeCounter(KeyLocator(value.getKeyLocator()))
+            self._validityPeriod = ChangeCounter(ValidityPeriod(value.getValidityPeriod()))
             self._signature = value._signature
         else:
             raise RuntimeError(
@@ -70,6 +73,15 @@ class Sha256WithEcdsaSignature(Signature):
         :rtype: KeyLocator
         """
         return self._keyLocator.get()
+
+    def getValidityPeriod(self):
+        """
+        Get the validity period.
+
+        :return: The validity period.
+        :rtype: ValidityPeriod
+        """
+        return self._validityPeriod.get()
 
     def getSignature(self):
         """
@@ -117,6 +129,7 @@ class Sha256WithEcdsaSignature(Signature):
         """
         # Make sure each of the checkChanged is called.
         changed = self._keyLocator.checkChanged()
+        changed = self._validityPeriod.checkChanged() or changed
         if changed:
             # A child object has changed, so update the change count.
             self._changeCount += 1

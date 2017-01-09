@@ -60,7 +60,6 @@ class Certificate(Data):
             return True
         return False
 
-
     def isTooLate(self):
         """
         Check if the certificate end date is in the past
@@ -71,6 +70,9 @@ class Certificate(Data):
         if secondsSince1970 > self._notAfter/1000:
             return True
         return False
+
+    def isInValidityPeriod(self, time):
+        return self.getSignature().getValidityPeriod().isValid(time)
 
     def __str__(self):
         s = "Certificate name:\n"
