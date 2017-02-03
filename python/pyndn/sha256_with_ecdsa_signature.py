@@ -101,6 +101,15 @@ class Sha256WithEcdsaSignature(Signature):
         self._keyLocator.set(KeyLocator(keyLocator))
         self._changeCount += 1
 
+    def setValidityPeriod(self, validityPeriod):
+        """
+        Set the validity period to a copy of the given ValidityPeriod.
+
+        :param ValidityPeriod validityPeriod: The ValidityPeriod which is copied.
+        """
+        self._validityPeriod.set(ValidityPeriod(validityPeriod))
+        self._changeCount += 1
+
     def setSignature(self, signature):
         """
         Set the signature bytes to the given value.
