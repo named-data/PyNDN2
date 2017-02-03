@@ -3,6 +3,7 @@
 # Copyright (C) 2016-2017 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From ndn-cxx Certificate unit tests:
+# https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/security/v2/certificate.t.cpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -21,8 +22,10 @@
 from pyndn import Name
 from pyndn import Data
 from test_utils import fromIsoString
+from pyndn import KeyLocator
 from pyndn import KeyLocatorType
 from pyndn import Sha256WithRsaSignature
+from pyndn import ValidityPeriod
 from pyndn.util import Blob
 from pyndn.security.certificate import Certificate
 import unittest as ut
@@ -72,13 +75,13 @@ SIG_VALUE = Blob(bytearray([
 
 CERT = Blob(bytearray([
 0x06, 0xFD, 0x01, 0xBB, # Data
-  0x07, 0x33, # Name /ndn/site1/ksk-1416425377094/KEY/0123/%FD%00%00%01I%C9%8B
+  0x07, 0x33, # Name /ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B
     0x08, 0x03, 0x6E, 0x64, 0x6E,
     0x08, 0x05, 0x73, 0x69, 0x74, 0x65, 0x31,
+    0x08, 0x03, 0x4B, 0x45, 0x59,
     0x08, 0x11,
       0x6B, 0x73, 0x6B, 0x2D, 0x31, 0x34, 0x31, 0x36, 0x34, 0x32, 0x35, 0x33, 0x37, 0x37, 0x30, 0x39,
       0x34,
-    0x08, 0x03, 0x4B, 0x45, 0x59,
     0x08, 0x04, 0x30, 0x31, 0x32, 0x33,
     0x08, 0x07, 0xFD, 0x00, 0x00, 0x01, 0x49, 0xC9, 0x8B,
   0x14, 0x09, # MetaInfo
@@ -97,18 +100,18 @@ CERT = Blob(bytearray([
     0xEF, 0xED, 0x35, 0xE7, 0x7A, 0x62, 0xEA, 0x76, 0x7C, 0xBB, 0x08, 0x26, 0xC7, 0x02, 0x01, 0x11,
   0x16, 0x55, # SignatureInfo
     0x1B, 0x01, 0x01, # SignatureType
-    0x1C, 0x26, # KeyLocator: /ndn/site1/ksk-2516425377094/KEY
+    0x1C, 0x26, # KeyLocator: /ndn/site1/KEY/ksk-2516425377094
       0x07, 0x24,
         0x08, 0x03, 0x6E, 0x64, 0x6E,
         0x08, 0x05, 0x73, 0x69, 0x74, 0x65, 0x31,
+        0x08, 0x03, 0x4B, 0x45, 0x59,
         0x08, 0x11,
           0x6B, 0x73, 0x6B, 0x2D, 0x32, 0x35, 0x31, 0x36, 0x34, 0x32, 0x35, 0x33, 0x37, 0x37, 0x30, 0x39,
           0x34,
-        0x08, 0x03, 0x4B, 0x45, 0x59,
-    0xFD, 0x00, 0xFD, 0x26, # ValidityPeriod
-      0xFD, 0x00, 0xFE, 0x0F, # NotBefore = 20150814T223739
+    0xFD, 0x00, 0xFD, 0x26, # ValidityPeriod: (20150814T223739, 20150818T223738)
+      0xFD, 0x00, 0xFE, 0x0F,
         0x32, 0x30, 0x31, 0x35, 0x30, 0x38, 0x31, 0x34, 0x54, 0x32, 0x32, 0x33, 0x37, 0x33, 0x39,
-      0xFD, 0x00, 0xFF, 0x0F, # NotAfter =  20150818T223739
+      0xFD, 0x00, 0xFF, 0x0F,
         0x32, 0x30, 0x31, 0x35, 0x30, 0x38, 0x31, 0x38, 0x54, 0x32, 0x32, 0x33, 0x37, 0x33, 0x38,
   0x17, 0x80, # SignatureValue
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -122,6 +125,26 @@ CERT = Blob(bytearray([
   ]))
 
 class TestCertificate(ut.TestCase):
+    @staticmethod
+    def generateFakeSignature():
+        signatureInfo = Sha256WithRsaSignature()
+
+        keyLocatorName = Name("/ndn/site1/KEY/ksk-2516425377094")
+        keyLocator = KeyLocator()
+        keyLocator.setType(KeyLocatorType.KEYNAME)
+        keyLocator.setKeyName(keyLocatorName)
+        signatureInfo.setKeyLocator(keyLocator)
+
+        period = ValidityPeriod()
+        period.setPeriod(fromIsoString("20141111T050000"),
+                         fromIsoString("20141111T060000"))
+        signatureInfo.setValidityPeriod(period)
+
+        block2 = Blob(SIG_VALUE, False)
+        signatureInfo.setSignature(block2)
+
+        return signatureInfo
+
     def test_construction(self):
         # Debug: This should be a Certificate.
         certificate = Data()
@@ -132,33 +155,19 @@ class TestCertificate(ut.TestCase):
     def test_validity_period_checking(self):
         certificate = Certificate()
         certificate.setName(
-          Name("/ndn/site1/ksk-1416425377094/KEY/0123/%FD%00%00%01I%C9%8B"))
+          Name("/ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B"))
         certificate.getMetaInfo().setFreshnessPeriod(3600 * 1000.0)
         certificate.setContent(PUBLIC_KEY)
+        certificate.setSignature(self.generateFakeSignature())
 
-        certificate.setSignature(Sha256WithRsaSignature())
-        signatureInfo = certificate.getSignature()
-
-        signatureInfo.getKeyLocator().setType(KeyLocatorType.KEYNAME)
-        signatureInfo.getKeyLocator().setKeyName(
-          Name("/ndn/site1/ksk-2516425377094/KEY"))
-
-        notBefore = fromIsoString("20150819T120000")
-        notAfter =  fromIsoString("20150823T120000")
-        signatureInfo.getValidityPeriod().setPeriod(notBefore, notAfter)
-
-        signatureInfo.setSignature(SIG_VALUE)
-
-        self.assertEqual(False, certificate.isInValidityPeriod
-          (fromIsoString("20150819T115959")))
         self.assertEqual(True,  certificate.isInValidityPeriod
-          (fromIsoString("20150819T120000")))
+          (fromIsoString("20141111T050000")))
         self.assertEqual(True,  certificate.isInValidityPeriod
-          (fromIsoString("20150823T120000")))
+          (fromIsoString("20141111T060000")))
         self.assertEqual(False, certificate.isInValidityPeriod
-          (fromIsoString("20150823T120001")))
+          (fromIsoString("20141111T045959")))
         self.assertEqual(False, certificate.isInValidityPeriod
-          (fromIsoString("20150921T130000")))
+          (fromIsoString("20141111T060001")))
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
