@@ -20,17 +20,20 @@
 """
 This module defines the ExponentialReExpress class which uses an internal
 onTimeout to express the interest again with double the interestLifetime. See
-ExponentialReExpress.makeOnTimeout, which you should call instead of the private
-constructor. Create a new ExponentialReExpress where onTimeout expresses the
-interest again with double the interestLifetime. If the interesLifetime goes
-over settings.maxInterestLifetime, then call the given onTimeout. If this
-internally gets onData, just call the given onData.
+ExponentialReExpress.makeOnTimeout.
 """
 
 import logging
 from pyndn.interest import Interest
 
 class ExponentialReExpress(object):
+    """
+    You should call ExponentialReExpress.makeOnTimeout instead of the private
+    constructor. Create a new ExponentialReExpress where onTimeout expresses the
+    interest again with double the interestLifetime. If the interesLifetime goes
+    over maxInterestLifetime, then call the given onTimeout. If this internally
+    gets onData, just call the given onData.
+    """
     def __init__(self, face, onData, onTimeout, maxInterestLifetime):
         self._face = face
         self._callerOnData = onData
