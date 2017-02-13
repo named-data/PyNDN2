@@ -174,6 +174,51 @@ class ChronoSync2013(object):
             """
             return self._sequenceNo
 
+    class PrefixAndSessionNo(object):
+        """
+        A PrefixAndSessionNo holds a user's data prefix and session number (used
+        to return a list from getProducerPrefixes).
+        """
+        def __init__(self, dataPrefixUri, sessionNo):
+            self._dataPrefixUri = dataPrefixUri
+            self._sessionNo = sessionNo
+
+        def getDataPrefix(self):
+            """
+            Get the application data prefix.
+
+            :return: The application data prefix as a Name URI string.
+            :rtype: str
+            """
+            return self._dataPrefixUri
+
+        def getSessionNo(self):
+            """
+            Get the session number associated with the application data prefix.
+
+            :return: The session number.
+            :rtype: int
+            """
+            return self._sessionNo
+
+    def getProducerPrefixes(self):
+        """
+        Get a copy of the current list of producer data prefixes, and the
+        associated session number. You can use these in getProducerSequenceNo().
+        This includes the prefix for this user.
+
+        :return: A copy of the list of each producer prefix and session number.
+        :rtype: array of ChronoSync2013.PrefixAndSessionNo
+        """
+        prefixes = []
+
+        for i in range(self._digestTree.size()):
+            node = self._digestTree.get(i)
+            prefixes.append(ChronoSync2013.PrefixAndSessionNo
+              (node.getDataPrefix(), node.getSessionNo()))
+
+        return prefixes
+
     def getProducerSequenceNo(self, dataPrefix, sessionNo):
         """
         Get the current sequence number in the digest tree for the given

@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.4beta1 (2016-12-05)
+Interim changes since PyNDN v2.4beta1 (2017-02-13)
 --------------------------------------------------
 
 Changes
@@ -8,6 +8,7 @@ Changes
   for onInterest. (Thanks Pedro!)
 * https://redmine.named-data.net/issues/3543 Support for Link objects in the
   encrypt package Producer and Consumer.
+* ChronoSync2013: Added method getProducerPrefixes().
 
 Deprecated
 * In KeyChain, deprecated verifyData that takes an onValidationFailed(data)
