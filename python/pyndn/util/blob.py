@@ -145,11 +145,11 @@ class Blob(object):
         Return the bytes of the byte array as a raw str of the same length.
         This does not do any character encoding such as UTF-8.
 
-        :return: The array as a str, or None if isNull().
+        :return: The array as a str, or "" if isNull().
         :rtype: str
         """
         if self._array == None:
-            return None
+            return ""
         else:
             return "".join(map(chr, self.buf()))
 

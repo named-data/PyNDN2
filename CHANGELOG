@@ -10,6 +10,7 @@ Changes
   encrypt package Producer and Consumer.
 * https://redmine.named-data.net/issues/3922 In ChronoSync2013, support optional
   application info in the SyncState messages.
+* In Blob, if isNull(), changed toRawStr() to return "" instead of None.
 * ChronoSync2013: Added method getProducerPrefixes().
 
 Deprecated
