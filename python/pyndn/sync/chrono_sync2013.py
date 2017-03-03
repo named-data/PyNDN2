@@ -141,10 +141,11 @@ class ChronoSync2013(object):
         sync_state_pb2.SyncState, but we make a separate class so
         that we don't need the Protobuf definition in the ChronoSync API.
         """
-        def __init__(self, dataPrefixUri, sessionNo, sequenceNo):
+        def __init__(self, dataPrefixUri, sessionNo, sequenceNo, applicationInfo):
             self._dataPrefixUri = dataPrefixUri
             self._sessionNo = sessionNo
             self._sequenceNo = sequenceNo
+            self._applicationInfo = applicationInfo
 
         def getDataPrefix(self):
             """
@@ -173,6 +174,17 @@ class ChronoSync2013(object):
             :rtype: int
             """
             return self._sequenceNo
+
+        def getApplicationInfo(self):
+            """
+            Get the application info which was included when the sender
+            published the next sequence number.
+
+            :return: The applicationInfo Blob. If the sender did not provide
+              any, return an isNull Blob.
+            :rtype: Blob
+            """
+            return self._applicationInfo
 
     class PrefixAndSessionNo(object):
         """
@@ -236,7 +248,7 @@ class ChronoSync2013(object):
         else:
           return self._digestTree.get(index).getSequenceNo()
 
-    def publishNextSequenceNo(self):
+    def publishNextSequenceNo(self, applicationInfo = None):
         """
         Increment the sequence number, create a sync message with the new
         sequence number and publish a data packet where the name is
@@ -250,7 +262,15 @@ class ChronoSync2013(object):
         modifies the internal ChronoSync data structures, your application should
         make sure that it calls processEvents in the same thread as
         publishNextSequenceNo() (which also modifies the data structures).
+
+        :param Blob applicationInfo: (optional) This appends applicationInfo to
+          the content of the sync messages. This same info is provided to the
+          receiving application in the SyncState state object provided to the
+          onReceivedSyncState callback.
         """
+        applicationInfo = (applicationInfo if isinstance(applicationInfo, Blob)
+          else Blob(applicationInfo))
+
         self._sequenceNo += 1
 
         syncMessage = sync_state_pb2.SyncStateMsg()
@@ -259,6 +279,8 @@ class ChronoSync2013(object):
         content.type = SyncState_UPDATE
         content.seqno.seq = self._sequenceNo
         content.seqno.session = self._sessionNo
+        if not applicationInfo.isNull() and applicationInfo.size() > 0:
+            content.application_info = applicationInfo.toBytes()
 
         self._broadcastSyncState(self._digestTree.getRoot(), syncMessage)
 
@@ -455,9 +477,14 @@ class ChronoSync2013(object):
 
             # Only report UPDATE sync states.
             if syncState.type == SyncState_UPDATE:
+                if len(syncState.application_info) > 0:
+                    applicationInfo = Blob(syncState.application_info, True)
+                else:
+                    applicationInfo = Blob()
+
                 syncStates.append(self.SyncState(
                   syncState.name, syncState.seqno.session,
-                  syncState.seqno.seq))
+                  syncState.seqno.seq, applicationInfo))
 
         try:
             self._onReceivedSyncState(syncStates, isRecovery)
