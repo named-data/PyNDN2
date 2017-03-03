@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='sync-state.proto',
   package='Sync',
-  serialized_pb='\n\x10sync-state.proto\x12\x04Sync\"\xc1\x01\n\tSyncState\x12\x0c\n\x04name\x18\x01 \x02(\t\x12(\n\x04type\x18\x02 \x02(\x0e\x32\x1a.Sync.SyncState.ActionType\x12$\n\x05seqno\x18\x03 \x01(\x0b\x32\x15.Sync.SyncState.SeqNo\x1a%\n\x05SeqNo\x12\x0b\n\x03seq\x18\x01 \x02(\x04\x12\x0f\n\x07session\x18\x02 \x02(\x04\"/\n\nActionType\x12\n\n\x06UPDATE\x10\x00\x12\n\n\x06\x44\x45LETE\x10\x01\x12\t\n\x05OTHER\x10\x02\"+\n\x0cSyncStateMsg\x12\x1b\n\x02ss\x18\x01 \x03(\x0b\x32\x0f.Sync.SyncState')
+  serialized_pb='\n\x10sync-state.proto\x12\x04Sync\"\xdb\x01\n\tSyncState\x12\x0c\n\x04name\x18\x01 \x02(\t\x12(\n\x04type\x18\x02 \x02(\x0e\x32\x1a.Sync.SyncState.ActionType\x12$\n\x05seqno\x18\x03 \x01(\x0b\x32\x15.Sync.SyncState.SeqNo\x12\x18\n\x10\x61pplication_info\x18\x04 \x01(\x0c\x1a%\n\x05SeqNo\x12\x0b\n\x03seq\x18\x01 \x02(\x04\x12\x0f\n\x07session\x18\x02 \x02(\x04\"/\n\nActionType\x12\n\n\x06UPDATE\x10\x00\x12\n\n\x06\x44\x45LETE\x10\x01\x12\t\n\x05OTHER\x10\x02\"+\n\x0cSyncStateMsg\x12\x1b\n\x02ss\x18\x01 \x03(\x0b\x32\x0f.Sync.SyncState')
 
 
 
@@ -38,8 +38,8 @@ _SYNCSTATE_ACTIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=173,
-  serialized_end=220,
+  serialized_start=199,
+  serialized_end=246,
 )
 
 
@@ -73,8 +73,8 @@ _SYNCSTATE_SEQNO = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=134,
-  serialized_end=171,
+  serialized_start=160,
+  serialized_end=197,
 )
 
 _SYNCSTATE = _descriptor.Descriptor(
@@ -105,6 +105,13 @@ _SYNCSTATE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='application_info', full_name='Sync.SyncState.application_info', index=3,
+      number=4, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -116,7 +123,7 @@ _SYNCSTATE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=27,
-  serialized_end=220,
+  serialized_end=246,
 )
 
 
@@ -143,8 +150,8 @@ _SYNCSTATEMSG = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=222,
-  serialized_end=265,
+  serialized_start=248,
+  serialized_end=291,
 )
 
 _SYNCSTATE_SEQNO.containing_type = _SYNCSTATE;
