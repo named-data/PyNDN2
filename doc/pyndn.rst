@@ -194,6 +194,14 @@ pyndn.threadsafe_face module
     :undoc-members:
     :show-inheritance:
 
+pyndn.validity_period module
+----------------------------
+
+.. automodule:: pyndn.validity_period
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
