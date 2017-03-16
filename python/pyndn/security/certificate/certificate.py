@@ -56,7 +56,7 @@ class Certificate(Data):
         """
 
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
-        if secondsSince1970 < self._notBefore/1000:
+        if secondsSince1970 < self.getNotBefore()/1000:
             return True
         return False
 
@@ -67,7 +67,7 @@ class Certificate(Data):
         :rtype: boolean
         """
         secondsSince1970 = (datetime.now() - self.epochStart).total_seconds
-        if secondsSince1970 > self._notAfter/1000:
+        if secondsSince1970 > self.getNotAfter()/1000:
             return True
         return False
 
@@ -80,8 +80,8 @@ class Certificate(Data):
         s += "Validity:\n"
 
         dateFormat = "%Y%m%dT%H%M%S"
-        notBeforeStr = datetime.utcfromtimestamp(self._notBefore/1000).strftime(dateFormat)
-        notAfterStr = datetime.utcfromtimestamp(self._notAfter/1000).strftime(dateFormat)
+        notBeforeStr = datetime.utcfromtimestamp(self.getNotBefore()/1000).strftime(dateFormat)
+        notAfterStr = datetime.utcfromtimestamp(self.getNotAfter()/1000).strftime(dateFormat)
 
         s += "  NotBefore: " + notBeforeStr+"\n"
         s += "  NotAfter: " + notAfterStr + "\n"
@@ -130,8 +130,8 @@ class Certificate(Data):
         """
         root = DerSequence()
         validity = DerSequence()
-        notBefore = DerGeneralizedTime(self._notBefore)
-        notAfter = DerGeneralizedTime(self._notAfter)
+        notBefore = DerGeneralizedTime(self.getNotBefore())
+        notAfter = DerGeneralizedTime(self.getNotAfter())
 
         validity.addChild(notBefore)
         validity.addChild(notAfter)
