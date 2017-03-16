@@ -46,7 +46,7 @@ class Certificate(Data):
         else:
             self._notBefore = 1e37
             self._notAfter = -1e37
-            self._publicKey = None
+            self._publicKey = PublicKey()
 
     def isTooEarly(self):
         """
@@ -90,7 +90,7 @@ class Certificate(Data):
             s += "  " + str(sd.getOid()) + ": " + sd.getValue().toRawStr() + "\n"
 
         s += "Public key bits:\n"
-        keyDer = self._publicKey.getKeyDer()
+        keyDer = self.getPublicKeyDer()
         encodedKey = base64.b64encode(keyDer.toBytes())
         for idx in range(0, len(encodedKey), 64):
             # Use Blob to convert to a str.
@@ -236,6 +236,18 @@ class Certificate(Data):
         :rtype: PublicKey
         """
         return self._publicKey
+
+    def getPublicKeyDer(self):
+        """
+        Get the public key DER encoding.
+        :return: The DER encoding Blob.
+        :rtype: Blob
+        :throws: RuntimeError if the public key is not set.
+        """
+        if self._publicKey.getKeyDer().isNull():
+            raise RuntimeError("The public key is not set")
+
+        return self._publicKey.getKeyDer()
 
     def setNotBefore(self, notBefore):
         self._notBefore = notBefore
