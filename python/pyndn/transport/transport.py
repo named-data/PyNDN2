@@ -18,8 +18,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the Transport class which is a base class for specific
-transport classes such as UnixTransport.
+This module defines the Transport class which is used by Face to send packets
+and to listen for incoming packets. See connect() and processEvents() for more
+details.
 """
 
 class Transport(object):
