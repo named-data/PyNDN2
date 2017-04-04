@@ -69,7 +69,7 @@ class Counter(object):
 
 def main():
     loop = asyncio.get_event_loop()
-    face = ThreadsafeFace(loop, "aleph.ndn.ucla.edu")
+    face = ThreadsafeFace(loop, "memoria.ndn.ucla.edu")
 
     # Counter will stop the ioService after callbacks for all expressInterest.
     counter = Counter(loop, 3)
@@ -81,7 +81,7 @@ def main():
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 
     # Try to fetch using a known name.
-    name2 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
+    name2 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDX%DC5%1F")
     dump("Express name ", name2.toUri())
     face.expressInterest(name2, counter.onData, counter.onTimeout)
 
