@@ -41,7 +41,7 @@ class Data(object):
             self._signature = ChangeCounter(value.getSignature().clone())
             self._content = value._content
             self._defaultWireEncoding = value.getDefaultWireEncoding()
-            self._defaultFullName = value._defaultFullName
+            self._defaultFullName = Name(value._defaultFullName)
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
             self._name = ChangeCounter(Name(value) if type(value) is Name
