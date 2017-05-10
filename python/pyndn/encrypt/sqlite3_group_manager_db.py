@@ -58,6 +58,16 @@ CREATE TABLE IF NOT EXISTS
 INITIALIZATION4 = """
 CREATE UNIQUE INDEX IF NOT EXISTS
    memNameIndex ON members(member_name);"""
+INITIALIZATION5 = """
+CREATE TABLE IF NOT EXISTS
+  ekeys(
+    ekey_id             INTEGER PRIMARY KEY,
+    ekey_name           BLOB NOT NULL,
+    pub_key             BLOB NOT NULL
+  );"""
+INITIALIZATION6 = """
+CREATE UNIQUE INDEX IF NOT EXISTS
+   ekeyNameIndex ON ekeys(ekey_name);"""
 
 class Sqlite3GroupManagerDb(GroupManagerDb):
     """
@@ -69,6 +79,8 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
         super(Sqlite3GroupManagerDb, self).__init__()
 
         self._database = sqlite3.connect(databaseFilePath)
+        # Key: Name. Value: The encoded private key Blob.
+        self._privateKeyBase = {}
 
         cursor = self._database.cursor()
         # Enable foreign keys.
@@ -77,6 +89,8 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
         cursor.execute(INITIALIZATION2)
         cursor.execute(INITIALIZATION3)
         cursor.execute(INITIALIZATION4)
+        cursor.execute(INITIALIZATION5)
+        cursor.execute(INITIALIZATION6)
         self._database.commit()
         cursor.close()
 
@@ -453,6 +467,127 @@ class Sqlite3GroupManagerDb(GroupManagerDb):
         except Exception as ex:
             raise GroupManagerDb.Error(
               "Sqlite3GroupManagerDb.deleteMember: SQLite error: " + str(ex))
+
+    def hasEKey(self, eKeyName):
+        """
+        Check if there is an EKey with the name eKeyName in the database.
+
+        :param Name eKeyName: The name of the EKey.
+        :return: True if the EKey exists.
+        :rtype: bool
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        result = False
+
+        try:
+            cursor = self._database.cursor()
+            cursor.execute(
+              "SELECT ekey_id FROM ekeys where ekey_name=?",
+              (sqlite3.Binary(bytearray(eKeyName.wireEncode(TlvWireFormat.get()).buf())), ))
+            if cursor.fetchone() != None:
+                result = True
+
+            cursor.close()
+            return result
+        except Exception as ex:
+            raise GroupManagerDb.Error(
+              "Sqlite3GroupManagerDb.hasEKey: SQLite error: " + str(ex))
+
+    def addEKey(self, eKeyName, publicKey, privateKey):
+        """
+        Add the EKey with name eKeyName to the database.
+
+        :param Name eKeyName: The name of the EKey. This copies the Name.
+        :param Blob publicKey: The encoded public key of the group key pair.
+        :param Blob privateKey: The encoded private key of the group key pair.
+        :raises GroupManagerDb.Error: If a key with name eKeyName already exists
+          in the database, or other database error.
+        """
+        try:
+            cursor = self._database.cursor()
+            cursor.execute(
+              "INSERT INTO ekeys(ekey_name, pub_key) values (?, ?)",
+              (sqlite3.Binary(bytearray(eKeyName.wireEncode(TlvWireFormat.get()).buf())),
+               sqlite3.Binary(bytearray(publicKey.buf()))))
+            self._database.commit()
+            cursor.close()
+        except Exception as ex:
+            raise GroupManagerDb.Error(
+              "Sqlite3GroupManagerDb.addEKey: SQLite error: " + str(ex))
+
+        self._privateKeyBase[Name(eKeyName)] = privateKey
+
+    def getEKey(self, eKeyName):
+        """
+        Get the group key pair with the name eKeyName from the database.
+
+        :param Name eKeyName: The name of the EKey.
+        :return: A tuple (privateKeyBlob, publicKeyBlob) where "privateKeyBlob"
+          is the encoding Blob of the private key and "publicKeyBlob" is the
+          encoding Blob of the public key.
+        :rtype: (Blob, Blob)
+        :raises GroupManagerDb.Error: If the key with name eKeyName does not
+          exist in the database, or other database error.
+        """
+        publicKey = None
+        try:
+            cursor = self._database.cursor()
+            cursor.execute(
+              "SELECT pub_key FROM ekeys where ekey_name=?",
+              (sqlite3.Binary(bytearray(eKeyName.wireEncode(TlvWireFormat.get()).buf())), ))
+            result = cursor.fetchone()
+            if result != None:
+                publicKey = Blob(bytearray(result[0]), False)
+            cursor.close()
+        except Exception as ex:
+            raise GroupManagerDb.Error(
+              "Sqlite3GroupManagerDb.getMemberSchedule: SQLite error: " + str(ex))
+
+        if publicKey == None:
+            raise GroupManagerDb.Error(
+              "Sqlite3GroupManagerDb.getEKey: Cannot get the result from the database")
+
+        return (publicKey, self._privateKeyBase[Name(eKeyName)])
+
+    def cleanEKeys(self):
+        """
+        Delete all the EKeys in the database. The database will keep growing
+        because EKeys will keep being added, so this method should be called
+        periodically.
+
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        try:
+            cursor = self._database.cursor()
+            cursor.execute("DELETE FROM ekeys", (None,))
+            self._database.commit()
+            cursor.close()
+        except Exception as ex:
+            raise GroupManagerDb.Error(
+              "Sqlite3GroupManagerDb.cleanEKeys: SQLite error: " + str(ex))
+
+        self._privateKeyBase = {}
+
+    def deleteEKey(self, eKeyName):
+        """
+        Delete the EKey with name eKeyName from the database. If no key with the
+        name exists in the database, do nothing.
+
+        :param Name eKeyName: The name of the EKey.
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        try:
+            cursor = self._database.cursor()
+            cursor.execute(
+              "DELETE FROM ekeys WHERE ekey_name=?",
+              (sqlite3.Binary(bytearray(eKeyName.wireEncode(TlvWireFormat.get()).buf())), ))
+            self._database.commit()
+            cursor.close()
+        except Exception as ex:
+            raise GroupManagerDb.Error(
+              "Sqlite3GroupManagerDb.deleteEKey: SQLite error: " + str(ex))
+
+        del self._privateKeyBase[eKeyName]
 
     def _getScheduleId(self, name):
         """
