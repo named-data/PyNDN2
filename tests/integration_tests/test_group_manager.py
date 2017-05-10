@@ -372,3 +372,54 @@ class TestGroupManager(ut.TestCase):
 
         timePoint3 = Schedule.fromIsoString("20150827T023000")
         self.assertEqual(0, len(manager.getGroupKey(timePoint3)))
+
+    def test_get_group_key_without_regeneration(self):
+        # Create the group manager.
+        manager = GroupManager(
+          Name("Alice"), Name("data_type"),
+          Sqlite3GroupManagerDb(self.groupKeyDatabaseFilePath), 1024, 1,
+          self.keyChain)
+        self.setManager(manager)
+
+        # Get the data list from the group manager.
+        timePoint1 = Schedule.fromIsoString("20150825T093000")
+        result = manager.getGroupKey(timePoint1)
+
+        self.assertEqual(4, len(result))
+
+        # The first data packet contains the group's encryption key (public key).
+        data1 = result[0]
+        self.assertEqual(
+          "/Alice/READ/data_type/E-KEY/20150825T090000/20150825T100000",
+          data1.getName().toUri())
+        groupEKey1 = EncryptKey(data1.getContent())
+
+        # Get the second data packet and decrypt.
+        data = result[1]
+        self.assertEqual(
+          "/Alice/READ/data_type/D-KEY/20150825T090000/20150825T100000/FOR/ndn/memberA/ksk-123",
+          data.getName().toUri())
+
+        # Add new members to the database.
+        dataBlob = self.certificate.wireEncode()
+        memberD = Data()
+        memberD.wireDecode(dataBlob)
+        memberD.setName(Name("/ndn/memberD/KEY/ksk-123/ID-CERT/123"))
+        manager.addMember("schedule1", memberD)
+
+        result2 = manager.getGroupKey(timePoint1, False)
+        self.assertEqual(5, len(result2))
+
+        # Check that the new EKey is the same as the previous one.
+        data2 = result2[0]
+        self.assertEqual(
+          "/Alice/READ/data_type/E-KEY/20150825T090000/20150825T100000",
+           data2.getName().toUri())
+        groupEKey2 = EncryptKey(data2.getContent())
+        self.assertTrue(groupEKey1.getKeyBits().equals(groupEKey2.getKeyBits()));
+
+        # Check the second data packet.
+        data2 = result2[1]
+        self.assertEqual(
+          "/Alice/READ/data_type/D-KEY/20150825T090000/20150825T100000/FOR/ndn/memberA/ksk-123",
+          data2.getName().toUri())

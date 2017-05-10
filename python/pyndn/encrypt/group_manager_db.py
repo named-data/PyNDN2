@@ -197,3 +197,60 @@ class GroupManagerDb(object):
         :raises GroupManagerDb.Error: For a database error.
         """
         raise RuntimeError("GroupManagerDb.deleteMember is not implemented")
+
+    def hasEKey(self, eKeyName):
+        """
+        Check if there is an EKey with the name eKeyName in the database.
+
+        :param Name eKeyName: The name of the EKey.
+        :return: True if the EKey exists.
+        :rtype: bool
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        raise RuntimeError("GroupManagerDb.hasEKey is not implemented")
+
+    def addEKey(self, eKeyName, publicKey, privateKey):
+        """
+        Add the EKey with name eKeyName to the database.
+
+        :param Name eKeyName: The name of the EKey. This copies the Name.
+        :param Blob publicKey: The encoded public key of the group key pair.
+        :param Blob privateKey: The encoded private key of the group key pair.
+        :raises GroupManagerDb.Error: If a key with name eKeyName already exists
+          in the database, or other database error.
+        """
+        raise RuntimeError("GroupManagerDb.addEKey is not implemented")
+
+    def getEKey(self, eKeyName):
+        """
+        Get the group key pair with the name eKeyName from the database.
+
+        :param Name eKeyName: The name of the EKey.
+        :return: A tuple (privateKeyBlob, publicKeyBlob) where "privateKeyBlob"
+          is the encoding Blob of the private key and "publicKeyBlob" is the
+          encoding Blob of the public key.
+        :rtype: (Blob, Blob)
+        :raises GroupManagerDb.Error: If the key with name eKeyName does not
+          exist in the database, or other database error.
+        """
+        raise RuntimeError("GroupManagerDb.getEKey is not implemented")
+
+    def cleanEKeys(self):
+        """
+        Delete all the EKeys in the database. The database will keep growing
+        because EKeys will keep being added, so this method should be called
+        periodically.
+
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        raise RuntimeError("GroupManagerDb.cleanEKeys is not implemented")
+
+    def deleteEKey(self, eKeyName):
+        """
+        Delete the EKey with name eKeyName from the database. If no key with the
+        name exists in the database, do nothing.
+
+        :param Name eKeyName: The name of the EKey.
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        raise RuntimeError("GroupManagerDb.deleteEKey is not implemented")
