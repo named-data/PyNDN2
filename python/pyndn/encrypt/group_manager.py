@@ -59,7 +59,7 @@ class GroupManager(object):
 
         self._keyChain = keyChain
 
-    def getGroupKey(self, timeSlot):
+    def getGroupKey(self, timeSlot, needRegenerate = True):
         """
         Create a group key for the interval into which timeSlot falls. This
         creates a group key if it doesn't exist, and encrypts the key using the
@@ -67,6 +67,10 @@ class GroupManager(object):
 
         :param float timeSlot: The time slot to cover as milliseconds since
           Jan 1, 1970 UTC.
+        :param bool needRegenerate: (optional) needRegenerate should be True if
+          this is the first time this method is called, or a member was removed.
+          needRegenerate can be False if this is not the first time this method
+          is called, or a member was added. If omitted, use True.
         :return: A List of Data packets where the first is the E-KEY data packet
           with the group's public key and the rest are the D-KEY data packets
           with the group's private key encrypted with the public key of each
@@ -86,7 +90,17 @@ class GroupManager(object):
         endTimeStamp = Schedule.toIsoString(finalInterval.getEndTime())
 
         # Generate the private and public keys.
-        (privateKeyBlob, publicKeyBlob) = self._generateKeyPair()
+        eKeyName = Name(self._namespace)
+        eKeyName.append(Encryptor.NAME_COMPONENT_E_KEY).append(
+          startTimeStamp).append(endTimeStamp)
+
+        if not needRegenerate and self._database.hasEKey(eKeyName):
+            (publicKeyBlob, privateKeyBlob) = self._getEKey(eKeyName)
+        else:
+            (privateKeyBlob, publicKeyBlob) = self._generateKeyPair()
+            if self._database.hasEKey(eKeyName):
+                self._deleteEKey(eKeyName)
+            self._addEKey(eKeyName, publicKeyBlob, privateKeyBlob)
 
         # Add the first element to the result.
         # The E-KEY (public key) data packet name convention is:
@@ -182,6 +196,16 @@ class GroupManager(object):
           scheduleName.
         """
         self._database.updateMemberSchedule(identity, scheduleName)
+
+    def cleanEKeys(self):
+        """
+        Delete all the EKeys in the database. The database will keep growing
+        because EKeys will keep being added, so this method should be called
+        periodically.
+
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        self._database.cleanEKeys()
 
     def _calculateInterval(self, timeSlot, unsortedMemberKeys):
         """
@@ -307,5 +331,41 @@ class GroupManager(object):
           data, privateKeyBlob, keyName, certificateKey, encryptParams)
         self._keyChain.sign(data)
         return data
+
+    def _addEKey(self, eKeyName, publicKey, privateKey):
+        """
+        Add the EKey with name eKeyName to the database.
+
+        :param Name eKeyName: The name of the EKey. This copies the Name.
+        :param Blob publicKey: The encoded public key of the group key pair.
+        :param Blob privateKey: The encoded private key of the group key pair.
+        :raises GroupManagerDb.Error: If a key with name eKeyName already exists
+          in the database, or other database error.
+        """
+        self._database.addEKey(eKeyName, publicKey, privateKey)
+
+    def _getEKey(self, eKeyName):
+        """
+        Get the group key pair with the name eKeyName from the database.
+
+        :param Name eKeyName: The name of the EKey.
+        :return: A tuple (privateKeyBlob, publicKeyBlob) where "privateKeyBlob"
+          is the encoding Blob of the private key and "publicKeyBlob" is the
+          encoding Blob of the public key.
+        :rtype: (Blob, Blob)
+        :raises GroupManagerDb.Error: If the key with name eKeyName does not
+          exist in the database, or other database error.
+        """
+        return self._database.getEKey(eKeyName)
+
+    def _deleteEKey(self, eKeyName):
+        """
+        Delete the EKey with name eKeyName from the database. If no key with the
+        name exists in the database, do nothing.
+
+        :param Name eKeyName: The name of the EKey.
+        :raises GroupManagerDb.Error: For a database error.
+        """
+        self._database.deleteEKey(eKeyName)
 
     MILLISECONDS_IN_HOUR = 3600 * 1000
