@@ -102,6 +102,9 @@ class DerNode (object):
             lenCount = sizeLen & ((1<<7) -1)
             size = 0
             while lenCount > 0:
+                if len(inputBuf) <= idx:
+                    raise DerDecodingException(
+                      "DerNode::decodeHeader: The input length is too small");
                 b = inputBuf[idx]
                 idx += 1
                 self._header.append(b)
@@ -148,6 +151,9 @@ class DerNode (object):
         if isinstance(inputBuf, Blob):
             inputBuf = inputBuf.buf()
 
+        if len(inputBuf) <= startIdx:
+            raise DerDecodingException(
+              "DerNode::parse: The input length is too small");
         nodeType = inputBuf[startIdx] # don't increment, we're just peeking
 
         outputType = None
