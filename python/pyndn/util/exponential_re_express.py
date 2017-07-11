@@ -71,6 +71,8 @@ class ExponentialReExpress(object):
         :type onTimeout: function object
         :param float maxInterestLifetime: (optional) The maximum lifetime in
           milliseconds for re-expressed interests. If omitted, use 16000.
+        :return: The onTimeout function object to pass to expressInterest.
+        :rtype: function object
         """
         if maxInterestLifetime == None:
             maxInterestLifetime = 16000
