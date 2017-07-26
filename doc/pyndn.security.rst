@@ -9,6 +9,7 @@ Subpackages
     pyndn.security.certificate
     pyndn.security.identity
     pyndn.security.policy
+    pyndn.security.v2
 
 Submodules
 ----------
