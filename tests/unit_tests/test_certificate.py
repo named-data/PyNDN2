@@ -21,13 +21,13 @@
 
 from pyndn import Name
 from pyndn import Data
-from test_utils import fromIsoString
 from pyndn import KeyLocator
 from pyndn import KeyLocatorType
 from pyndn import Sha256WithRsaSignature
 from pyndn import ValidityPeriod
 from pyndn.util import Blob
-from pyndn.security.certificate import Certificate
+from pyndn.security.v2 import CertificateV2
+from test_utils import fromIsoString
 import unittest as ut
 
 # use Python 3's mock library if it's available
@@ -48,15 +48,6 @@ PUBLIC_KEY = Blob(bytearray([
 0x62, 0x25, 0xba, 0x5b, 0x4d, 0x8a, 0xc2, 0x7a, 0xbd, 0x43, 0x8a, 0x8f, 0xb8, 0xf2, 0xf1,
 0xc5, 0x6a, 0x30, 0xd3, 0x50, 0x8c, 0xc8, 0x9a, 0xdf, 0xef, 0xed, 0x35, 0xe7, 0x7a, 0x62,
 0xea, 0x76, 0x7c, 0xbb, 0x08, 0x26, 0xc7, 0x02, 0x01, 0x11
-  ]))
-
-SIG_INFO = Blob(bytearray([
-0x16, 0x55, 0x1B, 0x01, 0x01, 0x1C, 0x26, 0x07, 0x24, 0x08, 0x03, 0x6E, 0x64, 0x6E, 0x08, 0x05,
-0x73, 0x69, 0x74, 0x65, 0x31, 0x08, 0x11, 0x6B, 0x73, 0x6B, 0x2D, 0x32, 0x35, 0x31, 0x36, 0x34,
-0x32, 0x35, 0x33, 0x37, 0x37, 0x30, 0x39, 0x34, 0x08, 0x03, 0x4B, 0x45, 0x59, 0xFD, 0x00, 0xFD,
-0x26, 0xFD, 0x00, 0xFE, 0x0F, 0x32, 0x30, 0x31, 0x35, 0x30, 0x38, 0x31, 0x34, 0x54, 0x32, 0x32,
-0x33, 0x37, 0x33, 0x39, 0xFD, 0x00, 0xFF, 0x0F, 0x32, 0x30, 0x31, 0x35, 0x30, 0x38, 0x31, 0x38,
-0x54, 0x32, 0x32, 0x33, 0x37, 0x33, 0x38
   ]))
 
 SIG_VALUE = Blob(bytearray([
@@ -145,29 +136,104 @@ class TestCertificate(ut.TestCase):
 
         return signatureInfo
 
-    def test_construction(self):
-        # Debug: This should be a Certificate.
-        certificate = Data()
-        certificate.wireDecode(CERT)
+    def test_constructor(self):
+        certificate = CertificateV2()
+        certificate.wireDecode(Blob(CERT, False))
 
-        # TODO: Finish tests.
+        self.assertEqual(
+          Name("/ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B"),
+          certificate.getName())
+        self.assertEqual(Name("/ndn/site1/KEY/ksk-1416425377094"),
+          certificate.getKeyName())
+        self.assertEqual(Name("/ndn/site1"), certificate.getIdentity())
+        self.assertEqual(Name.Component("0123"), certificate.getIssuerId())
+        self.assertEqual(Name.Component("ksk-1416425377094"),
+          certificate.getKeyId())
+        self.assertEqual(Name("/ndn/site1/KEY/ksk-2516425377094"),
+          KeyLocator.getFromSignature(certificate.getSignature()).getKeyName())
+        self.assertEqual(fromIsoString("20150814T223739"),
+          certificate.getValidityPeriod().getNotBefore(), 0)
+        self.assertEqual(fromIsoString("20150818T223738"),
+          certificate.getValidityPeriod().getNotAfter(), 0)
+
+        try:
+          certificate.getPublicKey()
+        except:
+          self.fail("Error in getPublicKey");
+
+        data = Data()
+        data.wireDecode(Blob(CERT, False))
+        certificate2 = CertificateV2(data)
+        self.assertEqual(certificate.getName(), certificate2.getName())
+        self.assertTrue(certificate.getPublicKey().equals(certificate2.getPublicKey()))
+
+    def test_setters(self):
+        certificate = CertificateV2()
+        certificate.setName(
+          Name("/ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B"))
+        certificate.getMetaInfo().setFreshnessPeriod(3600 * 1000.0)
+        certificate.setContent(Blob(PUBLIC_KEY, False))
+        certificate.setSignature(self.generateFakeSignature())
+
+        self.assertEqual(
+          Name("/ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B"),
+          certificate.getName())
+        self.assertEqual(Name("/ndn/site1/KEY/ksk-1416425377094"),
+          certificate.getKeyName())
+        self.assertEqual(Name("/ndn/site1"), certificate.getIdentity())
+        self.assertEqual(Name.Component("0123"), certificate.getIssuerId())
+        self.assertEqual(Name.Component("ksk-1416425377094"),
+          certificate.getKeyId())
+        self.assertEqual(Name("/ndn/site1/KEY/ksk-2516425377094"),
+          KeyLocator.getFromSignature(certificate.getSignature()).getKeyName())
+        self.assertEqual(fromIsoString("20141111T050000"),
+          certificate.getValidityPeriod().getNotBefore(), 0)
+        self.assertEqual(fromIsoString("20141111T060000"),
+          certificate.getValidityPeriod().getNotAfter(), 0)
+
+        try:
+          certificate.getPublicKey()
+        except:
+          self.fail("Error in getPublicKey");
 
     def test_validity_period_checking(self):
-        certificate = Certificate()
+        certificate = CertificateV2()
         certificate.setName(
           Name("/ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B"))
         certificate.getMetaInfo().setFreshnessPeriod(3600 * 1000.0)
         certificate.setContent(PUBLIC_KEY)
         certificate.setSignature(self.generateFakeSignature())
 
-        self.assertEqual(True,  certificate.isInValidityPeriod
+        self.assertEqual(True,  certificate.isValid
           (fromIsoString("20141111T050000")))
-        self.assertEqual(True,  certificate.isInValidityPeriod
+        self.assertEqual(True,  certificate.isValid
           (fromIsoString("20141111T060000")))
-        self.assertEqual(False, certificate.isInValidityPeriod
+        self.assertEqual(False, certificate.isValid
           (fromIsoString("20141111T045959")))
-        self.assertEqual(False, certificate.isInValidityPeriod
+        self.assertEqual(False, certificate.isValid
           (fromIsoString("20141111T060001")))
+
+    def test_print_certificate_info(self):
+        expectedCertificateInfo = (
+"Certificate name:\n" +
+"  /ndn/site1/KEY/ksk-1416425377094/0123/%FD%00%00%01I%C9%8B\n" +
+"Validity:\n" +
+"  NotBefore: 20150814T223739\n" +
+"  NotAfter: 20150818T223738\n" +
+"Public key bits:\n" +
+"MIGdMA0GCSqGSIb3DQEBAQUAA4GLADCBhwKBgQCeBj5HhbI0N6qFR6wDJIO1nKgF\n" +
+"OiQe64kBu+mbssMirGjj8GwCzmimxNCnBpCcqhsIHYtDmjNnRG0hoxuImpdeWcQV\n" +
+"C9ksvVEHYYKtwbjXv5vPfSTCY/OXF+v+YiW6W02Kwnq9Q4qPuPLxxWow01CMyJrf\n" +
+"7+0153pi6nZ8uwgmxwIBEQ==\n" +
+"Signature Information:\n" +
+"  Signature Type: SignatureSha256WithRsa\n" +
+"  Key Locator: Name=/ndn/site1/KEY/ksk-2516425377094\n")
+
+        certificate = CertificateV2()
+        certificate.wireDecode(Blob(CERT, False))
+
+        actual = str(certificate)
+        self.assertEqual(expectedCertificateInfo, actual)
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
