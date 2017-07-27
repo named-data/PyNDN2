@@ -23,11 +23,10 @@ from pyndn.encoding.der.der_node import *
 from pyndn.encoding.der.der import *
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.util.blob import Blob
+from pyndn.util.common import Common
 from pyndn.data import Data
 from pyndn.meta_info import ContentType
 from datetime import datetime
-
-import base64
 
 class Certificate(Data):
     epochStart = datetime(1970,1,1)
@@ -90,12 +89,7 @@ class Certificate(Data):
             s += "  " + str(sd.getOid()) + ": " + sd.getValue().toRawStr() + "\n"
 
         s += "Public key bits:\n"
-        keyDer = self.getPublicKeyDer()
-        encodedKey = base64.b64encode(keyDer.toBytes())
-        for idx in range(0, len(encodedKey), 64):
-            # Use Blob to convert to a str.
-            s += Blob(encodedKey[idx:idx+64], False).toRawStr() + "\n"
-
+        s += Common.base64Encode(self.getPublicKeyDer().toBytes(), True)
 
         if len(self._extensionList) > 0:
             s += "Extensions:\n"
@@ -106,7 +100,6 @@ class Certificate(Data):
                 s += "  Value: " + str(ext.getValue()).encode('hex') + "\n"
 
         return s
-
 
     def addSubjectDescription(self, descr):
         """
