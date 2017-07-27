@@ -38,6 +38,7 @@ from pyndn.security.security_exception import SecurityException
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
 from pyndn.encoding.der.der_node import DerNode
+from pyndn.util.common import Common
 
 class FilePrivateKeyStorage(PrivateKeyStorage):
     """
@@ -98,9 +99,9 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         privateKeyFilePath = keyFilePathNoExtension + ".pri"
 
         with open(publicKeyFilePath, 'w') as keyFile:
-            keyFile.write(Blob(base64.b64encode(publicKeyDer), False).toRawStr())
+            keyFile.write(Common.base64Encode(publicKeyDer, True))
         with open(privateKeyFilePath, 'w') as keyFile:
-            keyFile.write(Blob(base64.b64encode(privateKeyDer), False).toRawStr())
+            keyFile.write(Common.base64Encode(privateKeyDer, True))
 
         os.chmod(publicKeyFilePath,  stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         os.chmod(privateKeyFilePath, stat.S_IRUSR)
@@ -268,10 +269,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         sha256.update(Blob(keyName, False).toBytes())
         hash = sha256.finalize()
 
-        digest = base64.b64encode(hash)
-        if type(digest) != str:
-            # In Python 3, this is bytes, so convert to a str.
-            digest = "".join(map(chr, digest))
+        digest = Common.base64Encode(hash)
         digest = digest.strip()
         digest = digest.replace('/', '%')
 
