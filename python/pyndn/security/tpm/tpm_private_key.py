@@ -29,7 +29,8 @@ from cryptography.hazmat.primitives import hashes
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
 from pyndn.util.blob import Blob
-from pyndn.encoding.der.der_node import DerNode
+from pyndn.encoding.der.der_node import DerNode, DerInteger
+from pyndn.encoding.der.der_exceptions import DerDecodingException
 
 class TpmPrivateKey(object):
     """
@@ -50,7 +51,54 @@ class TpmPrivateKey(object):
         def __init__(self, message):
             super(TpmPrivateKey.Error, self).__init__(message)
 
-    # TODO: loadPkcs1
+    def loadPkcs1(self, encoding, keyType = None):
+        """
+        Load the unencrypted private key from a buffer with the PKCS #1 encoding.
+        This replaces any existing private key in this object.
+
+        :param encoding: The byte buffer with the private key encoding.
+        :type encoding: str, or an array type with int elements which is
+          converted to str
+        :param KeyType keyType: (optional) The KeyType, such as KeyType.RSA.
+          If omitted or None, then partially decode the private key to determine
+          the key type.
+        :raises TpmPrivateKey.Error: For errors decoding the key.
+        """
+        if keyType == None:
+            # Try to determine the key type.
+            try:
+                parsedNode = DerNode.parse(Blob(encoding, False).buf())
+                children = parsedNode.getChildren()
+
+                # An RsaPrivateKey has integer version 0 and 8 integers.
+                if (len(children) == 9 and
+                    isinstance(children[0], DerInteger) and
+                    children[0].toVal() == 0 and
+                    isinstance(children[1], DerInteger) and
+                    isinstance(children[2], DerInteger) and
+                    isinstance(children[3], DerInteger) and
+                    isinstance(children[4], DerInteger) and
+                    isinstance(children[5], DerInteger) and
+                    isinstance(children[6], DerInteger) and
+                    isinstance(children[7], DerInteger) and
+                    isinstance( children[8], DerInteger)):
+                    keyType = KeyType.RSA
+                else:
+                    # Assume it is an EC key. Try decoding it below.
+                    keyType = KeyType.ECDSA
+            except DerDecodingException:
+                # Assume it is an EC key. Try decoding it below.
+                keyType =  KeyType.ECDSA
+
+        if keyType == KeyType.ECDSA or keyType == KeyType.RSA:
+            # serialization can load PKCS #1 directly.
+            self._privateKey = serialization.load_der_private_key(
+              Blob(encoding, False).toBytes(), password = None, backend = default_backend())
+        else:
+            raise TpmPrivateKey.Error(
+              "loadPkcs1: Unrecognized keyType: " + str(keyType))
+
+        self._keyType = keyType
 
     def loadPkcs8(self, encoding, keyType = None):
         """
@@ -69,7 +117,7 @@ class TpmPrivateKey(object):
             # Decode the PKCS #8 DER to find the algorithm OID.
             oidString = None
             try:
-                parsedNode = DerNode.parse(Blob(encoding, False).buf(), 0)
+                parsedNode = DerNode.parse(Blob(encoding, False).buf())
                 pkcs8Children = parsedNode.getChildren()
                 algorithmIdChildren = DerNode.getSequence(
                   pkcs8Children, 1).getChildren()
@@ -184,9 +232,36 @@ class TpmPrivateKey(object):
         signer.update(data)
         return Blob(bytearray(signer.finalize()), False)
 
-    # TODO: toPkcs1
+    def toPkcs1(self):
+        """
+        Get the encoded unencrypted private key in PKCS #1.
+
+        :return: The private key encoding Blob.
+        :rtype: Blob
+        :raises TpmPrivateKey.Error: If no private key is loaded, or error
+          encoding.
+        """
+        if self._keyType == None:
+            raise TpmPrivateKey.Error("toPkcs1: The private key is not loaded")
+
+        # Decode the PKCS #8 private key.
+        try:
+            parsedNode = DerNode.parse(self.toPkcs8().buf(), 0)
+            pkcs8Children = parsedNode.getChildren()
+            return pkcs8Children[2].getPayload()
+        except Exception as ex:
+            raise TpmPrivateKey.Error(
+              "Error decoding PKCS #8 private key: " + str(ex))
 
     def toPkcs8(self):
+        """
+        Get the encoded unencrypted private key in PKCS #8.
+
+        :return: The private key encoding Blob.
+        :rtype: Blob
+        :raises TpmPrivateKey.Error: If no private key is loaded, or error
+          encoding.
+        """
         if self._keyType == None:
             raise TpmPrivateKey.Error("toPkcs8: The private key is not loaded")
 
