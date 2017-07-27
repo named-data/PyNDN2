@@ -69,7 +69,6 @@ Notes:
 See https://github.com/named-data/ndn-cxx/blob/master/docs/specs/certificate-format.rst
 """
 
-import base64
 from pyndn.name import Name
 from pyndn.data import Data
 from pyndn.meta_info import ContentType
@@ -78,6 +77,7 @@ from pyndn.key_locator import KeyLocator, KeyLocatorType
 from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.encrypt.schedule import Schedule
+from pyndn.util.common import Common
 
 class CertificateV2(Data):
     """
@@ -235,11 +235,7 @@ class CertificateV2(Data):
 
         result += "Public key bits:\n"
         try:
-            keyBase64 = base64.b64encode(self.getPublicKey().toBytes())
-            i = 0
-            while i < len(keyBase64):
-                result += keyBase64[i:i + 64] + "\n"
-                i += 64
+            result += Common.base64Encode(self.getPublicKey().toBytes(), True)
         except:
             # No public key.
             pass
