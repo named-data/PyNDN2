@@ -22,6 +22,7 @@ This module defines the Common class which has static utility functions.
 """
 
 import datetime
+import base64
 from io import BytesIO
 
 # _BytesIOValueIsStr is True if BytesIO.getvalue would return a str.
@@ -80,7 +81,7 @@ class Common(object):
         """
         Check if obj has type str or (in Python 2) unicode. This is necessary
         because Python 2 has two string types, str and unicode, but Python 3
-        doesn't have type unicode so we have to be carefor to check for
+        doesn't have type unicode so we have to be careful to check for
         type(obj) is unicode.
 
         :param any obj: The object to check if it is str or unicode.
@@ -141,6 +142,34 @@ class Common(object):
         :rtype: int
         """
         return None if value == None or value < 0 else int(value)
+
+    @staticmethod
+    def base64Encode(input, addNewlines = False):
+        """
+        Encode the input as base64.
+
+        :param input: The bytes to encode.
+        :type input: A byte array suitable for base64.b64encode (str in Python 2,
+          bytes in Python 3).
+        :param bool addNewlines: (optional) If True, add newlines to the
+          encoding (good for writing to a file).  If omitted or False, do not
+          add newlines.
+        :return: The encoding.
+        :rtype: str
+        """
+        base64Str = base64.b64encode(input)
+        if not type(base64Str) is str:
+            base64Str = "".join(map(chr, base64Str))
+            
+        if not addNewlines:
+            return base64Str
+
+        result = ""
+        i = 0
+        while i < len(base64Str):
+            result += base64Str[i:i + 64] + "\n"
+            i += 64
+        return result
 
     """
     The practical limit of the size of a network-layer packet. If a packet is
