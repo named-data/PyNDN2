@@ -179,7 +179,7 @@ class KeyChain(object):
     def generateRSAKeyPairAsDefault(
           self, identityName, isKsk = False, keySize = 2048):
         """
-        Generate a pair of RSA keys for the specified identity and set it as
+        Generate a pair of RSA keys for the specified identity and set it as the
         default key for the identity.
 
         :param NameidentityName: The name of the identity.
@@ -198,7 +198,7 @@ class KeyChain(object):
           self, identityName, isKsk = False, keySize = 2048):
         """
         Generate a pair of ECDSA keys for the specified identity and set it as
-        default key for the identity.
+        the default key for the identity.
 
         :param NameidentityName: The name of the identity.
         :param bool isKsk: (optional) true for generating a Key-Signing-Key
