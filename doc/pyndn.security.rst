@@ -8,7 +8,9 @@ Subpackages
 
     pyndn.security.certificate
     pyndn.security.identity
+    pyndn.security.pib
     pyndn.security.policy
+    pyndn.security.tpm
     pyndn.security.v2
 
 Submodules
