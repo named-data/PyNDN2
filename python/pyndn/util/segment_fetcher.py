@@ -81,7 +81,6 @@ Example:
 import logging
 from pyndn.interest import Interest
 from pyndn.util.blob import Blob
-from pyndn.security.key_chain import KeyChain
 
 class SegmentFetcher(object):
     """
@@ -183,6 +182,8 @@ class SegmentFetcher(object):
           handle any exceptions.
         :type onError: function object
         """
+        # Import KeyChain here to avoid import loops.
+        from pyndn.security.key_chain import KeyChain
         if (validatorKeyChainOrVerifySegment == None or
             isinstance(validatorKeyChainOrVerifySegment, KeyChain)):
             SegmentFetcher(
