@@ -25,9 +25,25 @@ objects, one of which is set as the default certificate of this key. A
 certificate can be directly accessed by getting a CertificateV2 object.
 """
 
+from pyndn.name import Name
 from pyndn.security.v2.certificate_v2 import CertificateV2
 
 class PibKey(object):
+
+    @staticmethod
+    def constructKeyName(identityName, keyId):
+        """
+        Construct a key name based on the appropriate naming conventions.
+
+        :param Name identityName: The name of the identity.
+        :param Name.Component keyId: The key ID name component.
+        :return: The constructed name as a new Name.
+        :rtype: Name
+        """
+        keyName = Name(identityName)
+        keyName.append(CertificateV2.KEY_COMPONENT).append(keyId)
+
+        return keyName
 
     @staticmethod
     def isValidKeyName(keyName):
