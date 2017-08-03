@@ -1,7 +1,8 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2017 Regents of the University of California.
+# Copyright (C) 2017 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
+# Author: From code in ndn-cxx by Yingdi Yu <yingdi@cs.ucla.edu>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,19 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.security import key_chain, key_id_type, key_params
-from pyndn.security import security_exception, security_types
-__all__ = ['key_chain', 'key_id_type', 'key_params', 'security_exception',
-           'security_types']
+"""
+This module defines the KeyIdType enum which represents the type of a KeyId
+component in a key name.
+"""
 
-import sys as _sys
+class KeyIdType(object):
+    # USER_SPECIFIED: A user-specified key ID. It is the user's responsibility
+    # to ensure the uniqueness of key names.
+    USER_SPECIFIED = 0
 
-try:
-    from pyndn.security.key_chain import *
-    from pyndn.security.key_id_type import *
-    from pyndn.security.key_params import *
-    from pyndn.security.security_exception import *
-    from pyndn.security.security_types import *
-except ImportError:
-    del _sys.modules[__name__]
-    raise
+    # SHA256: The SHA256 hash of the public key as the key id. This KeyId type
+    # guarantees the uniqueness of key names.
+    SHA256 = 1
+
+    # RANDOM: A 64-bit random number as the key id. This KeyId provides rough
+    # uniqueness of key names.
+    RANDOM = 2

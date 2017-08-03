@@ -24,6 +24,14 @@ pyndn.security.key_chain module
     :undoc-members:
     :show-inheritance:
 
+pyndn.security.key_id_type module
+---------------------------------
+
+.. automodule:: pyndn.security.key_id_type
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.key_params module
 --------------------------------
 

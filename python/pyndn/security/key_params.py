@@ -25,24 +25,86 @@ generation.
 """
 
 from pyndn.security.security_types import KeyType
+from pyndn.security.key_id_type import KeyIdType
+from pyndn.name import Name
 
 class KeyParams(object):
     """
-    The constructor is protected and used by subclasses.
+    Create a key generation parameter. This constructor is protected and used by
+    subclasses.
+
+    :param keyType keyType: The type for the created key.
+    :param keyIdTypeOrKeyId: If this is a KeyIdType, it is the method for how
+      the key id should be generated, which must not be KeyIdType.USER_SPECIFIED.
+      If this is a Name.Component, it is the user-specified key ID, in which
+      case this sets the keyIdType to KeyIdType.USER_SPECIFIED. (The keyId must
+      not be empty.)
+    :type keyIdTypeOrKeyId: int from KeyIdType or Name.Component.
+    :throws ValueError: If keyIdTypeOrKeyId is a KeyIdType and it is
+      KeyIdType.USER_SPECIFIED, or if keyIdTypeOrKeyId is a Name.Component and
+      it is empty.
     """
-    def __init__(self, keyType):
+    def __init__(self, keyType, keyIdTypeOrKeyId):
         self._keyType = keyType
+
+        if isinstance(keyIdTypeOrKeyId, Name.Component):
+            keyId = keyIdTypeOrKeyId
+
+            if keyId.getValue().size() == 0:
+                raise ValueError("KeyParams: keyId is empty")
+
+            self._keyIdType = KeyIdType.USER_SPECIFIED
+            self._keyId = keyId
+        else:
+            keyIdType = keyIdTypeOrKeyId
+            
+            if keyIdType == KeyIdType.USER_SPECIFIED:
+                raise ValueError("KeyParams: KeyIdType is USER_SPECIFIED")
+
+            self._keyIdType = keyIdType
+            self._keyId = Name.Component()
 
     def getKeyType(self):
         return self._keyType
 
-class RsaKeyParams(KeyParams):
-    def __init__(self, size = None):
-        super(RsaKeyParams, self).__init__(RsaKeyParams._getType())
+    def getKeyIdType(self):
+        return self._keyIdType
 
-        if size == None:
-            size = RsaKeyParams._getDefaultSize()
-        self._size = size
+    def getKeyId(self):
+        return self._keyId
+
+    def setKeyId(self, keyId):
+        self._keyId = keyId
+
+class RsaKeyParams(KeyParams):
+    """
+    Possible forms of the constructor are:
+    RsaKeyParams(keyId, size)
+    RsaKeyParams(keyId)
+    RsaKeyParams(size, keyIdType)
+    RsaKeyParams(size)
+    RsaKeyParams()
+    """
+    def __init__(self, keyIdOrSize = None, arg2 = None):
+        if isinstance(keyIdOrSize, Name.Component):
+            keyId = keyIdOrSize
+            super(RsaKeyParams, self).__init__(RsaKeyParams._getType(), keyId)
+
+            if arg2 == None:
+                self._size = RsaKeyParams._getDefaultSize()
+            else:
+                self._size = arg2
+        else:
+            size = keyIdOrSize
+            if size != None:
+                keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
+                super(RsaKeyParams, self).__init__(
+                  RsaKeyParams._getType(), keyIdType)
+                self._size = size
+            else:
+                super(RsaKeyParams, self).__init__(
+                  RsaKeyParams._getType(), KeyIdType.RANDOM)
+                self._size = RsaKeyParams._getDefaultSize()
 
     def getKeySize(self):
         return self._size
@@ -56,12 +118,34 @@ class RsaKeyParams(KeyParams):
         return KeyType.RSA
 
 class EcdsaKeyParams(KeyParams):
-    def __init__(self, size = None):
-        super(EcdsaKeyParams, self).__init__(EcdsaKeyParams._getType())
+    """
+    Possible forms of the constructor are:
+    EcdsaKeyParams(keyId, size)
+    EcdsaKeyParams(keyId)
+    EcdsaKeyParams(size, keyIdType)
+    EcdsaKeyParams(size)
+    EcdsaKeyParams()
+    """
+    def __init__(self, keyIdOrSize = None, arg2 = None):
+        if isinstance(keyIdOrSize, Name.Component):
+            keyId = keyIdOrSize
+            super(EcdsaKeyParams, self).__init__(EcdsaKeyParams._getType(), keyId)
 
-        if size == None:
-            size = EcdsaKeyParams._getDefaultSize()
-        self._size = size
+            if arg2 == None:
+                self._size = EcdsaKeyParams._getDefaultSize()
+            else:
+                self._size = arg2
+        else:
+            size = keyIdOrSize
+            if size != None:
+                keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
+                super(EcdsaKeyParams, self).__init__(
+                  EcdsaKeyParams._getType(), keyIdType)
+                self._size = size
+            else:
+                super(EcdsaKeyParams, self).__init__(
+                  EcdsaKeyParams._getType(), KeyIdType.RANDOM)
+                self._size = EcdsaKeyParams._getDefaultSize()
 
     def getKeySize(self):
         return self._size
@@ -75,12 +159,34 @@ class EcdsaKeyParams(KeyParams):
         return KeyType.ECDSA
 
 class AesKeyParams(KeyParams):
-    def __init__(self, size = None):
-        super(AesKeyParams, self).__init__(AesKeyParams._getType())
+    """
+    Possible forms of the constructor are:
+    AesKeyParams(keyId, size)
+    AesKeyParams(keyId)
+    AesKeyParams(size, keyIdType)
+    AesKeyParams(size)
+    AesKeyParams()
+    """
+    def __init__(self, keyIdOrSize = None, arg2 = None):
+        if isinstance(keyIdOrSize, Name.Component):
+            keyId = keyIdOrSize
+            super(AesKeyParams, self).__init__(AesKeyParams._getType(), keyId)
 
-        if size == None:
-            size = AesKeyParams._getDefaultSize()
-        self._size = size
+            if arg2 == None:
+                self._size = AesKeyParams._getDefaultSize()
+            else:
+                self._size = arg2
+        else:
+            size = keyIdOrSize
+            if size != None:
+                keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
+                super(AesKeyParams, self).__init__(
+                  AesKeyParams._getType(), keyIdType)
+                self._size = size
+            else:
+                super(AesKeyParams, self).__init__(
+                  AesKeyParams._getType(), KeyIdType.RANDOM)
+                self._size = AesKeyParams._getDefaultSize()
 
     def getKeySize(self):
         return self._size
