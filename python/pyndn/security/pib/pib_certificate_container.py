@@ -54,7 +54,7 @@ class PibCertificateContainer(object):
         :return: The number of certificates.
         :rtype: int
         """
-        return len(self._certificates)
+        return len(self._certificateNames)
 
     def add(self, certificate):
         """
