@@ -27,7 +27,7 @@ from pyndn.security.pib.pib_key import PibKey
 from pyndn.security.pib.pib import Pib
 from .pib_data_fixture import PibDataFixture
 
-class TestPibCertificateContainer(ut.TestCase):
+class TestPibKeyContainer(ut.TestCase):
     def setUp(self):
         self.fixture = PibDataFixture()
 
