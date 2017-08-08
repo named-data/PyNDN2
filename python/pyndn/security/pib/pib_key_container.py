@@ -158,5 +158,4 @@ class PibKeyContainer(object):
         :note: This method is heavy-weight and should be used in a debugging
           mode only.
         """
-        return self._keyNames.equals(
-          self._pibImpl.getKeysOfIdentity(self._identityName))
+        return self._keyNames == self._pibImpl.getKeysOfIdentity(self._identityName)
