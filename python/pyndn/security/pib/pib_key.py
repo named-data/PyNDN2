@@ -39,6 +39,72 @@ class PibKey(object):
     def __init__(self, impl):
         self._impl = impl
 
+    def getName(self):
+        """
+        Get the key name.
+
+        :return: The key name. You must not modify the Key object. If you need
+          to modify it, make a copy.
+        :rtype: Name
+        :raises ValueError: If the backend implementation instance is invalid.
+        """
+        return self._lock().getName()
+
+    def getIdentityName(self):
+        """
+        Get the name of the identity this key belongs to.
+
+        :return: The name of the identity. You must not modify the Key object.
+          If you need to modify it, make a copy.
+        :rtype: Name
+        :raises ValueError: If the backend implementation instance is invalid.
+        """
+        return self._lock().getIdentityName()
+
+    def getKeyType(self):
+        """
+        Get the key type.
+
+        :return: The key type.
+        :rtype: an int from the KeyType enum
+        :raises ValueError: If the backend implementation instance is invalid.
+        """
+        return self._lock().getKeyType()
+
+    def getPublicKey(self):
+        """
+        Get the public key encoding.
+
+        :return: The public key encoding.
+        :rtype: Blob
+        :raises ValueError: If the backend implementation instance is invalid.
+        """
+        return self._lock().getPublicKey()
+
+    def getCertificate(self, certificateName):
+        """
+        Get the certificate with name certificateName.
+
+        :param Name certificateName: The name of the certificate.
+        :return: A copy of the CertificateV2 object.
+        :rtype: CertificateV2
+        :raises ValueError: If certificateName does not match the key name, or
+          if the backend implementation instance is invalid.
+        :raises Pib.Error: If the certificate does not exist.
+        """
+        return self._lock().getCertificate(certificateName)
+
+    def getDefaultCertificate(self):
+        """
+        Get the default certificate for this Key.
+
+        :return: A copy of the default certificate.
+        :rtype: CertificateV2
+        :raises ValueError: If the backend implementation instance is invalid.
+        :raises Pib.Error: If the default certificate does not exist.
+        """
+        return self._lock().getDefaultCertificate()
+
     @staticmethod
     def constructKeyName(identityName, keyId):
         """
@@ -96,7 +162,7 @@ class PibKey(object):
         :raises ValueError: If the name of the certificate does not match the
           key name.
         """
-        self._lockImpl().addCertificate(certificate)
+        self._lock().addCertificate(certificate)
 
     def _removeCertificate(self, certificateName):
         """
@@ -106,7 +172,7 @@ class PibKey(object):
         :param Name certificateName: The name of the certificate.
         :raises ValueError: If certificateName does not match the key name.
         """
-        self._lockImpl().removeCertificate(certificateName)
+        self._lock().removeCertificate(certificateName)
 
     def _setDefaultCertificate(self, certificateName):
         """
@@ -119,9 +185,9 @@ class PibKey(object):
         :raises ValueError: If certificateName does not match the key name.
         :raises Pib.Error: If the certificate does not exist.
         """
-        return self._lockImpl().setDefaultCertificate(certificateName)
+        return self._lock().setDefaultCertificate(certificateName)
 
-    def _lockImpl(self):
+    def _lock(self):
         """
         Check the validity of the _impl instance.
 
