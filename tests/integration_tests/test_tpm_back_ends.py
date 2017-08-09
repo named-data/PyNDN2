@@ -20,6 +20,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import unittest as ut
+import os
 from pyndn.util import Blob, SignedBlob
 from pyndn.name import Name
 from pyndn.encrypt.algo.encrypt_params import EncryptParams, EncryptAlgorithmType
@@ -30,15 +31,24 @@ from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.pib.pib_key import PibKey
 from pyndn.security.tpm.tpm import Tpm
 from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
+from pyndn.security.tpm.tpm_back_end_file import TpmBackEndFile
 
 class TestTpmBackEnds(ut.TestCase):
     def setUp(self):
         self.backEndMemory = TpmBackEndMemory()
-        #debug self.backEndFile
 
-        self.backEndList = [None]
+        locationPath = os.path.abspath("policy_config/ndnsec-key-file")
+        if os.path.exists(locationPath):
+            # Delete files from a previous test.
+            for fileName in os.listdir(locationPath):
+                filePath = os.path.join(locationPath, fileName)
+                if os.path.isfile(filePath):
+                    os.remove(filePath)
+        self.backEndFile = TpmBackEndFile(locationPath)
+
+        self.backEndList = [None, None]
         self.backEndList[0] = self.backEndMemory
-        #debug self.backEndList[1] = self.backEndFile
+        self.backEndList[1] = self.backEndFile
 
     def test_key_management(self):
         for tpm in self.backEndList:
