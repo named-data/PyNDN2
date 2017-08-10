@@ -116,3 +116,6 @@ class TestPibIdentityContainer(ut.TestCase):
         self.assertEquals(0, container2.size())
         self.assertEquals(0, len(container2._identities))
         self.assertTrue(not (fixture.id2 in container2._identities))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

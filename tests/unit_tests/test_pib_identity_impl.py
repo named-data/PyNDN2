@@ -268,3 +268,6 @@ class TestPibIdentityImpl(ut.TestCase):
             pass
         else:
             self.fail("Did not throw the expected exception")
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)
