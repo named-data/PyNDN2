@@ -19,9 +19,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+import os
 import unittest as ut
 from pyndn.name import Name
 from pyndn.security.pib.pib_memory import PibMemory
+from pyndn.security.pib.pib_sqlite3 import PibSqlite3
 from pyndn.security.pib.pib import Pib
 from .pib_data_fixture import PibDataFixture
 
@@ -32,17 +34,38 @@ class PibMemoryFixture(PibDataFixture):
         self._myPib = PibMemory()
         self.pib = self._myPib
 
+class PibSqlite3Fixture(PibDataFixture):
+    def __init__(self, databaseDirectoryPath, databaseFilename):
+        super(PibSqlite3Fixture, self).__init__()
+
+        self._myPib = PibSqlite3(databaseDirectoryPath, databaseFilename)
+        self.pib = self._myPib
+
 class TestPibImpl(ut.TestCase):
     def setUp(self):
         self.pibMemoryFixture = PibMemoryFixture()
-        #debug self.pibSqlite3Fixture = PibSqlite3Fixture()
 
-        self.pibImpls = [None]
+        databaseDirectoryPath = os.path.abspath("policy_config")
+        databaseFilename = "test-pib.db"
+        self.databaseFilePath =  os.path.join(
+          databaseDirectoryPath, databaseFilename)
+        try:
+            os.remove(self.databaseFilePath)
+        except OSError:
+            # no such file
+            pass
+        self.pibSqlite3Fixture = PibSqlite3Fixture(
+          databaseDirectoryPath, databaseFilename)
+
+        self.pibImpls = [None, None]
         self.pibImpls[0] = self.pibMemoryFixture
-        #debug self.pibImpls[1] = self.pibSqlite3Fixture
+        self.pibImpls[1] = self.pibSqlite3Fixture
 
     def tearDown(self):
-        pass #debug databaseFilePath.delete()
+        try:
+            os.remove(self.databaseFilePath)
+        except OSError:
+            pass
 
     def test_certificate_decoding(self):
         # Use pibMemoryFixture to test.
