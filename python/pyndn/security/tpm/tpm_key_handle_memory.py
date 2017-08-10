@@ -19,7 +19,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the TpmKeyHandleMemory which extends TpmKeyHandle to
+This module defines the TpmKeyHandleMemory class which extends TpmKeyHandle to
 implement a TPM key handle that keeps the private key in memory.
 """
 

@@ -95,7 +95,7 @@ class TpmBackEndMemory(TpmBackEnd):
         doesn't exist, do nothing.
 
         :param Name keyName: The name of the key to delete.
-        :raises TpmBackEnd.Error: Ff the deletion fails.
+        :raises TpmBackEnd.Error: If the deletion fails.
         """
         try:
             del self._keys[keyName]
