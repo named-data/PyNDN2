@@ -203,11 +203,10 @@ class TpmBackEnd(object):
         return not self.isTpmLocked()
 
     @staticmethod
-    def setKeyName(keyHandle, identityName, params):
+    def constructKeyName(identityName, params):
         """
-        Set the key name in keyHandle according to identityName and params.
+        Construct the key name according to identityName and params.
 
-        :param TpmKeyHandle keyHandle:
         :param Name identityName:
         :param KeyParams params:
         """
@@ -225,7 +224,18 @@ class TpmBackEnd(object):
             raise TpmBackEnd.Error(
               "setKeyName: unrecognized params.getKeyIdType()")
 
-        keyHandle.setKeyName(PibKey.constructKeyName(identityName, keyId))
+        return PibKey.constructKeyName(identityName, keyId)
+
+    @staticmethod
+    def setKeyName(keyHandle, identityName, params):
+        """
+        Set the key name in keyHandle according to identityName and params.
+
+        :param TpmKeyHandle keyHandle:
+        :param Name identityName:
+        :param KeyParams params:
+        """
+        keyHandle.setKeyName(TpmBackEnd.constructKeyName(identityName, params))
 
     def _doHasKey(self, keyName):
         """
@@ -272,7 +282,7 @@ class TpmBackEnd(object):
         Your subclass must implement it.
 
         :param Name keyName: The name of the key to delete.
-        :raises TpmBackEnd.Error: Ff the deletion fails.
+        :raises TpmBackEnd.Error: If the deletion fails.
         """
         raise RuntimeError("TpmBackEnd._doDeleteKey is not implemented")
 
