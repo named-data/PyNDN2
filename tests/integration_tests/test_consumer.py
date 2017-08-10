@@ -383,3 +383,6 @@ class TestConsumer(ut.TestCase):
         self.assertEqual(1, cKeyCount[0], "cKeyCount")
         self.assertEqual(1, dKeyCount[0], "dKeyCount")
         self.assertEqual(1, finalCount[0], "finalCount")
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

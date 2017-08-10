@@ -303,7 +303,5 @@ class TestRegexMatching(ut.TestCase):
         # signed interests
         pass
 
-
-
 if __name__ == '__main__':
     ut.main(verbosity=2)

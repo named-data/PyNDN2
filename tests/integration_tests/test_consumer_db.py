@@ -100,3 +100,6 @@ class TestConsumerDb(ut.TestCase):
         resultBlob = database.getKey(keyName)
 
         self.assertEqual(0, resultBlob.size())
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

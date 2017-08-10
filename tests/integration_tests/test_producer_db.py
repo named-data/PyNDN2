@@ -91,3 +91,6 @@ class TestProducerDb(ut.TestCase):
             database.deleteContentKey(point4)
         except Exception as ex:
             self.fail("Unexpected error deleting a non-existing content key: " + repr(ex))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)
