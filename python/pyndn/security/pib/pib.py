@@ -39,6 +39,23 @@ returned by the KeyChain getPib() method.
 """
 
 class Pib(object):
+    """
+    Create a Pib instance. This constructor should only be called by KeyChain.
+
+    :param str scheme: The scheme for the PIB.
+    :param str location: The location for the PIB.
+    :param PibImpl pibImpl: The PIB backend implementation.
+    """
+    def __init__(self, scheme, location, pibImpl):
+        self._defaultIdentity = None
+        self._scheme = scheme
+        self._location = location
+        self._identities = PibIdentityContainer(pibImpl)
+        self._pibImpl = pibImpl
+
+        if pibImpl == None:
+            raise ValueError("The pibImpl is null")
+
     class Error(Exception):
         """
         Create a Pib.Error which represents a semantic error in PIB processing.
@@ -47,3 +64,140 @@ class Pib(object):
         """
         def __init__(self, message):
             super(Pib.Error, self).__init__(message)
+
+    def getScheme(self):
+        """
+        Get the scheme of the PIB locator.
+
+        :return: The scheme string.
+        :rtype: str
+        """
+        return self._scheme
+
+    def getPibLocator(self):
+        """
+        Get the PIB locator.
+
+        :return: The PIB locator.
+        :type: str
+        """
+        return self._scheme + ":" + self._location
+
+    def setTpmLocator(self, tpmLocator):
+        """
+        Set the corresponding TPM information to tpmLocator. If the tpmLocator
+        is different from the existing one, the PIB will be reset. Otherwise,
+        nothing will be changed.
+
+        :param str tpmLocator: The TPM locator.
+        """
+        if tpmLocator == self._pibImpl.getTpmLocator():
+            return
+
+        self._reset
+        self._pibImpl.setTpmLocator(tpmLocator)
+
+    def getTpmLocator(self):
+        """
+        Get the TPM Locator.
+
+        :return: The TPM Locator.
+        :rtype: str
+        :raises Pib.Error: If the TPM locator is empty.
+        """
+        tpmLocator = self._pibImpl.getTpmLocator()
+        if tpmLocator == "":
+            raise Pib.Error("TPM info does not exist")
+
+        return tpmLocator
+
+    def getIdentity(self, identityName):
+        """
+        Get the identity with name identityName.
+
+        :param Name identityName: The name of the identity.
+        :return: The PibIdentity object.
+        :rtype: PibIdentity
+        :raises Pib.Error: If the identity does not exist.
+        """
+        # BOOST_ASSERT(identities_.isConsistent()).
+
+        return self._identities.get(identityName)
+
+    def getDefaultIdentity(self):
+        """
+        Get the default identity.
+
+        :return: The PibIdentity object.
+        :rtype: PibIdentity
+        :raises Pib.Error: If there is no default identity.
+        """
+        # BOOST_ASSERT(identities_.isConsistent())
+
+        if self._defaultIdentity == None:
+            self._defaultIdentity = self._identities.get(
+              self._pibImpl.getDefaultIdentity())
+
+        # BOOST_ASSERT(pibImpl_->getDefaultIdentity() == defaultIdentity_->getName())
+
+        return self._defaultIdentity
+
+    def _reset(self):
+        """
+        Reset the content in the PIB, including a reset of the TPM locator. This
+        should only be called by KeyChain.
+        """
+        self._pibImpl.clearIdentities()
+        self._pibImpl.setTpmLocator("")
+        self._defaultIdentity = None
+        self._identities.reset()
+
+    def _addIdentity(self, identityName):
+        """
+        Add an identity with name identityName. Create the identity if it does
+        not exist. This should only be called by KeyChain.
+
+        :param Name identityName: The name of the identity, which is copied.
+        :return: The PibIdentity object.
+        :rtype: PibIdentity
+        """
+        # BOOST_ASSERT(identities_.isConsistent())
+
+        return self._identities.add(identityName)
+
+    def _removeIdentity(self, identityName):
+        """
+        Remove the identity with name identityName, and its related keys and
+        certificates. If the default identity is being removed, no default
+        identity will be selected.  If the identity does not exist, do nothing.
+        This should only be called by KeyChain.
+
+        :param Name identityName: The name of the identity.
+        """
+        # BOOST_ASSERT(identities_.isConsistent())
+
+        if (self._defaultIdentity != None and
+            self._defaultIdentity.getName().equals(identityName)):
+            self._defaultIdentity = None
+
+        self._identities.remove(identityName)
+
+    def _setDefaultIdentity(self, identityName):
+        """
+        Set the identity with name identityName as the default identity. Create
+        the identity if it does not exist. This should only be called by
+        KeyChain.
+
+        :param Name identityName: The name of the identity.
+        :return: The PibIdentity object of the default identity.
+        :rtype: PibIdentity
+        """
+        # BOOST_ASSERT(identities_.isConsistent())
+
+        self._defaultIdentity = self._identities.add(identityName)
+
+        self._pibImpl.setDefaultIdentity(identityName)
+        return self._defaultIdentity
+
+# Put this last to avoid an import loop.
+from pyndn.security.pib.pib_identity_container import PibIdentityContainer
