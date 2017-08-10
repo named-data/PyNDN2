@@ -75,6 +75,14 @@ pyndn.security.pib.pib_memory module
     :undoc-members:
     :show-inheritance:
 
+pyndn.security.pib.pib_sqlite3 module
+-------------------------------------
+
+.. automodule:: pyndn.security.pib.pib_sqlite3
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
