@@ -149,3 +149,6 @@ class TestInterval(ut.TestCase):
         self.assertTrue(not tempInterval.isEmpty())
         self.assertEqual(toIsoString(tempInterval.getStartTime()), "20150825T030000")
         self.assertEqual(toIsoString(tempInterval.getEndTime()), "20150825T050000")
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

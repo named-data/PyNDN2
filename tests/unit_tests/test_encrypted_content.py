@@ -274,3 +274,6 @@ class TestEncryptedContent(ut.TestCase):
         encoded = content.wireEncode()
         contentBlob = Blob(encrypted, False)
         self.assertTrue(contentBlob.equals(encoded))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

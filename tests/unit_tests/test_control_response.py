@@ -52,3 +52,6 @@ class TestControlResponse(ut.TestCase):
         self.assertEqual(response.getStatusCode(), 404);
         self.assertEqual(response.getStatusText(), "Nothing not found");
         self.assertEqual(response.getBodyAsControlParameters().getFaceId(), 10);
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

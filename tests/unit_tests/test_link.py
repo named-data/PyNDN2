@@ -1106,3 +1106,6 @@ class TestLink(ut.TestCase):
             pass
         if not gotError:
           self.fail("Expected error decoding an interest with selected delegation not a non-negative integer")
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)
