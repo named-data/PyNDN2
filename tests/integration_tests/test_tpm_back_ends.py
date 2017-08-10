@@ -32,6 +32,7 @@ from pyndn.security.pib.pib_key import PibKey
 from pyndn.security.tpm.tpm import Tpm
 from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
 from pyndn.security.tpm.tpm_back_end_file import TpmBackEndFile
+from pyndn.security.tpm.tpm_back_end_osx import TpmBackEndOsx
 
 class TestTpmBackEnds(ut.TestCase):
     def setUp(self):
@@ -46,9 +47,12 @@ class TestTpmBackEnds(ut.TestCase):
                     os.remove(filePath)
         self.backEndFile = TpmBackEndFile(locationPath)
 
-        self.backEndList = [None, None]
+        self.backEndOsx = TpmBackEndOsx()
+
+        self.backEndList = [None, None, None]
         self.backEndList[0] = self.backEndMemory
         self.backEndList[1] = self.backEndFile
+        self.backEndList[2] = self.backEndOsx
 
     def test_key_management(self):
         for tpm in self.backEndList:
