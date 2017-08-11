@@ -114,3 +114,6 @@ class TestAesAlgorithm(ut.TestCase):
         receivedBlob = AesAlgorithm.decrypt(
           decryptKey.getKeyBits(), cipherBlob, encryptParams)
         self.assertTrue(receivedBlob.equals(plainBlob))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

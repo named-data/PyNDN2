@@ -361,3 +361,6 @@ class TestProducer(ut.TestCase):
             self.assertEqual(4, timeoutCount[0])
             self.assertEqual(0, len(result))
         producer.createContentKey(testTime, onEncryptedKeys)
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

@@ -56,3 +56,6 @@ class TestControlParametersEncodeDecode(ut.TestCase):
         self.assertEqual(parameters.getStrategy().toUri(),
                   decodedParameters.getStrategy().toUri())
         self.assertEqual(parameters.getUri(), decodedParameters.getUri())
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

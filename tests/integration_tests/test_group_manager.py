@@ -423,3 +423,6 @@ class TestGroupManager(ut.TestCase):
         self.assertEqual(
           "/Alice/READ/data_type/D-KEY/20150825T090000/20150825T100000/FOR/ndn/memberA/ksk-123",
           data2.getName().toUri())
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

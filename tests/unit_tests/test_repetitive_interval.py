@@ -195,3 +195,6 @@ class TestRepetitiveInterval(ut.TestCase):
                               RepetitiveInterval(fromIsoString("20150825T000000"),
                                                  fromIsoString("20150828T000000"),
                                              5, 10, 2, RepetitiveInterval.RepeatUnit.MONTH)))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

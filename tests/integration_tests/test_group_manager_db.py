@@ -243,3 +243,6 @@ class TestGroupManagerDb(ut.TestCase):
             self.database.deleteSchedule("not-existing-time")
         except Exception as ex:
             self.fail("Unexpected error deleting a non-existing schedule: " + repr(ex))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

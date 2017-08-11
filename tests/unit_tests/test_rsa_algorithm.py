@@ -127,3 +127,6 @@ class TestRsaAlgorithm(ut.TestCase):
           decryptKey.getKeyBits(), cipherBlob, encryptParams)
 
         self.assertTrue(plainBlob.equals(decryptedBlob))
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

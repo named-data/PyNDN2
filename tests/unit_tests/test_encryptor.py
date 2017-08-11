@@ -257,3 +257,6 @@ class TestEncryptor(ut.TestCase):
             largePayload = AesAlgorithm.decrypt(nonce, bufferPayload, encryptParams)
 
             self.assertTrue(largeContent.equals(largePayload), input.testName)
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

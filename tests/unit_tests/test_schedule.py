@@ -285,3 +285,6 @@ class TestSchedule(ut.TestCase):
         self.assertEqual(result.isPositive, True)
         self.assertEqual(toIsoString(result.interval.getStartTime()), "20150826T060000")
         self.assertEqual(toIsoString(result.interval.getEndTime()), "20150826T080000")
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)
