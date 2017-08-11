@@ -38,7 +38,7 @@ from pyndn.key_locator import KeyLocatorType
 from pyndn.security.security_exception import SecurityException
 
 from pyndn.util.boost_info_parser import BoostInfoParser
-from pyndn.util.ndn_regex import NdnRegexMatcher
+from pyndn.util.regex.ndn_regex_top_matcher import NdnRegexTopMatcher
 
 """
 This module manages trust according to a configuration file in the
@@ -262,9 +262,10 @@ class ConfigPolicyManager(PolicyManager):
             # this just means the data/interest name has the signing identity as a prefix
             # that means everything before 'ksk-?' in the key name
             identityRegex = '^([^<KEY>]*)<KEY>(<>*)<ksk-.+><ID-CERT>'
-            identityMatch = NdnRegexMatcher.match(identityRegex, signatureName)
-            if identityMatch is not None:
-                identityPrefix = Name(identityMatch.group(1)).append(Name(identityMatch.group(2)))
+            identityMatch = NdnRegexTopMatcher(identityRegex)
+            if identityMatch.match(signatureName):
+                identityPrefix = identityMatch.expand("\\1").append(
+                  identityMatch.expand("\\2"))
                 if self._matchesRelation(objectName, identityPrefix, 'is-prefix-of'):
                     return True
                 else:
@@ -325,8 +326,8 @@ class ConfigPolicyManager(PolicyManager):
                 if (keyRegex != None and keyExpansion != None and
                       nameRegex != None and nameExpansion != None and
                       relationType != None):
-                    keyMatch = NdnRegexMatcher.match(keyRegex, signatureName)
-                    if keyMatch == None:
+                    keyMatch = NdnRegexTopMatcher(keyRegex)
+                    if not keyMatch.match(signatureName):
                         failureReason[0] = (
                           "The custom hyper-relation signatureName \"" +
                           signatureName.toUri() +
@@ -334,23 +335,25 @@ class ConfigPolicyManager(PolicyManager):
                         return False
                     keyMatchPrefix = keyMatch.expand(keyExpansion)
 
-                    nameMatch = NdnRegexMatcher.match(nameRegex, objectName)
-                    if nameMatch == None:
+                    nameMatch = NdnRegexTopMatcher(nameRegex)
+                    if not nameMatch.match(objectName):
                         failureReason[0] = (
                           "The custom hyper-relation objectName \"" +
                           objectName.toUri() +
                           "\" does not match the nameRegex \"" + nameRegex + "\"")
                         return False
-                    nameMatchStr = nameMatch.expand(nameExpansion)
+                    nameMatchExpansion = nameMatch.expand(nameExpansion)
 
                     if self._matchesRelation(
-                          Name(nameMatchStr), Name(keyMatchPrefix), relationType):
+                          nameMatchExpansion, keyMatchPrefix, relationType):
                         return True
                     else:
                         failureReason[0] = (
                           "The custom hyper-relation nameMatch \"" +
-                          nameMatchStr + "\" does not match the keyMatchPrefix \"" +
-                          keyMatchPrefix + "\" using relation " + relationType)
+                          nameMatchExpansion.toUri() +
+                          "\" does not match the keyMatchPrefix \"" +
+                          keyMatchPrefix.toUri() + "\" using relation " +
+                          relationType)
                         return False
     
         failureReason[0] = "Unrecognized checkerType: " + checkerType
@@ -414,7 +417,8 @@ class ConfigPolicyManager(PolicyManager):
                             matchName = Name(matchUri)
                             passed = self._matchesRelation(objName, matchName, matchRelation)
                         else:
-                            passed =  NdnRegexMatcher.match(regex, objName) is not None
+                            passed =  NdnRegexTopMatcher(regex).match(objName)
+
                         if not passed:
                             break
                     if passed:

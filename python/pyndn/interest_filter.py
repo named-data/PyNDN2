@@ -23,7 +23,7 @@ optional regex match expression for use in Face.setInterestFilter.
 """
 
 from pyndn.name import Name
-from pyndn.util.ndn_regex import NdnRegexMatcher
+from pyndn.util.regex.ndn_regex_top_matcher import NdnRegexTopMatcher
 
 class InterestFilter(object):
     """
@@ -86,8 +86,8 @@ class InterestFilter(object):
             if not self._prefix.match(name):
                 return False
 
-            return None != NdnRegexMatcher.match(
-              self._regexFilterPattern, name.getSubName(len(self._prefix)))
+            return NdnRegexTopMatcher(self._regexFilterPattern).match(
+              name.getSubName(len(self._prefix)))
         else:
             # Just perform a prefix match.
             return self._prefix.match(name)
@@ -124,20 +124,16 @@ class InterestFilter(object):
     def makePattern(regexFilter):
         """
         If regexFilter doesn't already have them, add ^ to the beginning and $
-        to the end since these are required by NdnRegexMatcher.match.
+        to the end since these are required by NdnRegexTopMatcher.
 
         :param str regexFilter: The regex filter.
         :return: The regex pattern with ^ and $.
         :rtype str:
         """
-        if len(regexFilter) == 0:
-            # We don't expect this.
-            return "^$"
-
         pattern = regexFilter
-        if pattern[0] != '^':
+        if not (len(pattern) >= 1 and pattern[0] == '^'):
             pattern = "^" + pattern
-        if pattern[-1] != '$':
+        if not (len(pattern) >= 1 and pattern[-1] == '$'):
             pattern = pattern + "$"
 
         return pattern
