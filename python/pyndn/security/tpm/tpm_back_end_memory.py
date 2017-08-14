@@ -23,6 +23,7 @@ This module defines the TpmBackEndMemory class which extends TpmBackEnd to
 implement a TPM back-end using in-memory storage.
 """
 
+from pyndn.name import Name
 from pyndn.security.tpm.tpm_private_key import TpmPrivateKey
 from pyndn.security.tpm.tpm_key_handle_memory import TpmKeyHandleMemory
 from pyndn.security.tpm.tpm_back_end import TpmBackEnd
