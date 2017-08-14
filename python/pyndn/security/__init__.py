@@ -18,9 +18,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn.security import key_chain, key_id_type, key_params
-from pyndn.security import security_exception, security_types
+from pyndn.security import security_exception, security_types, signing_info
 __all__ = ['key_chain', 'key_id_type', 'key_params', 'security_exception',
-           'security_types']
+           'security_types', 'signing_info']
 
 import sys as _sys
 
@@ -30,6 +30,7 @@ try:
     from pyndn.security.key_params import *
     from pyndn.security.security_exception import *
     from pyndn.security.security_types import *
+    from pyndn.security.signing_info import *
 except ImportError:
     del _sys.modules[__name__]
     raise
