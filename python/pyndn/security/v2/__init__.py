@@ -17,13 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.security.v2 import certificate_v2
-__all__ = ['certificate_v2']
+from pyndn.security.v2 import certificate_v2, certificate_cache_v2
+__all__ = ['certificate_v2', 'certificate_cache_v2']
 
 import sys as _sys
 
 try:
     from pyndn.security.v2.certificate_v2 import *
+    from pyndn.security.v2.certificate_cache_v2 import *
 except ImportError:
     del _sys.modules[__name__]
     raise
