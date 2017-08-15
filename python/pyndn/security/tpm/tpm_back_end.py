@@ -198,7 +198,7 @@ class TpmBackEnd(object):
         :param password: The password to unlock TPM.
         :type password: an array which implements the buffer protocol
         :return: True if the TPM was unlocked.
-        :rtype:
+        :rtype: bool
         """
         return not self.isTpmLocked()
 
