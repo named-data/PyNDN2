@@ -62,8 +62,8 @@ class TpmBackEndFile(TpmBackEnd):
 
     class Error(TpmBackEnd.Error):
         """
-        Create a TpmBackEndFile.Error extends TpmBackEnd.Error and represents a
-        non-semantic error in backend TPM file processing.
+        Create a TpmBackEndFile.Error which extends TpmBackEnd.Error and
+        represents a non-semantic error in backend TPM file processing.
 
         :param str message: The error message.
         """

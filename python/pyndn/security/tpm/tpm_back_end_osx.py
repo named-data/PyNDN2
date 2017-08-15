@@ -40,8 +40,9 @@ class TpmBackEndOsx(TpmBackEnd):
 
     class Error(TpmBackEnd.Error):
         """
-        Create a TpmBackEndOsx.Error extends TpmBackEnd.Error and represents a
-        non-semantic error in the backend TPM for the macOS Keychain services.
+        Create a TpmBackEndOsx.Error which extends TpmBackEnd.Error and
+        represents a non-semantic error in the backend TPM for the macOS
+        Keychain services.
 
         :param str message: The error message.
         """
