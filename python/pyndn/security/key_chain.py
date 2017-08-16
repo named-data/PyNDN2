@@ -34,33 +34,303 @@ from cryptography.hazmat.primitives import hashes, hmac
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
+from pyndn.meta_info import ContentType
+from pyndn.digest_sha256_signature import DigestSha256Signature
+from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
+from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
+from pyndn.key_locator import KeyLocator, KeyLocatorType
+from pyndn.validity_period import ValidityPeriod
 from pyndn.util.blob import Blob
+from pyndn.util.common import Common
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.key_params import RsaKeyParams
+from pyndn.security.security_types import KeyType
+from pyndn.security.signing_info import SigningInfo
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
+from pyndn.security.pib.pib_impl import PibImpl
+from pyndn.security.pib.pib import Pib
+from pyndn.security.tpm.tpm import Tpm
+from pyndn.security.v2.certificate_v2 import CertificateV2
 from pyndn.encoding.wire_format import WireFormat
 
 class KeyChain(object):
     """
-    Create a new KeyChain to use the optional identityManager and policyManager.
+    There are two forms to create KeyChain:
+    KeyChain(identityManager = None, policyManager = None) - Create a security
+    v1 KeyChain to use the optional identityManager and policyManager.
+    KeyChain(pibImpl, tpmBackEnd, policyManager) - Create a KeyChain using this
+    temporary constructor for the transition to security v2, which creates a
+    security v2 KeyChain but still uses the v1 PolicyManager.
 
     :param IdentityManager identityManager: (optional) The identity manager as a
       subclass of IdentityManager. If omitted, use the default IdentityManager
       constructor.
     :param PolicyManager policyManager: (optional) The policy manager as a
       subclass of PolicyManager. If omitted, use NoVerifyPolicyManager.
+    :param PibImpl pibImpl: The PibImpl when using the constructor form
+      KeyChain(pibImpl, tpmBackEnd, policyManager).
+    :param TpmBackEnd tpmBackEnd: The TpmBackEnd when using the constructor form
+      KeyChain(pibImpl, tpmBackEnd, policyManager).
     """
-    def __init__(self, identityManager = None, policyManager = None):
-        if identityManager == None:
-            identityManager = IdentityManager()
-        if policyManager == None:
-            policyManager = NoVerifyPolicyManager()
+    def __init__(self, arg1 = None, arg2 = None, arg3 = None):
+        self._identityManager_ = None  # for security v1
+        self._policyManager = None     # for security v1
+        self._face = None              # for security v1
 
-        self._identityManager = identityManager
-        self._policyManager = policyManager
-        self._face = None
+        self._pib = None
+        self._tpm = None
+
+        if isinstance(arg1, PibImpl):
+            pibImpl = arg1
+            tpmBackEnd = arg2
+            policyManager = arg3
+            
+            # TODO: KeyChain(pibLocator, tpmLocator, allowReset)
+            self._isSecurityV1 = False
+            self._policyManager = policyManager
+
+            self._pib = Pib("", "", pibImpl)
+            self._tpm = Tpm("", "", tpmBackEnd)
+        else:
+            identityManager = arg1
+            policyManager = arg2
+
+            self._isSecurityV1 = True
+            if identityManager == None:
+                identityManager = IdentityManager()
+            if policyManager == None:
+                policyManager = NoVerifyPolicyManager()
+
+            self._identityManager = identityManager
+            self._policyManager = policyManager
+
+    class Error(Exception):
+        """
+        Create a KeyChain.Error which represents an error in KeyChain processing.
+
+        :param str message: The error message.
+        """
+        def __init__(self, message):
+            super(KeyChain.Error, self).__init__(message)
+
+    def getPib(self):
+        """
+        :rtype: Pib
+        """
+        return self._pib
+
+    def getTpm(self):
+        """
+        :rtype: Tpm
+        """
+        return self._tpm
+
+    # Identity management
+
+    # TODO: createIdentity
+
+    def deleteIdentity(self, identity):
+        """
+        Delete the identity. After this operation, the identity is invalid.
+
+        :param PibIdentity identity: The identity to delete.
+        """
+        identityName = identity.getName()
+
+        keyNames = identity._getKeys().getKeyNames()
+        for keyName in keyNames:
+            self._tpm._deleteKey(keyName)
+
+        self._pib._removeIdentity(identityName)
+        # TODO: Mark identity as invalid.
+
+    def setDefaultIdentity(self, identity):
+        """
+        Set the identity as the default identity.
+
+        :param PibIdentity identity: The identity to make the default.
+        """
+        self._pib._setDefaultIdentity(identity.getName())
+
+    # Key management
+
+    # Certificate management
+
+    # Signing
+
+    def sign(self, target, paramsOrCertificateName = None, wireFormat = None):
+        """
+        Sign the target. If it is a Data or Interest object, set its signature.
+        If it is an array, return a signature object.
+
+        :param target: If this is a Data object, wire encode for signing,
+          update its signature and key locator field and wireEncoding. If this
+          is an Interest object, wire encode for signing, append a SignatureInfo
+          to the Interest name, sign the name components and append a final name
+          component with the signature bits. If it is an array, sign it and
+          return a Signature object.
+        :type target: Data, Interest or an array which implements the
+          buffer protocol
+        :param paramsOrCertificateName: (optional) If a SigningInfo, it is the
+          signing parameters. If a Name, it is the certificate name of the key
+          to use for signing. If omitted and this is a security v1 KeyChain then
+          use the IdentityManager to get the default identity. Otherwise, use
+          the PIB to get the default key of the default identity.
+        :type paramsOrCertificateName: SigningInfo or Name
+        :param wireFormat: (optional) A WireFormat object used to encode the
+           input. If omitted, use WireFormat.getDefaultWireFormat().
+        :type wireFormat: A subclass of WireFormat
+        :return: The Signature object (only if the target is an array).
+        :rtype: An object of a subclass of Signature
+        """
+        if isinstance(paramsOrCertificateName, WireFormat):
+            # Shift the arguments.
+            wireFormat = paramsOrCertificateName
+            paramsOrCertificateName = None
+
+        if wireFormat == None:
+            wireFormat = WireFormat.getDefaultWireFormat()
+
+        if paramsOrCertificateName == None:
+            # Convert sign(target) into sign(target, paramsOrCertificateName)
+            if self._isSecurityV1:
+                paramsOrCertificateName = self._prepareDefaultCertificateName()
+            else:
+                paramsOrCertificateName = self._defaultSigningInfo
+
+        if isinstance(paramsOrCertificateName, Name):
+            certificateName = paramsOrCertificateName
+
+            if not self._isSecurityV1:
+                # Make and use a SigningInfo for backwards compatibility.
+                if not (isinstance(target, Interest) or
+                        isinstance(target, Data)):
+                    raise SecurityException(
+                      "sign(buffer, certificateName) is not supported for security v2. Use sign with SigningInfo.")
+
+                signingInfo = SigningInfo()
+                signingInfo.setSigningCertificateName(certificateName)
+                try:
+                    self.sign(target, signingInfo, wireFormat)
+                except Exception as ex:
+                    raise SecurityException("Error in sign: " + str(ex))
+
+                return
+
+            if isinstance(target, Interest):
+                self._identityManager.signInterestByCertificate(
+                  target, certificateName, wireFormat)
+            elif isinstance(target, Data):
+                self._identityManager.signByCertificate(
+                  target, certificateName, wireFormat)
+            else:
+                return self._identityManager.signByCertificate(
+                  target, certificateName)
+
+            return
+
+        params = paramsOrCertificateName
+
+        if isinstance(target, Data):
+            data = target
+
+            keyName = [None]
+            signatureInfo = self._prepareSignatureInfo(params, keyName)
+
+            data.setSignature(signatureInfo)
+
+            # Encode once to get the signed portion.
+            encoding = data.wireEncode(wireFormat)
+
+            signatureBytes = self._signBuffer(
+              encoding.toSignedBytes(), keyName[0], params.getDigestAlgorithm())
+            data.getSignature().setSignature(signatureBytes)
+
+            # Encode again to include the signature.
+            data.wireEncode(wireFormat)
+        elif isinstance(target, Interest):
+            interest = target
+
+            keyName = [None]
+            signatureInfo = self._prepareSignatureInfo(params, keyName)
+
+            # Append the encoded SignatureInfo.
+            interest.getName().append(wireFormat.encodeSignatureInfo(signatureInfo))
+
+            # Append an empty signature so that the "signedPortion" is correct.
+            interest.getName().append(Name.Component())
+            # Encode once to get the signed portion, and sign.
+            encoding = interest.wireEncode(wireFormat)
+            signatureBytes = self._signBuffer(
+              encoding.toSignedBytes(), keyName[0], params.getDigestAlgorithm())
+            signatureInfo.setSignature(signatureBytes)
+
+            # Remove the empty signature and append the real one.
+            interest.setName(interest.getName().getPrefix(-1).append
+              (wireFormat.encodeSignatureValue(signatureInfo)))
+        else:
+            buffer = target
+
+            keyName = [None]
+            signatureInfo = _prepareSignatureInfo(params, keyName)
+
+            return self._signBuffer(
+              buffer, keyName[0], params.getDigestAlgorithm())
+
+    def selfSign(self, key):
+        """
+        Generate a self-signed certificate for the public key and add it to the
+        PIB. This creates the certificate name from the key name by appending
+        "self" and a version based on the current time. If no default
+        certificate for the key has been set, then set the certificate as the
+        default for the key.
+
+        :param PibKey key: The PibKey with the key name and public key.
+        :return: The new certificate.
+        :rtype: CertificateV2
+        """
+        certificate = CertificateV2()
+
+        # Set the name.
+        now = Common.getNowMilliseconds()
+        certificateName = Name(key.getName())
+        certificateName.append("self").appendVersion(int(now))
+        certificate.setName(certificateName)
+
+        # Set the MetaInfo.
+        certificate.getMetaInfo().setType(ContentType.KEY)
+        # Set a one-hour freshness period.
+        certificate.getMetaInfo().setFreshnessPeriod(3600 * 1000.0)
+
+        # Set the content.
+        certificate.setContent(key.getPublicKey())
+
+        # Set the signature-info.
+        signingInfo = SigningInfo(key)
+        dummyKeyName = [None]
+        certificate.setSignature(
+          self._prepareSignatureInfo(signingInfo, dummyKeyName))
+        # Set a 20-year validity period.
+        ValidityPeriod.getFromSignature(certificate.getSignature()).setPeriod(
+          now, now + 20 * 365 * 24 * 3600 * 1000.0)
+
+        self.sign(certificate, signingInfo)
+
+        try:
+            key._addCertificate(certificate)
+        except Exception as ex:
+            # We don't expect this since we just created the certificate.
+            raise KeyChain.Error("Error encoding certificate: " + str(ex))
+
+        return certificate
+
+    # Import and export
+
+    # PIB & TPM backend registry
+
+    # Security v1 methods
 
     def createIdentityAndCertificate(self, identityName, params = None):
         """
@@ -103,8 +373,17 @@ class KeyChain(object):
         Delete the identity from the public and private key storage. If the
         identity to be deleted is current default system default, the method
         will not delete the identity and will return immediately.
+
         :param Name identityName: The name of the identity to delete.
         """
+        if not self._isSecurityV1:
+            try:
+               self.deleteIdentity(self._pib.getIdentity(identityName))
+            except:
+                pass
+
+            return
+
         self._identityManager.deleteIdentity(identityName)
 
     def getDefaultIdentity(self):
@@ -115,6 +394,12 @@ class KeyChain(object):
         :rtype: Name
         :raises SecurityException: if the default identity is not set.
         """
+        if not self._isSecurityV1:
+            try:
+               return self._pib.getDefaultIdentity().getName()
+            except Exception as ex:
+                raise SecurityException("Error in getDefaultIdentity: " + str(ex))
+
         return self._identityManager.getDefaultIdentity()
 
     def getDefaultCertificateName(self):
@@ -127,6 +412,13 @@ class KeyChain(object):
           default key name for the identity is not set or the default
           certificate name for the key name is not set.
         """
+        if not self._isSecurityV1:
+            try:
+                return (self._pib.getDefaultIdentity().getDefaultKey()
+                        .getDefaultCertificate().getName())
+            except Exception as ex:
+                raise SecurityException("Error in getDefaultCertificate: " + str(ex))
+
         return self._identityManager.getDefaultCertificateName()
 
     def generateRSAKeyPair(self, identityName, isKsk = False, keySize = 2048):
@@ -142,6 +434,10 @@ class KeyChain(object):
         :return: The generated key name.
         :rtype: Name
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "generateRSAKeyPair is not supported for security v2. Use createIdentityV2.")
+
         return self._identityManager.generateRSAKeyPair(
           identityName, isKsk, keySize)
 
@@ -158,6 +454,10 @@ class KeyChain(object):
         :return: The generated key name.
         :rtype: Name
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "generateEcdsaKeyPair is not supported for security v2. Use createIdentityV2.")
+
         return self._identityManager.generateEcdsaKeyPair(
           identityName, isKsk, keySize)
 
@@ -171,6 +471,10 @@ class KeyChain(object):
           that the keyName contains the same identity name. If an empty name, it
           is ignored.
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "setDefaultKeyForIdentity is not supported for security v2. Use getPib() methods.")
+
         if identityNameCheck == None:
             identityNameCheck = Name()
         return self._identityManager.setDefaultKeyForIdentity(
@@ -191,6 +495,10 @@ class KeyChain(object):
         :return: The generated key name.
         :rtype: Name
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "generateRSAKeyPairAsDefault is not supported for security v2. Use createIdentityV2.")
+
         return  self._identityManager.generateRSAKeyPairAsDefault(
           identityName, isKsk, keySize)
 
@@ -209,6 +517,10 @@ class KeyChain(object):
         :return: The generated key name.
         :rtype: Name
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "generateEcdsaKeyPairAsDefault is not supported for security v2. Use createIdentityV2.")
+
         return  self._identityManager.generateEcdsaKeyPairAsDefault(
           identityName, isKsk, keySize)
 
@@ -220,6 +532,13 @@ class KeyChain(object):
         :return: The signing request data.
         :rtype: Blob
         """
+        if not self._isSecurityV1:
+            try:
+                return self._pib.getIdentity(PibKey.extractIdentityFromKeyName(
+                         keyName)).getKey(keyName).getPublicKey()
+            except Exception as ex:
+                raise SecurityException("Error in getKey: " + str(ex))
+
         return self._identityManager.getPublicKey(keyName).getKeyDer()
 
     def installIdentityCertificate(self, certificate):
@@ -228,6 +547,10 @@ class KeyChain(object):
 
         :param IdentityCertificate certificate: The certificate to to added.
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "installIdentityCertificate is not supported for security v2. Use getPib() methods.")
+
         self._identityManager.addCertificate(certificate)
 
     def setDefaultCertificateForKey(self, certificate):
@@ -236,6 +559,10 @@ class KeyChain(object):
 
         :param IdentityCertificate certificate: The certificate.
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "setDefaultCertificateForKey is not supported for security v2. Use getPib() methods.")
+
         self._identityManager.setDefaultCertificateForKey(certificate)
 
     def getCertificate(self, certificateName):
@@ -246,12 +573,20 @@ class KeyChain(object):
         :return: The requested certificate.
         :rtype: IdentityCertificate
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "getCertificate is not supported for security v2. Use getPib() methods.")
+
         return self._identityManager.getCertificate(certificateName)
 
     def getIdentityCertificate(self, certificateName):
         """
         :deprecated: Use getCertificate.
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "getIdentityCertificate is not supported for security v2. Use getPib() methods.")
+
         return self._identityManager.getCertificate(certificateName)
 
     def revokeKey(self, keyName):
@@ -280,6 +615,10 @@ class KeyChain(object):
         :return: The identity manager.
         :rtype: IdentityManager
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "getIdentityManager is not supported for security v2")
+
         return self._identityManager
 
     #
@@ -298,51 +637,6 @@ class KeyChain(object):
     #
     # Sign/Verify
     #
-
-    def sign(self, target, certificateNameOrWireFormat = None, wireFormat = None):
-        """
-        Sign the target. If it is a Data or Interest object, set its signature.
-        If it is an array, return a signature object. There are two forms of sign:
-        sign(target, certificateName, wireFormat = None).
-        sign(target, wireFormat = None).
-
-        :param target: If this is a Data object, wire encode for signing,
-          update its signature and key locator field and wireEncoding. If this
-          is an Interest object, wire encode for signing, append a SignatureInfo
-          to the Interest name, sign the name components and append a final name
-          component with the signature bits. If it is an array, sign it and
-          return a Signature object.
-        :type target: Data, Interest or an array which implements the
-          buffer protocol
-        :param Name certificateName: (optional) The certificate name of the key
-          to use for signing. If omitted, use the default identity in the
-          identity storage.
-        :param wireFormat: (optional) A WireFormat object used to encode the
-           input. If omitted, use WireFormat.getDefaultWireFormat().
-        :type wireFormat: A subclass of WireFormat
-        :return: The Signature object (only if the target is an array).
-        :rtype: An object of a subclass of Signature
-        """
-        if isinstance(certificateNameOrWireFormat, Name):
-            certificateName = certificateNameOrWireFormat
-        else:
-            certificateName = None
-
-        if isinstance(certificateNameOrWireFormat, WireFormat):
-            wireFormat = certificateNameOrWireFormat
-
-        if certificateName == None:
-            certificateName = self._prepareDefaultCertificateName()
-
-        if isinstance(target, Interest):
-            self._identityManager.signInterestByCertificate(
-              target, certificateName, wireFormat)
-        elif isinstance(target, Data):
-            self._identityManager.signByCertificate(
-              target, certificateName, wireFormat)
-        else:
-            return self._identityManager.signByCertificate(
-              target, certificateName)
 
     def signByIdentity(self, target, identityName = None, wireFormat = None):
         """
@@ -364,6 +658,20 @@ class KeyChain(object):
         """
         if identityName == None:
             identityName = Name()
+
+        if not self._isSecurityV1:
+            if not isinstance(target, Data):
+                raise SecurityException(
+                  "signByIdentity(buffer, identityName) is not supported for security v2. Use sign with SigningInfo.");
+
+            signingInfo = SigningInfo()
+            signingInfo.setSigningIdentity(identityName)
+            try:
+                self.sign(target, signingInfo, wireFormat)
+            except Exception as ex:
+                raise SecurityException("Error in sign: " + str(ex))
+
+            return
 
         if isinstance(target, Data):
             if identityName.size() == 0:
@@ -413,6 +721,16 @@ class KeyChain(object):
            input. If omitted, use WireFormat.getDefaultWireFormat().
         :type wireFormat: A subclass of WireFormat
         """
+        if not self._isSecurityV1:
+            signingInfo = SigningInfo()
+            signingInfo.setSha256Signing()
+            try:
+                self.sign(target, signingInfo, wireFormat)
+            except Exception as ex:
+                raise SecurityException("Error in sign: " + str(ex))
+
+            return
+
         if isinstance(target, Interest):
             self._identityManager.signInterestWithSha256(target, wireFormat)
         else:
@@ -620,6 +938,116 @@ class KeyChain(object):
     # Private methods
     #
 
+    def _prepareSignatureInfo(self, params, keyName):
+        """
+        Prepare a Signature object according to signingInfo and get the signing
+        key name.
+
+        :param SigningInfo params: The signing parameters.
+        :param Array<Name> keyName: Set keyName[0] to the signing key name.
+        :return: A new Signature object with the SignatureInfo.
+        :rtype: Signature
+        :raises InvalidSigningInfoError: when the requested signing method
+          cannot be satisfied.
+        """
+        identity = None
+        key = None
+
+        if params.getSignerType() == SigningInfo.SignerType.NULL:
+            try:
+                identity = self._pib.getDefaultIdentity()
+            except Pib.Error:
+                # There is no default identity, so use sha256 for signing.
+                keyName[0] = SigningInfo.getDigestSha256Identity()
+                return DigestSha256Signature()
+        elif params.getSignerType() == SigningInfo.SignerType.ID:
+            identity = params.getPibIdentity()
+            if identity == None:
+                try:
+                    identity = self._pib.getIdentity(params.getSignerName())
+                except Pib.Error:
+                    raise InvalidSigningInfoError(
+                      "Signing identity `" + params.getSignerName().toUri() +
+                      "` does not exist")
+        elif params.getSignerType() == SigningInfo.SignerType.KEY:
+            key = params.getPibKey()
+            if key == None:
+                identityName = PibKey.extractIdentityFromKeyName(
+                  params.getSignerName())
+
+                try:
+                    identity = self._pib.getIdentity(identityName)
+                    key = identity.getKey(params.getSignerName())
+                    # We will use the PIB key instance, so reset the identity.
+                    identity = None
+                except Pib.Error:
+                    raise InvalidSigningInfoError(
+                      "Signing key `" + params.getSignerName().toUri() +
+                      "` does not exist")
+        elif params.getSignerType() == SigningInfo.SignerType.CERT:
+            identityName = CertificateV2.extractIdentityFromCertName(
+              params.getSignerName())
+
+            try:
+                identity = self._pib.getIdentity(identityName)
+                key = identity.getKey(
+                  CertificateV2.extractKeyNameFromCertName(params.getSignerName()))
+            except Pib.Error:
+                raise InvalidSigningInfoError(
+                  "Signing certificate `" + params.getSignerName().toUri() +
+                  "` does not exist")
+        elif params.getSignerType() == SigningInfo.SignerType.SHA256:
+            keyName[0] = SigningInfo.getDigestSha256Identity()
+            return DigestSha256Signature()
+        else:
+            # We don't expect this to happen.
+            raise InvalidSigningInfoError("Unrecognized signer type")
+
+        if identity == None and key == None:
+            raise InvalidSigningInfoError("Cannot determine signing parameters")
+
+        if identity != None and key == None:
+            try:
+                key = identity.getDefaultKey()
+            except Pib.Error:
+                raise InvalidSigningInfoError(
+                  "Signing identity `" + identity.getName().toUri() +
+                  "` does not have default certificate")
+
+        if key.getKeyType() == KeyType.RSA:
+            signatureInfo = Sha256WithRsaSignature()
+        elif key.getKeyType() == KeyType.ECDSA:
+            signatureInfo = Sha256WithEcdsaSignature()
+        else:
+            raise KeyChain.Error("Unsupported key type")
+
+        keyLocator = KeyLocator.getFromSignature(signatureInfo)
+        keyLocator.setType(KeyLocatorType.KEYNAME)
+        keyLocator.setKeyName(key.getName())
+
+        keyName[0] = key.getName()
+        return signatureInfo
+
+    def _signBuffer(self, buffer, keyName, digestAlgorithm):
+        """
+        Sign the byte buffer using the key with name keyName.
+
+        :param buffer: The input byte buffer.
+        :type buffer: an array which implements the buffer protocol
+        :param Name keyName: The name of the key.
+        :param digestAlgorithm: The digest algorithm for the signature.
+        :type digestAlgorithm: int from DigestAlgorithm
+        :return: The signature Blob, or an isNull Blob if the key does not
+          exist, or for an unrecognized digestAlgorithm.
+        :rtype: Blob
+        """
+        if keyName.equals(SigningInfo.getDigestSha256Identity()):
+            return Blob(Common.digestSha256(buffer))
+
+        return self._tpm.sign(buffer, keyName, digestAlgorithm)
+
+    # Private security v1 methods
+
     def _makeOnCertificateData(self, nextStep):
         """
         Make and return an onData callback to use in expressInterest.
@@ -688,5 +1116,32 @@ class KeyChain(object):
 
             self.createIdentityAndCertificate(defaultIdentity)
             self._identityManager.setDefaultIdentity(defaultIdentity)
+
+
+    _defaultPibLocator = None # str
+    _defaultTpmLocator = None # str
+    _pibFactories = {} # str => MakePibImpl
+    _tpmFactories = {} # str => MakeTpmBackEnd
+    _defaultSigningInfo = SigningInfo()
+
+class InvalidSigningInfoError(KeyChain.Error):
+    """
+    Create an InvalidSigningInfoError which extends KeyChain.Error to indicate
+    that the supplied SigningInfo is invalid.
+
+    :param str message: The error message.
+    """
+    def __init__(self, message):
+        super(InvalidSigningInfoError, self).__init__(message)
+
+class LocatorMismatchError(KeyChain.Error):
+    """
+    Create a LocatorMismatchError which extends KeyChain.Error to indicate that
+    the supplied TPM locator does not match the locator stored in the PIB.
+
+    :param str message: The error message.
+    """
+    def __init__(self, message):
+        super(LocatorMismatchError, self).__init__(message)
 
 _systemRandom = SystemRandom()
