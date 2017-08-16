@@ -746,6 +746,25 @@ class ConfigPolicyManager(PolicyManager):
 
     def _getCertificateInterest(self, stepCount, matchType, objectName, 
            signature, failureReason):
+        """
+        This is a helper for checkVerificationPolicy to verify the rule and
+        return a certificate interest to fetch the next certificate in the
+        hierarchy if needed.
+
+        :param int stepCount: The number of verification steps that have been
+          done, used to track the verification progress.
+        :param str matchType: Either "data" or "interest".
+        :param Name objectName: The name of the data or interest packet.
+        :param Signature signature: The Signature object for the data or
+          interest packet.
+        :param Array<str> failureReason: If can't determine the interest, set
+          failureReason[0] to the failure reason.
+        :return: None if can't determine the interest, otherwise the interest
+          for the ValidationRequest to fetch the next certificate. However, if
+          the interest has an empty name, the validation succeeded and no need
+          to fetch a certificate.
+        :rtype: Interest
+        """
         if stepCount > self._maxDepth:
             failureReason[0] = ("The verification stepCount " + stepCount +
                   " exceeded the maxDepth " + self._maxDepth)
