@@ -56,6 +56,14 @@ pyndn.security.security_types module
     :undoc-members:
     :show-inheritance:
 
+pyndn.security.signing_info module
+----------------------------------
+
+.. automodule:: pyndn.security.signing_info
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
