@@ -29,13 +29,14 @@ from pyndn.interest import Interest
 from pyndn.key_locator import KeyLocator
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.policy.certificate_cache import CertificateCache
+from pyndn.security.v2.certificate_v2 import CertificateV2
+from pyndn.security.v2.certificate_cache_v2 import CertificateCacheV2
 from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.key_locator import KeyLocatorType
-from pyndn.security.security_exception import SecurityException
 
 from pyndn.util.boost_info_parser import BoostInfoParser
 from pyndn.util.regex.ndn_regex_top_matcher import NdnRegexTopMatcher
@@ -46,7 +47,7 @@ Validator Configuration File Format
 (http://redmine.named-data.net/projects/ndn-cxx/wiki/CommandValidatorConf)
 
 Once a rule is matched, the ConfigPolicyManager looks in the
-CertificateCache for the IdentityCertificate matching the name in the KeyLocator
+certificate cache for the certificate matching the name in the KeyLocator
 and uses its public key to verify the data packet or signed interest. If the
 certificate can't be found, it is downloaded, verified and installed. A chain
 of certificates will be followed to a maximum depth.
@@ -60,12 +61,19 @@ class ConfigPolicyManager(PolicyManager):
     """
     Create a new ConfigPolicyManager which will act on the rules specified
     in the configuration and download unknown certificates when necessary.
+    If certificateCache is a CertificateCache (or omitted) this creates a
+    security v1 PolicyManager to verify certificates in format v1. To verify
+    certificates in format v2, use a CertificateCacheV2 for the certificateCache.
 
     :param str configFileName: (optional) If not null or empty, the path to the
       configuration file containing verification rules. Otherwise, you should
       separately call load().
-    :param CertificateCache certificateCache: (optional) A CertificateCache to
-        hold known certificates.
+    :param certificateCache: (optional) A CertificateCache to hold known
+      certificates. If certificateCache this is a CertificateCache (or omitted
+      or None) this creates a security v1 PolicyManager to verify certificates
+      in format v1. If this is a CertificateCacheV2, verify certificates in
+      format v1. If omitted or None, create an internal v1 CertificateCache.
+    :type certificateCache: CertificateCache or CertificateCacheV2
     :param int searchDepth: (optional) The maximum number of links to follow
       when verifying a certificate chain.
     :param int graceInterval: (optional) The window of time difference (in
@@ -82,10 +90,18 @@ class ConfigPolicyManager(PolicyManager):
             searchDepth=5, graceInterval=3000, keyTimestampTtl=3600000,
             maxTrackedKeys=1000):
         super(ConfigPolicyManager, self).__init__()
+
         if certificateCache is None:
-            self._certificateCache = CertificateCache()
-        else:
+            certificateCache = CertificateCache()
+        if isinstance(certificateCache, CertificateCache):
+            self._isSecurityV1 = True
             self._certificateCache = certificateCache
+            self._certificateCacheV2 = None
+        else:
+            self._isSecurityV1 = False
+            self._certificateCache = None
+            self._certificateCacheV2 = certificateCache
+
         self._maxDepth = searchDepth
         self._keyGraceInterval = graceInterval
         self._keyTimestampTtl = keyTimestampTtl
@@ -100,7 +116,10 @@ class ConfigPolicyManager(PolicyManager):
         """
         Reset the certificate cache and other fields to the constructor state.
         """
-        self._certificateCache.reset()
+        if self._isSecurityV1:
+            self._certificateCache.reset()
+        else:
+            self._certificateCacheV2.reset()
 
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
@@ -114,7 +133,7 @@ class ConfigPolicyManager(PolicyManager):
         self.requiresVerification = True
 
         self.config = BoostInfoParser()
-        self._refreshManager = TrustAnchorRefreshManager()
+        self._refreshManager = TrustAnchorRefreshManager(self._isSecurityV1)
 
     def load(self, configFileNameOrInput, inputName = None):
         """
@@ -207,7 +226,10 @@ class ConfigPolicyManager(PolicyManager):
                 self.requiresVerification = False
                 break
 
-            self._lookupCertificate(certID, isPath)
+            if self._isSecurityV1:
+                self._lookupCertificate(certID, isPath)
+            else:
+                self._lookupCertificateV2(certID, isPath)
 
     def _checkSignatureMatch(self, signatureName, objectName, rule, failureReason):
         """
@@ -233,19 +255,39 @@ class ConfigPolicyManager(PolicyManager):
             signerInfo = checker['signer'][0]
             signerType = signerInfo['type'][0].getValue()
             if signerType == 'file':
-                cert = self._lookupCertificate(signerInfo['file-name'][0].getValue(), True)
-                if cert is None:
-                    failureReason[0] = (
-                      "Can't find fixed-signer certificate file: " +
-                      signerInfo['file-name'][0].getValue())
-                    return False
+                if self._isSecurityV1:
+                    cert = self._lookupCertificate(
+                      signerInfo['file-name'][0].getValue(), True)
+                    if cert is None:
+                        failureReason[0] = (
+                          "Can't find fixed-signer certificate file: " +
+                          signerInfo['file-name'][0].getValue())
+                        return False
+                else:
+                    cert = self._lookupCertificateV2(
+                      signerInfo['file-name'][0].getValue(), True)
+                    if cert is None:
+                        failureReason[0] = (
+                          "Can't find fixed-signer certificate file: " +
+                          signerInfo['file-name'][0].getValue())
+                        return False
             elif signerType == 'base64':
-                cert = self._lookupCertificate(signerInfo['base64-string'][0].getValue(), False)
-                if cert is None:
-                    failureReason[0] = (
-                      "Can't find fixed-signer certificate base64: " +
-                      signerInfo['base64-string'][0].getValue())
-                    return False
+                if self._isSecurityV1:
+                    cert = self._lookupCertificate(
+                      signerInfo['base64-string'][0].getValue(), False)
+                    if cert is None:
+                        failureReason[0] = (
+                          "Can't find fixed-signer certificate base64: " +
+                          signerInfo['base64-string'][0].getValue())
+                        return False
+                else:
+                    cert = self._lookupCertificateV2(
+                      signerInfo['base64-string'][0].getValue(), False)
+                    if cert is None:
+                        failureReason[0] = (
+                          "Can't find fixed-signer certificate base64: " +
+                          signerInfo['base64-string'][0].getValue())
+                        return False
             else:
                 failureReason[0] = ("Unrecognized fixed-signer signerType: " +
                   signerType)
@@ -368,6 +410,10 @@ class ConfigPolicyManager(PolicyManager):
         :return: The certificate object, or None if not found.
         :rtype: IdentityCertificate
         """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "lookupCertificate: For security v2, use lookupCertificateV2()")
+
         try:
             certUri = self._fixedCertificateCache[certID]
         except KeyError:
@@ -385,6 +431,39 @@ class ConfigPolicyManager(PolicyManager):
             self._certificateCache.insertCertificate(cert)
         else:
             cert = self._certificateCache.getCertificate(Name(certUri))
+
+        return cert
+
+    def _lookupCertificateV2(self, certID, isPath):
+        """
+        This looks up certificates specified as base64-encoded data or file
+        names. These are cached by filename or encoding to avoid repeated
+        reading of files or decoding.
+
+        :return: The CertificateV2, or None if not found.
+        :rtype: CertificateV2
+        """
+        if self._isSecurityV1:
+            raise SecurityException(
+              "lookupCertificateV2: For security v1, use lookupCertificate()")
+
+        try:
+            certUri = self._fixedCertificateCache[certID]
+        except KeyError:
+            if isPath:
+                # load the certificate data (base64 encoded IdentityCertificate)
+                cert = TrustAnchorRefreshManager.loadCertificateV2FromFile(
+                        certID)
+            else:
+                certData = b64decode(certID)
+                cert = CertificateV2()
+                cert.wireDecode(Blob(certData, False))
+
+            certUri = cert.getName()[:-1].toUri()
+            self._fixedCertificateCache[certID] = certUri
+            self._certificateCacheV2.insert(cert)
+        else:
+            cert = self._certificateCacheV2.find(Name(certUri))
 
         return cert
 
@@ -566,14 +645,14 @@ class ConfigPolicyManager(PolicyManager):
         :return: None for no further step for looking up a certificate chain.
         :rtype: ValidationRequest
         """
-        if stepCount > self._maxDepth:
-            try:
-                onValidationFailed(
-                  dataOrInterest, "The verification stepCount " + stepCount +
-                  " exceeded the maxDepth " + self._maxDepth)
-            except:
-                logging.exception("Error in onValidationFailed")
-            return None
+        objectName = dataOrInterest.getName()
+        matchType = "data"
+
+        # For command interests, we need to ignore the last 4 components when
+        #   matching the name.
+        if isinstance(dataOrInterest, Interest):
+            objectName = objectName.getPrefix(-4)
+            matchType = "interest"
 
         signature = self._extractSignature(dataOrInterest, wireFormat)
         # no signature -> fail
@@ -586,122 +665,72 @@ class ConfigPolicyManager(PolicyManager):
                 logging.exception("Error in onValidationFailed")
             return None
 
-        if not KeyLocator.canGetFromSignature(signature):
-            # We only support signature types with key locators.
-            try:
-                onValidationFailed(
-                  dataOrInterest,
-                  "The signature type does not support a KeyLocator")
-            except:
-                logging.exception("Error in onValidationFailed")
-            return None
-
-        keyLocator = None
-        try:
-            keyLocator = KeyLocator.getFromSignature(signature)
-        except Exception as ex:
-            # No key locator -> fail.
-            try:
-                onValidationFailed(
-                  dataOrInterest, "Error in KeyLocator.getFromSignature: " +
-                  str(ex))
-            except:
-                logging.exception("Error in onValidationFailed")
-            return None
-
-        signatureName = keyLocator.getKeyName()
-        # no key name in KeyLocator -> fail
-        if signatureName.size() == 0:
-            try:
-                onValidationFailed(
-                  dataOrInterest,
-                  "The signature KeyLocator doesn't have a key name")
-            except:
-                logging.exception("Error in onValidationFailed")
-            return None
-
-        objectName = dataOrInterest.getName()
-        matchType = "data"
-
-        #for command interests, we need to ignore the last 4 components when matching the name
-        if isinstance(dataOrInterest, Interest):
-            objectName = objectName.getPrefix(-4)
-            matchType = "interest"
-
-        # first see if we can find a rule to match this packet
-        try:
-            matchedRule = self._findMatchingRule(objectName, matchType)
-        except:
-            matchedRule = None
-
-        # no matching rule -> fail
-        if matchedRule is None:
-            try:
-                onValidationFailed(
-                  dataOrInterest, "No matching rule found for " +
-                  objectName.toUri())
-            except:
-                logging.exception("Error in onValidationFailed")
-            return None
-
         failureReason = ["unknown"]
-        signatureMatches = self._checkSignatureMatch(
-          signatureName, objectName, matchedRule, failureReason)
-        if not signatureMatches:
+        certificateInterest = self._getCertificateInterest(
+          stepCount, matchType, objectName, signature, failureReason)
+        if certificateInterest is None:
             try:
                 onValidationFailed(dataOrInterest, failureReason[0])
             except:
                 logging.exception("Error in onValidationFailed")
             return None
 
-        # before we look up keys, refresh any certificate directories
-        self._refreshManager.refreshAnchors()
-
-        # now finally check that the data or interest was signed correctly
-        # if we don't actually have the certificate yet, create a
-        # ValidationRequest for it
-        foundCert = self._refreshManager.getCertificate(signatureName)
-        if foundCert is None:
-            foundCert = self._certificateCache.getCertificate(signatureName)
-        if foundCert is None:
-            certificateInterest = Interest(signatureName)
+        if certificateInterest.getName().size() > 0:
             def onCertificateDownloadComplete(data):
-                try:
-                    certificate = IdentityCertificate(data)
-                except:
+                if self._isSecurityV1:
                     try:
-                        onValidationFailed(
-                          dataOrInterest, "Cannot decode certificate " +
-                          data.getName().toUri())
+                        certificate = IdentityCertificate(data)
                     except:
-                        logging.exception("Error in onValidationFailed")
-                    return None
-                self._certificateCache.insertCertificate(certificate)
+                        try:
+                            onValidationFailed(
+                              dataOrInterest, "Cannot decode certificate " +
+                              data.getName().toUri())
+                        except:
+                            logging.exception("Error in onValidationFailed")
+                        return None
+                    self._certificateCache.insertCertificate(certificate)
+                else:
+                    try:
+                        certificate = CertificateV2(data)
+                    except:
+                        try:
+                            onValidationFailed(
+                              dataOrInterest, "Cannot decode certificate " +
+                              data.getName().toUri())
+                        except:
+                            logging.exception("Error in onValidationFailed")
+                        return None
+                    self._certificateCacheV2.insert(certificate)
+
                 self.checkVerificationPolicy(dataOrInterest, stepCount+1,
                         onVerified, onValidationFailed)
 
-            nextStep = ValidationRequest(certificateInterest,
+            return ValidationRequest(certificateInterest,
                     onCertificateDownloadComplete, onValidationFailed,
                     2, stepCount+1)
 
-            return nextStep
-
-        # for interests, we must check that the timestamp is fresh enough
-        # I do this after (possibly) downloading the certificate to avoid
-        # filling the cache with bad keys
+        # For interests, we must check that the timestamp is fresh enough.
+        # This is done after (possibly) downloading the certificate to avoid
+        # filling the cache with bad keys.
         if isinstance(dataOrInterest, Interest):
-            keyName = foundCert.getPublicKeyName()
+            signatureName = KeyLocator.getFromSignature(signature).getKeyName()
+            if self._isSecurityV1:
+                keyName = IdentityCertificate.certificateNameToPublicKeyName(
+                  signatureName)
+            else:
+                keyName = signatureName
             timestamp = dataOrInterest.getName().get(-4).toNumber()
 
             if not self._interestTimestampIsFresh(
-                     keyName, timestamp, failureReason):
+                  keyName, timestamp, failureReason):
                 try:
                     onValidationFailed(dataOrInterest, failureReason[0])
                 except:
                     logging.exception("Error in onValidationFailed")
                 return None
 
-        # certificate is known, verify the signature
+        # Certificate is known. Verify the signature.
+        # wireEncode returns the cached encoding if available.
         if self._verify(signature, dataOrInterest.wireEncode(), failureReason):
             try:
                 onVerified(dataOrInterest)
@@ -714,6 +743,66 @@ class ConfigPolicyManager(PolicyManager):
                 onValidationFailed(dataOrInterest, failureReason[0])
             except:
                 logging.exception("Error in onValidationFailed")
+
+    def _getCertificateInterest(self, stepCount, matchType, objectName, 
+           signature, failureReason):
+        if stepCount > self._maxDepth:
+            failureReason[0] = ("The verification stepCount " + stepCount +
+                  " exceeded the maxDepth " + self._maxDepth)
+            return None
+
+        # First see if we can find a rule to match this packet.
+        try:
+            matchedRule = self._findMatchingRule(objectName, matchType)
+        except:
+            matchedRule = None
+
+        # No matching rule -> fail.
+        if matchedRule is None:
+            failureReason[0] = "No matching rule found for " + objectName.toUri()
+            return None
+
+        if not KeyLocator.canGetFromSignature(signature):
+            # We only support signature types with key locators.
+            failureReason[0] = "The signature type does not support a KeyLocator"
+            return None
+
+        keyLocator = KeyLocator.getFromSignature(signature)
+
+        signatureName = keyLocator.getKeyName()
+        # No key name in KeyLocator -> fail.
+        if signatureName.size() == 0:
+            failureReason[0] = "The signature KeyLocator doesn't have a key name"
+            return None
+
+        signatureMatches = self._checkSignatureMatch(
+          signatureName, objectName, matchedRule, failureReason)
+        if not signatureMatches:
+            try:
+                onValidationFailed(dataOrInterest, failureReason[0])
+            except:
+                logging.exception("Error in onValidationFailed")
+            return None
+
+        # Before we look up keys, refresh any certificate directories.
+        self._refreshManager.refreshAnchors()
+
+        # If we don't actually have the certificate yet, return a
+        #   certificateInterest for it.
+        if self._isSecurityV1:
+            foundCert = self._refreshManager.getCertificate(signatureName)
+            if foundCert is None:
+                foundCert = self._certificateCache.getCertificate(signatureName)
+            if foundCert is None:
+                return Interest(signatureName)
+        else:
+            foundCert = self._refreshManager.getCertificateV2(signatureName)
+            if foundCert is None:
+                foundCert = self._certificateCacheV2.find(signatureName)
+            if foundCert is None:
+                return Interest(signatureName)
+
+        return Interest()
 
     def _verify(self, signatureInfo, signedBlob, failureReason):
         """
@@ -738,21 +827,42 @@ class ConfigPolicyManager(PolicyManager):
         if (keyLocator.getType() == KeyLocatorType.KEYNAME):
             # Assume the key name is a certificate name.
             signatureName = keyLocator.getKeyName()
-            certificate = self._refreshManager.getCertificate(signatureName)
-            if certificate is None:
-                certificate = self._certificateCache.getCertificate(signatureName)
-            if certificate is None:
-                failureReason[0] = ("Cannot find a certificate with name " +
-                  signatureName.toUri())
-                return False
 
-            publicKeyDer = certificate.getPublicKeyInfo().getKeyDer()
-            if publicKeyDer.isNull():
-                # We don't expect this to happen.
-                failureReason[0] = (
-                  "There is no public key in the certificate with name " +
-                  certificate.getName().toUri())
-                return False
+            if self._isSecurityV1:
+                certificate = self._refreshManager.getCertificate(signatureName)
+                if certificate is None:
+                    certificate = self._certificateCache.getCertificate(
+                      signatureName)
+                if certificate is None:
+                    failureReason[0] = ("Cannot find a certificate with name " +
+                      signatureName.toUri())
+                    return False
+
+                publicKeyDer = certificate.getPublicKeyInfo().getKeyDer()
+                if publicKeyDer.isNull():
+                    # We don't expect this to happen.
+                    failureReason[0] = (
+                      "There is no public key in the certificate with name " +
+                      certificate.getName().toUri())
+                    return False
+            else:
+                certificate = self._refreshManager.getCertificateV2(signatureName)
+                if certificate is None:
+                    certificate = self._certificateCacheV2.find(
+                      signatureName)
+                if certificate is None:
+                    failureReason[0] = ("Cannot find a certificate with name " +
+                      signatureName.toUri())
+                    return False
+
+                try:
+                    publicKeyDer = certificate.getPublicKey()
+                except:
+                    # We don't expect this to happen.
+                    failureReason[0] = (
+                      "There is no public key in the certificate with name " +
+                      certificate.getName().toUri())
+                    return False
 
             if self.verifySignature(signatureInfo, signedBlob, publicKeyDer):
                 return True
@@ -768,16 +878,21 @@ class TrustAnchorRefreshManager(object):
     """
     Manages the trust-anchor certificates, including refresh.
     """
-    def __init__(self):
-        super(TrustAnchorRefreshManager, self).__init__()
+    def __init__(self, isSecurityV1):
+        self._isSecurityV1 = isSecurityV1
 
         self._certificateCache = CertificateCache()
+        self._certificateCacheV2 = CertificateCacheV2()
         # maps the directory name to certificate names so they can be
         # deleted when necessary
         self._refreshDirectories = {}
 
     @staticmethod
     def loadIdentityCertificateFromFile(filename):
+        """
+        :param str filename:
+        :rtype: IdentityCertificate
+        """
         with open(filename, 'r') as certFile:
             encodedData = certFile.read()
             decodedData = b64decode(encodedData)
@@ -785,9 +900,42 @@ class TrustAnchorRefreshManager(object):
             cert.wireDecode(Blob(decodedData, False))
             return cert
 
+    @staticmethod
+    def loadCertificateV2FromFile(filename):
+        """
+        :param str filename:
+        :rtype: CertificateV2
+        """
+        with open(filename, 'r') as certFile:
+            encodedData = certFile.read()
+            decodedData = b64decode(encodedData)
+            cert = CertificateV2()
+            cert.wireDecode(Blob(decodedData, False))
+            return cert
+
     def getCertificate(self, certificateName):
+        """
+        :param Name certificateName:
+        :rtype: IdentityCertificate
+        """
+        if not self._isSecurityV1:
+            raise SecurityException(
+              "getCertificate: For security v2, use getCertificateV2()")
+
         # assumes timestamp is already removed
         return self._certificateCache.getCertificate(certificateName)
+
+    def getCertificateV2(self, certificateName):
+        """
+        :param Name certificateName:
+        :rtype: CertificateV2
+        """
+        if self._isSecurityV1:
+            raise SecurityException(
+              "getCertificateV2: For security v1, use getCertificate()")
+
+        # assumes timestamp is already removed
+        return self._certificateCacheV2.find(certificateName)
 
     # refershPeriod in milliseconds.
     def addDirectory(self, directoryName, refreshPeriod):
@@ -795,16 +943,29 @@ class TrustAnchorRefreshManager(object):
                 if os.path.isfile(os.path.join(directoryName, f))]
         certificateNames = []
         for f in allFiles:
-            try:
-                fullPath = os.path.join(directoryName, f)
-                cert = self.loadIdentityCertificateFromFile(fullPath)
-            except SecurityException:
-                pass # allow files that are not certificates
+            if self._isSecurityV1:
+                try:
+                    fullPath = os.path.join(directoryName, f)
+                    cert = self.loadIdentityCertificateFromFile(fullPath)
+                except Exception:
+                    pass # allow files that are not certificates
+                else:
+                    # Cut off the timestamp so it matches KeyLocator Name format.
+                    certUri = cert.getName()[:-1].toUri()
+                    self._certificateCache.insertCertificate(cert)
+                    certificateNames.append(certUri)
             else:
-                # cut off timestamp so it matches KeyLocator Name format
-                certUri = cert.getName()[:-1].toUri()
-                self._certificateCache.insertCertificate(cert)
-                certificateNames.append(certUri)
+                try:
+                    fullPath = os.path.join(directoryName, f)
+                    cert = self.loadCertificateV2FromFile(fullPath)
+                except Exception:
+                    pass # allow files that are not certificates
+                else:
+                    # Get the key name since this is in the KeyLocator.
+                    certUri = CertificateV2.extractKeyNameFromCertName(
+                      cert.getName()).toUri()
+                    self._certificateCacheV2.insert(cert)
+                    certificateNames.append(certUri)
 
         self._refreshDirectories[directoryName] = {
           'certificates': certificateNames,
@@ -823,7 +984,10 @@ class TrustAnchorRefreshManager(object):
                 # should we be deleting
                 for c in certificateList:
                     try:
-                        self._certificateCache.deleteCertificate(Name(c))
+                        if self._isSecurityV1:
+                            self._certificateCache.deleteCertificate(Name(c))
+                        else:
+                            self._certificateCacheV2.deleteCertificate(Name(c))
                     except KeyError:
                         # was already removed? not supported?
                         pass
