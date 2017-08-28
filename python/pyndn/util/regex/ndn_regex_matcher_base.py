@@ -26,7 +26,7 @@ class NdnRegexMatcherBase(object):
 
     :param str expr: The expression.
     :param type:
-    :type type: An in from the NdnRegexMatcherBase.NdnRegexExprType enum.
+    :type type: An int from the NdnRegexMatcherBase.NdnRegexExprType enum
     :param NdnRegexBackrefManager backrefManager: (optional) The
       NdnRegexBackrefManager to use. If omitted or None, use a new
       NdnRegexBackrefManager().
@@ -75,12 +75,12 @@ class NdnRegexMatcherBase(object):
 
         if self._recursiveMatch(0, name, offset, length):
             i = offset
-            while (i < offset + length):
+            while i < offset + length:
                 self._matchResult.append(name.get(i))
                 i += 1
             result = True
         else:
-          result = False
+            result = False
 
         return result
 
