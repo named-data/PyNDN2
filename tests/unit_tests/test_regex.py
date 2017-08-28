@@ -91,6 +91,15 @@ class TestRegex(ut.TestCase):
         self.assertEquals(1, len(cm.getMatchResult()))
         self.assertEquals("d", cm.getMatchResult()[0].toEscapedString())
 
+        backRef = NdnRegexBackrefManager()
+        try:
+            NdnRegexComponentSetMatcher("[<a]", backRef)
+            self.fail("Did not throw the expected exception")
+        except NdnRegexMatcherBase.Error:
+            pass
+        else:
+            self.fail("Did not throw the expected exception")
+
     def test_repeat_matcher(self):
         backRef = NdnRegexBackrefManager()
         cm = NdnRegexRepeatMatcher("[<a><b>]*", backRef, 8)
@@ -421,6 +430,8 @@ class TestRegex(ut.TestCase):
         self.assertEquals(True, res)
         self.assertEquals(6, len(cm.getMatchResult()))
         self.assertEquals(Name("/ndn/edu/ucla/yingdi/mac/"), cm.expand())
+
+from pyndn.util.regex.ndn_regex_matcher_base import NdnRegexMatcherBase
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
