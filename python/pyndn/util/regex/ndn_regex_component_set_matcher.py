@@ -97,12 +97,13 @@ class NdnRegexComponentSetMatcher(NdnRegexMatcherBase):
         rcount = 0
 
         while lcount > rcount:
+            if index >= len(self._expr):
+                raise NdnRegexMatcherBase.Error("Error: angle brackets mismatch")
+
             if self._expr[index] == '<':
                 lcount += 1
             elif self._expr[index] == '>':
                 rcount += 1
-            elif self._expr[index] == 0:
-                raise NdnRegexMatcherBase.Error("Error: square brackets mismatch")
 
             index += 1
 
@@ -114,10 +115,10 @@ class NdnRegexComponentSetMatcher(NdnRegexMatcherBase):
         if len(self._expr) != end:
             raise NdnRegexMatcherBase.Error("Component expr error " + self._expr)
         else:
-          component =  NdnRegexComponentMatcher(
-            self._expr[1 : end - 1], self._backrefManager)
+            component = NdnRegexComponentMatcher(
+              self._expr[1 : end - 1], self._backrefManager)
 
-          self._components.append(component)
+            self._components.append(component)
 
     def _compileMultipleComponents(self, start, lastIndex):
         """
