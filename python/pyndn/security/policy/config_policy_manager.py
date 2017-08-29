@@ -345,7 +345,7 @@ class ConfigPolicyManager(PolicyManager):
             except KeyError:
                 pass
             else:
-                if NdnRegexMatcher.match(keyRegex, signatureName) is not None:
+                if NdnRegexTopMatcher(simpleKeyRegex).match(signatureName):
                     return True
                 else:
                     failureReason[0] = ("The custom signatureName \"" +
