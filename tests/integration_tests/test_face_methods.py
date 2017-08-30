@@ -148,20 +148,6 @@ class TestFaceInterestMethods(ut.TestCase):
 
         return dataCallback, timeoutCallback, onNackCallback
 
-    def test_any_interest(self):
-        uri = "/"
-        (dataCallback, timeoutCallback, onNackCallback) = self.run_express_name_test(uri)
-        self.assertTrue(timeoutCallback.call_count == 0 , 'Timeout on expressed interest')
-
-        # check that the callback was correct
-        self.assertEqual(dataCallback.call_count, 1, 'Expected 1 onData callback, got '+str(dataCallback.call_count))
-
-        onDataArgs = dataCallback.call_args[0] # the args are returned as ([ordered arguments], [keyword arguments])
-
-        #just check that the interest was returned correctly?
-        callbackInterest = onDataArgs[0]
-        self.assertTrue(callbackInterest.getName() == (Name(uri)), 'Interest returned on callback had different name')
-
     # TODO: Replace this with a test that connects to a Face on localhost
     #def test_specific_interest(self):
     #    uri = "/ndn/edu/ucla/remap/ndn-js-test/howdy.txt/%FD%052%A1%DF%5E%A4"
