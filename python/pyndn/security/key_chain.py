@@ -26,6 +26,7 @@ Note: This class is an experimental feature. See the API docs for more detail at
 http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
+import sys
 import inspect
 import logging
 from random import SystemRandom
@@ -42,6 +43,7 @@ from pyndn.key_locator import KeyLocator, KeyLocatorType
 from pyndn.validity_period import ValidityPeriod
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
+from pyndn.util.config_file import ConfigFile
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.security_types import KeyType
@@ -51,19 +53,33 @@ from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.security.pib.pib_impl import PibImpl
 from pyndn.security.pib.pib import Pib
+from pyndn.security.pib.pib_sqlite3 import PibSqlite3
+from pyndn.security.pib.pib_memory import PibMemory
 from pyndn.security.tpm.tpm import Tpm
+from pyndn.security.tpm.tpm_back_end_file import TpmBackEndFile
+from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
+from pyndn.security.tpm.tpm_back_end_osx import TpmBackEndOsx
 from pyndn.security.v2.certificate_v2 import CertificateV2
 from pyndn.encoding.wire_format import WireFormat
 
 class KeyChain(object):
     """
-    There are two forms to create KeyChain:
+    There are three forms to create KeyChain:
+    KeyChain(pibLocator, tpmLocator, allowReset = False) - Create a KeyChain to
+    use the PIB and TPM defined by the given locators, which creates a security
+    v2 KeyChain that uses CertificateV2, Pib, Tpm and Validator (instead of v1
+    Certificate, IdentityStorage, PrivateKeyStorage and PolicyManager).
     KeyChain(identityManager = None, policyManager = None) - Create a security
     v1 KeyChain to use the optional identityManager and policyManager.
     KeyChain(pibImpl, tpmBackEnd, policyManager) - Create a KeyChain using this
     temporary constructor for the transition to security v2, which creates a
     security v2 KeyChain but still uses the v1 PolicyManager.
 
+    :param str pibLocator: The PIB locator, e.g., "pib-sqlite3:/example/dir".
+    :param str tpmLocator: The TPM locator, e.g., "tpm-memory:".
+    :param bool allowReset: (optional) If True, the PIB will be reset when the
+      supplied tpmLocator mismatches the one in the PIB. If omitted, don't allow
+      reset.
     :param IdentityManager identityManager: (optional) The identity manager as a
       subclass of IdentityManager. If omitted, use the default IdentityManager
       constructor.
@@ -82,12 +98,65 @@ class KeyChain(object):
         self._pib = None
         self._tpm = None
 
-        if isinstance(arg1, PibImpl):
+        if Common.typeIsString(arg1):
+            pibLocator = arg1
+            tpmLocator = arg2
+            allowReset = arg3
+            if allowReset == None:
+                allowReset = False
+
+            self._isSecurityV1 = False
+
+            # PIB locator.
+            pibScheme = [None]
+            pibLocation = [None]
+            KeyChain._parseAndCheckPibLocator(pibLocator, pibScheme, pibLocation)
+            canonicalPibLocator = pibScheme[0] + ":" + pibLocation[0]
+
+            # Create the PIB.
+            self._pib = KeyChain._createPib(canonicalPibLocator)
+            oldTpmLocator = ""
+            try:
+                oldTpmLocator = pib_.getTpmLocator()
+            except Pib.Error:
+                # The TPM locator is not set in the PIB yet.
+                pass
+
+            # TPM locator.
+            tpmScheme = [None]
+            tpmLocation = [None]
+            KeyChain._parseAndCheckTpmLocator(tpmLocator, tpmScheme, tpmLocation)
+            canonicalTpmLocator = tpmScheme[0] + ":" + tpmLocation[0]
+
+            config = ConfigFile()
+            if canonicalPibLocator == KeyChain._getDefaultPibLocator(config):
+                # The default PIB must use the default TPM.
+                if (oldTpmLocator != "" and
+                      oldTpmLocator != KeyChain._getDefaultTpmLocator(config)):
+                    self._pib._reset()
+                    canonicalTpmLocator = self._getDefaultTpmLocator(config)
+            else:
+                # Check the consistency of the non-default PIB.
+                if (oldTpmLocator == "" and
+                      oldTpmLocator != canonicalTpmLocator):
+                    if allowReset:
+                        self._pib._reset()
+                    else:
+                        raise LocatorMismatchError(
+                          "The supplied TPM locator does not match the TPM locator in the PIB: " +
+                          oldTpmLocator + " != " + canonicalTpmLocator)
+
+            # Note that a key mismatch may still happen if the TPM locator is
+            # initially set to a wrong one or if the PIB was shared by more than
+            # one TPM before. This is due to the old PIB not having TPM info.
+            # The new PIB should not have this problem.
+            self._tpm = KeyChain._createTpm(canonicalTpmLocator)
+            self._pib.setTpmLocator(canonicalTpmLocator)
+        elif isinstance(arg1, PibImpl):
             pibImpl = arg1
             tpmBackEnd = arg2
             policyManager = arg3
             
-            # TODO: KeyChain(pibLocator, tpmLocator, allowReset)
             self._isSecurityV1 = False
             self._policyManager = policyManager
 
@@ -198,7 +267,7 @@ class KeyChain(object):
             if self._isSecurityV1:
                 paramsOrCertificateName = self._prepareDefaultCertificateName()
             else:
-                paramsOrCertificateName = self._defaultSigningInfo
+                paramsOrCertificateName = KeyChain._defaultSigningInfo
 
         if isinstance(paramsOrCertificateName, Name):
             certificateName = paramsOrCertificateName
@@ -662,7 +731,7 @@ class KeyChain(object):
         if not self._isSecurityV1:
             if not isinstance(target, Data):
                 raise SecurityException(
-                  "signByIdentity(buffer, identityName) is not supported for security v2. Use sign with SigningInfo.");
+                  "signByIdentity(buffer, identityName) is not supported for security v2. Use sign with SigningInfo.")
 
             signingInfo = SigningInfo()
             signingInfo.setSigningIdentity(identityName)
@@ -934,9 +1003,191 @@ class KeyChain(object):
 
     DEFAULT_KEY_PARAMS = RsaKeyParams()
 
-    #
-    # Private methods
-    #
+    # Private security v2 methods
+
+    @staticmethod
+    def _getPibFactories():
+        """
+        Get the PIB factories map. On the first call, this initializes the map
+        with factories for standard PibImpl implementations.
+
+        :return: A map where the key is the scheme string and the value is a
+          function object makePibImpl(location) which takes a string location
+          and returns a new PibImpl object.
+        :rtype: dict<str, function object>
+        """
+        if KeyChain._pibFactories == None:
+            KeyChain._pibFactories = {}
+
+            # Add the standard factories.
+            KeyChain._pibFactories[
+              PibSqlite3.getScheme()] = lambda location: PibSqlite3(location)
+            KeyChain._pibFactories[
+              PibMemory.getScheme()] = lambda location: PibMemory()
+
+        return KeyChain._pibFactories
+
+    @staticmethod
+    def _getTpmFactories():
+        """
+        Get the TPM factories map. On the first call, this initializes the map
+        with factories for standard TpmBackEnd implementations.
+
+        :return: A map where the key is the scheme string and the value is a
+          function object makeTpmBackEnd(location) which takes a string location
+          and returns a new TpmBackEnd object.
+        """
+        if KeyChain._tpmFactories == None:
+            KeyChain._tpmFactories = {}
+
+            # Add the standard factories.
+            if sys.platform == 'darwin':
+                KeyChain._tpmFactories[
+                  TpmBackEndOsx.getScheme()] = lambda location: TpmBackEndOsx()
+            KeyChain._tpmFactories[
+              TpmBackEndFile.getScheme()] = lambda location: TpmBackEndFile(location)
+            KeyChain._tpmFactories[
+              TpmBackEndMemory.getScheme()] = lambda location: TpmBackEndMemory()
+
+        return KeyChain._tpmFactories
+
+    @staticmethod
+    def _parseLocatorUri(uri, scheme, location):
+        """
+        Parse the uri and set the scheme and location.
+
+        :param str uri: The URI to parse.
+        :param Array<str> scheme: Set scheme[0] to the scheme.
+        :param Array<str> location: Set location[0] to the location.
+        """
+        iColon = uri.find(':')
+        if iColon >= 0:
+          scheme[0] = uri[0 : iColon]
+          location[0] = uri[iColon + 1 :]
+        else:
+          scheme[0] = uri
+          location[0] = ""
+
+    @staticmethod
+    def _parseAndCheckPibLocator(pibLocator, pibScheme, pibLocation):
+        """
+        Parse the pibLocator and set the pibScheme and pibLocation.
+
+        :param str pibLocator: The PIB locator to parse.
+        :param Array<str> pibScheme: Set pibScheme[0] to the PIB scheme.
+        :param Array<str> pibLocation: Set pibLocation[0] to the PIB location.
+        """
+        KeyChain._parseLocatorUri(pibLocator, pibScheme, pibLocation)
+
+        if pibScheme[0] == "":
+            pibScheme[0] = KeyChain._getDefaultPibScheme()
+
+        if not (pibScheme[0] in KeyChain._getPibFactories()):
+            raise KeyChain.Error("PIB scheme `" + pibScheme[0] +
+              "` is not supported")
+
+    @staticmethod
+    def _parseAndCheckTpmLocator(tpmLocator, tpmScheme, tpmLocation):
+        """
+        Parse the tpmLocator and set the tpmScheme and tpmLocation.
+
+        :param str tpmLocator: The TPM locator to parse.
+        :param Array<str> tpmScheme: Set tpmScheme[0] to the TPM scheme.
+        :param Array<str> tpmLocation: Set tpmLocation[0] to the TPM location.
+        """
+        KeyChain._parseLocatorUri(tpmLocator, tpmScheme, tpmLocation)
+
+        if tpmScheme[0] == "":
+            tpmScheme[0] = KeyChain._getDefaultTpmScheme()
+
+        if not (tpmScheme[0] in KeyChain._getTpmFactories()):
+            raise KeyChain.Error("TPM scheme `" + tpmScheme[0] +
+              "` is not supported")
+
+    @staticmethod
+    def _getDefaultPibScheme():
+        """
+        :rtype: str
+        """
+        return PibSqlite3.getScheme()
+
+    @staticmethod
+    def _getDefaultTpmScheme():
+        """
+        :rtype: str
+        """
+        if sys.platform == 'darwin':
+            return TpmBackEndOsx.getScheme()
+        else:
+            return TpmBackEndFile.getScheme()
+
+    @staticmethod
+    def _createPib(pibLocator):
+        """
+        Create a Pib according to the pibLocator.
+
+        :param str pibLocator: The PIB locator, e.g., "pib-sqlite3:/example/dir".
+        :return: A new Pib object.
+        :rtype: Pib
+        """
+        pibScheme = [None]
+        pibLocation = [None]
+        KeyChain._parseAndCheckPibLocator(pibLocator, pibScheme, pibLocation)
+        pibFactory = KeyChain._getPibFactories()[pibScheme[0]]
+        return Pib(
+          pibScheme[0], pibLocation[0], pibFactory(pibLocation[0]))
+
+    @staticmethod
+    def _createTpm(tpmLocator):
+        """
+        Create a Tpm according to the tpmLocator.
+
+        :param str tpmLocator: The TPM locator, e.g., "tpm-memory:".
+        :return: A new Tpm object.
+        :rtype: Tpm
+        """
+        tpmScheme = [None]
+        tpmLocation = [None]
+        KeyChain._parseAndCheckTpmLocator(tpmLocator, tpmScheme, tpmLocation)
+        tpmFactory = KeyChain._getTpmFactories()[tpmScheme[0]]
+        return Tpm(
+          tpmScheme[0], tpmLocation[0], tpmFactory(tpmLocation[0]))
+
+    @staticmethod
+    def _getDefaultPibLocator(config):
+        """
+        :param str config:
+        :rtype: str
+        """
+        if KeyChain._defaultPibLocator != None:
+            return KeyChain._defaultPibLocator
+
+        clientPib = System.getenv("NDN_CLIENT_PIB")
+        if clientPib != None and clientPib != "":
+            KeyChain._defaultPibLocator = clientPib
+        else:
+            KeyChain._defaultPibLocator = config.get(
+              "pib", KeyChain._getDefaultPibScheme() + ":")
+
+        return KeyChain._defaultPibLocator
+
+    @staticmethod
+    def _getDefaultTpmLocator(config):
+        """
+        :param str config:
+        :rtype: str
+        """
+        if KeyChain._defaultTpmLocator != None:
+            return KeyChain._defaultTpmLocator
+
+        clientTpm = System.getenv("NDN_CLIENT_TPM")
+        if clientTpm != None and clientTpm != "":
+            KeyChain._defaultTpmLocator = clientTpm
+        else:
+            KeyChain._defaultTpmLocator = config.get(
+              "tpm", getDefaultTpmScheme() + ":")
+
+        return KeyChain._defaultTpmLocator
 
     def _prepareSignatureInfo(self, params, keyName):
         """
