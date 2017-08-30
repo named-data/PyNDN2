@@ -33,6 +33,7 @@ from pyndn.security.v2.certificate_v2 import CertificateV2
 from pyndn.security.v2.certificate_cache_v2 import CertificateCacheV2
 from pyndn.security.policy.validation_request import ValidationRequest
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
+from pyndn.security.security_exception import SecurityException
 from pyndn.util.blob import Blob
 from pyndn.util.common import Common
 from pyndn.encoding.wire_format import WireFormat
@@ -339,9 +340,9 @@ class ConfigPolicyManager(PolicyManager):
                       matchName.toUri() + "\" using relation " + relationType)
                     return False
 
-            # is this a simple regex?
+            # Is this a simple regex?
             try:
-                keyRegex = keyLocatorInfo['regex'][0].getValue()
+                simpleKeyRegex = keyLocatorInfo['regex'][0].getValue()
             except KeyError:
                 pass
             else:
@@ -350,8 +351,8 @@ class ConfigPolicyManager(PolicyManager):
                 else:
                     failureReason[0] = ("The custom signatureName \"" +
                       signatureName.toUri() +
-                      "\" does not regex match simpleKeyRegex \"" + keyRegex +
-                      "\"")
+                      "\" does not regex match simpleKeyRegex \"" +
+                      simpleKeyRegex + "\"")
                     return False
 
             # is this a hyper-relation?
@@ -797,10 +798,6 @@ class ConfigPolicyManager(PolicyManager):
         signatureMatches = self._checkSignatureMatch(
           signatureName, objectName, matchedRule, failureReason)
         if not signatureMatches:
-            try:
-                onValidationFailed(dataOrInterest, failureReason[0])
-            except:
-                logging.exception("Error in onValidationFailed")
             return None
 
         # Before we look up keys, refresh any certificate directories.
