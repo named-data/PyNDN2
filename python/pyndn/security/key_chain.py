@@ -53,6 +53,7 @@ from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.security.pib.pib_impl import PibImpl
 from pyndn.security.pib.pib import Pib
+from pyndn.security.pib.pib_key import PibKey
 from pyndn.security.pib.pib_sqlite3 import PibSqlite3
 from pyndn.security.pib.pib_memory import PibMemory
 from pyndn.security.tpm.tpm import Tpm
@@ -117,7 +118,7 @@ class KeyChain(object):
             self._pib = KeyChain._createPib(canonicalPibLocator)
             oldTpmLocator = ""
             try:
-                oldTpmLocator = pib_.getTpmLocator()
+                oldTpmLocator = self._pib.getTpmLocator()
             except Pib.Error:
                 # The TPM locator is not set in the PIB yet.
                 pass
@@ -202,10 +203,29 @@ class KeyChain(object):
 
     def deleteIdentity(self, identity):
         """
-        Delete the identity. After this operation, the identity is invalid.
+        This method has two forms:
+        deleteIdentity(identity) - Delete the PibIdentity identity. After this
+        operation, the identity is invalid.
+        deleteIdentity(identityName) - Delete the identity from the public and
+        private key storage. If the identity to be deleted is the current
+        default system default, the method will not delete the identity and will
+        return immediately.
 
         :param PibIdentity identity: The identity to delete.
+        :param Name identityName: The name of the identity to delete.
         """
+        if isinstance(identity, Name):
+            if not self._isSecurityV1:
+                try:
+                   self.deleteIdentity(self._pib.getIdentity(identity))
+                except:
+                    pass
+
+                return
+
+            self._identityManager.deleteIdentity(identity)
+            return
+
         identityName = identity.getName()
 
         keyNames = identity._getKeys().getKeyNames()
@@ -343,7 +363,7 @@ class KeyChain(object):
             buffer = target
 
             keyName = [None]
-            signatureInfo = _prepareSignatureInfo(params, keyName)
+            signatureInfo = self._prepareSignatureInfo(params, keyName)
 
             return self._signBuffer(
               buffer, keyName[0], params.getDigestAlgorithm())
@@ -436,24 +456,6 @@ class KeyChain(object):
         """
         return IdentityCertificate.certificateNameToPublicKeyName(
           self.createIdentityAndCertificate(identityName, params))
-
-    def deleteIdentity(self, identityName):
-        """
-        Delete the identity from the public and private key storage. If the
-        identity to be deleted is current default system default, the method
-        will not delete the identity and will return immediately.
-
-        :param Name identityName: The name of the identity to delete.
-        """
-        if not self._isSecurityV1:
-            try:
-               self.deleteIdentity(self._pib.getIdentity(identityName))
-            except:
-                pass
-
-            return
-
-        self._identityManager.deleteIdentity(identityName)
 
     def getDefaultIdentity(self):
         """
@@ -1185,7 +1187,7 @@ class KeyChain(object):
             KeyChain._defaultTpmLocator = clientTpm
         else:
             KeyChain._defaultTpmLocator = config.get(
-              "tpm", getDefaultTpmScheme() + ":")
+              "tpm", KeyChain._getDefaultTpmScheme() + ":")
 
         return KeyChain._defaultTpmLocator
 
@@ -1293,7 +1295,9 @@ class KeyChain(object):
         :rtype: Blob
         """
         if keyName.equals(SigningInfo.getDigestSha256Identity()):
-            return Blob(Common.digestSha256(buffer))
+            sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+            sha256.update(buffer)
+            return Blob(sha256.finalize())
 
         return self._tpm.sign(buffer, keyName, digestAlgorithm)
 
