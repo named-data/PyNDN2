@@ -30,6 +30,7 @@ from pyndn.util.blob import Blob
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.pib.pib_certificate_container import PibCertificateContainer
 from pyndn.security.pib.pib_key import PibKey
+from pyndn.security.pib.pib import Pib
 
 class PibKeyImpl(object):
     """
