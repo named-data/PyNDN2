@@ -215,14 +215,14 @@ class Tpm(object):
         :raises TpmBackEnd.Error: If the deletion fails.
         """
         try:
-            self._keys.remove(keyName)
+            del self._keys[keyName]
         except KeyError:
             # Do nothing if it doesn't exist.
             pass
 
         self._backEnd.deleteKey(keyName)
 
-    def _exportPrivateKey(keyName, password):
+    def _exportPrivateKey(self, keyName, password):
         """
         Get the encoded private key with name keyName in PKCS #8 format, possiby
         encrypted. This should only be called by KeyChain.
