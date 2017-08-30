@@ -312,7 +312,7 @@ class TpmPrivateKey(object):
         Get the Elliptic Curve algorithm object for the key size.
 
         :param int keySize: The key size.
-        :raises SecurityException: If the key size is not supported.
+        :raises TpmPrivateKey.Error: If the key size is not supported.
         """
         if keySize == 256:
             return ec.SECP256R1()
@@ -321,7 +321,7 @@ class TpmPrivateKey(object):
         elif keySize == 521:
             return ec.SECP521R1()
         else:
-            raise SecurityException("Unsupported EC key size: " + str(keySize))
+            raise TpmPrivateKey.Error("Unsupported EC key size: " + str(keySize))
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
     EC_ENCRYPTION_OID = "1.2.840.10045.2.1"
