@@ -27,6 +27,7 @@ http://named-data.net/doc/ndn-ccl-api/key-chain.html .
 """
 
 import sys
+import os
 import inspect
 import logging
 from random import SystemRandom
@@ -49,6 +50,7 @@ from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.security_types import KeyType
 from pyndn.security.signing_info import SigningInfo
 from pyndn.security.identity.identity_manager import IdentityManager
+from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
 from pyndn.security.pib.pib_impl import PibImpl
@@ -65,7 +67,7 @@ from pyndn.encoding.wire_format import WireFormat
 
 class KeyChain(object):
     """
-    There are three forms to create KeyChain:
+    There are four forms to create a KeyChain:
     KeyChain(pibLocator, tpmLocator, allowReset = False) - Create a KeyChain to
     use the PIB and TPM defined by the given locators, which creates a security
     v2 KeyChain that uses CertificateV2, Pib, Tpm and Validator (instead of v1
@@ -75,6 +77,14 @@ class KeyChain(object):
     KeyChain(pibImpl, tpmBackEnd, policyManager) - Create a KeyChain using this
     temporary constructor for the transition to security v2, which creates a
     security v2 KeyChain but still uses the v1 PolicyManager.
+    Finally, the default constructor KeyChain() creates a KeyChain with the
+    default PIB and TPM, which are platform-dependent and can be overridden
+    system-wide or individually by the user. The default constructor creates a
+    security v2 KeyChain that uses CertificateV2, Pib, Tpm and Validator.
+    However, if the default security v1 database file still exists, and the
+    default security v2 database file does not yet exists, then assume that the
+    system is running an older NFD and create a security v1 KeyChain with the
+    default IdentityManager and a NoVerifyPolicyManager.
 
     :param str pibLocator: The PIB locator, e.g., "pib-sqlite3:/example/dir".
     :param str tpmLocator: The TPM locator, e.g., "tpm-memory:".
@@ -98,6 +108,19 @@ class KeyChain(object):
 
         self._pib = None
         self._tpm = None
+
+        if arg1 == None:
+            # The default constructor.
+            if (os.path.isfile(BasicIdentityStorage.getDefaultDatabaseFilePath()) and
+                not os.path.isfile(PibSqlite3.getDefaultDatabaseFilePath())):
+                # The security v1 SQLite file still exists and the security v2
+                #   does not yet.
+                arg1 = IdentityManager()
+                arg2 = NoVerifyPolicyManager()
+            else:
+                # Set the security v2 locators to default empty strings.
+                arg1 = ""
+                arg2 = ""
 
         if Common.typeIsString(arg1):
             pibLocator = arg1
@@ -1164,7 +1187,10 @@ class KeyChain(object):
         if KeyChain._defaultPibLocator != None:
             return KeyChain._defaultPibLocator
 
-        clientPib = System.getenv("NDN_CLIENT_PIB")
+        try:
+            clientPib = os.environ["NDN_CLIENT_PIB"]
+        except KeyError:
+            clientPib = None
         if clientPib != None and clientPib != "":
             KeyChain._defaultPibLocator = clientPib
         else:
@@ -1182,7 +1208,10 @@ class KeyChain(object):
         if KeyChain._defaultTpmLocator != None:
             return KeyChain._defaultTpmLocator
 
-        clientTpm = System.getenv("NDN_CLIENT_TPM")
+        try:
+            clientTpm = os.environ["NDN_CLIENT_TPM"]
+        except KeyError:
+            clientTpm = None
         if clientTpm != None and clientTpm != "":
             KeyChain._defaultTpmLocator = clientTpm
         else:
@@ -1375,8 +1404,8 @@ class KeyChain(object):
 
     _defaultPibLocator = None # str
     _defaultTpmLocator = None # str
-    _pibFactories = {} # str => MakePibImpl
-    _tpmFactories = {} # str => MakeTpmBackEnd
+    _pibFactories = None # str => MakePibImpl
+    _tpmFactories = None # str => MakeTpmBackEnd
     _defaultSigningInfo = SigningInfo()
 
 class InvalidSigningInfoError(KeyChain.Error):
