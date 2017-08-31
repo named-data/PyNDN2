@@ -221,13 +221,7 @@ class PibSqlite3(PibImpl):
         super(PibSqlite3, self).__init__()
 
         if databaseDirectoryPath == None or databaseDirectoryPath == "":
-            if not "HOME" in os.environ:
-                # Don't expect this to happen
-                home = "."
-            else:
-                home = os.environ["HOME"]
-
-            databaseDirectoryPath = os.path.join(home, ".ndn")
+            databaseDirectoryPath = PibSqlite3.getDefaultDatabaseDirectoryPath()
 
         try:
             if not os.path.exists(databaseDirectoryPath):
@@ -873,6 +867,35 @@ class PibSqlite3(PibImpl):
         else:
             raise Pib.Error(
              "No default certificate for key `" + keyName.toUri() + "`")
+
+    @staticmethod
+    def getDefaultDatabaseDirectoryPath():
+        """
+        Get the default that the constructor uses if databaseDirectoryPath is
+        omitted. This does not try to create the directory.
+
+        :return: The default database directory path.
+        :rtype: str
+        """
+        if not "HOME" in os.environ:
+            # Don't expect this to happen
+            home = "."
+        else:
+            home = os.environ["HOME"]
+
+        return os.path.join(home, ".ndn")
+
+    @staticmethod
+    def getDefaultDatabaseFilePath():
+        """
+        Get the default database file path that the constructor uses if
+        databaseDirectoryPath and databaseFilename are omitted.
+
+        :return: The default database file path.
+        :rtype: str
+        """
+        return os.path.join(
+          PibSqlite3.getDefaultDatabaseDirectoryPath(), "pib.db")
 
     def _hasDefaultIdentity(self):
         """
