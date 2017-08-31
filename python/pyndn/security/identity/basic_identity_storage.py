@@ -98,13 +98,7 @@ class BasicIdentityStorage(IdentityStorage):
         super(BasicIdentityStorage, self).__init__()
 
         if databaseFilePath == None or databaseFilePath == "":
-            if not "HOME" in os.environ:
-                # Don't expect this to happen
-                home = "."
-            else:
-                home = os.environ["HOME"]
-
-            identityDirectory = os.path.join(home, ".ndn")
+            identityDirectory = BasicIdentityStorage.getDefaultDatabaseDirectoryPath()
             if not os.path.exists(identityDirectory):
                 os.makedirs(identityDirectory)
 
@@ -682,6 +676,36 @@ class BasicIdentityStorage(IdentityStorage):
 
         self._database.commit()
         cursor.close()
+
+    @staticmethod
+    def getDefaultDatabaseDirectoryPath():
+        """
+        Get the default directory that the constructor uses if databaseFilePath
+        is omitted. This does not try to create the directory.
+
+        :return: The default database directory path.
+        :rtype: str
+        """
+        if not "HOME" in os.environ:
+            # Don't expect this to happen
+            home = "."
+        else:
+            home = os.environ["HOME"]
+
+        return os.path.join(home, ".ndn")
+
+    @staticmethod
+    def getDefaultDatabaseFilePath():
+        """
+        Get the default database file path that the constructor uses if
+        databaseFilePath is omitted.
+
+        :return: The default database file path.
+        :rtype: str
+        """
+        return os.path.join(
+          BasicIdentityStorage.getDefaultDatabaseDirectoryPath(),
+          "ndnsec-public-info.db")
 
     def _updateKeyStatus(self, keyName, isActive):
         """
