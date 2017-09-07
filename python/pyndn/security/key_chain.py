@@ -212,12 +212,18 @@ class KeyChain(object):
         """
         :rtype: Pib
         """
+        if self._isSecurityV1:
+            raise SecurityException("getPib is not supported for security v1")
+
         return self._pib
 
     def getTpm(self):
         """
         :rtype: Tpm
         """
+        if self._isSecurityV1:
+            raise SecurityException("getTpm is not supported for security v1")
+
         return self._tpm
 
     # Identity management
