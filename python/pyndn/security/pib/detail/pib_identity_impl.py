@@ -37,7 +37,7 @@ class PibIdentityImpl(object):
     :param PibImpl pibImpl: The Pib backend implementation.
     :param bool needInit: If true and the identity does not exist in the pibImpl
       back end, then create it (and If no default identity has been set,
-      identityName becomes the default). If false, then throw Pib::Error if the
+      identityName becomes the default). If false, then throw Pib.Error if the
       identity does not exist in the pibImpl back end.
     :raises Pib.Error: If the identity does not exist in the pibImpl back end
       and needInit is false.
