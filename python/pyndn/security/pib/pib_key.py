@@ -187,6 +187,16 @@ class PibKey(object):
         """
         return self._lock().setDefaultCertificate(certificateName)
 
+    def _getCertificates(self):
+        """
+        Get the PibCertificateContainer in the PibKeyImpl. This should only be
+        called by KeyChain.
+
+        :return: The PibCertificateContainer.
+        :rtype: PibCertificateContainer
+        """
+        return self._lock()._certificates
+
     def _lock(self):
         """
         Check the validity of the _impl instance.
