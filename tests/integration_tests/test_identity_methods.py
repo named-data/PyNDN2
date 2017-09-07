@@ -159,7 +159,7 @@ class TestSqlIdentityStorage(ut.TestCase):
             int(time.time()))
 
         self.identityManager.createIdentityAndCertificate(
-          identityName, KeyChain.DEFAULT_KEY_PARAMS)
+          identityName, KeyChain.getDefaultKeyParams())
         keyName1 = self.identityManager.getDefaultKeyNameForIdentity(identityName)
         cert2 = self.identityManager.selfSign(keyName1)
         self.identityStorage.addCertificate(cert2)
