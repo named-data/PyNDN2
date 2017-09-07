@@ -161,7 +161,7 @@ class KeyChain(object):
                     canonicalTpmLocator = self._getDefaultTpmLocator(config)
             else:
                 # Check the consistency of the non-default PIB.
-                if (oldTpmLocator == "" and
+                if (oldTpmLocator != "" and
                       oldTpmLocator != canonicalTpmLocator):
                     if allowReset:
                         self._pib._reset()
@@ -228,7 +228,41 @@ class KeyChain(object):
 
     # Identity management
 
-    # TODO: createIdentity
+    def createIdentityV2(self, identityName, params = None):
+        """
+        Create a security V2 identity for identityName. This method will check
+        if the identity exists in PIB and whether the identity has a default key
+        and default certificate. If the identity does not exist, this method
+        will create the identity in PIB. If the identity's default key does not
+        exist, this method will create a key pair and set it as the identity's
+        default key. If the key's default certificate is missing, this method
+        will create a self-signed certificate for the key. If identityName did
+        not exist and no default identity was selected before, the created
+        identity will be set as the default identity.
+
+        :param Name identityName: The name of the identity.
+        :param KeyParams params: (optional) The key parameters if a key needs to
+          be generated for the identity. If omitted, use getDefaultKeyParams().
+        :return: The created Identity instance.
+        """
+        if params == None:
+            params = KeyChain.getDefaultKeyParams()
+
+        id = self._pib._addIdentity(identityName)
+
+        try:
+            key = id.getDefaultKey()
+        except Pib.Error:
+            key = self.createKey(id, params)
+
+        try:
+            key.getDefaultCertificate()
+        except Pib.Error:
+            logging.getLogger(__name__).info("No default cert for " +
+              key.getName() + ", requesting self-signing")
+            self.selfSign(key)
+
+        return id
 
     def deleteIdentity(self, identity):
         """
@@ -274,7 +308,116 @@ class KeyChain(object):
 
     # Key management
 
+    def createKey(self, identity, params = None):
+        """
+        Create a key for the identity according to params. If the identity had
+        no default key selected, the created key will be set as the default for
+        this identity. This method will also create a self-signed certificate
+        for the created key.
+
+        :param PibIdentity identity: A valid PibIdentity object.
+        :param KeyParams params: (optional) The key parameters if a key needs to
+          be generated for the identity. If omitted, use getDefaultKeyParams().
+        """
+        if params == None:
+            params = KeyChain.getDefaultKeyParams()
+
+        # Create the key in the TPM.
+        keyName = self._tpm._createKey(identity.getName(), params)
+
+        # Set up the key info in the PIB.
+        publicKey = self._tpm.getPublicKey(keyName)
+        key = identity._addKey(publicKey.toBytes(), keyName)
+
+        logging.getLogger(__name__).info(
+          "Requesting self-signing for newly created key " + key.getName().toUri())
+        self.selfSign(key)
+
+        return key
+
+    def deleteKey(self, identity, key):
+        """
+        Delete the given key of the given identity. The key becomes invalid.
+
+        :param PibIdentity identity: A valid PibIdentity object.
+        :param PibKey key: The key to delete.
+        :raises ValueError: If the key does not belong to the identity.
+        """
+        keyName = key.getName()
+        if not identity.getName().equals(key.getIdentityName()):
+            raise ValueError("Identity `" + identity.getName().toUri() +
+              "` does not match key `" + keyName.toUri() + "`")
+
+        identity._removeKey(keyName)
+        self._tpm._deleteKey(keyName)
+
+    def setDefaultKey(self, identity, key):
+        """
+        Set the key as the default key of identity.
+
+        :param PibIdentity identity: A valid PibIdentity object.
+        :param PibKey key: The key to become the default.
+        :raises ValueError: If the key does not belong to the identity.
+        """
+        if not identity.getName().equals(key.getIdentityName()):
+            raise ValueError("Identity `" + identity.getName().toUri() +
+              "` does not match key `" + key.getName().toUri() + "`")
+
+        identity._setDefaultKey(key.getName())
+
     # Certificate management
+
+    def addCertificate(self, key, certificate):
+        """
+        Add a certificate for the key. If the key had no default certificate
+        selected, the added certificate will be set as the default certificate 
+        for this key.
+        
+        :param PibKey key: A valid PibKey object.
+        :param CertificateV2 certificate: The certificate to add. This copies 
+          the object.
+        :raises ValueError: If the key does not match the certificate.
+        :note: This method overwrites a certificate with the same name, without
+          considering the implicit digest.
+        """
+        if (not key.getName().equals(certificate.getKeyName()) or
+              not certificate.getContent().equals(key.getPublicKey())):
+            raise ValueError("Key `" + key.getName().toUri() +
+              "` does not match certificate `" +
+              certificate.getKeyName().toUri() + "`")
+
+        key._addCertificate(certificate)
+
+    def deleteCertificate(self, key, certificateName):
+        """
+        Delete the certificate with the given name from the given key. If the
+        certificate does not exist, this does nothing.
+
+        :param PibKey key: A valid PibKey object.
+        :param Name certificateName: The name of the certificate to delete.
+        :raises ValueError: If certificateName does not follow certificate
+          naming conventions.
+        """
+        if not CertificateV2.isValidName(certificateName):
+            raise ValueError("Wrong certificate name `" +
+              certificateName.toUri() + "`")
+
+        key._removeCertificate(certificateName)
+
+    def setDefaultCertificate(self, key, certificate):
+        """
+        Set the certificate as the default certificate of the key. The
+        certificate will be added to the key, potentially overriding an existing
+        certificate if it has the same name (without considering implicit
+        digest).
+
+        :param PibKey key: A valid PibKey object.
+        :param CertificateV2 certificate: The certificate to become the default.
+          This copies the object.
+        """
+        # This replaces the certificate it it exists.
+        self.addCertificate(key, certificate)
+        key._setDefaultCertificate(certificate.getName())
 
     # Signing
 
@@ -452,9 +595,9 @@ class KeyChain(object):
 
     def createIdentityAndCertificate(self, identityName, params = None):
         """
-        Create an identity by creating a pair of Key-Signing-Key (KSK) for this
-        identity and a self-signed certificate of the KSK. If a key pair or
-        certificate for the identity already exists, use it.
+        Create a security v1 identity by creating a pair of Key-Signing-Key
+        (KSK) for this identity and a self-signed certificate of the KSK. If a
+        key pair or certificate for the identity already exists, use it.
 
         :param Name identityName: The name of the identity.
         :param KeyParams params: (optional) The key parameters if a key needs to
@@ -469,9 +612,9 @@ class KeyChain(object):
 
     def createIdentity(self, identityName, params = None):
         """
-        Create an identity by creating a pair of Key-Signing-Key (KSK) for this
-        identity and a self-signed certificate of the KSK. If a key pair or
-        certificate for the identity already exists, use it.
+        Create a security v1 identity by creating a pair of Key-Signing-Key
+        (KSK) for this identity and a self-signed certificate of the KSK. If a
+        key pair or certificate for the identity already exists, use it.
 
         :deprecated: Use createIdentityAndCertificate which returns the
           certificate name instead of the key name. You can use
