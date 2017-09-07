@@ -68,6 +68,60 @@ class PibIdentity(object):
         """
         return self._lock().getDefaultKey()
 
+    def _addKey(self,  key, keyName):
+        """
+        Add the key. If a key with the same name already exists, overwrite the 
+        key. If no default key for the identity has been set, then set the added 
+        key as default for the identity. This should only be called by KeyChain.
+
+        :param key: The public key bits. This copies the buffer.
+        :type key: an array which implements the buffer protocol
+        :param Name keyName: The name of the key. This copies the name.
+        :return: The PibKey object.
+        :rtype: PibKey
+        """
+        return self._lock().addKey(key, keyName)
+
+    def _removeKey(self, keyName):
+        """
+        Remove the key with keyName and its related certificates. If the key
+        does not exist, do nothing. This should only be called by KeyChain.
+
+        :param Name keyName: The name of the key.
+        """
+        self._lock().removeKey(keyName)
+
+    def _setDefaultKey(self, keyOrKeyName, arg2 = None):
+        """
+        setDefaultKey has two forms:
+        setDefaultKey(keyName) - Set the key with name keyName as the default
+        key of the identity.
+        setDefaultKey(key, keyName) - Add a key with name keyName and set it as
+        the default key of the identity. This should only be called by KeyChain.
+
+        :param key: The buffer of encoded key bytes. (This is only used when
+          calling setDefaultKey(key, keyName). )
+        :type key: an array which implements the buffer protocol
+        :param Name keyName: The name of the key. This copies the name.
+        :return: The PibKey object of the default key.
+        :rtype: PibKey
+        :raises ValueError: If the name of the key does not match the identity
+          name.
+        :raises Pib.Error: If calling setDefaultKey(keyName) and the key does
+          not exist, or if calling setDefaultKey(key, keyName) and a key with
+          the same name already exists.
+        """
+        return self._lock().setDefaultKey(keyOrKeyName, arg2)
+
+    def _getKeys(self):
+        """
+        Get the PibKeyContainer in the PibIdentityImpl. This should only be
+        called by KeyChain.
+
+        :rtype: PibKeyContainer
+        """
+        return self._lock()._keys
+
     def _lock(self):
         """
         Check the validity of the _impl instance.
