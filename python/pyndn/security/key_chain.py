@@ -458,12 +458,12 @@ class KeyChain(object):
 
         :param Name identityName: The name of the identity.
         :param KeyParams params: (optional) The key parameters if a key needs to
-          be generated for the identity. If omitted, use DEFAULT_KEY_PARAMS.
+          be generated for the identity. If omitted, use getDefaultKeyParams().
         :return: The name of the default certificate of the identity.
         :rtype: Name
         """
         if params == None:
-            params = KeyChain.DEFAULT_KEY_PARAMS
+            params = KeyChain.getDefaultKeyParams()
         return self._identityManager.createIdentityAndCertificate(
           identityName, params)
 
@@ -479,7 +479,7 @@ class KeyChain(object):
           certificate name to the key name.
         :param Name identityName: The name of the identity.
         :param KeyParams params: (optional) The key parameters if a key needs to
-          be generated for the identity. If omitted, use DEFAULT_KEY_PARAMS.
+          be generated for the identity. If omitted, use getDefaultKeyParams().
         :return: The key name of the auto-generated KSK of the identity.
         :rtype: Name
         """
@@ -1032,6 +1032,11 @@ class KeyChain(object):
         # Use the flexible Blob.equals operator.
         return newSignatureBits == data.getSignature().getSignature()
 
+    @staticmethod
+    def getDefaultKeyParams():
+        return KeyChain._defaultKeyParams
+
+    # :deprecated: Use getDefaultKeyParams().
     DEFAULT_KEY_PARAMS = RsaKeyParams()
 
     # Private security v2 methods
@@ -1413,6 +1418,7 @@ class KeyChain(object):
     _pibFactories = None # str => MakePibImpl
     _tpmFactories = None # str => MakeTpmBackEnd
     _defaultSigningInfo = SigningInfo()
+    _defaultKeyParams = RsaKeyParams()
 
 class InvalidSigningInfoError(KeyChain.Error):
     """
