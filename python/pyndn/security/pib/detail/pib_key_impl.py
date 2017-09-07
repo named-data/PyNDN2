@@ -48,7 +48,7 @@ class PibKeyImpl(object):
       PibKeyImpl(keyName, keyEncoding, pibImpl) .)
     :type keyEncoding: an array which implements the buffer protocol
     :param PibImpl pibImpl: The Pib backend implementation.
-    :raises Pib.Error If the constructor is the form PibKeyImpl(keyName, pibImpl)
+    :raises Pib.Error: If the constructor is the form PibKeyImpl(keyName, pibImpl)
       (without the keyEncoding) and the key with keyName does not exist.
     """
     def __init__(self, keyName, arg2, arg3 = None):
