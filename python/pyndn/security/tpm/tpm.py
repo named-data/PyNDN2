@@ -241,7 +241,7 @@ class Tpm(object):
         """
         return self._backEnd.exportKey(keyName, password)
 
-    def _importKey(self, keyName, pkcs8, password):
+    def _importPrivateKey(self, keyName, pkcs8, password):
         """
         Import an encoded private key with name keyName in PKCS #8 format,
         possibly passwprd-encrypted. This should only be called by KeyChain.
