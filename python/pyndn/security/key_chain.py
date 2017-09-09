@@ -591,6 +591,37 @@ class KeyChain(object):
 
     # PIB & TPM backend registry
 
+    @staticmethod
+    def registerPibBackend(scheme, makePibImpl):
+        """
+        Add to the PIB factories map where scheme is the key and makePibImpl is
+        the value. If your application has its own PIB implementations, this
+        must be called before creating a KeyChain instance which uses your PIB
+        scheme.
+
+        :param str scheme: The PIB scheme.
+        :param makePibImpl: A callback which takes the PIB location and returns
+          a new PibImpl instance.
+        :type makePibImpl: function object
+        """
+        KeyChain._getPibFactories()[scheme] = makePibImpl
+
+
+    @staticmethod
+    def registerTpmBackend(scheme, makeTpmBackEnd):
+        """
+        Add to the TPM factories map where scheme is the key and makeTpmBackEnd
+        is the value. If your application has its own TPM implementations, this
+        must be called before creating a KeyChain instance which uses your TPM
+        scheme.
+
+        :param str scheme: The TPM scheme.
+        :param makeTpmBackEnd: A callback which takes the TPM location and
+          returns a new TpmBackEnd instance.
+        :type makeTpmBackEnd: function object
+        """
+        KeyChain._getTpmFactories()[scheme] = makeTpmBackEnd
+
     # Security v1 methods
 
     def createIdentityAndCertificate(self, identityName, params = None):
