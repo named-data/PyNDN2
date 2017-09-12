@@ -19,7 +19,7 @@
 
 """
 This module defines the SelfVerifyPolicyManager class which implements a
-PolicyManager to look in the IdentityStorage for the public key with the name in
+PolicyManager to look in the storage for the public key with the name in
 the KeyLocator (if available) and use it to verify the data packet or signed
 interest, without searching a certificate chain. If the public key can't be
 found, the verification fails.
@@ -35,20 +35,27 @@ from pyndn.key_locator import KeyLocator, KeyLocatorType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.policy.policy_manager import PolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
+from pyndn.security.identity.identity_storage import IdentityStorage
 
 class SelfVerifyPolicyManager(PolicyManager):
     """
     Create a new SelfVerifyPolicyManager which will look up the public key in
-    the given identityStorage.
+    the given storage.
 
-    :param IdentityStorage identityStorage: (optional) The IdentityStorage for
-      looking up the public key. This object must remain valid during the life
-      of this SelfVerifyPolicyManager. If omitted, then don't look for a public
-      key with the name in the KeyLocator and rely on the KeyLocator having the
-      full public key DER.
+    :param storage: (optional) The IdentityStorage or PibImpl for looking up the
+      public key. This object must remain valid during the life of this
+      SelfVerifyPolicyManager. If omitted, then don't look for a public key with
+      the name in the KeyLocator and rely on the KeyLocator having the full
+      public key DER.
+    :type storage: IdentityStorage or PibImpl
     """
-    def __init__(self, identityStorage = None):
-        self._identityStorage = identityStorage
+    def __init__(self, storage = None):
+        if isinstance(storage, IdentityStorage):
+            self._identityStorage = storage
+            self._pibImpl = None
+        else:
+            self._identityStorage = None
+            self._pibImpl = storage
 
     def skipVerifyAndTrust(self, dataOrInterest):
         """
@@ -76,7 +83,7 @@ class SelfVerifyPolicyManager(PolicyManager):
     def checkVerificationPolicy(self, dataOrInterest, stepCount, onVerified,
                                 onValidationFailed, wireFormat = None):
         """
-        Look in the IdentityStorage for the public key with the name in the
+        Look in the storage for the public key with the name in the
         KeyLocator (if available) and use it to verify the data packet or
         signed interest. If the public key can't be found, call
         onValidationFailed.
@@ -188,7 +195,7 @@ class SelfVerifyPolicyManager(PolicyManager):
     def _verify(self, signatureInfo, signedBlob, failureReason):
         """
         Check the type of signatureInfo to get the KeyLocator. Look in the
-        IdentityStorage for the public key with the name in the KeyLocator and
+        storage for the public key with the name in the KeyLocator and
         use it to verify the signedBlob. If the public key can't be found,
         return false. (This is a generalized method which can verify both a Data
         packet and an interest.)
@@ -219,7 +226,7 @@ class SelfVerifyPolicyManager(PolicyManager):
 
     def _getPublicKeyDer(self, keyLocator, failureReason):
         """
-        Look in the IdentityStorage for the public key with the name in the
+        Look in the storage for the public key with the name in the
         KeyLocator. If the public key can't be found, return and empty Blob.
 
         :param KeyLocator keyLocator: The KeyLocator.
@@ -245,6 +252,14 @@ class SelfVerifyPolicyManager(PolicyManager):
                 failureReason[0] = (
                   "The identityStorage doesn't have the key named " +
                   keyName.toUri())
+                return Blob()
+        elif (keyLocator.getType() == KeyLocatorType.KEYNAME and
+                self._pibImpl != None):
+            try:
+                return self._pibImpl.getKeyBits(keyLocator.getKeyName())
+            except SecurityException:
+                failureReason[0] = (
+                  "The pibImpl doesn't have the key named " + keyName.toUri())
                 return Blob()
         else:
             # Can't find a key to verify.
