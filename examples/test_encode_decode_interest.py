@@ -21,11 +21,10 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn import KeyLocatorType
 from pyndn import Face
-from pyndn.security import KeyType
 from pyndn.security import KeyChain
-from pyndn.security.identity import IdentityManager
-from pyndn.security.identity import MemoryIdentityStorage
-from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security import SafeBag
+from pyndn.security.pib.pib_memory import PibMemory
+from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
 from pyndn.security.policy import SelfVerifyPolicyManager
 from pyndn.util import Blob
 
@@ -232,22 +231,19 @@ def main():
     freshInterest.getExclude().appendComponent(Name("abc")[0]).appendAny()
     dump(freshInterest.toUri())
 
-    identityStorage = MemoryIdentityStorage()
-    privateKeyStorage = MemoryPrivateKeyStorage()
-    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage),
-                        SelfVerifyPolicyManager(identityStorage))
-
-    # Initialize the storage.
-    keyName = Name("/testname/DSK-123")
-    certificateName = keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
-    identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
-    privateKeyStorage.setKeyPairForKeyName(
-      keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
+    # Set up the KeyChain.
+    pibImpl = PibMemory()
+    keyChain = KeyChain(
+      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
+    # This puts the public key in the pibImpl used by the SelfVerifyPolicyManager.
+    keyChain.importSafeBag(SafeBag
+      (Name("/testname/KEY/123"),
+       Blob(DEFAULT_RSA_PRIVATE_KEY_DER, False),
+       Blob(DEFAULT_RSA_PUBLIC_KEY_DER, False)))
 
     # Make a Face just so that we can sign the interest.
     face = Face("localhost")
-    face.setCommandSigningInfo(keyChain, certificateName)
+    face.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName())
     face.makeCommandInterest(freshInterest)
 
     reDecodedFreshInterest = Interest()
