@@ -26,6 +26,8 @@ should provide, for example TpmBackEndMemory.
 """
 
 from random import SystemRandom
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from pyndn.name import Name
 from pyndn.util.blob import Blob
 from pyndn.security.key_id_type import KeyIdType
@@ -212,9 +214,7 @@ class TpmBackEnd(object):
         """
         if params.getKeyIdType() == KeyIdType.USER_SPECIFIED:
             keyId = params.getKeyId()
-        elif params.getKeyIdType() == KeyIdType.SHA256:
-            digest = Common.digestSha256(keyHandle.derivePublicKey().buf())
-            keyId = Name.Component(digest)
+        # We don't have the keyHandle, so we can't support KeyIdType.SHA256.
         elif params.getKeyIdType() == KeyIdType.RANDOM:
             if params.getKeyId().getValue().size() == 0:
                 raise TpmBackEnd.Error(
@@ -235,7 +235,23 @@ class TpmBackEnd(object):
         :param Name identityName:
         :param KeyParams params:
         """
-        keyHandle.setKeyName(TpmBackEnd.constructKeyName(identityName, params))
+        if params.getKeyIdType() == KeyIdType.USER_SPECIFIED:
+            keyId = params.getKeyId()
+        elif params.getKeyIdType() == KeyIdType.SHA256:
+            sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+            sha256.update(keyHandle.derivePublicKey().toBytes())
+            digest = sha256.finalize()
+            keyId = Name.Component(digest)
+        elif params.getKeyIdType() == KeyIdType.RANDOM:
+            if params.getKeyId().getValue().size() == 0:
+                raise TpmBackEnd.Error(
+                  "setKeyName: The keyId is empty for type RANDOM")
+            keyId = params.getKeyId()
+        else:
+            raise TpmBackEnd.Error(
+              "setKeyName: unrecognized params.getKeyIdType()")
+
+        keyHandle.setKeyName(PibKey.constructKeyName(identityName, keyId))
 
     def _doHasKey(self, keyName):
         """
