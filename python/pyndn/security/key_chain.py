@@ -32,6 +32,8 @@ import inspect
 import logging
 from random import SystemRandom
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import padding, ec
+from cryptography.hazmat.primitives.serialization import load_der_public_key
 from cryptography.hazmat.primitives import hashes, hmac
 from pyndn.name import Name
 from pyndn.interest import Interest
@@ -49,10 +51,12 @@ from pyndn.security.security_exception import SecurityException
 from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.security_types import KeyType
 from pyndn.security.signing_info import SigningInfo
+from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
 from pyndn.security.certificate.identity_certificate import IdentityCertificate
+from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.pib.pib_impl import PibImpl
 from pyndn.security.pib.pib import Pib
 from pyndn.security.pib.pib_key import PibKey
@@ -588,6 +592,105 @@ class KeyChain(object):
         return certificate
 
     # Import and export
+
+    def importSafeBag(self, safeBag, password = None):
+        """
+        Import a certificate and its corresponding private key encapsulated in a
+        SafeBag. If the certificate and key are imported properly, the default
+        setting will be updated as if a new key and certificate is added into
+        this KeyChain.
+
+        :param SafeBag safeBag: The SafeBag containing the certificate and
+          private key. This copies the values from the SafeBag.
+        :param password: (optional) The password for decrypting the private key.
+          If the password is supplied, use it to decrypt the PKCS #8
+          EncryptedPrivateKeyInfo. If the password is omitted or None, import an
+          unencrypted PKCS #8 PrivateKeyInfo.
+        :type password: an array which implements the buffer protocol
+        """
+        certificate = CertificateV2(safeBag.getCertificate())
+        identity = certificate.getIdentity()
+        keyName = certificate.getKeyName()
+        publicKeyBits = certificate.getPublicKey()
+
+        if self._tpm.hasKey(keyName):
+            raise KeyChain.Error("Private key `" + keyName.toUri() +
+              "` already exists")
+
+        try:
+            existingId = self._pib.getIdentity(identity)
+            existingId.getKey(keyName)
+            raise KeyChain.Error("Public key `" + keyName.toUri() +
+              "` already exists")
+        except Pib.Error:
+            # Either the identity or the key doesn't exist, so OK to import.
+            pass
+
+        try:
+            self._tpm._importPrivateKey(
+              keyName, safeBag.getPrivateKeyBag().toBytes(), password)
+        except Exception:
+            raise KeyChain.Error("Failed to import private key `" +
+              keyName.toUri() + "`")
+
+        # Check the consistency of the private key and certificate.
+        content = Blob([0x01, 0x02, 0x03, 0x04])
+        try:
+            signatureBits = self._tpm.sign(
+              content.toBytes(), keyName, DigestAlgorithm.SHA256)
+        except Exception:
+            self._tpm._deleteKey(keyName)
+            raise KeyChain.Error("Invalid private key `" + keyName.toUri() + "`")
+
+        try:
+            publicKey = PublicKey(publicKeyBits)
+        except Exception as ex:
+            # Promote to Pib.Error.
+            self._tpm._deleteKey(keyName)
+            raise Pib.Error("Error decoding public key " + str(ex))
+
+        # TODO: Move verify into PublicKey?
+        isVerified = False
+        try:
+            if publicKey.getKeyType() == KeyType.ECDSA:
+                cryptoPublicKey = load_der_public_key(
+                  publicKey.getKeyDer().toBytes(), backend = default_backend())
+                verifier = cryptoPublicKey.verifier(
+                  signatureBits.toBytes(), ec.ECDSA(hashes.SHA256()))
+                verifier.update(content.toBytes())
+                try:
+                    verifier.verify()
+                    isVerified = True
+                except InvalidSignature:
+                    isVerified = False
+            elif publicKey.getKeyType() == KeyType.RSA:
+                cryptoPublicKey = load_der_public_key(
+                  publicKey.getKeyDer().toBytes(), backend = default_backend())
+                verifier = cryptoPublicKey.verifier(
+                  signatureBits.toBytes(), padding.PKCS1v15(), hashes.SHA256())
+                verifier.update(content.toBytes())
+                try:
+                    verifier.verify()
+                    isVerified = True
+                except InvalidSignature:
+                    isVerified = False
+            else:
+              # We don't expect this.
+              raise ValueError("Unrecognized key type")
+        except Exception as ex:
+            # Promote to Pib.Error.
+            self._tpm._deleteKey(keyName)
+            raise Pib.Error("Error verifying with the public key " + str(ex))
+
+        if not isVerified:
+            self._tpm._deleteKey(keyName)
+            raise KeyChain.Error("Certificate `" + certificate.getName().toUri() +
+              "` and private key `" + keyName.toUri() + "` do not match")
+
+        # The consistency is verified. Add to the PIB.
+        id = self._pib._addIdentity(identity)
+        key = id._addKey(certificate.getPublicKey().toBytes(), keyName)
+        key._addCertificate(certificate)
 
     # PIB & TPM backend registry
 
