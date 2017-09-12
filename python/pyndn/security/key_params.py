@@ -88,10 +88,10 @@ class RsaKeyParams(KeyParams):
     def __init__(self, keyIdOrSize = None, arg2 = None):
         if isinstance(keyIdOrSize, Name.Component):
             keyId = keyIdOrSize
-            super(RsaKeyParams, self).__init__(RsaKeyParams._getType(), keyId)
+            super(RsaKeyParams, self).__init__(RsaKeyParams.getType(), keyId)
 
             if arg2 == None:
-                self._size = RsaKeyParams._getDefaultSize()
+                self._size = RsaKeyParams.getDefaultSize()
             else:
                 self._size = arg2
         else:
@@ -99,22 +99,22 @@ class RsaKeyParams(KeyParams):
             if size != None:
                 keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
                 super(RsaKeyParams, self).__init__(
-                  RsaKeyParams._getType(), keyIdType)
+                  RsaKeyParams.getType(), keyIdType)
                 self._size = size
             else:
                 super(RsaKeyParams, self).__init__(
-                  RsaKeyParams._getType(), KeyIdType.RANDOM)
-                self._size = RsaKeyParams._getDefaultSize()
+                  RsaKeyParams.getType(), KeyIdType.RANDOM)
+                self._size = RsaKeyParams.getDefaultSize()
 
     def getKeySize(self):
         return self._size
 
     @staticmethod
-    def _getDefaultSize():
+    def getDefaultSize():
         return 2048
 
     @staticmethod
-    def _getType():
+    def getType():
         return KeyType.RSA
 
 class EcdsaKeyParams(KeyParams):
@@ -129,10 +129,10 @@ class EcdsaKeyParams(KeyParams):
     def __init__(self, keyIdOrSize = None, arg2 = None):
         if isinstance(keyIdOrSize, Name.Component):
             keyId = keyIdOrSize
-            super(EcdsaKeyParams, self).__init__(EcdsaKeyParams._getType(), keyId)
+            super(EcdsaKeyParams, self).__init__(EcdsaKeyParams.getType(), keyId)
 
             if arg2 == None:
-                self._size = EcdsaKeyParams._getDefaultSize()
+                self._size = EcdsaKeyParams.getDefaultSize()
             else:
                 self._size = arg2
         else:
@@ -140,22 +140,22 @@ class EcdsaKeyParams(KeyParams):
             if size != None:
                 keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
                 super(EcdsaKeyParams, self).__init__(
-                  EcdsaKeyParams._getType(), keyIdType)
+                  EcdsaKeyParams.getType(), keyIdType)
                 self._size = size
             else:
                 super(EcdsaKeyParams, self).__init__(
-                  EcdsaKeyParams._getType(), KeyIdType.RANDOM)
-                self._size = EcdsaKeyParams._getDefaultSize()
+                  EcdsaKeyParams.getType(), KeyIdType.RANDOM)
+                self._size = EcdsaKeyParams.getDefaultSize()
 
     def getKeySize(self):
         return self._size
 
     @staticmethod
-    def _getDefaultSize():
+    def getDefaultSize():
         return 256
 
     @staticmethod
-    def _getType():
+    def getType():
         return KeyType.ECDSA
 
 class AesKeyParams(KeyParams):
@@ -170,10 +170,10 @@ class AesKeyParams(KeyParams):
     def __init__(self, keyIdOrSize = None, arg2 = None):
         if isinstance(keyIdOrSize, Name.Component):
             keyId = keyIdOrSize
-            super(AesKeyParams, self).__init__(AesKeyParams._getType(), keyId)
+            super(AesKeyParams, self).__init__(AesKeyParams.getType(), keyId)
 
             if arg2 == None:
-                self._size = AesKeyParams._getDefaultSize()
+                self._size = AesKeyParams.getDefaultSize()
             else:
                 self._size = arg2
         else:
@@ -181,20 +181,20 @@ class AesKeyParams(KeyParams):
             if size != None:
                 keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
                 super(AesKeyParams, self).__init__(
-                  AesKeyParams._getType(), keyIdType)
+                  AesKeyParams.getType(), keyIdType)
                 self._size = size
             else:
                 super(AesKeyParams, self).__init__(
-                  AesKeyParams._getType(), KeyIdType.RANDOM)
-                self._size = AesKeyParams._getDefaultSize()
+                  AesKeyParams.getType(), KeyIdType.RANDOM)
+                self._size = AesKeyParams.getDefaultSize()
 
     def getKeySize(self):
         return self._size
 
     @staticmethod
-    def _getDefaultSize():
+    def getDefaultSize():
         return 64
 
     @staticmethod
-    def _getType():
+    def getType():
         return KeyType.AES
