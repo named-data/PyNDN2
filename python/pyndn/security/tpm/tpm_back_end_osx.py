@@ -336,6 +336,9 @@ class TpmBackEndOsx(TpmBackEnd):
               TpmBackEndOsx._getAsymmetricKeyType(keyType))
             cf.CFDictionaryAddValue(
               attrDict, osx._kSecAttrKeySizeInBits, cfKeySize)
+            # TODO: Use TpmBackEnd.setKeyName after generating like in ndn-cpp
+            # because constructKeyName doesn't support KeyIdType.SHA256 .
+            # This requires calling SecKeychainItemModifyAttributesAndData.
             keyName = TpmBackEnd.constructKeyName(identityName, params)
             keyLabel = CFSTR(keyName.toUri())
             cf.CFDictionaryAddValue(
