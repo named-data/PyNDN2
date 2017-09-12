@@ -238,9 +238,9 @@ class TestTpmPrivateKey(ut.TestCase):
 
             # TODO: Move verify into PublicKey?
             if dataSet.keyParams.getKeyType() == KeyType.ECDSA:
-                publicKey = load_der_public_key(
+                cryptoPublicKey = load_der_public_key(
                   publicKeyBits.toBytes(), backend = default_backend())
-                verifier = publicKey.verifier(
+                verifier = cryptoPublicKey.verifier(
                   signature.toBytes(), ec.ECDSA(hashes.SHA256()))
                 verifier.update(data.toBytes())
                 try:
@@ -249,9 +249,9 @@ class TestTpmPrivateKey(ut.TestCase):
                 except InvalidSignature:
                     result = False
             elif dataSet.keyParams.getKeyType() == KeyType.RSA:
-                publicKey = load_der_public_key(
+                cryptoPublicKey = load_der_public_key(
                   publicKeyBits.toBytes(), backend = default_backend())
-                verifier = publicKey.verifier(
+                verifier = cryptoPublicKey.verifier(
                   signature.toBytes(), padding.PKCS1v15(), hashes.SHA256())
                 verifier.update(data.toBytes())
                 try:
