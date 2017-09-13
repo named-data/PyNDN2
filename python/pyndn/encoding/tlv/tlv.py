@@ -48,6 +48,7 @@ class Tlv(object):
     SignatureType =    27
     KeyLocator =       28
     KeyLocatorDigest = 29
+    ForwardingHint =   30
     SelectedDelegation = 32
     FaceInstance =     128
     ForwardingEntry =  129
