@@ -146,20 +146,3 @@ class PrivateKeyStorage(object):
           override.
         """
         raise RuntimeError("doesKeyExist is not implemented")
-
-    @staticmethod
-    def getEcCurve(keySize):
-        """
-        Get the Elliptic Curve algorithm object for the key size.
-
-        :param int keySize: The key size.
-        :raises SecurityException: If the key size is not supported.
-        """
-        if keySize == 256:
-            return ec.SECP256R1()
-        elif keySize == 384:
-            return ec.SECP384R1()
-        elif keySize == 521:
-            return ec.SECP521R1()
-        else:
-            raise SecurityException("Unsupported EC key size: " + str(keySize))

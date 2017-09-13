@@ -24,9 +24,9 @@ from pyndn import Data
 from pyndn import KeyLocatorType
 from pyndn.security import KeyType
 from pyndn.security import KeyChain
-from pyndn.security.identity import IdentityManager
-from pyndn.security.identity import MemoryIdentityStorage
-from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security import SafeBag
+from pyndn.security.pib.pib_memory import PibMemory
+from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
 from pyndn.security.policy import SelfVerifyPolicyManager
 
 def getNowSeconds():
@@ -190,19 +190,16 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto, keyType):
     finalBlockId = Name("/%00")[0]
 
     # Initialize the private key storage in case useCrypto is true.
-    identityStorage = MemoryIdentityStorage()
-    privateKeyStorage = MemoryPrivateKeyStorage()
-    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage),
-                        SelfVerifyPolicyManager(identityStorage))
-    keyName = Name("/testname/DSK-123")
-    certificateName = keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
-    identityStorage.addKey(keyName, keyType, Blob(
-      DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PUBLIC_KEY_DER))
-    privateKeyStorage.setKeyPairForKeyName(
-      keyName, keyType,
-      DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PUBLIC_KEY_DER,
-      DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PRIVATE_KEY_DER)
+    pibImpl = PibMemory()
+    keyChain = KeyChain(
+      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
+    keyChain.importSafeBag(SafeBag
+      (Name("/testname/KEY/123"),
+       Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA
+            else DEFAULT_RSA_PRIVATE_KEY_DER, False),
+       Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA
+            else DEFAULT_RSA_PUBLIC_KEY_DER, False)))
+    certificateName = keyChain.getDefaultCertificateName()
 
     # Set up signatureBits in case useCrypto is false.
     signatureBits = Blob(bytearray(256))
@@ -217,7 +214,7 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto, keyType):
 
         if useCrypto:
             # This sets the signature fields.
-            keyChain.sign(data, certificateName)
+            keyChain.sign(data)
         else:
             # Imitate IdentityManager.signByCertificate to set up the signature
             # fields, but don't sign.
@@ -253,14 +250,16 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
     :rtype: float
     """
     # Initialize the private key storage in case useCrypto is true.
-    identityStorage = MemoryIdentityStorage()
-    privateKeyStorage = MemoryPrivateKeyStorage()
-    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage),
-                        SelfVerifyPolicyManager(identityStorage))
-    keyName = Name("/testname/DSK-123")
-    identityStorage.addKey(
-      keyName, keyType, Blob(
-      DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA else DEFAULT_RSA_PUBLIC_KEY_DER))
+    pibImpl = PibMemory()
+    keyChain = KeyChain(
+      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
+    # This puts the public key in the pibImpl used by the SelfVerifyPolicyManager.
+    keyChain.importSafeBag(SafeBag
+      (Name("/testname/KEY/123"),
+       Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA
+            else DEFAULT_RSA_PRIVATE_KEY_DER, False),
+       Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA
+            else DEFAULT_RSA_PUBLIC_KEY_DER, False)))
 
     start = getNowSeconds()
     for i in range(nIterations):

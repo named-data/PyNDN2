@@ -23,16 +23,13 @@ This module defines the MemoryPrivateKeyStorage class which extends
 PrivateKeyStorage to implement private key storage in memory.
 """
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, rsa, ec
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.certificate.public_key import PublicKey
+from pyndn.security.tpm.tpm_private_key import TpmPrivateKey
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
 
 class MemoryPrivateKeyStorage(PrivateKeyStorage):
@@ -40,7 +37,7 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         super(MemoryPrivateKeyStorage, self).__init__()
         # The key is the keyName.toUri(). The value is security.certificate.PublicKey.
         self._publicKeyStore = {}
-        # The key is the keyName.toUri(). The value is self.PrivateKey.
+        # The key is the keyName.toUri(). The value is TpmPrivateKey.
         self._privateKeyStore = {}
 
     def setPublicKeyForKeyName(self, keyName, keyType, publicKeyDer):
@@ -68,8 +65,12 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :type privateKeyDer: str, or an array type with int elements which is
           converted to str
         """
-        self._privateKeyStore[keyName.toUri()] = self.PrivateKey(
-          keyType, privateKeyDer)
+        privateKey = TpmPrivateKey()
+        try:
+            privateKey.loadPkcs8(privateKeyDer, keyType)
+        except Exception as ex:
+            raise SecurityException("Error in loadPkcs8: " + str(ex))
+        self._privateKeyStore[keyName.toUri()] = privateKey
 
     def setKeyPairForKeyName(
           self, keyName, keyType, publicKeyDer, privateKeyDer = None):
@@ -103,29 +104,20 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :param Name keyName: The name of the key pair.
         :param KeyParams params: The parameters of the key.
         """
-        if (params.getKeyType() == KeyType.RSA or
-            params.getKeyType() == KeyType.ECDSA):
-            if params.getKeyType() == KeyType.RSA:
-                privateKey = rsa.generate_private_key(
-                  public_exponent = 65537, key_size = params.getKeySize(),
-                  backend = default_backend())
-            else:
-                privateKey = ec.generate_private_key(
-                  PrivateKeyStorage.getEcCurve(params.getKeySize()),
-                  default_backend())
+        privateKey = None
+        try:
+            privateKey = TpmPrivateKey.generatePrivateKey(params)
+        except Exception as ex:
+            raise SecurityException("Error in generatePrivateKey: " + str(ex))
 
-            self.setPublicKeyForKeyName(
-              keyName, params.getKeyType(), privateKey.public_key().public_bytes(
-                encoding = serialization.Encoding.DER,
-                format = serialization.PublicFormat.SubjectPublicKeyInfo))
-            self.setPrivateKeyForKeyName(
-              keyName, params.getKeyType(), privateKey.private_bytes(
-                encoding = serialization.Encoding.DER,
-                format = serialization.PrivateFormat.PKCS8,
-                encryption_algorithm = serialization.NoEncryption()))
-        # TODO generate ECDSA keys
-        else:
-            raise RuntimeError("generateKeyPair: KeyType is not supported")
+        publicKeyDer = None
+        try:
+            publicKeyDer = privateKey.derivePublicKey()
+        except Exception as ex:
+            raise SecurityException("Error in derivePublicKey: " + str(ex))
+
+        self._privateKeyStore[keyName.toUri()] = privateKey
+        self._publicKeyStore[keyName.toUri()] = PublicKey(publicKeyDer)
 
     def deleteKeyPair(self, keyName):
         """
@@ -176,10 +168,6 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         :rtype: Blob
         :raises SecurityException: if can't find the private key with keyName.
         """
-        if digestAlgorithm != DigestAlgorithm.SHA256:
-            raise SecurityException(
-              "MemoryPrivateKeyStorage.sign: Unsupported digest algorithm")
-
         # Find the private key.
         keyUri = keyName.toUri()
         if not keyUri in self._privateKeyStore:
@@ -187,21 +175,10 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
               "MemoryPrivateKeyStorage: Cannot find private key " + keyUri)
         privateKey = self._privateKeyStore[keyUri]
 
-        # Sign the data.
-        data = Blob(data, False).toBytes()
-        if (privateKey.getKeyType() == KeyType.RSA or
-            privateKey.getKeyType() == KeyType.ECDSA):
-            if privateKey.getKeyType() == KeyType.RSA:
-                signer = privateKey.getPrivateKey().signer(
-                  padding.PKCS1v15(), hashes.SHA256())
-            else:
-                signer = privateKey.getPrivateKey().signer(ec.ECDSA(hashes.SHA256()))
-
-            signer.update(data)
-            return Blob(bytearray(signer.finalize()), False)
-        else:
-            raise SecurityException(
-              "MemoryPrivateKeyStorage.sign: Unrecognized private key type")
+        try:
+            return privateKey.sign(Blob(data, False).toBytes(), digestAlgorithm)
+        except Exception as ex:
+            raise SecurityException("Error in sign: " + str(ex))
 
     def doesKeyExist(self, keyName, keyClass):
         """
@@ -222,26 +199,3 @@ class MemoryPrivateKeyStorage(PrivateKeyStorage):
         else:
           # KeyClass.SYMMETRIC not implemented yet.
           return False
-
-    class PrivateKey:
-        """
-        PrivateKey is a simple class to hold a cryptography key object along
-        with a KeyType.
-        """
-        def __init__(self, keyType, keyData):
-            self._keyType = keyType
-
-            keyData = Blob(keyData, False).toBytes()
-
-            if keyType == KeyType.ECDSA or keyType == KeyType.RSA:
-                self._privateKey = serialization.load_der_private_key(
-                  keyData, password = None, backend = default_backend())
-            else:
-                raise SecurityException(
-                  "PrivateKey constructor: Unrecognized keyType")
-
-        def getKeyType(self):
-            return self._keyType
-
-        def getPrivateKey(self):
-            return self._privateKey

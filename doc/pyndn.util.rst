@@ -1,6 +1,13 @@
 pyndn.util package
 ==================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pyndn.util.regex
+
 Submodules
 ----------
 
@@ -72,14 +79,6 @@ pyndn.util.memory_content_cache module
 --------------------------------------
 
 .. automodule:: pyndn.util.memory_content_cache
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pyndn.util.ndn_regex module
----------------------------
-
-.. automodule:: pyndn.util.ndn_regex
     :members:
     :undoc-members:
     :show-inheritance:

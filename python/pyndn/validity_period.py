@@ -121,6 +121,42 @@ class ValidityPeriod(object):
         """
         return self._notBefore <= time and time <= self._notAfter
 
+    @staticmethod
+    def canGetFromSignature(signature):
+        """
+        If the signature is a type that has a ValidityPeriod (so that
+        getFromSignature will succeed), return true.
+        Note: This is a static method of ValidityPeriod instead of a method of
+        Signature so that the Signature base class does not need to be overloaded
+        with all the different kinds of information that various signature
+        algorithms may use.
+
+        :param Signature signature: An object of a subclass of Signature.
+        :return: True if the signature is a type that has a ValidityPeriod,
+          otherwise False.
+        :rtype: bool
+        """
+        return (type(signature) is pyndn.sha256_with_ecdsa_signature.Sha256WithEcdsaSignature or
+                type(signature) is pyndn.sha256_with_rsa_signature.Sha256WithRsaSignature)
+
+    @staticmethod
+    def getFromSignature(signature):
+        """
+        If the signature is a type that has a ValidityPeriod, then return it. Otherwise
+        throw an error.
+
+        :param Signature signature: An object of a subclass of Signature.
+        :return: The signature's ValidityPeriod. It is an error if signature doesn't
+          have a ValidityPeriod.
+        :rtype: ValidityPeriod
+        """
+        if (type(signature) is pyndn.sha256_with_ecdsa_signature.Sha256WithEcdsaSignature or
+            type(signature) is pyndn.sha256_with_rsa_signature.Sha256WithRsaSignature):
+            return signature.getValidityPeriod()
+        else:
+            raise RuntimeError(
+              "ValidityPeriod.getFromSignature: Signature type does not have a ValidityPeriod")
+
     def getChangeCount(self):
         """
         Get the change count, which is incremented each time this object is
@@ -130,3 +166,7 @@ class ValidityPeriod(object):
         :rtype: int
         """
         return self._changeCount
+
+# Put these last to avoid an import loop.
+import pyndn.sha256_with_ecdsa_signature
+import pyndn.sha256_with_rsa_signature

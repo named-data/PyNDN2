@@ -8,7 +8,10 @@ Subpackages
 
     pyndn.security.certificate
     pyndn.security.identity
+    pyndn.security.pib
     pyndn.security.policy
+    pyndn.security.tpm
+    pyndn.security.v2
 
 Submodules
 ----------
@@ -17,6 +20,14 @@ pyndn.security.key_chain module
 -------------------------------
 
 .. automodule:: pyndn.security.key_chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.key_id_type module
+---------------------------------
+
+.. automodule:: pyndn.security.key_id_type
     :members:
     :undoc-members:
     :show-inheritance:
@@ -41,6 +52,14 @@ pyndn.security.security_types module
 ------------------------------------
 
 .. automodule:: pyndn.security.security_types
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.signing_info module
+----------------------------------
+
+.. automodule:: pyndn.security.signing_info
     :members:
     :undoc-members:
     :show-inheritance:

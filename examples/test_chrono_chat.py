@@ -30,11 +30,10 @@ from pyndn import Name
 from pyndn import Interest
 from pyndn import Data
 from pyndn import Face
-from pyndn.security import KeyType
 from pyndn.security import KeyChain
-from pyndn.security.identity import IdentityManager
-from pyndn.security.identity import MemoryIdentityStorage
-from pyndn.security.identity import MemoryPrivateKeyStorage
+from pyndn.security import SafeBag
+from pyndn.security.pib.pib_memory import PibMemory
+from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
 from pyndn.security.policy import NoVerifyPolicyManager
 from pyndn.util import Blob
 from pyndn.sync import ChronoSync2013
@@ -489,24 +488,20 @@ def main():
       screenName)
     print("")
 
-    # Set up the key chain.
     face = Face(host)
 
-    identityStorage = MemoryIdentityStorage()
-    privateKeyStorage = MemoryPrivateKeyStorage()
-    keyChain = KeyChain(IdentityManager(identityStorage, privateKeyStorage),
-                        NoVerifyPolicyManager())
-    keyChain.setFace(face)
-    keyName = Name("/testname/DSK-123")
-    certificateName = keyName.getSubName(0, keyName.size() - 1).append(
-      "KEY").append(keyName[-1]).append("ID-CERT").append("0")
-    identityStorage.addKey(keyName, KeyType.RSA, Blob(DEFAULT_RSA_PUBLIC_KEY_DER))
-    privateKeyStorage.setKeyPairForKeyName(
-      keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
-    face.setCommandSigningInfo(keyChain, certificateName)
+    # Set up the key chain.
+    pibImpl = PibMemory()
+    keyChain = KeyChain(pibImpl, TpmBackEndMemory(), NoVerifyPolicyManager())
+    keyChain.importSafeBag(SafeBag
+      (Name("/testname/KEY/123"),
+       Blob(DEFAULT_RSA_PRIVATE_KEY_DER, False),
+       Blob(DEFAULT_RSA_PUBLIC_KEY_DER, False)))
+    face.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName())
 
     chat = Chat(
-      screenName, chatRoom, Name(hubPrefix), face, keyChain, certificateName)
+      screenName, chatRoom, Name(hubPrefix), face, keyChain,
+      keyChain.getDefaultCertificateName())
 
     # The main loop to process Chat while checking stdin to send a message.
     print("Enter your chat message. To quit, enter \"leave\" or \"exit\".")

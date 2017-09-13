@@ -27,17 +27,15 @@ import os
 import stat
 import base64
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, rsa, ec
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from pyndn.util.blob import Blob
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyClass
-from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.identity.private_key_storage import PrivateKeyStorage
-from pyndn.encoding.der.der_node import DerNode
+from pyndn.util.common import Common
+from pyndn.security.tpm.tpm_private_key import TpmPrivateKey
 
 class FilePrivateKeyStorage(PrivateKeyStorage):
     """
@@ -68,29 +66,12 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         if self.doesKeyExist(keyName, KeyClass.PRIVATE):
             raise SecurityException("Private key already exists")
 
-        publicKeyDer = None
-        privateKeyDer = None
-
-        if (params.getKeyType() == KeyType.RSA or
-            params.getKeyType() == KeyType.ECDSA):
-            if params.getKeyType() == KeyType.RSA:
-                privateKey = rsa.generate_private_key(
-                  public_exponent = 65537, key_size = params.getKeySize(),
-                  backend = default_backend())
-            else:
-                privateKey = ec.generate_private_key(
-                  PrivateKeyStorage.getEcCurve(params.getKeySize()),
-                  default_backend())
-
-            publicKeyDer = privateKey.public_key().public_bytes(
-              encoding = serialization.Encoding.DER,
-              format = serialization.PublicFormat.SubjectPublicKeyInfo)
-            privateKeyDer = privateKey.private_bytes(
-              encoding = serialization.Encoding.DER,
-              format = serialization.PrivateFormat.PKCS8,
-              encryption_algorithm = serialization.NoEncryption())
-        else:
-            raise SecurityException("Unsupported key type")
+        try:
+            privateKey = TpmPrivateKey.generatePrivateKey(params)
+            privateKeyDer = privateKey.toPkcs8().toBytes()
+            publicKeyDer = privateKey.derivePublicKey().toBytes()
+        except Exception as ex:
+            raise SecurityException("Error in generatePrivateKey: " + str(ex))
 
         keyUri = keyName.toUri()
         keyFilePathNoExtension = self.maintainMapping(keyUri)
@@ -98,9 +79,9 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         privateKeyFilePath = keyFilePathNoExtension + ".pri"
 
         with open(publicKeyFilePath, 'w') as keyFile:
-            keyFile.write(Blob(base64.b64encode(publicKeyDer), False).toRawStr())
+            keyFile.write(Common.base64Encode(publicKeyDer, True))
         with open(privateKeyFilePath, 'w') as keyFile:
-            keyFile.write(Blob(base64.b64encode(privateKeyDer), False).toRawStr())
+            keyFile.write(Common.base64Encode(privateKeyDer, True))
 
         os.chmod(publicKeyFilePath,  stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         os.chmod(privateKeyFilePath, stat.S_IRUSR)
@@ -159,40 +140,18 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
             raise SecurityException(
               "FilePrivateKeyStorage.sign: private key doesn't exist")
 
-        if digestAlgorithm != DigestAlgorithm.SHA256:
-            raise SecurityException(
-              "FilePrivateKeyStorage.sign: Unsupported digest algorithm")
-
         # Read the private key.
         base64Content = None
         with open(self.nameTransform(keyURI, ".pri")) as keyFile:
             base64Content = keyFile.read()
-        der = Blob(base64.b64decode(base64Content), False)
+        pkcs8Der = base64.b64decode(base64Content)
 
-        # Decode the PKCS #8 key to get the algorithm OID.
-        parsedNode = DerNode.parse(der.buf(), 0)
-        pkcs8Children = parsedNode.getChildren()
-        algorithmIdChildren = DerNode.getSequence(pkcs8Children, 1).getChildren()
-        oidString = algorithmIdChildren[0].toVal()
-
-        privateKey = serialization.load_der_private_key(
-          der.toBytes(), password = None, backend = default_backend())
-
-        # Sign the data.
-        data = Blob(data, False).toBytes()
-        if (oidString == PublicKey.RSA_ENCRYPTION_OID or
-            oidString == PublicKey.EC_ENCRYPTION_OID):
-            if oidString == PublicKey.RSA_ENCRYPTION_OID:
-                signer = privateKey.signer(padding.PKCS1v15(), hashes.SHA256())
-            else:
-                signer = privateKey.signer(ec.ECDSA(hashes.SHA256()))
-
-            signer.update(data)
-            signature = signer.finalize()
-            return Blob(bytearray(signature), False)
-        else:
-            raise SecurityException(
-              "FilePrivateKeyStorage.sign: Unrecognized private key type")
+        privateKey = TpmPrivateKey()
+        try:
+            privateKey.loadPkcs8(pkcs8Der)
+            return privateKey.sign(Blob(data, False).toBytes(), digestAlgorithm)
+        except Exception as ex:
+            raise SecurityException("Error in sign: " + str(ex))
 
     def decrypt(self, keyName, data, isSymmetric = False):
         """
@@ -268,10 +227,7 @@ class FilePrivateKeyStorage(PrivateKeyStorage):
         sha256.update(Blob(keyName, False).toBytes())
         hash = sha256.finalize()
 
-        digest = base64.b64encode(hash)
-        if type(digest) != str:
-            # In Python 3, this is bytes, so convert to a str.
-            digest = "".join(map(chr, digest))
+        digest = Common.base64Encode(hash)
         digest = digest.strip()
         digest = digest.replace('/', '%')
 
