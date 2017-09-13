@@ -111,7 +111,9 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (Blob, int, int)
         """
-        if haveModule_pyndn:
+        # TODO: Support forwarding hint in C bindings.
+        #if haveModule_pyndn:
+        if haveModule_pyndn and interest.getForwardingHint().size() == 0:
             # Use the C bindings.
             result = _pyndn.Tlv0_1_1WireFormat_encodeInterest(interest)
             return (Blob(result[0], False), result[1], result[2])
@@ -120,6 +122,20 @@ class Tlv0_2WireFormat(WireFormat):
         saveLength = len(encoder)
 
         # Encode backwards.
+        if interest.getForwardingHint().size() > 0:
+            if interest.getSelectedDelegationIndex() >= 0:
+                raise RuntimeError(
+                  "An Interest may not have a selected delegation when encoding a forwarding hint")
+            if interest.hasLink():
+                raise RuntimeError(
+                  "An Interest may not have a link object when encoding a forwarding hint")
+
+            forwardingHintSaveLength = len(encoder)
+            Tlv0_2WireFormat._encodeDelegationSet(
+              interest.getForwardingHint(), encoder)
+            encoder.writeTypeAndLength(
+              Tlv.ForwardingHint, len(encoder) - forwardingHintSaveLength)
+
         encoder.writeOptionalNonNegativeIntegerTlv(
           Tlv.SelectedDelegation, interest.getSelectedDelegationIndex())
         linkWireEncoding = interest.getLinkWireEncoding(self)
@@ -192,9 +208,10 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (int, int)
         """
-        if haveModule_pyndn:
-            # Use the C bindings.
-            return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
+        # TODO: Support forwarding hint in C bindings.
+        #if haveModule_pyndn:
+        #    # Use the C bindings.
+        #    return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
 
         decoder = TlvDecoder(input)
 
@@ -207,6 +224,14 @@ class Tlv0_2WireFormat(WireFormat):
         interest.setInterestLifetimeMilliseconds(
            decoder.readOptionalNonNegativeIntegerTlvAsFloat
            (Tlv.InterestLifetime, endOffset))
+
+        if decoder.peekType(Tlv.ForwardingHint, endOffset):
+            forwardingHintEndOffset = decoder.readNestedTlvsStart(
+              Tlv.ForwardingHint)
+            Tlv0_2WireFormat._decodeDelegationSet(
+              interest.getForwardingHint(), forwardingHintEndOffset, decoder,
+              copy)
+            decoder.finishNestedTlvs(forwardingHintEndOffset)
 
         if decoder.peekType(Tlv.Data, endOffset):
             # Get the bytes of the Link TLV.
@@ -574,17 +599,7 @@ class Tlv0_2WireFormat(WireFormat):
         :rtype: Blob
         """
         encoder = TlvEncoder(256)
-
-        # Encode backwards.
-        for i in range(delegationSet.size() - 1, -1, -1):
-            saveLength = len(encoder)
-
-            Tlv0_2WireFormat._encodeName(delegationSet.get(i).getName(), encoder)
-            encoder.writeNonNegativeIntegerTlv(
-              Tlv.Link_Preference, delegationSet.get(i).getPreference())
-
-            encoder.writeTypeAndLength(
-              Tlv.Link_Delegation, len(encoder) - saveLength)
+        Tlv0_2WireFormat._encodeDelegationSet(delegationSet, encoder)
 
         return Blob(encoder.getOutput(), False)
 
@@ -606,18 +621,8 @@ class Tlv0_2WireFormat(WireFormat):
           If omitted, use True.
         """
         decoder = TlvDecoder(input)
-        endOffset = len(input)
-
-        delegationSet.clear()
-        while decoder.getOffset() < endOffset:
-            decoder.readTypeAndLength(Tlv.Link_Delegation)
-            preference = decoder.readNonNegativeIntegerTlv(Tlv.Link_Preference)
-            name = Name()
-            Tlv0_2WireFormat._decodeName(name, decoder, copy)
-
-            # Add unsorted to preserve the order so that Interest selected
-            # delegation index will work.
-            delegationSet.addUnsorted(preference, name)
+        Tlv0_2WireFormat._decodeDelegationSet(
+          delegationSet, len(input), decoder, copy)
 
     def encodeEncryptedContent(self, encryptedContent):
         """
@@ -1236,6 +1241,56 @@ class Tlv0_2WireFormat(WireFormat):
             Tlv.ControlParameters_ExpirationPeriod, endOffset))
 
         decoder.finishNestedTlvs(endOffset)
+
+    @staticmethod
+    def _encodeDelegationSet(delegationSet, encoder):
+        """
+        Encode delegationSet to the encoder as a sequence of NDN-TLV Delegation.
+        Note that the sequence of Delegation does not have an outer TLV type and
+        length because (when used in a Link object) it is intended to use the
+        type and length of a Data packet's Content.
+
+        :param DelegationSet delegationSet: The DelegationSet object to encode.
+        :param TlvEncoder encoder The TlvEncoder to receive the encoding.
+        """
+        # Encode backwards.
+        for i in range(delegationSet.size() - 1, -1, -1):
+            saveLength = len(encoder)
+
+            Tlv0_2WireFormat._encodeName(delegationSet.get(i).getName(), encoder)
+            encoder.writeNonNegativeIntegerTlv(
+              Tlv.Link_Preference, delegationSet.get(i).getPreference())
+
+            encoder.writeTypeAndLength(
+              Tlv.Link_Delegation, len(encoder) - saveLength)
+
+    @staticmethod
+    def _decodeDelegationSet(delegationSet, endOffset, decoder, copy):
+        """
+        Decode input as a sequence of NDN-TLV Delegation and set the fields of
+        the delegationSet object. Note that the sequence of Delegation does not
+        have an outer TLV type and length because (when used in a Link object)
+        it is intended to use the type and length of a Data packet's Content.
+
+        :param DelegationSet delegationSet: The DelegationSet object whose
+          fields are updated.
+        :param int endOffset: Decode elements up to endOffset in the input. This
+          does not call finishNestedTlvs.
+        :param TlvDecoder decoder: The decoder with the input to decode.
+        :param bool copy: If True, copy from the input when making new Blob
+          values. If False, then Blob values share memory with the input, which
+          must remain unchanged while the Blob values are used.
+        """
+        delegationSet.clear()
+        while decoder.getOffset() < endOffset:
+            decoder.readTypeAndLength(Tlv.Link_Delegation)
+            preference = decoder.readNonNegativeIntegerTlv(Tlv.Link_Preference)
+            name = Name()
+            Tlv0_2WireFormat._decodeName(name, decoder, copy)
+
+            # Add unsorted to preserve the order so that Interest selected
+            # delegation index will work.
+            delegationSet.addUnsorted(preference, name)
 
     @staticmethod
     def toIsoString(msSince1970):
