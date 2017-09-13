@@ -31,6 +31,7 @@ from pyndn.name import Name
 from pyndn.key_locator import KeyLocator
 from pyndn.exclude import Exclude
 from pyndn.link import Link
+from pyndn.delegation_set import DelegationSet
 from pyndn.lp.incoming_face_id import IncomingFaceId
 
 class Interest(object):
@@ -47,6 +48,7 @@ class Interest(object):
 
             self._nonce = value.getNonce()
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
+            self._forwardingHint = ChangeCounter(DelegationSet(value.getForwardingHint()))
             self._linkWireEncoding = value._linkWireEncoding
             self._linkWireEncodingFormat = value._linkWireEncodingFormat
             self._link = ChangeCounter(None)
@@ -67,6 +69,7 @@ class Interest(object):
 
             self._nonce = Blob()
             self._interestLifetimeMilliseconds = None
+            self._forwardingHint = ChangeCounter(DelegationSet())
             self._linkWireEncoding = Blob()
             self._linkWireEncodingFormat = None
             self._link = ChangeCounter(None)
@@ -160,6 +163,16 @@ class Interest(object):
 
         return self._nonce
 
+    def getForwardingHint(self):
+        """
+        Get the forwarding hint object which you can modify to add or remove
+        forwarding hints.
+
+        :return: The forwarding hint as a DelegationSet.
+        :rtype: DelegationSet
+        """
+        return self._forwardingHint.get()
+
     def hasLink(self):
         """
         Check if this interest has a link object (or a link wire encoding which
@@ -167,6 +180,7 @@ class Interest(object):
 
         :return:  True if this interest has a link object, False if not.
         :rtype: bool
+        :deprecated: Use getForwardingHint.
         """
         return self._link.get() != None or not self._linkWireEncoding.isNull()
 
@@ -178,6 +192,7 @@ class Interest(object):
         :rtype: Link
         :raises ValueError: For error decoding the link wire encoding (if
           necessary).
+        :deprecated: Use getForwardingHint.
         """
         if self._link.get() != None:
             return self._link.get()
@@ -206,6 +221,7 @@ class Interest(object):
         :return: The wire encoding, or an isNull Blob if the link is not
           specified.
         :rtype: Blob
+        :deprecated: Use getForwardingHint.
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
@@ -227,6 +243,7 @@ class Interest(object):
 
         :return: The selected delegation index. If not specified, return None.
         :rtype: int
+        :deprecated: Use getForwardingHint.
         """
         return self._selectedDelegationIndex
 
@@ -322,6 +339,26 @@ class Interest(object):
         self._changeCount += 1
         return self
 
+    def setForwardingHint(self, forwardingHint):
+        """
+        Set this interest to use a copy of the given DelegationSet object as the
+        forwarding hint.
+
+        :note: You can also call getForwardingHint and change the forwarding
+          hint directly.
+        :param DelegationSet forwardingHint: The DelegationSet object to use as
+          the forwarding  hint. This makes a copy of the object. If no
+          forwarding hint is specified, set to a new default DelegationSet()
+          with no entries.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        self._forwardingHint.set(
+          DelegationSet(forwardingHint) if type(forwardingHint) is DelegationSet
+                        else DelegationSet())
+        self._changeCount += 1
+        return self
+
     def setLinkWireEncoding(self, encoding, wireFormat = None):
         """
         Set the link wire encoding bytes, without decoding them. If there is a
@@ -335,6 +372,7 @@ class Interest(object):
           WireFormat.getDefaultWireFormat().
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
+        :deprecated: Use setForwardingHint.
         """
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
@@ -356,6 +394,7 @@ class Interest(object):
 
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
+        :deprecated: Use setForwardingHint.
         """
         return self.setLinkWireEncoding(Blob(), None)
 
@@ -367,6 +406,7 @@ class Interest(object):
           not specified, set to None.
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
+        :deprecated: Use setForwardingHint.
         """
         self._selectedDelegationIndex = Common.nonNegativeIntOrNone(selectedDelegationIndex)
         self._changeCount += 1
@@ -711,6 +751,7 @@ class Interest(object):
         changed = self._name.checkChanged()
         changed = self._keyLocator.checkChanged() or changed
         changed = self._exclude.checkChanged() or changed
+        changed = self._forwardingHint.checkChanged() or changed
         if changed:
             # A child object has changed, so update the change count.
             self._changeCount += 1

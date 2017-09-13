@@ -45,6 +45,8 @@ class DelegationSet(object):
         else:
             self._delegations = [] # of DelegationSet.Delegation.
 
+        self._changeCount = 0
+
     class Delegation(object):
         """
         A DelegationSet.Delegation holds a preference number and delegation name.
@@ -116,6 +118,7 @@ class DelegationSet(object):
           i += 1
 
         self._delegations.insert(i, newDelegation)
+        self._changeCount += 1
 
     def addUnsorted(self, preference, name):
         """
@@ -128,6 +131,7 @@ class DelegationSet(object):
         :param Name name: The delegation name. This makes a copy of the name.
         """
         self._delegations.append(DelegationSet.Delegation(preference, name))
+        self._changeCount += 1
 
     def remove(self, name):
         """
@@ -148,6 +152,8 @@ class DelegationSet(object):
                 self._delegations.pop(i)
             i -= 1
 
+        if wasRemoved:
+            self._changeCount += 1
         return wasRemoved
 
     def clear(self):
@@ -155,6 +161,7 @@ class DelegationSet(object):
         Clear the list of delegations.
         """
         self._delegations = []
+        self._changeCount += 1
 
     def size(self):
         """
@@ -226,3 +233,13 @@ class DelegationSet(object):
           wireFormat.decodeDelegationSet(self, input.buf(), False)
         else:
           wireFormat.decodeDelegationSet(self, input, True)
+
+    def getChangeCount(self):
+        """
+        Get the change count, which is incremented each time this object is
+        changed.
+
+        :return: The change count.
+        :rtype: int
+        """
+        return self._changeCount

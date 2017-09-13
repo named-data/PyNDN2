@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.5beta1 (2017-08-11)
+Interim changes since PyNDN v2.5beta1 (2017-09-13)
 --------------------------------------------------
 
 Bug fixes
@@ -8,6 +8,11 @@ Bug fixes
 Changes
 * https://redmine.named-data.net/issues/3812 In encrypt GroupManager, save private
   keys in memory to avoid regenerate group key pairs.
+* https://redmine.named-data.net/issues/4251 Added Interest get/setForwardingHint.
+
+Deprecated
+* In Interest, deprecated link object and selected delegation methods.
+  Use get/setForwardingHint.
 
 PyNDN v2.5beta1 (2017-03-16)
 ----------------------------
