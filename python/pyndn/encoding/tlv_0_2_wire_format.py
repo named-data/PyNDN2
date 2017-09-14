@@ -111,9 +111,7 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (Blob, int, int)
         """
-        # TODO: Support forwarding hint in C bindings.
-        #if haveModule_pyndn:
-        if haveModule_pyndn and interest.getForwardingHint().size() == 0:
+        if haveModule_pyndn:
             # Use the C bindings.
             result = _pyndn.Tlv0_1_1WireFormat_encodeInterest(interest)
             return (Blob(result[0], False), result[1], result[2])
@@ -208,10 +206,9 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (int, int)
         """
-        # TODO: Support forwarding hint in C bindings.
-        #if haveModule_pyndn:
-        #    # Use the C bindings.
-        #    return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
+        if haveModule_pyndn:
+            # Use the C bindings.
+            return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
 
         decoder = TlvDecoder(input)
 
