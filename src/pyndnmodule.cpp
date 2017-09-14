@@ -31,6 +31,7 @@ public:
     getExclude = Py_BuildValue("s", "getExclude");
     getFinalBlockId = Py_BuildValue("s", "getFinalBlockId");
     getFreshnessPeriod = Py_BuildValue("s", "getFreshnessPeriod");
+    getForwardingHint = Py_BuildValue("s", "getForwardingHint");
     getInterestLifetimeMilliseconds = Py_BuildValue("s", "getInterestLifetimeMilliseconds");
     getKeyData = Py_BuildValue("s", "getKeyData");
     getKeyLocator = Py_BuildValue("s", "getKeyLocator");
@@ -71,7 +72,10 @@ public:
     setSignature = Py_BuildValue("s", "setSignature");
     setSignatureInfoEncoding = Py_BuildValue("s", "setSignatureInfoEncoding");
     setType = Py_BuildValue("s", "setType");
+    size = Py_BuildValue("s", "size");
     unsetLink = Py_BuildValue("s", "unsetLink");
+    wireDecode = Py_BuildValue("s", "wireDecode");
+    wireEncode = Py_BuildValue("s", "wireEncode");
   }
   PyObject* _array;
   PyObject* _components;
@@ -94,6 +98,7 @@ public:
   PyObject* getContent;
   PyObject* getFinalBlockId;
   PyObject* getFreshnessPeriod;
+  PyObject* getForwardingHint;
   PyObject* getInterestLifetimeMilliseconds;
   PyObject* getKeyData;
   PyObject* getKeyLocator;
@@ -134,7 +139,10 @@ public:
   PyObject* setSignature;
   PyObject* setSignatureInfoEncoding;
   PyObject* setType;
+  PyObject* size;
   PyObject* unsetLink;
+  PyObject* wireDecode;
+  PyObject* wireEncode;
 };
 
 static strClass str;
@@ -503,10 +511,13 @@ setValidityPeriod
  * @param interestLite The InterestLite to update.
  * @param pool1 This calls pool1.reset to store a temporary value which must
  * remain valid while interestLite is used.
+ * @param pool2 This calls pool2.reset to store a temporary value which must
+ * remain valid while interestLite is used.
  */
 static void
 toInterestLite
-  (PyObject* interest, InterestLite& interestLite, PyObjectRef& pool1)
+  (PyObject* interest, InterestLite& interestLite, PyObjectRef& pool1,
+   PyObjectRef& pool2)
 {
   PyObjectRef name(PyObject_CallMethodObjArgs(interest, str.getName, NULL));
   toNameLite(name, interestLite.getName());
@@ -528,6 +539,23 @@ toInterestLite
   interestLite.setMustBeFresh(toBoolByMethod(interest, str.getMustBeFresh));
   interestLite.setInterestLifetimeMilliseconds
     (toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
+
+  PyObjectRef forwardingHint
+    (PyObject_CallMethodObjArgs(interest, str.getForwardingHint, NULL));
+  if (toLongByMethod(forwardingHint, str.size) > 0) {
+    // InterestLite only stores the encoded delegation set. Cache the wire
+    // encoding in pool2 long enough to encode the Interest.
+    // TODO: Support the wireFormat param.
+    // TODO: Catch exceptions from wireEncode.
+    pool2.reset(PyObject_CallMethodObjArgs
+      (forwardingHint, str.wireEncode, NULL));
+    PyObjectRef forwardingHintWireEncodingArray
+      (PyObject_GetAttr(pool2, str._array));
+    interestLite.setForwardingHintWireEncoding
+      (toBlobLiteFromArray(forwardingHintWireEncodingArray));
+  }
+  else
+    interestLite.setForwardingHintWireEncoding(BlobLite());
 
   // TODO: Support the wireFormat param.
   // TODO: Catch exceptions from getLinkWireEncoding.
@@ -569,6 +597,17 @@ setInterest(PyObject* interest, const InterestLite& interestLite)
   callMethodFromDouble
     (interest, str.setInterestLifetimeMilliseconds,
      interestLite.getInterestLifetimeMilliseconds());
+
+  if (interestLite.getForwardingHintWireEncoding().buf()) {
+    // InterestLite only stores the encoded delegation set.
+    PyObjectRef forwardingHintWireEncoding
+      (makeBlob(interestLite.getForwardingHintWireEncoding()));
+    PyObjectRef forwardingHint
+      (PyObject_CallMethodObjArgs(interest, str.getForwardingHint, NULL));
+    // TODO: Catch exceptions from wireDecode.
+    PyObjectRef ignoreResult(PyObject_CallMethodObjArgs
+      (forwardingHint, str.wireDecode, forwardingHintWireEncoding.obj, NULL));
+  }
 
   if (interestLite.getLinkWireEncoding().buf()) {
     PyObjectRef linkWireEncoding(makeBlob(interestLite.getLinkWireEncoding()));
@@ -889,8 +928,8 @@ _pyndn_Tlv0_1_1WireFormat_encodeInterest(PyObject *self, PyObject *args)
      excludeEntries, sizeof(excludeEntries) / sizeof(excludeEntries[0]),
      keyNameComponents, sizeof(keyNameComponents) / sizeof(keyNameComponents[0]));
 
-  PyObjectRef pool1;
-  toInterestLite(interest, interestLite, pool1);
+  PyObjectRef pool1, pool2;
+  toInterestLite(interest, interestLite, pool1, pool2);
 
   DynamicBytearray output(256);
   size_t signedPortionBeginOffset, signedPortionEndOffset, encodingLength;
