@@ -2,6 +2,7 @@
 /**
  * Copyright (C) 2015-2017 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
+ * @author: José Quevedo <quevedo@av.it.pt>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,51 +20,42 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#ifndef NDN_TCP_TRANSPORT_LITE_HPP
-#define NDN_TCP_TRANSPORT_LITE_HPP
+#ifndef NDN_ESP8266_TCP_TRANSPORT_LITE_HPP
+#define NDN_ESP8266_TCP_TRANSPORT_LITE_HPP
 
+#ifdef ARDUINO
+
+#include <WiFiClient.h>
+#include "../../c/common.h"
 #include "../../c/errors.h"
-#include "../../c/transport/transport-types.h"
+#include "../../c/encoding/element-reader-types.h"
 #include "../util/dynamic-uint8-array-lite.hpp"
 #include "../encoding/element-listener-lite.hpp"
 
 namespace ndn {
 
 /**
- * A TcpTransportLite object is used to send packets and to listen for incoming
- * packets over a TCP socket. See connect() and processEvents() for more details.
+ * An Esp8266TcpTransportLite uses the WiFiClient class of the esp8266 core
+ * for Arduino environment to communicate over TCP.
  */
-class TcpTransportLite : private ndn_TcpTransport {
+class Esp8266TcpTransportLite {
 public:
   /**
-   * Create a TcpTransport with default values for no connection yet and to use
-   * the given DynamicUInt8ArrayLite buffer for the ElementReader. Note that the
-   * ElementReader is not valid until you call connect.
+   * Create a Esp8266TcpTransportLite with default values for no connection
+   * yet and to use the given DynamicUInt8ArrayLite buffer for the
+   * ElementReader. Note that the ElementReader is not valid until you call
+   * connect.
    * @param buffer A DynamicUInt8ArrayLite which is used to save data before
    * calling the elementListener (see connect). The object must remain valid
    * during the entire life of this object. If the reallocFunction given to
    * buffer's constructor is 0, then its array must be large enough to save a
-   * full element, perhaps MAX_NDN_PACKET_SIZE bytes.
+   * full Data or Interest packet.
    */
-  TcpTransportLite(DynamicUInt8ArrayLite& buffer);
+  Esp8266TcpTransportLite(DynamicUInt8ArrayLite& buffer);
 
   /**
-   * Determine whether this transport connecting to the host is
-   * to a node on the current machine; results are not cached. According to
-   * http://redmine.named-data.net/projects/nfd/wiki/ScopeControl#local-face,
-   * TCP transports with a loopback address are local. If host is a host name,
-   * this will do a blocking DNS lookup; otherwise this will parse the IP address
-   * and examine the first octet to determine if it is a loopback address (e.g.
-   * the first IPv4 octet is 127 or IPv6 is "::1").
-   * @param host The host to check.
-   * @param result Set result to true if the host is local, false if not.
-   * @return 0 for success, else an error code.
-   */
-  ndn_Error
-  isLocal(const char *host, bool& result);
-
-  /**
-   * Connect with TCP to the host:port.
+   * Connect with TCP to the host:port. Note that your sketch must already have
+   * called WiFi.begin(...).
    * @param host The host to connect to.
    * @param port The port to connect to.
    * @param elementListener The ElementListenerLite whose onReceivedElement
@@ -73,7 +65,7 @@ public:
    * @return 0 for success, else an error code.
    */
   ndn_Error
-  connect(const char* host, unsigned short port, ElementListenerLite& elementListener);
+  connect(const char* host, int port, ElementListenerLite& elementListener);
 
   /**
    * Send data to the socket.
@@ -108,18 +100,13 @@ public:
   ndn_Error
   close();
 
-  /**
-   * Downcast the reference to the ndn_TcpTransport struct to a TcpTransportLite.
-   * @param transport A reference to the ndn_TcpTransport struct.
-   * @return The same reference as TcpTransportLite.
-   */
-  static TcpTransportLite&
-  downCast(ndn_TcpTransport& transport) { return *(TcpTransportLite*)&transport; }
-
-  static const TcpTransportLite&
-  downCast(const ndn_TcpTransport& transport) { return *(TcpTransportLite*)&transport; }
+private:
+  ndn_ElementReader elementReader_;
+  WiFiClient client_;
 };
 
 }
+
+#endif // ARDUINO
 
 #endif

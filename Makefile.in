@@ -200,6 +200,7 @@ am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/transport/_pyndn_la-unix-transport-lite.lo \
 	src/lite/util/_pyndn_la-blob-lite.lo \
 	src/lite/util/_pyndn_la-crypto-lite.lo \
+	src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo \
 	src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo
 nodist__pyndn_la_OBJECTS = $(am__objects_3) \
 	src/_pyndn_la-pyndnmodule.lo
@@ -516,6 +517,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
   include/ndn-cpp/lite/util/crypto-lite.hpp \
+  include/ndn-cpp/lite/util/dynamic-malloc-uint8-array-lite.hpp \
   include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp
 
 
@@ -601,6 +603,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
   src/lite/util/crypto-lite.cpp \
+  src/lite/util/dynamic-malloc-uint8-array-lite.cpp \
   src/lite/util/dynamic-uint8-array-lite.cpp
 
 pyexec_LTLIBRARIES = _pyndn.la
@@ -958,6 +961,9 @@ src/lite/util/_pyndn_la-blob-lite.lo: src/lite/util/$(am__dirstamp) \
 	src/lite/util/$(DEPDIR)/$(am__dirstamp)
 src/lite/util/_pyndn_la-crypto-lite.lo: src/lite/util/$(am__dirstamp) \
 	src/lite/util/$(DEPDIR)/$(am__dirstamp)
+src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo:  \
+	src/lite/util/$(am__dirstamp) \
+	src/lite/util/$(DEPDIR)/$(am__dirstamp)
 src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo:  \
 	src/lite/util/$(am__dirstamp) \
 	src/lite/util/$(DEPDIR)/$(am__dirstamp)
@@ -1078,6 +1084,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/transport/$(DEPDIR)/_pyndn_la-unix-transport-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-blob-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-crypto-lite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-malloc-uint8-array-lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array-lite.Plo@am__quote@
 
 .c.o:
@@ -1575,6 +1582,13 @@ src/lite/util/_pyndn_la-crypto-lite.lo: src/lite/util/crypto-lite.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/util/crypto-lite.cpp' object='src/lite/util/_pyndn_la-crypto-lite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/util/_pyndn_la-crypto-lite.lo `test -f 'src/lite/util/crypto-lite.cpp' || echo '$(srcdir)/'`src/lite/util/crypto-lite.cpp
+
+src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo: src/lite/util/dynamic-malloc-uint8-array-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo -MD -MP -MF src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-malloc-uint8-array-lite.Tpo -c -o src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo `test -f 'src/lite/util/dynamic-malloc-uint8-array-lite.cpp' || echo '$(srcdir)/'`src/lite/util/dynamic-malloc-uint8-array-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-malloc-uint8-array-lite.Tpo src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-malloc-uint8-array-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/util/dynamic-malloc-uint8-array-lite.cpp' object='src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/util/_pyndn_la-dynamic-malloc-uint8-array-lite.lo `test -f 'src/lite/util/dynamic-malloc-uint8-array-lite.cpp' || echo '$(srcdir)/'`src/lite/util/dynamic-malloc-uint8-array-lite.cpp
 
 src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo: src/lite/util/dynamic-uint8-array-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo -MD -MP -MF src/lite/util/$(DEPDIR)/_pyndn_la-dynamic-uint8-array-lite.Tpo -c -o src/lite/util/_pyndn_la-dynamic-uint8-array-lite.lo `test -f 'src/lite/util/dynamic-uint8-array-lite.cpp' || echo '$(srcdir)/'`src/lite/util/dynamic-uint8-array-lite.cpp

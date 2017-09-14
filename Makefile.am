@@ -68,6 +68,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/transport/unix-transport-lite.hpp \
   include/ndn-cpp/lite/util/blob-lite.hpp \
   include/ndn-cpp/lite/util/crypto-lite.hpp \
+  include/ndn-cpp/lite/util/dynamic-malloc-uint8-array-lite.hpp \
   include/ndn-cpp/lite/util/dynamic-uint8-array-lite.hpp
 
 # Just the C code.
@@ -151,6 +152,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/transport/unix-transport-lite.cpp \
   src/lite/util/blob-lite.cpp \
   src/lite/util/crypto-lite.cpp \
+  src/lite/util/dynamic-malloc-uint8-array-lite.cpp \
   src/lite/util/dynamic-uint8-array-lite.cpp
 
 pyexec_LTLIBRARIES = _pyndn.la

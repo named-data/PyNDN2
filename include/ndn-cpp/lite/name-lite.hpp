@@ -33,7 +33,7 @@ class ExcludeLite;
 /**
  * A NameLite holds an array of NameLite::Component.
  */
-class NameLite : private ndn_Name {
+class NameLite : public ndn_Name {
 public:
   /**
    * A NameLite::Component holds a pointer to the component value.
@@ -393,8 +393,8 @@ public:
     downCast(const ndn_NameComponent& component) { return *(Component*)&component; }
 
   private:
-    friend NameLite;
-    friend ExcludeLite;
+    friend class NameLite;
+    friend class ExcludeLite;
   };
 
   /**
@@ -487,7 +487,17 @@ public:
    * components array.
    */
   ndn_Error
-  append(const NameLite::Component& component);
+  append(const Component& component);
+
+  /**
+   * Append all of the components of the given name to this name, including each
+   * component's type.
+   * @param name The NameLite with the components to copy.
+   * @return 0 for success, or an error code if there is no more room in the
+   * components array.
+   */
+  ndn_Error
+  append(const NameLite& name);
 
   /**
    * Append a GENERIC component to this name with the bytes in raw string value.
@@ -620,6 +630,14 @@ public:
    */
   ndn_Error
   set(const NameLite& other);
+
+  /**
+   * Remove and return the last name component.
+   * @return A pointer to the last name component that was removed. If size() is
+   * already zero then return a null pointer.
+   */
+  const Component*
+  pop();
 
   /**
    * Downcast the reference to the ndn_Name struct to a NameLite.
