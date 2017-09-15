@@ -121,7 +121,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         # Encode backwards.
         if interest.getForwardingHint().size() > 0:
-            if interest.getSelectedDelegationIndex() >= 0:
+            if interest.getSelectedDelegationIndex() != None:
                 raise RuntimeError(
                   "An Interest may not have a selected delegation when encoding a forwarding hint")
             if interest.hasLink():
