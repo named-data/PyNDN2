@@ -1,0 +1,4 @@
+Sphinx==1.6.3
+cryptography==2.0.3
+trollius==2.1
+protobuf==3.4.0

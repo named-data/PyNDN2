@@ -1,0 +1,19 @@
+language: python
+sudo: false
+python:
+  - 2.7
+branches:
+  only:
+    - master
+script:
+  - pip install -r .travis.d/requirements.txt
+  - export PYTHONPATH=`pwd`/python
+  - cd doc
+  - make html
+  - cd ..
+after_success:
+  - ssh-keyscan -H $HOSTNAME 2>&1 | tee -a $HOME/.ssh/known_hosts
+  - openssl aes-256-cbc -K $encrypted_e73ed2842ced_key -iv $encrypted_e73ed2842ced_iv -in .travis.d/id-rsa.enc -out .travis.d/id-rsa -d
+  - mkdir -p ~/.ssh && mv .travis.d/id-rsa ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+  - rsync -arv --delete --progress doc/_build/html/ $USERNAME@$HOSTNAME:/var/www/named-data.net/www/doc/ndn-ccl/latest/PyNDN2
+  # TODO: sync tagged versions
