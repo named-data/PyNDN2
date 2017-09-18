@@ -23,6 +23,7 @@ doc/_build
 
 # integration_test temporary files
 tests/integration_tests/policy_config/test-public-info.db
+tests/integration_tests/policy_config/ndnsec-key-file
 
 # Compiled files
 *.slo
