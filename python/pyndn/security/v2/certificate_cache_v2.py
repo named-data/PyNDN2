@@ -156,7 +156,7 @@ class CertificateCacheV2(object):
 
         # TODO: Delete from certificatesByTime_.
 
-    def reset(self):
+    def clear(self):
         """
         Clear all certificates from the cache.
         """

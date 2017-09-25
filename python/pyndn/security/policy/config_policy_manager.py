@@ -120,7 +120,7 @@ class ConfigPolicyManager(PolicyManager):
         if self._isSecurityV1:
             self._certificateCache.reset()
         else:
-            self._certificateCacheV2.reset()
+            self._certificateCacheV2.clear()
 
         # stores the fixed-signer certificate name associated with validation rules
         # so we don't keep loading from files
