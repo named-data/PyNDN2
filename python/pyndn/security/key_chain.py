@@ -1584,9 +1584,11 @@ class KeyChain(object):
                   "Signing identity `" + identity.getName().toUri() +
                   "` does not have default certificate")
 
-        if key.getKeyType() == KeyType.RSA:
+        if (key.getKeyType() == KeyType.RSA and
+              params.getDigestAlgorithm() == DigestAlgorithm.SHA256):
             signatureInfo = Sha256WithRsaSignature()
-        elif key.getKeyType() == KeyType.ECDSA:
+        elif (key.getKeyType() == KeyType.ECDSA and
+              params.getDigestAlgorithm() == DigestAlgorithm.SHA256):
             signatureInfo = Sha256WithEcdsaSignature()
         else:
             raise KeyChain.Error("Unsupported key type")
