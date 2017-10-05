@@ -431,11 +431,12 @@ class KeyChain(object):
         If it is an array, return a signature object.
 
         :param target: If this is a Data object, wire encode for signing,
-          update its signature and key locator field and wireEncoding. If this
-          is an Interest object, wire encode for signing, append a SignatureInfo
-          to the Interest name, sign the name components and append a final name
-          component with the signature bits. If it is an array, sign it and
-          return a Signature object.
+          replace its Signature object based on the type of key and other info
+          in the SigningInfo params or default identity, and update the
+          wireEncoding. If this is an Interest object, wire encode for signing,
+          append a SignatureInfo to the Interest name, sign the name components
+          and append a final name component with the signature bits. If it is an
+          array, sign it and return a Signature object.
         :type target: Data, Interest or an array which implements the
           buffer protocol
         :param paramsOrCertificateName: (optional) If a SigningInfo, it is the
