@@ -40,6 +40,14 @@ pyndn.security.key_params module
     :undoc-members:
     :show-inheritance:
 
+pyndn.security.safe_bag module
+------------------------------
+
+.. automodule:: pyndn.security.safe_bag
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.security_exception module
 ----------------------------------------
 
