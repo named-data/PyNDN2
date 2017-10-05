@@ -21,21 +21,22 @@
 
 import unittest as ut
 from pyndn import Name
-from pyndn.security import KeyChain
 from pyndn.security.pib.pib import Pib
 from pyndn.security.v2 import CertificateV2
+from pyndn.util.common import Common
+from .identity_management_fixture import IdentityManagementFixture
 
 class TestKeyChain(ut.TestCase):
     def setUp(self):
-        self._keyChain = KeyChain("pib-memory:", "tpm-memory:")
+        self._fixture = IdentityManagementFixture()
         
     def test_management(self):
         identityName = Name("/test/id")
         identity2Name = Name("/test/id2")
 
-        self.assertEqual(0, self._keyChain.getPib()._identities.size())
+        self.assertEqual(0, self._fixture._keyChain.getPib()._identities.size())
         try:
-            self._keyChain.getPib().getDefaultIdentity()
+            self._fixture._keyChain.getPib().getDefaultIdentity()
             self.fail("Did not throw the expected exception")
         except Pib.Error:
             pass
@@ -43,14 +44,14 @@ class TestKeyChain(ut.TestCase):
             self.fail("Did not throw the expected exception")
 
         # Create an identity.
-        id = self._keyChain.createIdentityV2(identityName)
+        id = self._fixture._keyChain.createIdentityV2(identityName)
         self.assertTrue(id != None)
         self.assertTrue(identityName in
-          self._keyChain.getPib()._identities._identities)
+          self._fixture._keyChain.getPib()._identities._identities)
 
         # The first added identity becomes the default identity.
         try:
-            self._keyChain.getPib().getDefaultIdentity()
+            self._fixture._keyChain.getPib().getDefaultIdentity()
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
 
@@ -74,7 +75,7 @@ class TestKeyChain(ut.TestCase):
             self.fail("Unexpected exception: " + str(ex))
 
         self.assertEqual(1, id._getKeys().size())
-        self._keyChain.deleteKey(id, key)
+        self._fixture._keyChain.deleteKey(id, key)
 # TODO: Implement key validity.
 #        # The key instance should not be valid anymore.
 #        self.assertTrue(!key)
@@ -90,7 +91,7 @@ class TestKeyChain(ut.TestCase):
         self.assertEqual(0, id._getKeys().size())
 
         # Create another key.
-        self._keyChain.createKey(id)
+        self._fixture._keyChain.createKey(id)
         # The added key becomes the default key.
         try:
             id.getDefaultKey()
@@ -107,7 +108,7 @@ class TestKeyChain(ut.TestCase):
             self.fail("Unexpected exception: " + str(ex))
 
         # Create a third key.
-        key3 = self._keyChain.createKey(id)
+        key3 = self._fixture._keyChain.createKey(id)
         self.assertTrue(not key3.getName().equals(key2.getName()))
         # The added key will not be the default key, because the default key already exists.
         self.assertTrue(id.getDefaultKey().getName().equals(key2.getName()))
@@ -121,7 +122,7 @@ class TestKeyChain(ut.TestCase):
         self.assertEqual(1, key3._getCertificates().size())
         key3Cert1 = list(key3._getCertificates()._certificates.values())[0]
         key3CertName = key3Cert1.getName()
-        self._keyChain.deleteCertificate(key3, key3CertName)
+        self._fixture._keyChain.deleteCertificate(key3, key3CertName)
         self.assertEqual(0, key3._getCertificates().size())
         try:
             key3.getDefaultCertificate()
@@ -132,7 +133,7 @@ class TestKeyChain(ut.TestCase):
             self.fail("Did not throw the expected exception")
 
         # Add a certificate.
-        self._keyChain.addCertificate(key3, key3Cert1)
+        self._fixture._keyChain.addCertificate(key3, key3Cert1)
         self.assertEqual(1, key3._getCertificates().size())
         try:
             key3.getDefaultCertificate()
@@ -140,7 +141,7 @@ class TestKeyChain(ut.TestCase):
             self.fail("Unexpected exception: " + str(ex))
 
         # Overwriting the certificate should work.
-        self._keyChain.addCertificate(key3, key3Cert1)
+        self._fixture._keyChain.addCertificate(key3, key3Cert1)
         self.assertEqual(1, key3._getCertificates().size())
         # Add another certificate.
         key3Cert2 = CertificateV2(key3Cert1)
@@ -148,34 +149,34 @@ class TestKeyChain(ut.TestCase):
         key3Cert2Name.append("Self")
         key3Cert2Name.appendVersion(1)
         key3Cert2.setName(key3Cert2Name)
-        self._keyChain.addCertificate(key3, key3Cert2)
+        self._fixture._keyChain.addCertificate(key3, key3Cert2)
         self.assertEqual(2, key3._getCertificates().size())
 
         # Set the default certificate.
         self.assertTrue(key3.getDefaultCertificate().getName().equals(key3CertName))
-        self._keyChain.setDefaultCertificate(key3, key3Cert2)
+        self._fixture._keyChain.setDefaultCertificate(key3, key3Cert2)
         self.assertTrue(key3.getDefaultCertificate().getName().equals(key3Cert2Name))
 
         # Set the default key.
         self.assertTrue(id.getDefaultKey().getName().equals(key2.getName()))
-        self._keyChain.setDefaultKey(id, key3)
+        self._fixture._keyChain.setDefaultKey(id, key3)
         self.assertTrue(id.getDefaultKey().getName().equals(key3.getName()))
 
         # Set the default identity.
-        id2 = self._keyChain.createIdentityV2(identity2Name)
-        self.assertTrue(self._keyChain.getPib().getDefaultIdentity().getName()
+        id2 = self._fixture._keyChain.createIdentityV2(identity2Name)
+        self.assertTrue(self._fixture._keyChain.getPib().getDefaultIdentity().getName()
           .equals(id.getName()))
-        self._keyChain.setDefaultIdentity(id2)
-        self.assertTrue(self._keyChain.getPib().getDefaultIdentity().getName()
+        self._fixture._keyChain.setDefaultIdentity(id2)
+        self.assertTrue(self._fixture._keyChain.getPib().getDefaultIdentity().getName()
           .equals(id2.getName()))
 
         # Delete an identity.
-        self._keyChain.deleteIdentity(id)
+        self._fixture._keyChain.deleteIdentity(id)
 # TODO: Implement identity validity.
 #        # The identity instance should not be valid anymore.
 #        BOOST_CHECK(!id)
         try:
-            self._keyChain.getPib().getIdentity(identityName)
+            self._fixture._keyChain.getPib().getIdentity(identityName)
             self.fail("Did not throw the expected exception")
         except Pib.Error:
             pass
@@ -183,7 +184,19 @@ class TestKeyChain(ut.TestCase):
             self.fail("Did not throw the expected exception")
 
         self.assertTrue(not (identityName in
-          self._keyChain.getPib()._identities._identities))
+          self._fixture._keyChain.getPib()._identities._identities))
+
+    def test_self_signed_cert_validity(self):
+        certificate = (self._fixture.addIdentity
+          (Name("/Security/V2/TestKeyChain/SelfSignedCertValidity"))
+           .getDefaultKey().getDefaultCertificate())
+        self.assertTrue(certificate.isValid())
+        # Check 10 years from now.
+        self.assertTrue(certificate.isValid
+          (Common.getNowMilliseconds() + 10 * 365 * 24 * 3600 * 1000.0))
+        # Check that notAfter is later than 10 years from now.
+        self.assertTrue(certificate.getValidityPeriod().getNotAfter() >
+          Common.getNowMilliseconds() + 10 * 365 * 24 * 3600 * 1000.0)
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
