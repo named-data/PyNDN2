@@ -25,29 +25,44 @@ period.
 """
 
 import math
+from pyndn.util.common import Common
 
 class ValidityPeriod(object):
     """
-    Create a new ValidityPeriod object, possibly copying values from another object.
+    There are three forms of the ValidityPeriod constructor:
+    ValidityPeriod() - Create a default ValidityPeriod where the period is not
+    specified.
+    ValidityPeriod(validityPeriod) - Create a new ValidityPeriod with a copy of
+    the fields in the given validityPeriod object.
+    ValidityPeriod(notBefore, notAfter) - Create a ValidityPeriod with the given
+    period.
 
-    :param ValidityPeriod value: (optional) If value is a ValidityPeriod, copy
-      its values. If value is omitted, reate a default ValidityPeriodLite where
-      the period is not specified.
+    :param ValidityPeriod validityPeriod: The ValidityPeriod to copy.
+    :param float notBefore: The beginning of the validity period range as
+      milliseconds since Jan 1, 1970 UTC. Note that this is rounded up to
+      the nearest whole second.
+    :param float notAfter: The end of the validity period range as
+      milliseconds since Jan 1, 1970 UTC. Note that this is rounded down to
+      the nearest whole second.
     """
-    def __init__(self, value = None):
-        if value == None:
+    def __init__(self, validityPeriodOrNotBefore = None, notAfter = None):
+        self._changeCount = 0
+
+        if validityPeriodOrNotBefore == None:
             self._notBefore = 1e37
             self._notAfter = -1e37
-        elif type(value) is ValidityPeriod:
+        elif type(validityPeriodOrNotBefore) is ValidityPeriod:
             # Copy its values.
-            self._notBefore = value._notBefore
-            self._notAfter = value._notAfter
+            validityPeriod = validityPeriodOrNotBefore
+            self._notBefore = validityPeriod._notBefore
+            self._notAfter = validityPeriod._notAfter
+        elif notAfter != None:
+            notBefore = validityPeriodOrNotBefore
+            self.setPeriod(notBefore, notAfter)
         else:
             raise RuntimeError(
               "Unrecognized type for ValidityPeriod constructor: " +
               str(type(value)))
-
-        self._changeCount = 0
 
     def hasPeriod(self):
         """
@@ -108,17 +123,22 @@ class ValidityPeriod(object):
 
         return self
 
-    def isValid(self, time):
+    def isValid(self, time = None):
         """
         Check if the time falls within the validity period.
 
-        :param float time: The time to check as milliseconds since Jan 1, 1970
-          UTC.
+        :param float time: (optional) The time to check as milliseconds since
+          Jan 1, 1970 UTC. If omitted, use the current time.
         :return: True if the beginning of the validity period is less than or
           equal to time and time is less than or equal to the end of the
           validity period.
         :rtype: bool
         """
+        if time == None:
+            # Round up to the nearest second like in setPeriod.
+            time = round(math.ceil
+              (round(Common.getNowMilliseconds()) / 1000.0) * 1000.0)
+
         return self._notBefore <= time and time <= self._notAfter
 
     @staticmethod
