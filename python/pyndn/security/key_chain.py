@@ -575,12 +575,9 @@ class KeyChain(object):
 
         # Set the signature-info.
         signingInfo = SigningInfo(key)
-        dummyKeyName = [None]
-        certificate.setSignature(
-          self._prepareSignatureInfo(signingInfo, dummyKeyName))
         # Set a 20-year validity period.
-        ValidityPeriod.getFromSignature(certificate.getSignature()).setPeriod(
-          now, now + 20 * 365 * 24 * 3600 * 1000.0)
+        signingInfo.setValidityPeriod(
+          ValidityPeriod(now, now + 20 * 365 * 24 * 3600 * 1000.0))
 
         self.sign(certificate, signingInfo)
 
@@ -1593,6 +1590,13 @@ class KeyChain(object):
             signatureInfo = Sha256WithEcdsaSignature()
         else:
             raise KeyChain.Error("Unsupported key type")
+
+        if (params.getValidityPeriod().hasPeriod() and
+            ValidityPeriod.canGetFromSignature(signatureInfo)):
+            # Set the ValidityPeriod from the SigningInfo params.
+            ValidityPeriod.getFromSignature(signatureInfo).setPeriod(
+              params.getValidityPeriod().getNotBefore(),
+              params.getValidityPeriod().getNotAfter())
 
         keyLocator = KeyLocator.getFromSignature(signatureInfo)
         keyLocator.setType(KeyLocatorType.KEYNAME)
