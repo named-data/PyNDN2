@@ -27,11 +27,13 @@ is not valid.
 
 from pyndn.name import Name
 from pyndn.security.security_types import DigestAlgorithm
+from pyndn.validity_period import ValidityPeriod
 from pyndn.security.pib.pib_identity import PibIdentity
 from pyndn.security.pib.pib_key import PibKey
 
 class SigningInfo(object):
     def __init__(self, arg1 = None, arg2 = None):
+        self._validityPeriod = ValidityPeriod()
         if arg1 is None:
             self.reset(SigningInfo.SignerType.NULL)
             self._digestAlgorithm = DigestAlgorithm.SHA256
@@ -79,8 +81,6 @@ class SigningInfo(object):
                 raise ValueError("Invalid signing string scheme")
         else:
             raise ValueError("SigningInfo: Unrecognized type")
-
-        # Omit signatureInfo_ until we need it.
 
     class SignerType(object):
         # No signer is specified. Use default settings or follow the trust schema.
@@ -248,6 +248,33 @@ class SigningInfo(object):
         """
         return self._digestAlgorithm
 
+    def setValidityPeriod(self, validityPeriod):
+        """
+        Set the validity period for the signature info.
+        Note that the equivalent ndn-cxx method uses a semi-prepared
+        SignatureInfo, but this method only uses the ValidityPeriod from the
+        SignatureInfo.
+
+        :param ValidityPeriod validityPeriod: The validity period, which is
+          copied.
+        :return: This SigningInfo.
+        :rtype: SigningInfo
+        """
+        self._validityPeriod = ValidityPeriod(validityPeriod)
+        return self
+
+    def getValidityPeriod(self):
+        """
+        Get the validity period for the signature info.
+        Note that the equivalent ndn-cxx method uses a semi-prepared
+        SignatureInfo, but this method only uses the ValidityPeriod from the
+        SignatureInfo.
+
+        :return: The validity period.
+        :rtype: ValidityPeriod
+        """
+        return self._validityPeriod
+
     def __str__(self):
         """
         Get the string representation of this SigningInfo.
@@ -299,5 +326,6 @@ class SigningInfo(object):
         self._name = Name()
         self._identity = None
         self._key = None
+        self._validityPeriod = ValidityPeriod()
 
 
