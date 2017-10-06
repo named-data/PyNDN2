@@ -32,6 +32,41 @@ from pyndn.security.pib.pib_identity import PibIdentity
 from pyndn.security.pib.pib_key import PibKey
 
 class SigningInfo(object):
+    """
+    The SigningInfo constructor has multiple forms:
+    SigningInfo() - Create a default SigningInfo with
+    SigningInfo.SignerType.NULL and an empty Name.
+    SigningInfo(signerType, signerName) - Create a SigningInfo with the
+    signerType and optional signer Name.
+    Signinginfo(identity) - Create a SigningInfo of type
+    SigningInfo.SignerType.ID according to the given PibIdentity, where the
+    digest algorithm is set to DigestAlgorithm.SHA256.
+    SigningInfo(key) - Create a SigningInfo of type SigningInfo.SignerType.KEY
+    according to the given PibKey, where the digest algorithm is set to
+    DigestAlgorithm.SHA256.
+    SigningInfo(signingString) - Create a SigningInfo from its string
+    representation, where the digest algorithm is set to DigestAlgorithm.SHA256.
+
+    :param signerType: The type of signer.
+    :type signerType: An int from the SigningInfo.SignerType enum.
+    :param Name signerName: The name of signer. The interpretation of the
+      signerName differs based on the signerType. This copies the Name.
+    :param PibIdentity identity: An existing PibIdentity which is not copied.
+    :param PibKey key: An existing PibKey which is not copied.
+    :param str signingString: The representative signing string for the signing
+      method, as follows:
+      Default signing: "" (the empty string).
+      Signing with the default certificate of the default key for the identity
+      with the specified name:
+      `id:/my-identity`.
+      Signing with the default certificate of the key with the specified name:
+      `key:/my-identity/ksk-1`.
+      Signing with the certificate with the specified name:
+      `cert:/my-identity/KEY/ksk-1/ID-CERT/%FD%01`.
+      Signing with sha256 digest: `id:/localhost/identity/digest-sha256` (the
+      value returned by getDigestSha256Identity()).
+    :raises ValueError: If the signingString format is invalid.
+    """
     def __init__(self, arg1 = None, arg2 = None):
         self._validityPeriod = ValidityPeriod()
         if arg1 is None:
