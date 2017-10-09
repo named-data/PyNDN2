@@ -19,9 +19,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the PibKey class which provides access to a key at the s
-econd level in the PIB's Identity-Key-Certificate hierarchy. A PibKey object has
-a Name (identity + "KEY" + keyId), and contains one or more CertificateV2
+This module defines the PibKey class which provides access to a key at the
+second level in the PIB's Identity-Key-Certificate hierarchy. A PibKey object
+has a Name (identity + "KEY" + keyId), and contains one or more CertificateV2
 objects, one of which is set as the default certificate of this key. A
 certificate can be directly accessed by getting a CertificateV2 object.
 """
