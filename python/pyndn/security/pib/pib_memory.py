@@ -49,7 +49,7 @@ class PibMemory(PibImpl):
         self._defaultKeyNames = {}
 
         # keyName => keyBits Blob.
-        self._keys ={}
+        self._keys = {}
 
         # keyName => default certificate Name.
         self._defaultCertificateNames = {}
@@ -132,9 +132,9 @@ class PibMemory(PibImpl):
         Erase all certificates, keys, and identities.
         """
         self._defaultIdentityName = None
-        self._identityNames = []
+        self._identityNames = set()
         self._defaultKeyNames = {}
-        self._keys ={}
+        self._keys = {}
         self._defaultCertificateNames = {}
         self._certificates = {}
 
@@ -142,7 +142,7 @@ class PibMemory(PibImpl):
         """
         Get the names of all the identities.
 
-        :return: The a fresh set of identity names. The Name objects are fresh
+        :return: A fresh set of identity names. The Name objects are fresh
           copies.
         :rtype: set of Name
         """
