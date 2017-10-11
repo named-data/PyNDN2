@@ -300,9 +300,9 @@ class TestPibImpl(ut.TestCase):
             # Remove id1, which should remove all the keys.
             pib.removeIdentity(fixture.id1)
             keyNames = pib.getKeysOfIdentity(fixture.id1)
-            self.assertEquals(0, len(keyNames ))
+            self.assertEquals(0, len(keyNames))
 
-    def test_key_management(self):
+    def test_certificate_management(self):
         for fixture in self.pibImpls:
             pib = fixture.pib
 
