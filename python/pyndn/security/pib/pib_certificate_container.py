@@ -29,7 +29,7 @@ from pyndn.security.v2.certificate_v2 import CertificateV2
 
 class PibCertificateContainer(object):
     """
-    Create a CertificateContainer for a key with keyName. This constructor
+    Create a PibCertificateContainer for a key with keyName. This constructor
     should only be called by PibKeyImpl.
 
     :param Name keyName: The name of the key, which is copied.
