@@ -297,6 +297,7 @@ class TestPibKeyImpl(ut.TestCase):
 
         try:
             PibKeyImpl(Name("/wrong"), fixture.id1Key1.buf(), pibImpl)
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
@@ -305,6 +306,7 @@ class TestPibKeyImpl(ut.TestCase):
         wrongKey = Blob("")
         try:
             PibKeyImpl(fixture.id1Key2Name, wrongKey.toBytes(), pibImpl)
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
@@ -313,6 +315,7 @@ class TestPibKeyImpl(ut.TestCase):
         key11.addCertificate(fixture.id1Key1Cert1)
         try:
             key11.addCertificate(fixture.id1Key2Cert1)
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
@@ -320,6 +323,7 @@ class TestPibKeyImpl(ut.TestCase):
 
         try:
             key11.removeCertificate(fixture.id1Key2Cert1.getName())
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
@@ -327,6 +331,7 @@ class TestPibKeyImpl(ut.TestCase):
 
         try:
             key11.getCertificate(fixture.id1Key2Cert1.getName())
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
@@ -334,6 +339,7 @@ class TestPibKeyImpl(ut.TestCase):
 
         try:
             key11.setDefaultCertificate(fixture.id1Key2Cert1)
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
@@ -341,6 +347,7 @@ class TestPibKeyImpl(ut.TestCase):
 
         try:
             key11.setDefaultCertificate(fixture.id1Key2Cert1.getName())
+            self.fail("Did not throw the expected exception")
         except ValueError:
             pass
         else:
