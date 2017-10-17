@@ -76,8 +76,8 @@ class PibKeyContainer(object):
               "` does not match the identity name `" +
               self._identityName.toUri() + "`")
 
-        self._keyNames.add(keyName)
         # Copy the Name.
+        self._keyNames.add(Name(keyName))
         self._keys[Name(keyName)] = PibKeyImpl(keyName, key, self._pibImpl)
 
         return self.get(keyName)
