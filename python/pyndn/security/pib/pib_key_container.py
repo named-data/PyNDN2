@@ -123,7 +123,7 @@ class PibKeyContainer(object):
               "` does not match identity `" + self._identityName.toUri() + "`")
 
         try:
-            pibKeyImpl = self._keys.get(keyName)
+            pibKeyImpl = self._keys[keyName]
         except KeyError:
             pibKeyImpl = None
 
