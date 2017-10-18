@@ -29,6 +29,8 @@ class PibIdentity(object):
     """
     Create a PibIdentity which uses the impl backend implementation. This
     constructor should only be called by PibIdentityContainer.
+
+    :param PibIdentityImpl impl: The PibIdentityImpl.
     """
     def __init__(self, impl):
         self._impl = impl
