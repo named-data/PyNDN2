@@ -326,7 +326,7 @@ class SigningInfo(object):
         elif self._type == SigningInfo.SignerType.CERT:
             return "cert:" + self.getSignerName().toUri()
         elif self._type == SigningInfo.SignerType.SHA256:
-            return "id:" + self.getDigestSha256Identity().toUri()
+            return "id:" + SigningInfo.getDigestSha256Identity().toUri()
         else:
             # We don't expect this to happen.
             raise ValueError("Unknown signer type")
@@ -347,7 +347,7 @@ class SigningInfo(object):
         Check and set the signerType, and set others to default values. This
         does NOT reset the digest algorithm.
 
-        :param signerType: The The type of signer.
+        :param signerType: The type of signer.
         :type signerType: int from the SigningInfo.SignerType enum
         """
         if (not (signerType == SigningInfo.SignerType.NULL or
