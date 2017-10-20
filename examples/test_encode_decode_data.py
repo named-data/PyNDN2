@@ -25,6 +25,7 @@ from pyndn import DigestSha256Signature
 from pyndn import Sha256WithRsaSignature
 from pyndn import Sha256WithEcdsaSignature
 from pyndn import HmacWithSha256Signature
+from pyndn import GenericSignature
 from pyndn.security import KeyChain
 from pyndn.security import SafeBag
 from pyndn.security.pib.pib_memory import PibMemory
