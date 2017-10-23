@@ -156,8 +156,7 @@ class TpmBackEnd(object):
           EncryptedPrivateKeyInfo. If the password is None, import an
           unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
-        :raises TpmBackEnd.Error: If a key with name keyName already exists, or
-          for an error importing the key.
+        :raises TpmBackEnd.Error: For an error importing the key.
         """
         if self.hasKey(keyName):
             raise TpmBackEnd.Error("Key `" + keyName.toUri() + "` already exists")

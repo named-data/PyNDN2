@@ -148,8 +148,7 @@ class TpmBackEndMemory(TpmBackEnd):
           EncryptedPrivateKeyInfo. If the password is None, import an
           unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
-        :raises TpmBackEnd.Error: if a key with name keyName already exists, or
-          for an error importing the key.
+        :raises TpmBackEnd.Error: For an error importing the key.
         """
         try:
             if password != None:
