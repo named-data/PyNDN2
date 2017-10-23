@@ -79,7 +79,7 @@ class TpmBackEnd(object):
         :param KeyParams params: The KeyParams for creating the key.
         :return: The handle of the created key.
         :rtype: TpmKeyHandle
-        :raises TpmBackEnd.Error: If the key already exists or cannot be created.
+        :raises TpmBackEnd.Error: If the key cannot be created.
         """
         # Do key name checking.
         if params.getKeyIdType() == KeyIdType.USER_SPECIFIED:
