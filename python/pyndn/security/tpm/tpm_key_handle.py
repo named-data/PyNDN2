@@ -111,7 +111,7 @@ class TpmKeyHandle(object):
 
     def _doDerivePublicKey(self):
         """
-        A protected method to do the work of doDerivePublicKey().
+        A protected method to do the work of derivePublicKey().
         Your subclass must implement it.
 
         :return: The public key encoding Blob.

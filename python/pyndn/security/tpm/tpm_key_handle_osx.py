@@ -66,7 +66,7 @@ class TpmKeyHandleOsx(TpmKeyHandle):
 
     def _doDerivePublicKey(self):
         """
-        A protected method to do the work of doDerivePublicKey().
+        A protected method to do the work of derivePublicKey().
 
         :return: The public key encoding Blob.
         :rtype: Blob
