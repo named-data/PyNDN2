@@ -33,7 +33,8 @@ class KeyParams(object):
     Create a key generation parameter. This constructor is protected and used by
     subclasses.
 
-    :param keyType keyType: The type for the created key.
+    :param keyType: The type for the created key.
+    :type keyType: An int from the KeyType enum.
     :param keyIdTypeOrKeyId: If this is a KeyIdType, it is the method for how
       the key id should be generated, which must not be KeyIdType.USER_SPECIFIED.
       If this is a Name.Component, it is the user-specified key ID, in which
