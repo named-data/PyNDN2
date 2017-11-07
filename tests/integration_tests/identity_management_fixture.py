@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2017 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# Author: From ndn-group-encrypt unit tests
+# From ndn-cxx unit tests:
 # https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/identity-management-fixture.cpp
 #
 # This program is free software: you can redistribute it and/or modify
