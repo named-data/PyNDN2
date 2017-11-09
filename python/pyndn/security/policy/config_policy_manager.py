@@ -1003,7 +1003,13 @@ class TrustAnchorRefreshManager(object):
                         if self._isSecurityV1:
                             self._certificateCache.deleteCertificate(Name(c))
                         else:
-                            self._certificateCacheV2.deleteCertificate(Name(c))
+                            # The name in the CertificateCacheV2 contains the
+                            # but the name in the certificateList does not, so
+                            # find the certificate based on the prefix first.
+                            foundCertificate = self._certificateCacheV2.find(Name(c))
+                            if foundCertificate != None:
+                                self._certificateCacheV2.deleteCertificate(
+                                  foundCertificate.getName())
                     except KeyError:
                         # was already removed? not supported?
                         pass
