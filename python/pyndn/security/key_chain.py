@@ -247,7 +247,8 @@ class KeyChain(object):
         :param Name identityName: The name of the identity.
         :param KeyParams params: (optional) The key parameters if a key needs to
           be generated for the identity. If omitted, use getDefaultKeyParams().
-        :return: The created Identity instance.
+        :return: The created PibIdentity instance.
+        :rtype: PibIdentity
         """
         if params == None:
             params = KeyChain.getDefaultKeyParams()
@@ -322,6 +323,8 @@ class KeyChain(object):
         :param PibIdentity identity: A valid PibIdentity object.
         :param KeyParams params: (optional) The key parameters if a key needs to
           be generated for the identity. If omitted, use getDefaultKeyParams().
+        :return: The new PibKey.
+        :rtype: PibKey
         """
         if params == None:
             params = KeyChain.getDefaultKeyParams()
@@ -643,9 +646,9 @@ class KeyChain(object):
         try:
             publicKey = PublicKey(publicKeyBits)
         except Exception as ex:
-            # Promote to Pib.Error.
+            # Promote to KeyChain.Error.
             self._tpm._deleteKey(keyName)
-            raise Pib.Error("Error decoding public key " + str(ex))
+            raise KeyChain.Error("Error decoding public key " + str(ex))
 
         # TODO: Move verify into PublicKey?
         isVerified = False
@@ -676,9 +679,9 @@ class KeyChain(object):
               # We don't expect this.
               raise ValueError("Unrecognized key type")
         except Exception as ex:
-            # Promote to Pib.Error.
+            # Promote to KeyChain.Error.
             self._tpm._deleteKey(keyName)
-            raise Pib.Error("Error verifying with the public key " + str(ex))
+            raise KeyChain.Error("Error verifying with the public key " + str(ex))
 
         if not isVerified:
             self._tpm._deleteKey(keyName)
@@ -1467,7 +1470,7 @@ class KeyChain(object):
     @staticmethod
     def _getDefaultPibLocator(config):
         """
-        :param str config:
+        :param ConfigFile config:
         :rtype: str
         """
         if KeyChain._defaultPibLocator != None:
@@ -1488,7 +1491,7 @@ class KeyChain(object):
     @staticmethod
     def _getDefaultTpmLocator(config):
         """
-        :param str config:
+        :param ConfigFile config:
         :rtype: str
         """
         if KeyChain._defaultTpmLocator != None:

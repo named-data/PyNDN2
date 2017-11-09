@@ -70,10 +70,10 @@ class ConfigPolicyManager(PolicyManager):
       configuration file containing verification rules. Otherwise, you should
       separately call load().
     :param certificateCache: (optional) A CertificateCache to hold known
-      certificates. If certificateCache this is a CertificateCache (or omitted
+      certificates. If certificateCache is a CertificateCache (or omitted
       or None) this creates a security v1 PolicyManager to verify certificates
       in format v1. If this is a CertificateCacheV2, verify certificates in
-      format v1. If omitted or None, create an internal v1 CertificateCache.
+      format v2. If omitted or None, create an internal v1 CertificateCache.
     :type certificateCache: CertificateCache or CertificateCacheV2
     :param int searchDepth: (optional) The maximum number of links to follow
       when verifying a certificate chain.
