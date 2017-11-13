@@ -184,7 +184,7 @@ class PendingInterestTable(object):
     def extractEntriesForNackInterest(self, interest, entries):
         """
         Find all entries from the pending interest table where the OnNetworkNack
-        callback is not null and the entry's interest is the same as the given
+        callback is not None and the entry's interest is the same as the given
         interest, remove the entries from the table, set each entry's isRemoved
         flag, and add to the entries list. (We don't remove the entry if the
         OnNetworkNack callback is None so that OnTimeout will be called later.)

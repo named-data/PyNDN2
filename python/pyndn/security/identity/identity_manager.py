@@ -65,7 +65,7 @@ class IdentityManager(object):
             if identityStorage == None:
                 # We don't expect this to happen.
                 raise RuntimeError(
-                  "IdentityManager: A custom privateKeyStorage is supplied with a null identityStorage")
+                  "IdentityManager: A custom privateKeyStorage is supplied with a None identityStorage")
 
             self._identityStorage = identityStorage
             self._privateKeyStorage = privateKeyStorage

@@ -64,7 +64,7 @@ class PibKeyImpl(object):
             self._pibImpl = pibImpl
 
             if pibImpl == None:
-                raise ValueError("The pibImpl is null")
+                raise ValueError("The pibImpl is None")
 
             self._keyEncoding = self._pibImpl.getKeyBits(self._keyName)
 
@@ -87,7 +87,7 @@ class PibKeyImpl(object):
             self._pibImpl = pibImpl
 
             if pibImpl == None:
-                raise ValueError("The pibImpl is null")
+                raise ValueError("The pibImpl is None")
 
             try:
                 publicKey = PublicKey(self._keyEncoding)

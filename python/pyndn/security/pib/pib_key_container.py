@@ -45,7 +45,7 @@ class PibKeyContainer(object):
         self._pibImpl = pibImpl
 
         if pibImpl == None:
-            raise ValueError("The pibImpl is null")
+            raise ValueError("The pibImpl is None")
 
         self._keyNames = self._pibImpl.getKeysOfIdentity(identityName)
 

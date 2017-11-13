@@ -66,7 +66,7 @@ class ConfigPolicyManager(PolicyManager):
     security v1 PolicyManager to verify certificates in format v1. To verify
     certificates in format v2, use a CertificateCacheV2 for the certificateCache.
 
-    :param str configFileName: (optional) If not null or empty, the path to the
+    :param str configFileName: (optional) If not None or empty, the path to the
       configuration file containing verification rules. Otherwise, you should
       separately call load().
     :param certificateCache: (optional) A CertificateCache to hold known

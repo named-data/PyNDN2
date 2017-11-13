@@ -39,7 +39,7 @@ class TpmKeyHandleMemory(TpmKeyHandle):
         super(TpmKeyHandleMemory, self).__init__()
 
         if key == None:
-            raise ValueError("The key is null")
+            raise ValueError("The key is None")
 
         self._key = key
 

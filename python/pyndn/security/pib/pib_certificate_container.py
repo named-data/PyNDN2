@@ -42,7 +42,7 @@ class PibCertificateContainer(object):
         self._pibImpl = pibImpl
 
         if pibImpl == None:
-            raise ValueError("The pibImpl is null")
+            raise ValueError("The pibImpl is None")
 
         # A set of Name.
         self._certificateNames = self._pibImpl.getCertificatesOfKey(keyName)

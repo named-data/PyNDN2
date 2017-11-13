@@ -272,7 +272,7 @@ class Tpm(object):
         it is not already cached in _keys.
 
         :param Name keyName: The name of the key, which is copied.
-        :return: The key handle in the _keys cache, or null if no key exists
+        :return: The key handle in the _keys cache, or None if no key exists
           with name keyName.
         :rtype: TpmKeyHandle
         """

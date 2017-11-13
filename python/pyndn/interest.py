@@ -188,7 +188,7 @@ class Interest(object):
         """
         Get the link object. If necessary, decode it from the link wire encoding.
 
-        :return: The link object, or null if not specified.
+        :return: The link object, or None if not specified.
         :rtype: Link
         :raises ValueError: For error decoding the link wire encoding (if
           necessary).
@@ -362,7 +362,7 @@ class Interest(object):
     def setLinkWireEncoding(self, encoding, wireFormat = None):
         """
         Set the link wire encoding bytes, without decoding them. If there is a
-        link object, set it to null. If you later call getLink(), it will decode
+        link object, set it to None. If you later call getLink(), it will decode
         the wireEncoding to create the link object.
 
         :param Blob encoding: The Blob with the bytes of the link wire encoding.

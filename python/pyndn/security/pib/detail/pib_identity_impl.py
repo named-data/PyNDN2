@@ -51,7 +51,7 @@ class PibIdentityImpl(object):
         self._pibImpl = pibImpl
 
         if pibImpl == None:
-            raise ValueError("The pibImpl is null")
+            raise ValueError("The pibImpl is None")
 
         if needInit:
             self._pibImpl.addIdentity(self._identityName)

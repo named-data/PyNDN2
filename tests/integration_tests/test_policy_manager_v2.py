@@ -177,7 +177,7 @@ class TestPolicyManagerV2(ut.TestCase):
         self.keyName = Name(self.identityName).append("KEY").append("ksk-1416010123")
         self.pibImpl.addKey(self.identityName, self.keyName,
           TEST_RSA_PUBLIC_KEY_DER)
-        # Set the password null since we have an unencrypted PKCS #8 private key.
+        # Set the password to None since we have an unencrypted PKCS #8 private key.
         self.tpmBackEnd.importKey(self.keyName, TEST_RSA_PRIVATE_KEY_PKCS8,
           None)
 

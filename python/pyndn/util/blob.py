@@ -206,7 +206,7 @@ class Blob(object):
         If the hash code is already computed then return it, otherwise compute
         and return the hash code.
 
-        :return: The hash code for the buffer, or 0 if the buffer is null.
+        :return: The hash code for the buffer, or 0 if the buffer is None.
         :rtype: int
         """
         if self._hash == None:
@@ -253,7 +253,7 @@ class Blob(object):
         if self._array == None and other._array == None:
             return True
         if self._array == None or other._array == None:
-            # One of the blobs is null and the other isn't.
+            # One of the blobs is None and the other isn't.
             return False
 
         if len(self._array) != len(other._array):

@@ -118,7 +118,7 @@ class Face(object):
           interest is the sent Interest and networkNack is the received
           NetworkNack. If onNetworkNack is supplied, then onTimeout must be
           supplied too. However, if a network Nack is received and onNetworkNack
-          is null, do nothing and wait for the interest to time out. (Therefore,
+          is None, do nothing and wait for the interest to time out. (Therefore,
           an application which does not yet process a network Nack reason treats
           a Nack the same as a timeout.)
           NOTE: The library will log any exceptions raised by this callback, but
