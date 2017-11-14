@@ -252,7 +252,7 @@ class BasicIdentityStorage(IdentityStorage):
         """
         if keyName.size() == 0:
             raise SecurityException(
-              "BasicIdentityStorage::getKey: Empty keyName")
+              "BasicIdentityStorage.getKey: Empty keyName")
 
         identityUri = keyName[:-1].toUri()
         keyId = keyName[-1].toEscapedString()
@@ -268,7 +268,7 @@ class BasicIdentityStorage(IdentityStorage):
         else:
             cursor.close()
             raise SecurityException(
-              "BasicIdentityStorage::getKey: The key does not exist")
+              "BasicIdentityStorage.getKey: The key does not exist")
 
     def activateKey(self, keyName):
         """
@@ -390,13 +390,13 @@ class BasicIdentityStorage(IdentityStorage):
                 certificate.wireDecode(bytearray(certData))
             except ValueError:
                 raise SecurityException(
-                  "BasicIdentityStorage::getCertificate: The certificate cannot be decoded")
+                  "BasicIdentityStorage.getCertificate: The certificate cannot be decoded")
 
             return certificate
         else:
             cursor.close()
             raise SecurityException(
-              "BasicIdentityStorage::getCertificate: The certificate does not exist")
+              "BasicIdentityStorage.getCertificate: The certificate does not exist")
 
     def getTpmLocator(self):
         """
@@ -417,7 +417,7 @@ class BasicIdentityStorage(IdentityStorage):
         else:
             cursor.close()
             raise SecurityException(
-              "BasicIdentityStorage::getTpmLocator: TPM info does not exist")
+              "BasicIdentityStorage.getTpmLocator: TPM info does not exist")
 
     def deleteCertificateInfo(self, certificateName):
         """
@@ -479,7 +479,7 @@ class BasicIdentityStorage(IdentityStorage):
         else:
             cursor.close()
             raise SecurityException(
-              "BasicIdentityStorage::getDefaultIdentity: The default identity is not defined")
+              "BasicIdentityStorage.getDefaultIdentity: The default identity is not defined")
 
     def getDefaultKeyNameForIdentity(self, identityName):
         """
@@ -504,7 +504,7 @@ class BasicIdentityStorage(IdentityStorage):
         else:
             cursor.close()
             raise SecurityException(
-              "BasicIdentityStorage::getDefaultKeyNameForIdentity: The default key for the identity is not defined")
+              "BasicIdentityStorage.getDefaultKeyNameForIdentity: The default key for the identity is not defined")
 
     def getDefaultCertificateNameForKey(self, keyName):
         """
@@ -532,7 +532,7 @@ class BasicIdentityStorage(IdentityStorage):
         else:
             cursor.close()
             raise SecurityException(
-              "BasicIdentityStorage::getDefaultCertificateNameForKey: The default certificate for the key name is not defined")
+              "BasicIdentityStorage.getDefaultCertificateNameForKey: The default certificate for the key name is not defined")
 
     def getAllIdentities(self, nameList, isDefault):
         """

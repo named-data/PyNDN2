@@ -125,7 +125,7 @@ class ProtobufTlv(object):
                 elif (field.type == field.TYPE_ENUM):
                     if value < 0:
                         raise RuntimeError(
-                          "ProtobufTlv::encode: ENUM value may not be negative")
+                          "ProtobufTlv.encode: ENUM value may not be negative")
                     encoder.writeNonNegativeIntegerTlv(tlvType, value)
                 elif (field.type == field.TYPE_BYTES or
                       field.type == field.TYPE_STRING):
@@ -134,7 +134,7 @@ class ProtobufTlv(object):
                     if value:
                         encoder.writeTypeAndLength(tlvType, 0)
                 else:
-                    raise RuntimeError("ProtobufTlv::encode: Unknown field type")
+                    raise RuntimeError("ProtobufTlv.encode: Unknown field type")
 
     @staticmethod
     def _decodeMessageValue(message, decoder, endOffset):

@@ -122,12 +122,12 @@ class MemoryIdentityStorage(IdentityStorage):
         """
         if keyName.size() == 0:
             raise SecurityException(
-              "MemoryIdentityStorage::getKey: Empty keyName")
+              "MemoryIdentityStorage.getKey: Empty keyName")
 
         keyNameUri = keyName.toUri()
         if not (keyNameUri in self._keyStore):
             raise SecurityException(
-              "MemoryIdentityStorage::getKey: The key does not exist")
+              "MemoryIdentityStorage.getKey: The key does not exist")
 
         (_, publicKeyDer, _) = self._keyStore[keyNameUri]
         return publicKeyDer
@@ -197,14 +197,14 @@ class MemoryIdentityStorage(IdentityStorage):
         certificateNameUri = certificateName.toUri()
         if not (certificateNameUri in self._certificateStore):
             raise SecurityException(
-              "MemoryIdentityStorage::getCertificate: The certificate does not exist")
+              "MemoryIdentityStorage.getCertificate: The certificate does not exist")
 
         certificate = IdentityCertificate()
         try:
             certificate.wireDecode(self._certificateStore[certificateNameUri])
         except ValueError:
             raise SecurityException(
-              "MemoryIdentityStorage::getCertificate: The certificate cannot be decoded")
+              "MemoryIdentityStorage.getCertificate: The certificate cannot be decoded")
 
         return certificate
 
