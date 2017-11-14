@@ -157,7 +157,7 @@ class CertificateV2(Data):
 
     def getPublicKey(self):
         """
-        Get public key DER encoding.
+        Get the public key DER encoding.
 
         :return: The DER encoding Blob.
         :rtype: Blob
