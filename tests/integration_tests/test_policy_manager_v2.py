@@ -19,6 +19,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn.security import SigningInfo
+from pyndn.security import ValidityPeriod
 from pyndn.security.v2.certificate_v2 import CertificateV2
 from pyndn.security.v2.certificate_cache_v2 import CertificateCacheV2
 from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
@@ -27,6 +28,7 @@ from pyndn.util import Blob
 from pyndn import Name, Data, Interest, Face
 from pyndn.security import KeyChain
 from pyndn.security.policy import ConfigPolicyManager
+from pyndn.util.common import Common
 import unittest as ut
 import time
 import os
@@ -250,14 +252,19 @@ class TestPolicyManagerV2(ut.TestCase):
         # We have to sign it with the current identity or the policy manager
         # will create an interest for the signing certificate.
 
+        cert = CertificateV2()
+        certData = b64decode(CERT_DUMP)
+        cert.wireDecode(Blob(certData, False))
+        signingInfo = SigningInfo()
+        signingInfo.setSigningIdentity(self.identityName)
+        # Make sure the validity period is current for two years.
+        now = Common.getNowMilliseconds()
+        signingInfo.setValidityPeriod(ValidityPeriod
+          (now, now + 2 * 365 * 24 * 3600 * 1000.0))
+
+        self.keyChain.sign(cert, signingInfo)
+        encodedCert = b64encode(cert.wireEncode().toBytes())
         with open(self.testCertFile, 'w') as certFile:
-            cert = CertificateV2()
-            certData = b64decode(CERT_DUMP)
-            cert.wireDecode(Blob(certData, False))
-            signingInfo = SigningInfo()
-            signingInfo.setSigningIdentity(self.identityName)
-            self.keyChain.sign(cert, signingInfo)
-            encodedCert = b64encode(cert.wireEncode().toBytes())
             certFile.write(Blob(encodedCert, False).toRawStr())
 
         # Still too early for refresh to pick it up.
