@@ -105,7 +105,7 @@ class ValidationError(object):
         else:
             result = "Unrecognized error code " + str(self._code)
 
-        if this.info_.length > 0:
+        if len(this.info_) > 0:
             result += " (" + this.info_ + ")"
 
         return result
