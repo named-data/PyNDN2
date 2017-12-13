@@ -35,6 +35,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding, ec
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 from cryptography.hazmat.primitives import hashes, hmac
+from cryptography.exceptions import InvalidSignature
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
