@@ -94,6 +94,9 @@ class ConfigPolicyManager(PolicyManager):
 
         if certificateCache is None:
             certificateCache = CertificateCache()
+
+        # _certificateCacheV2 will be replaced below, but set it here to make pylint happy.
+        self._certificateCacheV2 = CertificateCacheV2()
         if isinstance(certificateCache, CertificateCache):
             self._isSecurityV1 = True
             self._certificateCache = certificateCache
