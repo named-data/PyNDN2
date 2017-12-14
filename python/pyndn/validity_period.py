@@ -62,7 +62,7 @@ class ValidityPeriod(object):
         else:
             raise RuntimeError(
               "Unrecognized type for ValidityPeriod constructor: " +
-              str(type(value)))
+              str(type(validityPeriodOrNotBefore)))
 
     def hasPeriod(self):
         """
