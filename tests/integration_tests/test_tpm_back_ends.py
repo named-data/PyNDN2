@@ -20,7 +20,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import unittest as ut
-import os
+import os, sys
 from pyndn.util import Blob, SignedBlob
 from pyndn.name import Name
 from pyndn.encrypt.algo.encrypt_params import EncryptParams, EncryptAlgorithmType
@@ -49,10 +49,11 @@ class TestTpmBackEnds(ut.TestCase):
 
         self.backEndOsx = TpmBackEndOsx()
 
-        self.backEndList = [None, None, None]
-        self.backEndList[0] = self.backEndMemory
-        self.backEndList[1] = self.backEndFile
-        self.backEndList[2] = self.backEndOsx
+        self.backEndList = []
+        self.backEndList.append(self.backEndMemory)
+        self.backEndList.append(self.backEndFile)
+        if sys.platform == 'darwin':
+            self.backEndList.append(self.backEndOsx)
 
     def test_key_management(self):
         for tpm in self.backEndList:
