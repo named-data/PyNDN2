@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 /**
- * Copyright (C) 2016-2017 Regents of the University of California.
+ * Copyright (C) 2016-2018 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -79,6 +79,12 @@ EcPrivateKeyLite::signWithSha256
 {
   return ndn_EcPrivateKey_signWithSha256
     (this, data, dataLength, signature, &signatureLength);
+}
+
+ndn_Error
+EcPrivateKeyLite::getCurveId(int& curveId) const
+{
+  return ndn_EcPrivateKey_getCurveId(this, &curveId);
 }
 
 }
