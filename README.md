@@ -11,6 +11,8 @@ for instructions to build and run from the full distribution.
 
 If you are new to the NDN community of software generally, read the
 [Contributor's Guide](https://github.com/named-data/NFD/blob/master/CONTRIBUTING.md).
+Proposed code contributions should use a
+[GitHub pull request](https://github.com/named-data/PyNDN2/pulls).
 
 If you only need to install the pyndn Python module, you can use easy_install.
 (If you don't have easy_install, see the instructions at
