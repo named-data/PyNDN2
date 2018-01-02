@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Regents of the University of California.
+ * Copyright (C) 2016-2018 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -167,6 +167,17 @@ ndn_EcPrivateKey_signWithSha256
     return NDN_ERROR_Error_in_sign_operation;
 
   *signatureLength = tempSignatureLength;
+  return NDN_ERROR_success;
+}
+
+ndn_Error
+ndn_EcPrivateKey_getCurveId(const struct ndn_EcPrivateKey *self, int *curveId)
+{
+  const EC_GROUP *group = EC_KEY_get0_group(self->privateKey);
+  if (!group)
+    return NDN_ERROR_Error_decoding_key;
+
+  *curveId = EC_GROUP_get_curve_name(group);
   return NDN_ERROR_success;
 }
 

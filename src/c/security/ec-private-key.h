@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Regents of the University of California.
+ * Copyright (C) 2016-2018 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -142,6 +142,16 @@ ndn_Error
 ndn_EcPrivateKey_signWithSha256
   (const struct ndn_EcPrivateKey *self, const uint8_t *data, size_t dataLength,
    uint8_t *signature, size_t *signatureLength);
+
+/**
+ * Get the OpenSSL curve ID.
+ * @param self A pointer to the ndn_EcPrivateKey struct.
+ * @param curveId Set curveId to the OpenSSL curve ID such as NID_secp384r1.
+ * @return 0 for success, else NDN_ERROR_Error_decoding_key if can't get the
+ * curve ID.
+ */
+ndn_Error
+ndn_EcPrivateKey_getCurveId(const struct ndn_EcPrivateKey *self, int *curveId);
 
 #ifdef __cplusplus
 }

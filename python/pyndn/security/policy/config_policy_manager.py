@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2017 Regents of the University of California.
+# Copyright (C) 2014-2018 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
 # From ndn-cxx security by Yingdi Yu <yingdi@cs.ucla.edu>.
 #
@@ -94,6 +94,9 @@ class ConfigPolicyManager(PolicyManager):
 
         if certificateCache is None:
             certificateCache = CertificateCache()
+
+        # _certificateCacheV2 will be replaced below, but set it here to make pylint happy.
+        self._certificateCacheV2 = CertificateCacheV2()
         if isinstance(certificateCache, CertificateCache):
             self._isSecurityV1 = True
             self._certificateCache = certificateCache

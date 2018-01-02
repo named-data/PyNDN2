@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2017 Regents of the University of California.
+# Copyright (C) 2014-2018 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From ndn-cxx security by Yingdi Yu <yingdi@cs.ucla.edu>.
 #
@@ -35,6 +35,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding, ec
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 from cryptography.hazmat.primitives import hashes, hmac
+from cryptography.exceptions import InvalidSignature
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data

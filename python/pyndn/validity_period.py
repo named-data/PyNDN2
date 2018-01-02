@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2016-2017 Regents of the University of California.
+# Copyright (C) 2016-2018 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # @author: From ndn-cxx src/security https://github.com/named-data/ndn-cxx
 #
@@ -62,7 +62,7 @@ class ValidityPeriod(object):
         else:
             raise RuntimeError(
               "Unrecognized type for ValidityPeriod constructor: " +
-              str(type(value)))
+              str(type(validityPeriodOrNotBefore)))
 
     def hasPeriod(self):
         """
