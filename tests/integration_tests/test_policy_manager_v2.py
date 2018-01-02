@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2017 Regents of the University of California.
+# Copyright (C) 2017-2018 Regents of the University of California.
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 #
