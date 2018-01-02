@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2017 Regents of the University of California.
+# Copyright (C) 2017-2018 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # Author: From ndn-cxx security https://github.com/named-data/ndn-cxx/blob/master/src/security/v2/validation-error.cpp
 #
@@ -19,7 +19,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This modules defines the ValidationError class which holds an error code and an
+This module defines the ValidationError class which holds an error code and an
 optional detailed error message.
 """
 
@@ -28,8 +28,10 @@ class ValidationError(object):
     Create a new ValidationError for the given code.
 
     :param int code: The code which is one of the standard error codes such as
-      INVALID_SIGNATURE, or a custom code if greater than or equal to USER_MIN.
-    :param str info: (optional) The optional error message.
+      ValidationError.INVALID_SIGNATURE, or a custom code if greater than or
+      equal to ValidationError.USER_MIN .
+    :param str info: {optinal) The error message. If omitted, use an empty
+      string.
     """
     def __init__(self, code, info = ""):
         self._code = code
@@ -54,8 +56,8 @@ class ValidationError(object):
         Get the error code given to the constructor.
 
         :return: The error code which is one of the standard error codes such as
-          INVALID_SIGNATURE, or a custom code if greater than or equal to
-          USER_MIN.
+          ValidationError.INVALID_SIGNATURE, or a custom code if greater than or
+          equal to ValidationError.USER_MIN.
         :rtype: int
         """
         return self._code
@@ -103,7 +105,7 @@ class ValidationError(object):
         else:
             result = "Unrecognized error code " + str(self._code)
 
-        if len(self._info.length) > 0:
+        if len(self._info) > 0:
             result += " (" + self._info + ")"
 
         return result
