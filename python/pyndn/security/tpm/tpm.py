@@ -256,15 +256,9 @@ class Tpm(object):
           EncryptedPrivateKeyInfo. If the password is None, import an
           unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
-        :return: True for success, False if importing fails.
-        :rtype: bool
+        :raises TpmBackEnd.Error: For an error importing the key.
         """
-        try:
-            self._backEnd.importKey(keyName, pkcs8, password)
-        except:
-            return False
-
-        return True
+        self._backEnd.importKey(keyName, pkcs8, password)
 
     def _findKey(self, keyName):
         """
