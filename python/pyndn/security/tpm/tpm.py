@@ -224,7 +224,7 @@ class Tpm(object):
 
     def _exportPrivateKey(self, keyName, password):
         """
-        Get the encoded private key with name keyName in PKCS #8 format, possiby
+        Get the encoded private key with name keyName in PKCS #8 format, possibly
         encrypted. This should only be called by KeyChain.
 
         :param Name keyName: The name of the key in the TPM.
@@ -244,7 +244,7 @@ class Tpm(object):
     def _importPrivateKey(self, keyName, pkcs8, password):
         """
         Import an encoded private key with name keyName in PKCS #8 format,
-        possibly passwprd-encrypted. This should only be called by KeyChain.
+        possibly password-encrypted. This should only be called by KeyChain.
 
         :param Name keyName: The name of the key to use in the TPM.
         :param pkcs8: The input byte buffer. If the password is supplied, this
