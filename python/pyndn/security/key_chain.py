@@ -642,9 +642,9 @@ class KeyChain(object):
         try:
             self._tpm._importPrivateKey(
               keyName, safeBag.getPrivateKeyBag().toBytes(), password)
-        except Exception:
+        except Exception as ex:
             raise KeyChain.Error("Failed to import private key `" +
-              keyName.toUri() + "`")
+              keyName.toUri() + "`: " + str(ex))
 
         # Check the consistency of the private key and certificate.
         content = Blob([0x01, 0x02, 0x03, 0x04])
