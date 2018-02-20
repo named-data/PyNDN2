@@ -231,6 +231,17 @@ class KeyChain(object):
 
         return self._tpm
 
+    def getIsSecurityV1(self):
+        """
+        Get the flag set by the constructor if this is a security v1 or v2
+        KeyChain.
+
+        :return: True if this is a security v1 KeyChain, false if this is a
+          security v2 KeyChain.
+        :rtype: bool
+        """
+        return self._isSecurityV1
+
     # Identity management
 
     def createIdentityV2(self, identityName, params = None):
@@ -631,9 +642,9 @@ class KeyChain(object):
         try:
             self._tpm._importPrivateKey(
               keyName, safeBag.getPrivateKeyBag().toBytes(), password)
-        except Exception:
+        except Exception as ex:
             raise KeyChain.Error("Failed to import private key `" +
-              keyName.toUri() + "`")
+              keyName.toUri() + "`: " + str(ex))
 
         # Check the consistency of the private key and certificate.
         content = Blob([0x01, 0x02, 0x03, 0x04])

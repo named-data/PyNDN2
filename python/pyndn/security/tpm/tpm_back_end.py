@@ -144,7 +144,7 @@ class TpmBackEnd(object):
     def importKey(self, keyName, pkcs8, password):
         """
         Import an encoded private key with name keyName in PKCS #8 format,
-          possibly passwprd-encrypted.
+          possibly password-encrypted.
 
         :param Name keyName: The name of the key to use in the TPM.
         :param pkcs8: The input byte buffer. If the password is supplied, this
@@ -323,7 +323,7 @@ class TpmBackEnd(object):
     def _doImportKey(self, keyName, pkcs8, password):
         """
         A protected method to import an encoded private key with name keyName in
-          PKCS #8 format, possibly passwprd-encrypted.
+          PKCS #8 format, possibly password-encrypted.
         Your subclass must implement it.
 
         :param Name keyName: The name of the key to use in the TPM.
