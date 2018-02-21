@@ -20,14 +20,15 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import unittest as ut
-import os, sys
-from pyndn.util import Blob, SignedBlob
+import os
+import sys
+from pyndn.util import Blob
 from pyndn.name import Name
 from pyndn.encrypt.algo.encrypt_params import EncryptParams, EncryptAlgorithmType
 from pyndn.encrypt.algo.rsa_algorithm import RsaAlgorithm
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.key_params import RsaKeyParams, EcdsaKeyParams
-from pyndn.security.policy.policy_manager import PolicyManager
+from pyndn.security.verification_helpers import VerificationHelpers
 from pyndn.security.pib.pib_key import PibKey
 from pyndn.security.tpm.tpm import Tpm
 from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
@@ -98,9 +99,8 @@ class TestTpmBackEnds(ut.TestCase):
 
             publicKey = key.derivePublicKey()
 
-            # TODO: Move verify to PublicKey?
-            result = PolicyManager._verifySha256WithRsaSignature(
-              signature, SignedBlob(content, 0, content.size()), publicKey)
+            result = VerificationHelpers.verifySignature(
+              content, signature, publicKey)
             self.assertEquals(True, result)
 
             tpm.deleteKey(keyName)
@@ -142,9 +142,8 @@ class TestTpmBackEnds(ut.TestCase):
 
             publicKey = key.derivePublicKey()
 
-            # TODO: Move verify to PublicKey?
-            result = PolicyManager._verifySha256WithEcdsaSignature(
-              signature, SignedBlob(content, 0, content.size()), publicKey)
+            result = VerificationHelpers.verifySignature(
+              content, signature, publicKey)
             self.assertEquals(True, result)
 
             tpm.deleteKey(keyName)
