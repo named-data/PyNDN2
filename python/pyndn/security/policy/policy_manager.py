@@ -18,11 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, ec
-from cryptography.hazmat.primitives.serialization import load_der_public_key
-from cryptography.hazmat.primitives import hashes
-from cryptography.exceptions import InvalidSignature
+from pyndn.security.verification_helpers import VerificationHelpers
+from pyndn.security.security_types import DigestAlgorithm
+from pyndn.security.certificate.public_key import PublicKey
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
@@ -134,7 +132,7 @@ class PolicyManager(object):
         Check the type of signature and use the publicKeyDer to verify the
         signedBlob using the appropriate signature algorithm.
 
-        :param Blob signature: An object of a subclass of Signature, e.g.
+        :param Signature signature: An object of a subclass of Signature, e.g.
           Sha256WithRsaSignature.
         :param SignedBlob signedBlob: the SignedBlob with the signed portion to
           verify.
@@ -146,100 +144,17 @@ class PolicyManager(object):
         :raises: SecurityException if the signature type is not recognized or if
           publicKeyDer can't be decoded.
         """
-        if isinstance(signature, Sha256WithRsaSignature):
+        if (isinstance(signature, Sha256WithRsaSignature) or
+            isinstance(signature, Sha256WithEcdsaSignature)):
             if publicKeyDer.isNull():
                 return False
-            return PolicyManager._verifySha256WithRsaSignature(
-              signature.getSignature(), signedBlob, publicKeyDer)
-        elif isinstance(signature, Sha256WithEcdsaSignature):
-            if publicKeyDer.isNull():
-                return False
-            return PolicyManager._verifySha256WithEcdsaSignature(
-              signature.getSignature(), signedBlob, publicKeyDer)
+            return VerificationHelpers.verifySignature(
+              signedBlob.toSignedBytes(), signature.getSignature(),
+              PublicKey(publicKeyDer), DigestAlgorithm.SHA256)
         elif isinstance(signature, DigestSha256Signature):
-            return PolicyManager._verifyDigestSha256Signature(
-              signature.getSignature(), signedBlob)
+            return VerificationHelpers.verifyDigest(
+              signedBlob.toSignedBytes(), signature.getSignature(),
+              DigestAlgorithm.SHA256)
         else:
             raise SecurityException(
               "PolicyManager.verify: Signature type is unknown")
-
-    @staticmethod
-    def _verifySha256WithRsaSignature(signature, signedBlob, publicKeyDer):
-        """
-        Verify the RSA signature on the SignedBlob using the given public key.
-
-        :param Blob signature: The signature bits.
-        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
-          verify.
-        :param Blob publicKeyDer: The DER-encoded public key used to verify the
-          signature.
-        :return: True if the signature verifies, False if not.
-        :rtype: bool
-        """
-        # Get the public key.
-        publicKeyDerBytes = publicKeyDer.toBytes()
-        try:
-            publicKey = load_der_public_key(
-              publicKeyDerBytes, backend = default_backend())
-        except:
-            raise SecurityException("Cannot decode the RSA public key")
-
-        # Verify.
-        verifier = publicKey.verifier(
-          signature.toBytes(), padding.PKCS1v15(), hashes.SHA256())
-        verifier.update(signedBlob.toSignedBytes())
-        try:
-            verifier.verify()
-            return True
-        except InvalidSignature:
-            return False
-
-    @staticmethod
-    def _verifySha256WithEcdsaSignature(signature, signedBlob, publicKeyDer):
-        """
-        Verify the ECDSA signature on the SignedBlob using the given public key.
-
-        :param Blob signature: The signature bits.
-        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
-          verify.
-        :param Blob publicKeyDer: The DER-encoded public key used to verify the
-          signature.
-        :return: True if the signature verifies, False if not.
-        :rtype: bool
-        """
-        # Get the public key.
-        publicKeyDerBytes = publicKeyDer.toBytes()
-        try:
-            publicKey = load_der_public_key(
-              publicKeyDerBytes, backend = default_backend())
-        except:
-            raise SecurityException("Cannot decode the ECDSA public key")
-
-        # Verify.
-        verifier = publicKey.verifier(
-          signature.toBytes(), ec.ECDSA(hashes.SHA256()))
-        verifier.update(signedBlob.toSignedBytes())
-        try:
-            verifier.verify()
-            return True
-        except InvalidSignature:
-            return False
-
-    @staticmethod
-    def _verifyDigestSha256Signature(signature, signedBlob):
-        """
-        Verify the DigestSha256 signature on the SignedBlob by verifying that
-        the digest of SignedBlob equals the signature.
-
-        :param Blob signature: The signature bits.
-        :param SignedBlob signedBlob: the SignedBlob with the signed portion to
-          verify.
-        :return: True if the signature verifies, False if not.
-        :rtype: bool
-        """
-        # Get the hash of the bytes to verify.
-        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
-        sha256.update(signedBlob.toSignedBytes())
-        signedPortionDigest = sha256.finalize()
-
-        return signature.toBytes() == signedPortionDigest
