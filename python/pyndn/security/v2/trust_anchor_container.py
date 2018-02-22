@@ -63,7 +63,8 @@ class TrustAnchorContainer(object):
         def __init__(self, message):
             super(TrustAnchorContainer.Error, self).__init__(message)
 
-    def insert(self, groupId, certificateOrPath, refreshPeriod, isDirectory = False):
+    def insert(self, groupId, certificateOrPath, refreshPeriod = None,
+               isDirectory = False):
         """
         There are two forms of insert:
         insert(groupId, certificate) - Insert a static trust anchor. If the
@@ -251,5 +252,5 @@ class TrustAnchorContainer(object):
             return len(self._anchorsByName)
 
     def _refresh(self):
-        for group in self._groups:
-            group.refresh()
+        for groupId in self._groups:
+            self._groups[groupId].refresh()
