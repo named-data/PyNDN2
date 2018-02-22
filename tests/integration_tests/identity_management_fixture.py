@@ -86,7 +86,34 @@ class IdentityManagementFixture(object):
         except Pib.Error:
             return False
 
-    # TODO: addSubCertificate
+    def addSubCertificate(self, subIdentityName, issuer, params = None):
+        """
+        Issue a certificate for subIdentityName signed by issuer. If the
+        identity does not exist, it is created. A new key is generated as the
+        default key for the identity. A default certificate for the key is
+        signed by the issuer using its default certificate.
+        """
+        if params == None:
+            params = KeyChain.getDefaultKeyParams()
+
+        subIdentity = self.addIdentity(subIdentityName, params)
+
+        request = subIdentity.getDefaultKey().getDefaultCertificate()
+
+        request.setName(request.getKeyName().append("parent").appendVersion(1))
+
+        certificateParams = SigningInfo(issuer)
+        # Validity period of 20 years.
+        now = Common.getNowMilliseconds()
+        certificateParams.setValidityPeriod(
+          ValidityPeriod(now, now + 20 * 365 * 24 * 3600 * 1000.0))
+
+        # Skip the AdditionalDescription.
+
+        self._keyChain.sign(request, certificateParams)
+        self._keyChain.setDefaultCertificate(subIdentity.getDefaultKey(), request)
+
+        return subIdentity
 
     def addCertificate(self, key, issuerId):
         """
