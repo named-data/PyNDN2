@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from pyndn.name import Name
 from pyndn.security.key_chain import KeyChain
 from pyndn.security.pib.pib import Pib
 from pyndn.security.v2.certificate_v2 import CertificateV2
@@ -125,7 +126,7 @@ class IdentityManagementFixture(object):
         :return: The new certificate.
         :rtype: CertificateV2
         """
-        certificateName = key.getName()
+        certificateName = Name(key.getName())
         certificateName.append(issuerId).appendVersion(3)
         certificate = CertificateV2()
         certificate.setName(certificateName)
