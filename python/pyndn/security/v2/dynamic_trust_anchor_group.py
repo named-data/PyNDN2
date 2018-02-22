@@ -57,7 +57,7 @@ class DynamicTrustAnchorGroup(TrustAnchorGroup):
 
         logging.getLogger(__name__).info(
           "Create a dynamic trust anchor group " + str(id) + " for file/dir " +
-          path + " with refresh time " + refreshPeriod)
+          path + " with refresh time " + str(refreshPeriod))
         self.refresh()
 
     def refresh(self):
