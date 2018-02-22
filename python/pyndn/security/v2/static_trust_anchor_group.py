@@ -59,7 +59,7 @@ class StaticTrustAnchorGroup(TrustAnchorGroup):
         :param Name certificateName: The certificate name.
         """
         try:
-            self._anchorNames.remove(certificateName.toUri())
+            self._anchorNames.remove(certificateName)
         except:
             pass
 
