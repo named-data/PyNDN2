@@ -46,8 +46,8 @@ class SafeBag(object):
     SafeBag(certificate, privateKeyBag) - Create a SafeBag with the given
     certificate and private key.
     SafeBag(keyName, privateKeyBag, publicKeyEncoding [, password,
-      digestAlgorithm, wireFormat]) - Create a SafeBag with given private key
-      and a new self-signed certificate for the given public key.
+    digestAlgorithm, wireFormat]) - Create a SafeBag with given private key
+    and a new self-signed certificate for the given public key.
 
     :param Data certificate: The certificate data packet (used only for
       SafeBag(certificate, privateKeyBag)). This copies the object.
