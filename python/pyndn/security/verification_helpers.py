@@ -53,11 +53,11 @@ class VerificationHelpers(object):
         :param digestAlgorithm: (optional) The digest algorithm. If omitted, use
           DigestAlgorithm.SHA256.
         :type digestAlgorithm: int from DigestAlgorithm
-        :return: True if verification succeeds, false if verification fails.
+        :return: True if verification succeeds, False if verification fails.
         :rtype: bool
         :raises: ValueError for an invalid public key type or digestAlgorithm.
         """
-        if digestAlgorithm is None:
+        if digestAlgorithm == None:
             digestAlgorithm = DigestAlgorithm.SHA256
 
         if isinstance(buffer, Blob):
@@ -158,7 +158,61 @@ class VerificationHelpers(object):
           data.wireEncode(wireFormat), data.getSignature(), publicKey,
           digestAlgorithm)
 
-    # TODO: verifyInterestSignature
+
+    @staticmethod
+    def verifyInterestSignature(
+      interest, publicKeyOrCertificate, digestAlgorithm = None, wireFormat = None):
+        """
+        Verify the Interest packet using the public key, where the last two name
+        components are the SignatureInfo and signature bytes. This does not
+        check the type of public key or digest algorithm against the type of
+        SignatureInfo such as Sha256WithRsaSignature.
+
+        :param Interest interest: The Interest packet to verify.
+        :param publicKeyOrCertificate: The object containing the public key, or
+          the public key DER which is used to make the PublicKey object, or the
+          certificate containing the public key.
+        :type publicKeyOrCertificate: Blob, or an object which is the same as
+          the bytes() operator, or CertificateV2
+        :param digestAlgorithm: (optional) The digest algorithm. If omitted, use
+          DigestAlgorithm.SHA256.
+        :param WireFormat wireFormat: (optional) A WireFormat object used to
+          encode the Interest packet. If omitted, use
+          WireFormat.getDefaultWireFormat().
+        :raises: ValueError for an invalid public key type or digestAlgorithm.
+        """
+        arg3 = digestAlgorithm
+        arg4 = wireFormat
+
+        if type(arg3) is int:
+            digestAlgorithm = arg3
+        else:
+            digestAlgorithm = None
+
+        if isinstance(arg3, WireFormat):
+            wireFormat = arg3
+        elif isinstance(arg4, WireFormat):
+            wireFormat = arg4
+        else:
+            wireFormat = None
+
+        if isinstance(publicKeyOrCertificate, CertificateV2):
+          try:
+              publicKey = publicKeyOrCertificate.getPublicKey()
+          except:
+              return False
+        else:
+            publicKey = publicKeyOrCertificate;
+
+        if wireFormat == None:
+            wireFormat = WireFormat.getDefaultWireFormat()
+        signature = VerificationHelpers._extractSignature(interest, wireFormat)
+        if signature == None:
+            return False
+
+        return VerificationHelpers.verifySignature(
+          interest.wireEncode(wireFormat), signature.getSignature(), publicKey,
+          digestAlgorithm)
     
     @staticmethod
     def verifyDigest(buffer, digest, digestAlgorithm):
@@ -189,3 +243,24 @@ class VerificationHelpers(object):
             return digest == bufferDigest
         else:
             raise ValueError("verifyDigest: Invalid digest algorithm")
+
+    @staticmethod
+    def _extractSignature(interest, wireFormat):
+        """
+        Extract the signature information from the interest name.
+
+        :param Interest interest: The interest whose signature is needed.
+        :param WireFormat wireFormat: The wire format used to decode signature
+          information from the interest name.
+        :return: The Signature object, or None if can't decode.
+        :rtype: Signature
+        """
+        if interest.getName().size() < 2:
+          return None
+
+        try:
+            return wireFormat.decodeSignatureInfoAndValue(
+              interest.getName().get(-2).getValue().buf(),
+              interest.getName().get(-1).getValue().buf(), False)
+        except:
+            return None
