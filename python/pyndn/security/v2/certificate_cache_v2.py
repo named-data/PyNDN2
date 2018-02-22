@@ -25,10 +25,13 @@ removed no later than its NotAfter time, or maxLifetime after it has been added
 to the cache.
 """
 
+import sys
 import logging
 import bisect
 from pyndn.name import Name
 from pyndn.security.v2.certificate_v2 import CertificateV2
+from pyndn.encrypt.schedule import Schedule
+from pyndn.util.common import Common
 
 class CertificateCacheV2(object):
     """
@@ -42,13 +45,15 @@ class CertificateCacheV2(object):
         if maxLifetimeMilliseconds == None:
             maxLifetimeMilliseconds = CertificateCacheV2.getDefaultLifetime()
 
-        # Name => CertificateV2.
+        # Name => CertificateCacheV2._Entry.
         self._certificatesByName = {}
         # The keys of _certificatesByName in sorted order, kept in sync with it.
         # (We don't use OrderedDict because it doesn't sort keys on insert.)
         self._certificatesByNameKeys = []
 
+        self._nextRefreshTime = sys.float_info.max
         self._maxLifetimeMilliseconds = maxLifetimeMilliseconds
+        self._nowOffsetMilliseconds = 0
 
     def insert(self, certificate):
         """
@@ -59,20 +64,36 @@ class CertificateCacheV2(object):
         :param CertificateV2 certificate: The certificate object, which is
           copied.
         """
-        # TODO: Implement certificatesByTime_ to support refresh(). There can be
-        # multiple certificate for the same removalTime, and adding the same
-        # certificate again should update the removalTime.
+        notAfterTime = certificate.getValidityPeriod().getNotAfter()
+        # _nowOffsetMilliseconds is only used for testing.
+        now = Common.getNowMilliseconds() + self._nowOffsetMilliseconds
+        if notAfterTime < now:
+            logging.getLogger(__name__).info("Not adding " +
+              certificate.getName().toUri() + ": already expired at " +
+              Schedule.toIsoString(notAfterTime))
+            return
+
+        removalTime = min(notAfterTime, now + self._maxLifetimeMilliseconds)
+        if removalTime < self._nextRefreshTime:
+            # We need to run refresh() sooner.
+            self._nextRefreshTime = removalTime
+
+        logging.getLogger(__name__).info("Adding " + certificate.getName().toUri() +
+          ", will remove in " + str((removalTime - now) / (3600 * 1000.0)) +
+          " hours")
 
         certificateCopy = CertificateV2(certificate)
         certificateName = certificateCopy.getName()
 
         if certificateName in self._certificatesByName:
             # A duplicate name. Simply replace.
-            self._certificatesByName[certificateName] = certificateCopy
+            self._certificatesByName[certificateName]._certificate = certificateCopy
+            self._certificatesByName[certificateName]._removalTime = removalTime
         else:
             # Insert into _certificatesByNameKeys sorted.
             # Keep it sync with _certificatesByName.
-            self._certificatesByName[certificateName] = certificateCopy
+            self._certificatesByName[certificateName] = CertificateCacheV2._Entry(
+              certificateCopy, removalTime)
             bisect.insort(self._certificatesByNameKeys, certificateName)
 
     def find(self, certificatePrefixOrInterest):
@@ -96,14 +117,14 @@ class CertificateCacheV2(object):
                 logging.getLogger(__name__).error(
                   "Certificate search using a name with an implicit digest is not yet supported")
 
-            # TODO: refresh()
+            self._refresh()
 
             # Find the first that is greater than or equal to certificatePrefix.
             i = bisect.bisect_left(self._certificatesByNameKeys, certificatePrefix)
             if (i >= len(self._certificatesByNameKeys) or
                 not certificatePrefix.isPrefixOf(self._certificatesByNameKeys[i])):
                 return None
-            return self._certificatesByName[self._certificatesByNameKeys[i]]
+            return self._certificatesByName[self._certificatesByNameKeys[i]]._certificate
         else:
             interest = certificatePrefixOrInterest
 
@@ -116,7 +137,7 @@ class CertificateCacheV2(object):
                 logging.getLogger(__name__).error(
                   "Certificate search using a name with an implicit digest is not yet supported")
 
-            # TODO: refresh()
+            self._refresh()
 
             # Find the first that is greater than or equal to interest.getName().
             i = bisect.bisect_left(self._certificatesByNameKeys, interest.getName())
@@ -125,7 +146,7 @@ class CertificateCacheV2(object):
 
             while i < len(self._certificatesByNameKeys):
                 key = self._certificatesByNameKeys[i]
-                certificate = self._certificatesByName[key]
+                certificate = self._certificatesByName[key]._certificate
                 if not interest.getName().isPrefixOf(certificate.getName()):
                     break
 
@@ -154,7 +175,9 @@ class CertificateCacheV2(object):
             # Do nothing if it doesn't exist.
             pass
 
-        # TODO: Delete from certificatesByTime_.
+        # This may be the certificate to be removed at _nextRefreshTime by
+        # _refresh(), but just allow _refresh() to run instead of updating
+        # _nextRefreshTime now.
 
     def clear(self):
         """
@@ -162,7 +185,7 @@ class CertificateCacheV2(object):
         """
         self._certificatesByName = {}
         self._certificatesByNameKeys = []
-        # TODO: certificatesByTime_.clear()
+        self._nextRefreshTime = sys.float_info.max
 
     @staticmethod
     def getDefaultLifetime():
@@ -173,3 +196,51 @@ class CertificateCacheV2(object):
         :rtype: float
         """
         return 3600.0 * 1000
+
+    def _setNowOffsetMilliseconds(self, nowOffsetMilliseconds):
+        """
+        Set the offset when insert() and _refresh() get the current time, which
+        should only be used for testing.
+
+        :param float nowOffsetMilliseconds: The offset in milliseconds.
+        """
+        self._nowOffsetMilliseconds = nowOffsetMilliseconds
+
+    class _Entry(object):
+        """
+        CertificateCacheV2._Entry is the value of the _certificatesByName map.
+        Create a new CertificateCacheV2.Entry with the given values.
+
+        :param CertificateV2 certificate: The certificate.
+        :param float removalTime: The removal time for this entry as
+          milliseconds since Jan 1, 1970 UTC.
+        """
+        def __init__(self, certificate, removalTime):
+            self._certificate = certificate
+            self._removalTime = removalTime
+
+    def _refresh(self):
+        """
+        Remove all outdated certificate entries.
+        """
+        # _nowOffsetMilliseconds is only used for testing.
+        now = Common.getNowMilliseconds() + self._nowOffsetMilliseconds
+        if now < self._nextRefreshTime:
+            return
+
+        # We recompute _nextRefreshTime.
+        nextRefreshTime = sys.float_info.max
+        # Go backwards through the list so we can erase entries.
+        i = len(self._certificatesByNameKeys) - 1
+        while i >= 0:
+            entry = self._certificatesByName[self._certificatesByNameKeys[i]]
+
+            if entry._removalTime <= now:
+                del self._certificatesByName[self._certificatesByNameKeys[i]]
+                self._certificatesByNameKeys.pop(i)
+            else:
+                nextRefreshTime = min(nextRefreshTime, entry._removalTime)
+
+            i -= 1
+
+        self._nextRefreshTime = nextRefreshTime
