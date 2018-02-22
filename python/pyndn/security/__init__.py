@@ -19,8 +19,9 @@
 
 from pyndn.security import key_chain, key_id_type, key_params, safe_bag
 from pyndn.security import security_exception, security_types, signing_info
+from pyndn.security import validator_null
 __all__ = ['key_chain', 'key_id_type', 'key_params', 'safe_bag', 'security_exception',
-           'security_types', 'signing_info']
+           'security_types', 'signing_info', 'validator_null']
 
 import sys as _sys
 
@@ -32,6 +33,7 @@ try:
     from pyndn.security.security_exception import *
     from pyndn.security.security_types import *
     from pyndn.security.signing_info import *
+    from pyndn.security.validator_null import *
 except ImportError:
     del _sys.modules[__name__]
     raise
