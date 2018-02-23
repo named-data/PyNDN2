@@ -21,17 +21,26 @@
 """
 This module defines the CertificateRequest class which represents a request for
 a certificate, associated with the number of retries left. The _interest and
-_nRetriesLeft fields are public so that you can modify them.
+_nRetriesLeft fields are public so that you can modify them. _interest is the
+Interest for the requested Data packet or Certificate, and _nRetriesLeft is the
+number of remaining retries after a timeout or NACK.
 """
 
 from pyndn.interest import Interest
 
 class CertificateRequest(object):
     """
-    Create a CertificateRequest with a default Interest and 0 retries left.
+    Create a CertificateRequest with an optional Interest.
+
+    :param Interest interest: (optional) If supplied, create a
+      CertificateRequest with a copy of the interest and 3 retries left. Of
+      omitted, create a CertificateRequest with a default Interest object and 0
+      retries left.
     """
-    def __init__(self):
-        # The Interest for the requested Data packet or Certificate.
-        self._interest = Interest()
-        # The number of remaining retries after time out or NACK.
-        self._nRetriesLeft = 0
+    def __init__(self, interest):
+        if interest != None:
+            self._interest = Interest(interest)
+            self._nRetriesLeft = 3
+        else:
+            self._interest = Interest()
+            self._nRetriesLeft = 0
