@@ -72,9 +72,9 @@ class Validator(CertificateStorage):
         self._maxDepth = 25
 
         if self._policy == None:
-            raise RuntimeError("The policy is null")
+            raise RuntimeError("The policy is None")
         if self._certificateFetcher == None:
-            raise RuntimeError("The certificateFetcher is null")
+            raise RuntimeError("The certificateFetcher is None")
 
         self._policy.setValidator(self)
         self._certificateFetcher.setCertificateStorage(self)
@@ -207,7 +207,7 @@ class Validator(CertificateStorage):
                 state._verifyOriginalPacket(certificate)
 
             for i in range(len(state._certificateChain)):
-                self.cacheVerifiedCertificate(state._ertificateChain[i])
+                self.cacheVerifiedCertificate(state._certificateChain[i])
 
             return
 
