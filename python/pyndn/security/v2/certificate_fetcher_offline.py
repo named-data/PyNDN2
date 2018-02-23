@@ -40,4 +40,4 @@ class CertificateFetcherOffline(CertificateFetcher):
         state.fail(ValidationError
           (ValidationError.CANNOT_RETRIEVE_CERTIFICATE,
            "Cannot fetch certificate " +
-           certificateRequest.interest_.getName().toUri() + " in offline mode"))
+           certificateRequest._interest.getName().toUri() + " in offline mode"))
