@@ -20,9 +20,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn import Interest
-from pyndn.security.v2.validator import Validator
-from pyndn.security.v2.certificate_fetcher_from_network import CertificateFetcherFromNetwork
-from pyndn.security.v2.certificate_cache_v2 import CertificateCacheV2
+from pyndn.security.v2 import Validator
+from pyndn.security.v2 import CertificateFetcherFromNetwork
+from pyndn.security.v2 import CertificateCacheV2
 from .identity_management_fixture import IdentityManagementFixture
 
 class ValidatorFixture(IdentityManagementFixture):

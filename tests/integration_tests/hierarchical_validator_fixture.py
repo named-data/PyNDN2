@@ -20,7 +20,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 from pyndn import Name
-from pyndn.security.v2.certificate_v2 import CertificateV2
+from pyndn.security.v2 import CertificateV2
 from .validator_fixture import ValidatorFixture
 
 class HierarchicalValidatorFixture(ValidatorFixture):
