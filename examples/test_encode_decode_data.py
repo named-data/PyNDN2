@@ -28,9 +28,8 @@ from pyndn import HmacWithSha256Signature
 from pyndn import GenericSignature
 from pyndn.security import KeyChain
 from pyndn.security import SafeBag
-from pyndn.security.pib.pib_memory import PibMemory
-from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
-from pyndn.security.policy import SelfVerifyPolicyManager
+from pyndn.security.v2 import Validator
+from pyndn.security.v2 import ValidationPolicyFromPib
 from pyndn.util import Blob
 
 DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
@@ -241,15 +240,15 @@ def dumpData(data):
         else:
             dump("signature.keyLocator: <none>")
 
-def makeOnVerified(prefix):
-    def onVerified(data):
+def makeSuccessCallback(prefix):
+    def successCallback(data):
         dump(prefix, "signature verification: VERIFIED")
-    return onVerified
+    return successCallback
 
-def makeOnValidationFailed(prefix):
-    def onValidationFailed(data, reason):
-        dump(prefix, "signature verification: FAILED. Reason: " + reason)
-    return onValidationFailed
+def makeFailureCallback(prefix):
+    def failureCallback(data, error):
+        dump(prefix, "signature verification: FAILED. Reason: " + str(error))
+    return failureCallback
 
 def main():
     data = Data()
@@ -268,17 +267,15 @@ def main():
     dumpData(reDecodedData)
 
     # Set up the KeyChain.
-    pibImpl = PibMemory()
-    keyChain = KeyChain(
-      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
-    # This puts the public key in the pibImpl used by the SelfVerifyPolicyManager.
+    keyChain = KeyChain("pib-memory:", "tpm-memory:")
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
        Blob(DEFAULT_RSA_PRIVATE_KEY_DER, False),
        Blob(DEFAULT_RSA_PUBLIC_KEY_DER, False)))
+    validator = Validator(ValidationPolicyFromPib(keyChain.getPib()))
 
-    keyChain.verifyData(reDecodedData, makeOnVerified("Re-decoded Data"),
-                        makeOnValidationFailed("Re-decoded Data"))
+    validator.validate(reDecodedData, makeSuccessCallback("Re-decoded Data"),
+      makeFailureCallback("Re-decoded Data"))
 
     freshData = Data(Name("/ndn/abc"))
     freshData.setContent("SUCCESS!")
@@ -289,7 +286,7 @@ def main():
     dump("Freshly-signed Data:")
     dumpData(freshData)
 
-    keyChain.verifyData(freshData, makeOnVerified("Freshly-signed Data"),
-                        makeOnValidationFailed("Freshly-signed Data"))
+    validator.validate(freshData, makeSuccessCallback("Freshly-signed Data"),
+      makeFailureCallback("Freshly-signed Data"))
 
 main()

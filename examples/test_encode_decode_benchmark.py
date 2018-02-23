@@ -25,9 +25,8 @@ from pyndn import KeyLocatorType
 from pyndn.security import KeyType
 from pyndn.security import KeyChain
 from pyndn.security import SafeBag
-from pyndn.security.pib.pib_memory import PibMemory
-from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
-from pyndn.security.policy import SelfVerifyPolicyManager
+from pyndn.security.v2 import Validator
+from pyndn.security.v2 import ValidationPolicyFromPib
 
 def getNowSeconds():
     return time.clock()
@@ -189,10 +188,8 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto, keyType):
         content = Name.fromEscapedString("abc")
     finalBlockId = Name("/%00")[0]
 
-    # Initialize the private key storage in case useCrypto is true.
-    pibImpl = PibMemory()
-    keyChain = KeyChain(
-      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
+    # Initialize the KeyChain in case useCrypto is true.
+    keyChain = KeyChain("pib-memory:", "tpm-memory:")
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
        Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA
@@ -230,12 +227,12 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto, keyType):
 
     return (finish - start, encoding)
 
-def onVerified(data):
+def onVerifySuccess(data):
     # Do nothing since we expect it to verify.
     pass
 
-def onValidationFailed(data, reason):
-    print("Signature verification: FAILED. Reason: " + reason)
+def onVerifyFailed(data, error):
+    print("Signature verification: FAILED. Reason: " + str(error))
 
 def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
     """
@@ -249,10 +246,8 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
     :return: The number of seconds for all iterations.
     :rtype: float
     """
-    # Initialize the private key storage in case useCrypto is true.
-    pibImpl = PibMemory()
-    keyChain = KeyChain(
-      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
+    # Initialize the KeyChain in case useCrypto is true.
+    keyChain = KeyChain("pib-memory:", "tpm-memory:")
     # This puts the public key in the pibImpl used by the SelfVerifyPolicyManager.
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
@@ -260,6 +255,7 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
             else DEFAULT_RSA_PRIVATE_KEY_DER, False),
        Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA
             else DEFAULT_RSA_PUBLIC_KEY_DER, False)))
+    validator = Validator(ValidationPolicyFromPib(keyChain.getPib()))
 
     start = getNowSeconds()
     for i in range(nIterations):
@@ -267,7 +263,7 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
         data.wireDecode(encoding)
 
         if useCrypto:
-            keyChain.verifyData(data, onVerified, onValidationFailed)
+            validator.validate(data,onVerifySuccess, onVerifyFailed)
 
     finish = getNowSeconds()
 

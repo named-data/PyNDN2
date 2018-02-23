@@ -32,9 +32,6 @@ from pyndn import Data
 from pyndn import Face
 from pyndn.security import KeyChain
 from pyndn.security import SafeBag
-from pyndn.security.pib.pib_memory import PibMemory
-from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
-from pyndn.security.policy import NoVerifyPolicyManager
 from pyndn.util import Blob
 from pyndn.sync import ChronoSync2013
 
@@ -491,8 +488,7 @@ def main():
     face = Face(host)
 
     # Set up the key chain.
-    pibImpl = PibMemory()
-    keyChain = KeyChain(pibImpl, TpmBackEndMemory(), NoVerifyPolicyManager())
+    keyChain = KeyChain("pib-memory:", "tpm-memory:")
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
        Blob(DEFAULT_RSA_PRIVATE_KEY_DER, False),
