@@ -63,7 +63,7 @@ class InterestValidationState(ValidationState):
 
         :param ValidationError error:
         """
-        logging.getLogger(__name__).info("" + error)
+        logging.getLogger(__name__).info("" + str(error))
         try:
             self._failureCallback(self._interest, error)
         except:

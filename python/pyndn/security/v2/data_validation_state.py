@@ -62,7 +62,7 @@ class DataValidationState(ValidationState):
 
         :param ValidationError error:
         """
-        logging.getLogger(__name__).info("" + error)
+        logging.getLogger(__name__).info("" + str(error))
         try:
             self._failureCallback(self._data, error)
         except:
