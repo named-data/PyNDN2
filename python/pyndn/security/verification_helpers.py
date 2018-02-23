@@ -154,9 +154,10 @@ class VerificationHelpers(object):
         else:
             publicKey = publicKeyOrCertificate;
 
+        encoding = data.wireEncode(wireFormat)
         return VerificationHelpers.verifySignature(
-          data.wireEncode(wireFormat), data.getSignature(), publicKey,
-          digestAlgorithm)
+          encoding.toSignedBytes(), data.getSignature().getSignature(),
+          publicKey, digestAlgorithm)
 
 
     @staticmethod
@@ -210,9 +211,10 @@ class VerificationHelpers(object):
         if signature == None:
             return False
 
+        encoding = interest.wireEncode(wireFormat)
         return VerificationHelpers.verifySignature(
-          interest.wireEncode(wireFormat), signature.getSignature(), publicKey,
-          digestAlgorithm)
+          encoding.toSignedBytes(), signature.getSignature().getSignature(),
+          publicKey, digestAlgorithm)
     
     @staticmethod
     def verifyDigest(buffer, digest, digestAlgorithm):
