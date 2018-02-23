@@ -213,8 +213,8 @@ class VerificationHelpers(object):
 
         encoding = interest.wireEncode(wireFormat)
         return VerificationHelpers.verifySignature(
-          encoding.toSignedBytes(), signature.getSignature().getSignature(),
-          publicKey, digestAlgorithm)
+          encoding.toSignedBytes(), signature.getSignature(), publicKey,
+          digestAlgorithm)
     
     @staticmethod
     def verifyDigest(buffer, digest, digestAlgorithm):
