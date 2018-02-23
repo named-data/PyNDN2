@@ -96,7 +96,7 @@ class CertificateStorage(object):
         """
         return self._unverifiedCertificateCache
 
-    def loadAnchor(self, groupId, certificateOrPath, refreshPeriod,
+    def loadAnchor(self, groupId, certificateOrPath, refreshPeriod = None,
           isDirectory = False):
         """
         There are two forms of loadAnchor:
