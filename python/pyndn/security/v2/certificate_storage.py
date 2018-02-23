@@ -38,7 +38,7 @@ class CertificateStorage(object):
         verified cache.
 
         :param Interest interestForCertificate: The Interest for the certificate.
-        :return: The found certificate, or null if not found.
+        :return: The found certificate, or None if not found.
         :rtype: CertificateV2
         """
         certificate = self._trustAnchors.find(interestForCertificate);

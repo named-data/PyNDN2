@@ -50,7 +50,7 @@ class ValidationPolicy(object):
         :raises: ValueError if the innerPolicy is None.
         """
         if innerPolicy == None:
-            raise ValueError("The innerPolicy argument cannot be null")
+            raise ValueError("The innerPolicy argument cannot be None")
 
         if self._validator != None:
             innerPolicy.setValidator(self._validator)
@@ -99,7 +99,7 @@ class ValidationPolicy(object):
         If the packet violates the policy, then the policy should call
         state.fail() with an appropriate error code and error description.
         If the packet conforms to the policy and no further key retrievals are
-        necessary, then the policy should call continueValidation(null, state).
+        necessary, then the policy should call continueValidation(None, state).
         If the packet conforms to the policy and a key needs to be fetched, then
         the policy should call
         continueValidation({appropriate-key-request-instance}, state).
