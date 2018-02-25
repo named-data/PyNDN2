@@ -303,8 +303,10 @@ class ValidationPolicySimpleHierarchyForInterestOnly(ValidationPolicySimpleHiera
 
     def checkPolicy(self, dataOrInterest, state, continueValidation):
         """
+        :param dataOrInterest:
         :type dataOrInterest: Data or Interest
-        :type state: ValidationState
+        :param ValidationState state:
+        :param continueValidation:
         :type continueValidation: function object
         """
         if isinstance(dataOrInterest, Data):

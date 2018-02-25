@@ -43,8 +43,10 @@ class ValidationPolicyFromPib(ValidationPolicy):
 
     def checkPolicy(self, dataOrInterest, state, continueValidation):
         """
+        :param dataOrInterest:
         :type dataOrInterest: Data or Interest
-        :type state: ValidationState
+        :param ValidationState state:
+        :param continueValidation:
         :type continueValidation: function object
         """
         keyName = ValidationPolicy.getKeyLocatorName(dataOrInterest, state)
@@ -56,8 +58,9 @@ class ValidationPolicyFromPib(ValidationPolicy):
 
     def _checkPolicyHelper(self, keyName, state, continueValidation):
         """
-        :type keyName: Name
-        :type state: ValidationState
+        :param Name keyName:
+        :param ValidationState state:
+        :param continueValidation:
         :type continueValidation: function object
         """
         try:

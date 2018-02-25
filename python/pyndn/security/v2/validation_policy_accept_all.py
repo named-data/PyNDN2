@@ -31,4 +31,11 @@ class ValidationPolicyAcceptAll(ValidationPolicy):
         super(ValidationPolicyAcceptAll, self).__init__()
 
     def checkPolicy(self, dataOrInterest, state, continueValidation):
+        """
+        :param dataOrInterest:
+        :type dataOrInterest: Data or Interest
+        :param ValidationState state:
+        :param continueValidation:
+        :type continueValidation: function object
+        """
         continueValidation(None, state)
