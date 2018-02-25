@@ -212,7 +212,7 @@ class ConfigPolicyManager(PolicyManager):
                 except KeyError:
                     refreshPeriod = 0
                 else:
-                    refreshMatch = re.match('(\d+)([hms])', refreshPeriodStr)
+                    refreshMatch = re.match('(\\d+)([hms])', refreshPeriodStr)
                     if not refreshMatch:
                         refreshPeriod = 0
                     else:
