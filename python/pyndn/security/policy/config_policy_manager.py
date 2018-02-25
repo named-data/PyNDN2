@@ -329,11 +329,8 @@ class ConfigPolicyManager(PolicyManager):
             # not checking type - only name is supported
 
             # is this a simple relation?
-            try:
-                relationType = keyLocatorInfo['relation'][0].getValue()
-            except KeyError:
-                pass
-            else:
+            relationType = keyLocatorInfo.getFirstValue("relation")
+            if relationType != None:
                 matchName = Name(keyLocatorInfo['name'][0].getValue())
                 if self._matchesRelation(signatureName, matchName, relationType):
                     return True
@@ -344,11 +341,8 @@ class ConfigPolicyManager(PolicyManager):
                     return False
 
             # Is this a simple regex?
-            try:
-                simpleKeyRegex = keyLocatorInfo['regex'][0].getValue()
-            except KeyError:
-                pass
-            else:
+            simpleKeyRegex = keyLocatorInfo.getFirstValue("regex")
+            if simpleKeyRegex != None:
                 if NdnRegexTopMatcher(simpleKeyRegex).match(signatureName):
                     return True
                 else:
@@ -359,11 +353,10 @@ class ConfigPolicyManager(PolicyManager):
                     return False
 
             # is this a hyper-relation?
-            try:
-                hyperRelation = keyLocatorInfo['hyper-relation'][0]
-            except KeyError:
-                pass
-            else:
+            hyperRelationList = keyLocatorInfo["hyper-relation"]
+            if len(hyperRelationList) >= 1:
+                hyperRelation = hyperRelationList[0]
+
                 keyRegex = hyperRelation.getFirstValue('k-regex')
                 keyExpansion = hyperRelation.getFirstValue('k-expand')
                 nameRegex = hyperRelation.getFirstValue('p-regex')
@@ -492,15 +485,14 @@ class ConfigPolicyManager(PolicyManager):
                     for f in filters:
                         # don't check the type - it can only be name for now
                         # we need to see if this is a regex or a relation
-                        try:
-                            regex = f['regex'][0].getValue()
-                        except KeyError:
-                            matchRelation = f['relation'][0].getValue()
-                            matchUri = f['name'][0].getValue()
+                        regexPattern = f.getFirstValue("regex")
+                        if regexPattern == None:
+                            matchRelation =f.getFirstValue("relation")
+                            matchUri = f.getFirstValue("name")
                             matchName = Name(matchUri)
                             passed = self._matchesRelation(objName, matchName, matchRelation)
                         else:
-                            passed =  NdnRegexTopMatcher(regex).match(objName)
+                            passed =  NdnRegexTopMatcher(regexPattern).match(objName)
 
                         if not passed:
                             break
