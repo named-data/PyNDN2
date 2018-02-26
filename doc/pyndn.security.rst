@@ -72,6 +72,38 @@ pyndn.security.signing_info module
     :undoc-members:
     :show-inheritance:
 
+pyndn.security.validator_config module
+--------------------------------------
+
+.. automodule:: pyndn.security.validator_config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.validator_config_error module
+--------------------------------------------
+
+.. automodule:: pyndn.security.validator_config_error
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.validator_null module
+------------------------------------
+
+.. automodule:: pyndn.security.validator_null
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.security.verification_helpers module
+------------------------------------------
+
+.. automodule:: pyndn.security.verification_helpers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
