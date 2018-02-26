@@ -50,7 +50,7 @@ class ValidatorConfig(Validator):
               ValidationPolicyConfig(),
               CertificateFetcherFromNetwork(fetcherOrFace))
             # TODO: Use getInnerPolicy().
-            self._policyConfig = self.getPolicy()
+            self._policyConfig = self._getPolicy()
 
     def load(self, filePathOrInputOrConfigSection, inputName = None):
         """
@@ -64,7 +64,7 @@ class ValidatorConfig(Validator):
 
         :param str filePath: The The path of the config file.
         :param str input: The contents of the configuration rules, with lines
-          separated by "\n" or "\r\n".
+          separated by "\\n" or "\\r\\n".
         :param BoostInfoTree configSection: The configuration section loaded
           from the config file. It should have one "validator" section.
         :param str inputName: Used for log messages, etc.
