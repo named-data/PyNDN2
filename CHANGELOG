@@ -1,3 +1,12 @@
+PyNDN v2.7beta1 (2018-02-26)
+----------------------------
+
+Changes
+* https://redmine.named-data.net/issues/4046
+  Added the security v2 Validator and policies such as ValidationPolicyConfig.
+  Updated examples to use the security v2 Validator.
+  Added security v2 Validator integration tests.
+
 PyNDN v2.6beta1 (2018-02-05)
 ----------------------------
 
