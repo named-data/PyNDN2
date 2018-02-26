@@ -27,7 +27,6 @@ certificate can be directly accessed by getting a CertificateV2 object.
 """
 
 from pyndn.name import Name
-from pyndn.security.v2.certificate_v2 import CertificateV2
 
 class PibKey(object):
     """
@@ -209,3 +208,6 @@ class PibKey(object):
             raise ValueError("Invalid key instance")
 
         return self._impl
+
+# Put this last to avoid an import loop.
+from pyndn.security.v2.certificate_v2 import CertificateV2

@@ -19,12 +19,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.security.key_chain import KeyChain
+from pyndn import Name
+from pyndn.security import KeyChain
 from pyndn.security.pib.pib import Pib
-from pyndn.security.v2.certificate_v2 import CertificateV2
-from pyndn.security.signing_info import SigningInfo
-from pyndn.validity_period import ValidityPeriod
-from pyndn.meta_info import ContentType
+from pyndn.security.v2 import CertificateV2
+from pyndn.security import SigningInfo
+from pyndn import ValidityPeriod
+from pyndn import ContentType
 from pyndn.util.common import Common
 
 class IdentityManagementFixture(object):
@@ -86,7 +87,34 @@ class IdentityManagementFixture(object):
         except Pib.Error:
             return False
 
-    # TODO: addSubCertificate
+    def addSubCertificate(self, subIdentityName, issuer, params = None):
+        """
+        Issue a certificate for subIdentityName signed by issuer. If the
+        identity does not exist, it is created. A new key is generated as the
+        default key for the identity. A default certificate for the key is
+        signed by the issuer using its default certificate.
+        """
+        if params == None:
+            params = KeyChain.getDefaultKeyParams()
+
+        subIdentity = self.addIdentity(subIdentityName, params)
+
+        request = subIdentity.getDefaultKey().getDefaultCertificate()
+
+        request.setName(request.getKeyName().append("parent").appendVersion(1))
+
+        certificateParams = SigningInfo(issuer)
+        # Validity period of 20 years.
+        now = Common.getNowMilliseconds()
+        certificateParams.setValidityPeriod(
+          ValidityPeriod(now, now + 20 * 365 * 24 * 3600 * 1000.0))
+
+        # Skip the AdditionalDescription.
+
+        self._keyChain.sign(request, certificateParams)
+        self._keyChain.setDefaultCertificate(subIdentity.getDefaultKey(), request)
+
+        return subIdentity
 
     def addCertificate(self, key, issuerId):
         """
@@ -98,7 +126,7 @@ class IdentityManagementFixture(object):
         :return: The new certificate.
         :rtype: CertificateV2
         """
-        certificateName = key.getName()
+        certificateName = Name(key.getName())
         certificateName.append(issuerId).appendVersion(3)
         certificate = CertificateV2()
         certificate.setName(certificateName)

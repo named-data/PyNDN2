@@ -23,9 +23,8 @@ from pyndn import KeyLocatorType
 from pyndn import Face
 from pyndn.security import KeyChain
 from pyndn.security import SafeBag
-from pyndn.security.pib.pib_memory import PibMemory
-from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
-from pyndn.security.policy import SelfVerifyPolicyManager
+from pyndn.security.v2 import Validator
+from pyndn.security.v2 import ValidationPolicyFromPib
 from pyndn.util import Blob
 
 DEFAULT_RSA_PUBLIC_KEY_DER = bytearray([
@@ -203,15 +202,15 @@ def dumpInterest(interest):
     else:
         dump("forwardingHint: <none>")
 
-def makeOnVerified(prefix):
-    def onVerified(interest):
+def makeSuccessCallback(prefix):
+    def successCallback(data):
         dump(prefix, "signature verification: VERIFIED")
-    return onVerified
+    return successCallback
 
-def makeOnValidationFailed(prefix):
-    def onValidationFailed(interest, reason):
-        dump(prefix, "signature verification: FAILED. Reason: " + reason)
-    return onValidationFailed
+def makeFailureCallback(prefix):
+    def failureCallback(data, error):
+        dump(prefix, "signature verification: FAILED. Reason: " + str(error))
+    return failureCallback
 
 def main():
     interest = Interest()
@@ -246,14 +245,12 @@ def main():
     dump(freshInterest.toUri())
 
     # Set up the KeyChain.
-    pibImpl = PibMemory()
-    keyChain = KeyChain(
-      pibImpl, TpmBackEndMemory(), SelfVerifyPolicyManager(pibImpl))
-    # This puts the public key in the pibImpl used by the SelfVerifyPolicyManager.
+    keyChain = KeyChain("pib-memory:", "tpm-memory:")
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
        Blob(DEFAULT_RSA_PRIVATE_KEY_DER, False),
        Blob(DEFAULT_RSA_PUBLIC_KEY_DER, False)))
+    validator = Validator(ValidationPolicyFromPib(keyChain.getPib()))
 
     # Make a Face just so that we can sign the interest.
     face = Face("localhost")
@@ -266,8 +263,8 @@ def main():
     dump("Re-decoded fresh Interest:")
     dumpInterest(reDecodedFreshInterest)
 
-    keyChain.verifyInterest(
-      reDecodedFreshInterest, makeOnVerified("Freshly-signed Interest"),
-      makeOnValidationFailed("Freshly-signed Interest"))
+    validator.validate(
+      reDecodedFreshInterest, makeSuccessCallback("Freshly-signed Interest"),
+      makeFailureCallback("Freshly-signed Interest"))
 
 main()

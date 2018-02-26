@@ -151,6 +151,8 @@ class BoostInfoTree(object):
         if len(key) == 0:
             return [self]
 
+        if not path[0] in self.subtrees:
+            return []
         subtrees = self.subtrees[path[0]]
         if len(path) == 1:
             return subtrees
