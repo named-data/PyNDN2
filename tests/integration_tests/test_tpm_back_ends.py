@@ -27,7 +27,7 @@ from pyndn.name import Name
 from pyndn.encrypt.algo.encrypt_params import EncryptParams, EncryptAlgorithmType
 from pyndn.encrypt.algo.rsa_algorithm import RsaAlgorithm
 from pyndn.security.security_types import DigestAlgorithm
-from pyndn.security.key_params import RsaKeyParams, EcdsaKeyParams
+from pyndn.security.key_params import RsaKeyParams, EcKeyParams
 from pyndn.security.verification_helpers import VerificationHelpers
 from pyndn.security.pib.pib_key import PibKey
 from pyndn.security.tpm.tpm import Tpm
@@ -134,7 +134,7 @@ class TestTpmBackEnds(ut.TestCase):
             # Create an EC key.
             identityName = Name("/Test/Ec/KeyName")
 
-            key = tpm.createKey(identityName, EcdsaKeyParams())
+            key = tpm.createKey(identityName, EcKeyParams())
             keyName = key.getKeyName()
 
             content = Blob([0x01, 0x02, 0x03, 0x04])

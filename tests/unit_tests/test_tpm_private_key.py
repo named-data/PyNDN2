@@ -26,7 +26,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, ec
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.exceptions import InvalidSignature
-from pyndn.security import RsaKeyParams, EcdsaKeyParams, DigestAlgorithm, KeyType
+from pyndn.security import RsaKeyParams, EcKeyParams, DigestAlgorithm, KeyType
 from pyndn.security.tpm.tpm_private_key import TpmPrivateKey
 from pyndn.security.certificate import PublicKey
 from pyndn.util import Blob
@@ -131,7 +131,7 @@ class TestTpmPrivateKey(ut.TestCase):
 
     class EcKeyTestData(object):
         def __init__(self) :
-            self.keyParams = EcdsaKeyParams()
+            self.keyParams = EcKeyParams()
 
             self.privateKeyPkcs1 = (
 "MIIBaAIBAQQgRxwcbzK9RV6AHYFsDcykI86o3M/a1KlJn0z8PcLMBZOggfowgfcC\n" +
@@ -237,7 +237,7 @@ class TestTpmPrivateKey(ut.TestCase):
             signature = key.sign(data.toBytes(), DigestAlgorithm.SHA256)
 
             # TODO: Move verify into PublicKey?
-            if dataSet.keyParams.getKeyType() == KeyType.ECDSA:
+            if dataSet.keyParams.getKeyType() == KeyType.EC:
                 cryptoPublicKey = load_der_public_key(
                   publicKeyBits.toBytes(), backend = default_backend())
                 verifier = cryptoPublicKey.verifier(

@@ -175,9 +175,9 @@ class CredentialStorage:
           keyName, KeyType.RSA, DEFAULT_RSA_PUBLIC_KEY_DER, DEFAULT_RSA_PRIVATE_KEY_DER)
 
         self.identityStorage.addKey(
-          ecdsaKeyName, KeyType.ECDSA, Blob(DEFAULT_EC_PUBLIC_KEY_DER))
+          ecdsaKeyName, KeyType.EC, Blob(DEFAULT_EC_PUBLIC_KEY_DER))
         self.privateKeyStorage.setKeyPairForKeyName(
-          ecdsaKeyName, KeyType.ECDSA, DEFAULT_EC_PUBLIC_KEY_DER, DEFAULT_EC_PRIVATE_KEY_DER)
+          ecdsaKeyName, KeyType.EC, DEFAULT_EC_PUBLIC_KEY_DER, DEFAULT_EC_PRIVATE_KEY_DER)
 
     def signData(self, data, certificateName = None):
         if certificateName is None:

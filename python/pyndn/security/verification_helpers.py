@@ -88,7 +88,7 @@ class VerificationHelpers(object):
                     return True
                 except:
                     return False
-            elif publicKey.getKeyType() == KeyType.ECDSA:
+            elif publicKey.getKeyType() == KeyType.EC:
                 # Get the public key.
                 try:
                     cryptoPublicKey = load_der_public_key(

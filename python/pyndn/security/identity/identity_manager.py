@@ -43,7 +43,7 @@ from pyndn.security.identity.osx_private_key_storage import OSXPrivateKeyStorage
 from pyndn.security.security_exception import SecurityException
 from pyndn.security.security_types import KeyType, DigestAlgorithm
 from pyndn.security.key_params import RsaKeyParams
-from pyndn.security.key_params import EcdsaKeyParams
+from pyndn.security.key_params import EcKeyParams
 from pyndn.security.certificate import IdentityCertificate
 from pyndn.security.certificate import PublicKey, CertificateSubjectDescription
 
@@ -222,7 +222,7 @@ class IdentityManager(object):
         :return: The generated key name.
         :rtype: Name
         """
-        keyName = self._generateKeyPair(identityName, isKsk, EcdsaKeyParams(keySize))
+        keyName = self._generateKeyPair(identityName, isKsk, EcKeyParams(keySize))
         return keyName
 
     def setDefaultKeyForIdentity(self, keyName, identityNameCheck = None):
@@ -726,7 +726,7 @@ class IdentityManager(object):
             signature.getKeyLocator().setKeyName(certificateName.getPrefix(-1))
 
             return signature
-        elif keyType == KeyType.ECDSA:
+        elif keyType == KeyType.EC:
             signature = Sha256WithEcdsaSignature()
             digestAlgorithm[0] = DigestAlgorithm.SHA256
 
