@@ -133,7 +133,7 @@ class SafeBag(object):
         # Set the signature info.
         if publicKey.getKeyType() == KeyType.RSA:
             certificate.setSignature(Sha256WithRsaSignature())
-        elif publicKey.getKeyType() == KeyType.ECDSA:
+        elif publicKey.getKeyType() == KeyType.EC:
             certificate.setSignature(Sha256WithEcdsaSignature())
         else:
             raise ValueError("Unsupported key type")

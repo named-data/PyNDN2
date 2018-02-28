@@ -112,7 +112,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
 
             if params.getKeyType() == KeyType.RSA:
                 keySize = params.getKeySize()
-            elif params.getKeyType() == KeyType.ECDSA:
+            elif params.getKeyType() == KeyType.EC:
                 keySize = params.getKeySize()
             else:
                 raise SecurityException("generateKeyPair: Unsupported key type ")
@@ -454,7 +454,7 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
         """
         if keyType == KeyType.RSA:
           return self._kSecAttrKeyTypeRSA
-        elif keyType == KeyType.ECDSA:
+        elif keyType == KeyType.EC:
           return self._kSecAttrKeyTypeECDSA
         else:
           logging.getLogger(__name__).debug("Unrecognized key type!")

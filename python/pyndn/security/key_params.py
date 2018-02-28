@@ -118,35 +118,35 @@ class RsaKeyParams(KeyParams):
     def getType():
         return KeyType.RSA
 
-class EcdsaKeyParams(KeyParams):
+class EcKeyParams(KeyParams):
     """
     Possible forms of the constructor are:
-    EcdsaKeyParams(keyId, size)
-    EcdsaKeyParams(keyId)
-    EcdsaKeyParams(size, keyIdType)
-    EcdsaKeyParams(size)
-    EcdsaKeyParams()
+    EcKeyParams(keyId, size)
+    EcKeyParams(keyId)
+    EcKeyParams(size, keyIdType)
+    EcKeyParams(size)
+    EcKeyParams()
     """
     def __init__(self, keyIdOrSize = None, arg2 = None):
         if isinstance(keyIdOrSize, Name.Component):
             keyId = keyIdOrSize
-            super(EcdsaKeyParams, self).__init__(EcdsaKeyParams.getType(), keyId)
+            super(EcKeyParams, self).__init__(EcKeyParams.getType(), keyId)
 
             if arg2 == None:
-                self._size = EcdsaKeyParams.getDefaultSize()
+                self._size = EcKeyParams.getDefaultSize()
             else:
                 self._size = arg2
         else:
             size = keyIdOrSize
             if size != None:
                 keyIdType = arg2 if arg2 != None else KeyIdType.RANDOM
-                super(EcdsaKeyParams, self).__init__(
-                  EcdsaKeyParams.getType(), keyIdType)
+                super(EcKeyParams, self).__init__(
+                  EcKeyParams.getType(), keyIdType)
                 self._size = size
             else:
-                super(EcdsaKeyParams, self).__init__(
-                  EcdsaKeyParams.getType(), KeyIdType.RANDOM)
-                self._size = EcdsaKeyParams.getDefaultSize()
+                super(EcKeyParams, self).__init__(
+                  EcKeyParams.getType(), KeyIdType.RANDOM)
+                self._size = EcKeyParams.getDefaultSize()
 
     def getKeySize(self):
         return self._size
@@ -157,7 +157,14 @@ class EcdsaKeyParams(KeyParams):
 
     @staticmethod
     def getType():
-        return KeyType.ECDSA
+        return KeyType.EC
+
+class EcdsaKeyParams(EcKeyParams):
+    """
+    :deprecated: Use EcKeyParams
+    """
+    def __init__(self, keyIdOrSize = None, arg2 = None):
+        super(EcdsaKeyParams, self).__init__(keyIdOrSize, arg2)
 
 class AesKeyParams(KeyParams):
     """

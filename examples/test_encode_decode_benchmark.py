@@ -192,9 +192,9 @@ def benchmarkEncodeDataSeconds(nIterations, useComplex, useCrypto, keyType):
     keyChain = KeyChain("pib-memory:", "tpm-memory:")
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
-       Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA
+       Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.EC
             else DEFAULT_RSA_PRIVATE_KEY_DER, False),
-       Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA
+       Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.EC
             else DEFAULT_RSA_PUBLIC_KEY_DER, False)))
     certificateName = keyChain.getDefaultCertificateName()
 
@@ -251,9 +251,9 @@ def benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding):
     # This puts the public key in the pibImpl used by the SelfVerifyPolicyManager.
     keyChain.importSafeBag(SafeBag
       (Name("/testname/KEY/123"),
-       Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.ECDSA
+       Blob(DEFAULT_EC_PRIVATE_KEY_DER if keyType == KeyType.EC
             else DEFAULT_RSA_PRIVATE_KEY_DER, False),
-       Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.ECDSA
+       Blob(DEFAULT_EC_PUBLIC_KEY_DER if keyType == KeyType.EC
             else DEFAULT_RSA_PUBLIC_KEY_DER, False)))
     validator = Validator(ValidationPolicyFromPib(keyChain.getPib()))
 
@@ -278,28 +278,28 @@ def benchmarkEncodeDecodeData(useComplex, useCrypto, keyType):
     :param bool useCrypto: See benchmarkEncodeDataSeconds.
     :param bool keyType: See benchmarkEncodeDataSeconds.
     """
-    nIterations = (4000 if keyType == KeyType.ECDSA else 1500) if useCrypto else 20000
+    nIterations = (4000 if keyType == KeyType.EC else 1500) if useCrypto else 20000
     (duration, encoding) = benchmarkEncodeDataSeconds(
       nIterations, useComplex, useCrypto, keyType)
     print("Encode " + ("complex" if useComplex else "simple ") +
           " data: Crypto? " +
-          (("EC " if keyType == KeyType.ECDSA else "RSA") if useCrypto else "-  ") +
+          (("EC " if keyType == KeyType.EC else "RSA") if useCrypto else "-  ") +
           ", Duration sec, Hz: " + repr(duration) + ", " +
           repr(nIterations / duration))
 
-    nIterations = (3000 if keyType == KeyType.ECDSA else 5000) if useCrypto else 20000
+    nIterations = (3000 if keyType == KeyType.EC else 5000) if useCrypto else 20000
     duration = benchmarkDecodeDataSeconds(nIterations, useCrypto, keyType, encoding)
     print("Decode " + ("complex" if useComplex else "simple ") +
           " data: Crypto? " +
-          (("EC " if keyType == KeyType.ECDSA else "RSA") if useCrypto else "-  ") +
+          (("EC " if keyType == KeyType.EC else "RSA") if useCrypto else "-  ") +
           ", Duration sec, Hz: " + repr(duration) + ", " +
           repr(nIterations / duration))
 
 def main():
     benchmarkEncodeDecodeData(False, False, KeyType.RSA)
     benchmarkEncodeDecodeData(True, False, KeyType.RSA)
-    benchmarkEncodeDecodeData(False, True, KeyType.ECDSA)
-    benchmarkEncodeDecodeData(True, True, KeyType.ECDSA)
+    benchmarkEncodeDecodeData(False, True, KeyType.EC)
+    benchmarkEncodeDecodeData(True, True, KeyType.EC)
     benchmarkEncodeDecodeData(False, True, KeyType.RSA)
     benchmarkEncodeDecodeData(True, True, KeyType.RSA)
 

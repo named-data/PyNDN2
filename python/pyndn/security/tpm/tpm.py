@@ -197,7 +197,7 @@ class Tpm(object):
         :raises TpmBackEnd.Error: If the key already exists or cannot be created.
         """
         if (params.getKeyType() == KeyType.RSA or
-            params.getKeyType() == KeyType.ECDSA):
+            params.getKeyType() == KeyType.EC):
             keyHandle = self._backEnd.createKey(identityName, params)
             keyName = keyHandle.getKeyName()
             self._keys[keyName] = keyHandle

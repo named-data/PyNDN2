@@ -321,7 +321,7 @@ class TpmBackEndOsx(TpmBackEnd):
             keyType = params.getKeyType()
             if keyType == KeyType.RSA:
                 keySize = params.getKeySize()
-            elif keyType == KeyType.ECDSA:
+            elif keyType == KeyType.EC:
                 keySize = params.getKeySize()
             else:
                 raise TpmBackEndOsx.Error(
@@ -456,7 +456,7 @@ class TpmBackEndOsx(TpmBackEnd):
 
         if keyType == KeyType.RSA:
           return osx._kSecAttrKeyTypeRSA
-        elif keyType == KeyType.ECDSA:
+        elif keyType == KeyType.EC:
           return osx._kSecAttrKeyTypeECDSA
         else:
           return None

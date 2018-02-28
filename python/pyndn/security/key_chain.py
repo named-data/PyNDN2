@@ -665,7 +665,7 @@ class KeyChain(object):
         # TODO: Move verify into PublicKey?
         isVerified = False
         try:
-            if publicKey.getKeyType() == KeyType.ECDSA:
+            if publicKey.getKeyType() == KeyType.EC:
                 cryptoPublicKey = load_der_public_key(
                   publicKey.getKeyDer().toBytes(), backend = default_backend())
                 verifier = cryptoPublicKey.verifier(
@@ -1600,7 +1600,7 @@ class KeyChain(object):
         if (key.getKeyType() == KeyType.RSA and
               params.getDigestAlgorithm() == DigestAlgorithm.SHA256):
             signatureInfo = Sha256WithRsaSignature()
-        elif (key.getKeyType() == KeyType.ECDSA and
+        elif (key.getKeyType() == KeyType.EC and
               params.getDigestAlgorithm() == DigestAlgorithm.SHA256):
             signatureInfo = Sha256WithEcdsaSignature()
         else:

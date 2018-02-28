@@ -86,12 +86,12 @@ class TpmPrivateKey(object):
                     keyType = KeyType.RSA
                 else:
                     # Assume it is an EC key. Try decoding it below.
-                    keyType = KeyType.ECDSA
+                    keyType = KeyType.EC
             except DerDecodingException:
                 # Assume it is an EC key. Try decoding it below.
-                keyType =  KeyType.ECDSA
+                keyType =  KeyType.EC
 
-        if keyType == KeyType.ECDSA or keyType == KeyType.RSA:
+        if keyType == KeyType.EC or keyType == KeyType.RSA:
             # serialization can load PKCS #1 directly.
             self._privateKey = serialization.load_der_private_key(
               Blob(encoding, False).toBytes(), password = None, backend = default_backend())
@@ -128,14 +128,14 @@ class TpmPrivateKey(object):
                   "Cannot decode the PKCS #8 private key: " + str(ex))
 
             if oidString == TpmPrivateKey.EC_ENCRYPTION_OID:
-                keyType = KeyType.ECDSA
+                keyType = KeyType.EC
             elif oidString == TpmPrivateKey.RSA_ENCRYPTION_OID:
                 keyType = KeyType.RSA
             else:
                 raise TpmPrivateKey.Error(
                   "loadPkcs8: Unrecognized private key OID: " + oidString)
 
-        if keyType == KeyType.ECDSA or keyType == KeyType.RSA:
+        if keyType == KeyType.EC or keyType == KeyType.RSA:
             self._privateKey = serialization.load_der_private_key(
               Blob(encoding, False).toBytes(), password = None, backend = default_backend())
         else:
@@ -153,7 +153,7 @@ class TpmPrivateKey(object):
         :raises TpmPrivateKey.Error: If no private key is loaded, or error
           converting to a public key.
         """
-        if (self._keyType == KeyType.ECDSA or
+        if (self._keyType == KeyType.EC or
             self._keyType == KeyType.RSA):
             publicKeyDer = self._privateKey.public_key().public_bytes(
               encoding = serialization.Encoding.DER,
@@ -225,7 +225,7 @@ class TpmPrivateKey(object):
 
         if self._keyType == KeyType.RSA:
             signer = self._privateKey.signer(padding.PKCS1v15(), hashes.SHA256())
-        elif self._keyType == KeyType.ECDSA:
+        elif self._keyType == KeyType.EC:
             signer = self._privateKey.signer(ec.ECDSA(hashes.SHA256()))
         else:
             return Blob()
@@ -287,7 +287,7 @@ class TpmPrivateKey(object):
           generating.
         """
         if (keyParams.getKeyType() == KeyType.RSA or
-            keyParams.getKeyType() == KeyType.ECDSA):
+            keyParams.getKeyType() == KeyType.EC):
             if keyParams.getKeyType() == KeyType.RSA:
                 privateKey = rsa.generate_private_key(
                   public_exponent = 65537, key_size = keyParams.getKeySize(),

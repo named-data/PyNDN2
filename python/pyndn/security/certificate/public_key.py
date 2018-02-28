@@ -71,7 +71,7 @@ class PublicKey(object):
             serialization.load_der_public_key(
               keyDer.toBytes(), backend = default_backend())
         elif oidString == self.EC_ENCRYPTION_OID:
-            self._keyType = KeyType.ECDSA
+            self._keyType = KeyType.EC
             # TODO: Check EC decoding.
         else:
             raise UnrecognizedKeyFormatException(
