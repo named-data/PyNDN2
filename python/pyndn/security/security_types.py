@@ -26,6 +26,8 @@ This module defines constants used by the security library.
 # Make these the same as ndn-cxx in case the storage file is shared.
 class KeyType(object):
     RSA = 0
+    EC = 1
+    # Deprecated. Use KeyType.EC .
     ECDSA = 1
     AES = 128
 
