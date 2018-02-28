@@ -37,6 +37,7 @@ from pyndn.util.boost_info_parser import BoostInfoParser
 from pyndn.security.v2.certificate_v2 import CertificateV2
 from pyndn.security.v2.certificate_request import CertificateRequest
 from pyndn.security.v2.validation_error import ValidationError
+from pyndn.security.validator_config_error import ValidatorConfigError
 from pyndn.security.v2.validator_config.config_rule import ConfigRule
 from pyndn.security.v2.validation_policy import ValidationPolicy
 
@@ -157,8 +158,8 @@ class ValidationPolicyConfig(ValidationPolicy):
             for i in range(len(self._interestRules)):
                 rule = self._interestRules[i]
 
-                if rule.match(true, interest.getName()):
-                    if rule.check(true, interest.getName(), keyLocatorName, state):
+                if rule.match(True, interest.getName()):
+                    if rule.check(True, interest.getName(), keyLocatorName, state):
                         continueValidation(
                           CertificateRequest(Interest(keyLocatorName)), state)
                         return
@@ -188,7 +189,7 @@ class ValidationPolicyConfig(ValidationPolicy):
             if fileName == None:
                 raise ValidatorConfigError("Expected <trust-anchor.file-name>")
 
-            refreshPeriod = _ValidationPolicyConfig.getRefreshPeriod(configSection)
+            refreshPeriod = ValidationPolicyConfig._getRefreshPeriod(configSection)
             self._validator.loadAnchor(fileName, fileName, refreshPeriod, False)
 
             return
