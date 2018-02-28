@@ -50,7 +50,7 @@ class ValidatorConfig(Validator):
               ValidationPolicyConfig(),
               CertificateFetcherFromNetwork(fetcherOrFace))
             # TODO: Use getInnerPolicy().
-            self._policyConfig = self._getPolicy()
+            self._policyConfig = self.getPolicy()
 
     def load(self, filePathOrInputOrConfigSection, inputName = None):
         """
