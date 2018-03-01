@@ -39,7 +39,7 @@ class DelegationSet(object):
       values.
     """
     def __init__(self, value  = None):
-        if type(value) is DelegationSet:
+        if isinstance(value, DelegationSet):
             # Copy the list.
             self._delegations = value._delegations[:]
         else:

@@ -42,7 +42,7 @@ class HmacWithSha256Signature(Signature):
         if value == None:
             self._keyLocator = ChangeCounter(KeyLocator())
             self._signature = Blob()
-        elif type(value) is HmacWithSha256Signature:
+        elif isinstance(value, HmacWithSha256Signature):
             # Copy its values.
             self._keyLocator = ChangeCounter(KeyLocator(value.getKeyLocator()))
             self._signature = value._signature

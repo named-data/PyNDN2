@@ -34,7 +34,7 @@ class Name(object):
     :type value: Name or str
     """
     def __init__(self, value = None):
-        if type(value) is Name:
+        if isinstance(value, Name):
             # Copy the components array, but don't need to copy each Component.
             self._components = value._components[:]
         elif Common.typeIsString(value):
@@ -59,7 +59,7 @@ class Name(object):
         :type value: Blob or Name.Component or value for Blob constructor
         """
         def __init__(self, value = None):
-            if type(value) is Name.Component:
+            if isinstance(value, Name.Component):
                 # Copy constructor. Use the existing Blob in the other Component.
                 self._value = value._value
                 self._type = value._type
@@ -482,7 +482,7 @@ class Name(object):
         # Python operators
 
         def __eq__(self, other):
-            return type(other) is Name.Component and self.equals(other)
+            return isinstance(other, Name.Component) and self.equals(other)
 
         def __ne__(self, other):
             return not self == other
@@ -1081,7 +1081,7 @@ class Name(object):
             raise ValueError("Unknown __getitem__ type: %s" % type(key))
 
     def __eq__(self, other):
-        return type(other) is Name and self.equals(other)
+        return isinstance(other, Name) and self.equals(other)
 
     def __ne__(self, other):
         return not self == other

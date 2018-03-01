@@ -25,7 +25,7 @@ interest to register a prefix with a forwarder.
 
 class ControlParameters(object):
     def __init__(self, value = None):
-        if type(value) is ControlParameters:
+        if isinstance(value, ControlParameters):
             # Make a deep copy.
             self._name = None if value._name == None else Name(value._name)
             self._faceId = value._faceId
@@ -183,7 +183,7 @@ class ControlParameters(object):
         :param Name name: The name. If not specified, set to None. If specified,
           this makes a copy of the name.
         """
-        self._name = Name(name) if type(name) is Name else None
+        self._name = Name(name) if isinstance(name, Name) else None
 
     def setFaceId(self, faceId):
         """
@@ -235,7 +235,7 @@ class ControlParameters(object):
         :param ForwardingFlags forwardingFlags: The new ForwardingFlace object.
         """
         self._forwardingFlags = (ForwardingFlags(forwardingFlags)
-                                 if type(forwardingFlags) is ForwardingFlags
+                                 if isinstance(forwardingFlags, ForwardingFlags)
                                  else ForwardingFlags())
 
     def setStrategy(self, strategy):
@@ -244,7 +244,7 @@ class ControlParameters(object):
 
         :param Name strategy: The Name to copy, or an empty Name if not specified.
         """
-        self._strategy = Name(strategy) if type(strategy) is Name else Name()
+        self._strategy = Name(strategy) if isinstance(strategy, Name) else Name()
 
     def setExpirationPeriod(self, expirationPeriod):
         """

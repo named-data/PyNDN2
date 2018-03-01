@@ -41,7 +41,7 @@ class GenericSignature(Signature):
             self._signature = Blob()
             self._signatureInfoEncoding = Blob()
             self._typeCode = None
-        elif type(value) is GenericSignature:
+        elif isinstance(value, GenericSignature):
             # Copy its values.
             self._signature = value._signature
             self._signatureInfoEncoding = value._signatureInfoEncoding

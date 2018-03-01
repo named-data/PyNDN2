@@ -227,7 +227,7 @@ class DerNode (object):
         if index < 0 or index >= len(children):
             raise DerDecodingException("getSequence: Child index is out of bounds")
 
-        if not (type(children[index]) is DerSequence):
+        if not isinstance(children[index], DerSequence):
             raise DerDecodingException(
               "getSequence: Child DerNode is not a DerSequence")
 

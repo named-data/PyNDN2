@@ -38,7 +38,7 @@ class DigestSha256Signature(Signature):
     def __init__(self, value = None):
         if value == None:
             self._signature = Blob()
-        elif type(value) is DigestSha256Signature:
+        elif isinstance(value, DigestSha256Signature):
             # Copy its values.
             self._signature = value._signature
         else:

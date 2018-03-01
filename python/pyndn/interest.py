@@ -36,7 +36,7 @@ from pyndn.lp.incoming_face_id import IncomingFaceId
 
 class Interest(object):
     def __init__(self, value = None):
-        if type(value) is Interest:
+        if isinstance(value, Interest):
             # Copy the values.
             self._name = ChangeCounter(Name(value.getName()))
             self._minSuffixComponents = value._minSuffixComponents
@@ -58,7 +58,7 @@ class Interest(object):
             self._defaultWireEncoding = value.getDefaultWireEncoding()
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
-            self._name = ChangeCounter(Name(value) if type(value) is Name
+            self._name = ChangeCounter(Name(value) if isinstance(value, Name)
                                                    else Name())
             self._minSuffixComponents = None
             self._maxSuffixComponents = None
@@ -276,7 +276,7 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._name.set(name if type(name) is Name else Name(name))
+        self._name.set(name if isinstance(name, Name) else Name(name))
         self._changeCount += 1
         return self
 
@@ -318,7 +318,7 @@ class Interest(object):
         :rtype: Interest
         """
         self._keyLocator.set(
-          KeyLocator(keyLocator) if type(keyLocator) is KeyLocator
+          KeyLocator(keyLocator) if isinstance(keyLocator, KeyLocator)
                      else KeyLocator())
         self._changeCount += 1
         return self
@@ -335,7 +335,7 @@ class Interest(object):
         :rtype: Interest
         """
         self._exclude.set(
-          Exclude(exclude) if type(exclude) is Exclude else Exclude())
+          Exclude(exclude) if isinstance(exclude, Exclude) else Exclude())
         self._changeCount += 1
         return self
 
@@ -354,7 +354,7 @@ class Interest(object):
         :rtype: Interest
         """
         self._forwardingHint.set(
-          DelegationSet(forwardingHint) if type(forwardingHint) is DelegationSet
+          DelegationSet(forwardingHint) if isinstance(forwardingHint, DelegationSet)
                         else DelegationSet())
         self._changeCount += 1
         return self

@@ -45,7 +45,7 @@ class OID(object):
         return result
 
     def __eq__(self, other):
-        if not (type(other) is OID):
+        if isinstance(other, OID):
             return False
         if len(self._oid) != len(other._oid):
             return False

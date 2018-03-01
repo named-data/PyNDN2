@@ -40,7 +40,7 @@ class Schedule(object):
     Schedule(schedule). A copy of the given schedule.
     """
     def __init__(self, value = None):
-        if type(value) is Schedule:
+        if isinstance(value, Schedule):
             # Make a copy.
             schedule = value
 

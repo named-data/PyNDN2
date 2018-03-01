@@ -37,7 +37,7 @@ class ForwardingFlags(object):
         if value == None:
             self._childInherit = True
             self._capture = False
-        elif type(value) is ForwardingFlags:
+        elif isinstance(value, ForwardingFlags):
             # Copy its values.
             self._childInherit = value._childInherit
             self._capture = value._capture
