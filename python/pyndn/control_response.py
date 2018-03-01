@@ -38,7 +38,7 @@ class ControlResponse(object):
     :type value: ControlResponse
     """
     def __init__(self, value = None):
-        if type(value) is ControlResponse:
+        if isinstance(value, ControlResponse):
             # Make a deep copy.
             self._bodyAsControlParameters = (None if
               value._bodyAsControlParameters == None
@@ -156,7 +156,7 @@ class ControlResponse(object):
         :rtype: ControlResponse
         """
         self._bodyAsControlParameters = (ControlParameters(controlParameters) if
-          type(controlParameters) is ControlParameters else None)
+          isinstance(controlParameters, ControlParameters) else None)
         return self
 
     # Create managed properties for read/write properties of the class for more pythonic syntax.

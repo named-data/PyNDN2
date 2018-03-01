@@ -44,7 +44,7 @@ class Sha256WithRsaSignature(Signature):
             self._keyLocator = ChangeCounter(KeyLocator())
             self._validityPeriod = ChangeCounter(ValidityPeriod())
             self._signature = Blob()
-        elif type(value) is Sha256WithRsaSignature:
+        elif isinstance(value, Sha256WithRsaSignature):
             # Copy its values.
             self._keyLocator = ChangeCounter(KeyLocator(value.getKeyLocator()))
             self._validityPeriod = ChangeCounter(ValidityPeriod(value.getValidityPeriod()))

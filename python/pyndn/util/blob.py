@@ -176,7 +176,7 @@ class Blob(object):
     # Python operators
 
     def __eq__(self, other):
-        return type(other) is Blob and self.equals(other)
+        return isinstance(other, Blob) and self.equals(other)
 
     def __ne__(self, other):
         return not self == other

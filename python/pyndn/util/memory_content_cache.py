@@ -206,7 +206,7 @@ class MemoryContentCache(object):
         :type onDataNotFound: function object
         """
         if onDataNotFound != None:
-            if type(filterOrPrefix) is InterestFilter:
+            if isinstance(filterOrPrefix, InterestFilter):
                 prefix = filterOrPrefix.getPrefix()
             else:
                 prefix = filterOrPrefix

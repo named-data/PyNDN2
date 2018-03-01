@@ -39,7 +39,7 @@ class InterestFilter(object):
       remaining name components.
     """
     def __init__(self, prefix, regexFilter = None):
-        if type(prefix) is InterestFilter:
+        if isinstance(prefix, InterestFilter):
             interestFilter = prefix
             # The copy constructor.
             self._prefix = Name(interestFilter._prefix)

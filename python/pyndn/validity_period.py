@@ -51,7 +51,7 @@ class ValidityPeriod(object):
         if validityPeriodOrNotBefore == None:
             self._notBefore = 1e37
             self._notAfter = -1e37
-        elif type(validityPeriodOrNotBefore) is ValidityPeriod:
+        elif isinstance(validityPeriodOrNotBefore, ValidityPeriod):
             # Copy its values.
             validityPeriod = validityPeriodOrNotBefore
             self._notBefore = validityPeriod._notBefore
@@ -156,8 +156,8 @@ class ValidityPeriod(object):
           otherwise False.
         :rtype: bool
         """
-        return (type(signature) is pyndn.sha256_with_ecdsa_signature.Sha256WithEcdsaSignature or
-                type(signature) is pyndn.sha256_with_rsa_signature.Sha256WithRsaSignature)
+        return (isinstance(signature, pyndn.sha256_with_ecdsa_signature.Sha256WithEcdsaSignature) or
+                isinstance(signature, pyndn.sha256_with_rsa_signature.Sha256WithRsaSignature))
 
     @staticmethod
     def getFromSignature(signature):
@@ -170,8 +170,8 @@ class ValidityPeriod(object):
           have a ValidityPeriod.
         :rtype: ValidityPeriod
         """
-        if (type(signature) is pyndn.sha256_with_ecdsa_signature.Sha256WithEcdsaSignature or
-            type(signature) is pyndn.sha256_with_rsa_signature.Sha256WithRsaSignature):
+        if (isinstance(signature, pyndn.sha256_with_ecdsa_signature.Sha256WithEcdsaSignature) or
+            isinstance(signature, pyndn.sha256_with_rsa_signature.Sha256WithRsaSignature)):
             return signature.getValidityPeriod()
         else:
             raise RuntimeError(

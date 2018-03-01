@@ -37,7 +37,7 @@ class EncryptedContent(object):
     :type value: EncryptedContent
     """
     def __init__(self, value = None):
-        if type(value) is EncryptedContent:
+        if isinstance(value, EncryptedContent):
             # Make a deep copy.
             self._algorithmType = value._algorithmType
             self._keyLocator = KeyLocator(value._keyLocator)
@@ -110,7 +110,7 @@ class EncryptedContent(object):
         :rtype: EncryptedContent
         """
         self._keyLocator = (KeyLocator(keyLocator) if
-          type(keyLocator) is KeyLocator else KeyLocator())
+          isinstance(keyLocator, KeyLocator) else KeyLocator())
         return self
 
     def setInitialVector(self, initialVector):

@@ -242,9 +242,9 @@ class CertificateV2(Data):
 
         result += "Signature Information:\n"
         result += "  Signature Type: "
-        if type(self.getSignature()) is Sha256WithEcdsaSignature:
+        if isinstance(self.getSignature(), Sha256WithEcdsaSignature):
             result += "SignatureSha256WithEcdsa\n"
-        elif type(self.getSignature()) is Sha256WithRsaSignature:
+        elif isinstance(self.getSignature(), Sha256WithRsaSignature):
             result += "SignatureSha256WithRsa\n"
         else:
             result += "<unknown>\n"

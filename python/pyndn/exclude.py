@@ -35,7 +35,7 @@ class Exclude(object):
     def __init__(self, value = None):
         if value == None:
             self._entries = []
-        elif type(value) is Exclude:
+        elif isinstance(value, Exclude):
             # Copy its values.  Each entry is read-only, so do a shallow copy.
             self._entries = value._entries[:]
         else:
@@ -64,7 +64,7 @@ class Exclude(object):
                 self._component = None
             else:
                 self._type = Exclude.COMPONENT
-                self._component = (value if type(value) is Name.Component
+                self._component = (value if isinstance(value, Name.Component)
                                    else Name.Component(value))
 
         def getType(self):
@@ -128,7 +128,7 @@ class Exclude(object):
         :return: This Exclude so that you can chain calls to append.
         :rtype: Exclude
         """
-        self._entries.append(component if type(component) is Exclude.Entry
+        self._entries.append(component if isinstance(component, Exclude.Entry)
                              else Exclude.Entry(component))
         self._changeCount += 1
         return self

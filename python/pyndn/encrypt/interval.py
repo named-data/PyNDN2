@@ -42,7 +42,7 @@ class Interval(object):
     :param Interval interval: The other interval with values to copy.
     """
     def __init__(self, value = None, endTime = None):
-        if type(value) is Interval:
+        if isinstance(value, Interval):
             # Make a copy.
             self._startTime = value._startTime
             self._endTime = value._endTime

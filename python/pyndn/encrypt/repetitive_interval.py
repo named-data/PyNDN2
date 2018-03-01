@@ -51,7 +51,7 @@ class RepetitiveInterval(object):
     """
     def __init__(self, startDate = None, endDate = None, intervalStartHour = None,
                  intervalEndHour = None, nRepeats = None, repeatUnit = None):
-        if type(startDate) is RepetitiveInterval:
+        if isinstance(startDate, RepetitiveInterval):
             # Make a copy.
             repetitiveInterval = startDate
 

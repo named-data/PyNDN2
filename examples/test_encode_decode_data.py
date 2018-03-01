@@ -200,26 +200,26 @@ def dumpData(data):
          else "<none>")
     keyLocator = None
     signature = data.getSignature()
-    if type(signature) is Sha256WithRsaSignature:
+    if isinstance(signature, Sha256WithRsaSignature):
         dump("Sha256WithRsa signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
         keyLocator = signature.getKeyLocator()
-    elif type(signature) is Sha256WithEcdsaSignature:
+    elif isinstance(signature, Sha256WithEcdsaSignature):
         dump("Sha256WithEcdsa signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
         keyLocator = signature.getKeyLocator()
-    elif type(signature) is HmacWithSha256Signature:
+    elif isinstance(signature, HmacWithSha256Signature):
         dump("HmacWithSha256 signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
         keyLocator = signature.getKeyLocator()
-    elif type(signature) is DigestSha256Signature:
+    elif isinstance(signature, DigestSha256Signature):
         dump("DigestSha256 signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())
-    elif type(signature) is GenericSignature:
+    elif isinstance(signature, GenericSignature):
         dump("Generic signature.signature:",
              "<none>" if signature.getSignature().size() == 0
                       else signature.getSignature().toHex())

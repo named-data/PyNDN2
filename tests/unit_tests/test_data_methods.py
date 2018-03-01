@@ -102,7 +102,7 @@ def dumpData(data):
          if len(data.getMetaInfo().getFinalBlockId().getValue()) > 0
          else "<none>"))
     signature = data.getSignature()
-    if type(signature) is Sha256WithRsaSignature:
+    if isinstance(signature, Sha256WithRsaSignature):
         result.append(dump("signature.signature:",
              "<none>" if len(signature.getSignature()) == 0
                       else signature.getSignature().toHex()))

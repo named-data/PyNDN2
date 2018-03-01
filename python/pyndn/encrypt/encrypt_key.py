@@ -34,7 +34,7 @@ class EncryptKey(object):
     :type value: Blob or EncryptKey
     """
     def __init__(self, value):
-        if type(value) is EncryptKey:
+        if isinstance(value, EncryptKey):
             # Make a deep copy.
             self._keyBits = value._keyBits
         else:

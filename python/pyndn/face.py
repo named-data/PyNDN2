@@ -153,13 +153,13 @@ class Face(object):
           'interestCopy', 'onData', 'onTimeout', 'onNetworkNack' and 'wireFormat'.
         :rtype: dict
         """
-        if type(interestOrName) is Interest:
+        if isinstance(interestOrName, Interest):
             # Node.expressInterest requires a copy of the interest.
             interestCopy = Interest(interestOrName)
         else:
             # The first argument is a name. Make the interest from the name and
             #   possible template.
-            if type(arg2) is Interest:
+            if isinstance(arg2, Interest):
                 template = arg2
                 # Copy the template.
                 interestCopy = Interest(template)

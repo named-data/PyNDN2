@@ -44,7 +44,7 @@ class Data(object):
             self._defaultFullName = Name(value._defaultFullName)
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
-            self._name = ChangeCounter(Name(value) if type(value) is Name
+            self._name = ChangeCounter(Name(value) if isinstance(value, Name)
                                                    else Name())
             self._metaInfo = ChangeCounter(MetaInfo())
             self._signature = ChangeCounter(Sha256WithRsaSignature())
@@ -244,7 +244,7 @@ class Data(object):
         :return: This Data so that you can chain calls to update values.
         :rtype: Data
         """
-        self._name.set(name if type(name) is Name else Name(name))
+        self._name.set(name if isinstance(name, Name) else Name(name))
         self._changeCount += 1
         return self
 

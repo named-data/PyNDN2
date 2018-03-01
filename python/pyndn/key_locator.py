@@ -39,7 +39,7 @@ class KeyLocator(object):
             self._type = None
             self._keyName = ChangeCounter(Name())
             self._keyData = Blob()
-        elif type(value) is KeyLocator:
+        elif isinstance(value, KeyLocator):
             # Copy its values.
             self._type = value._type
             self._keyName = ChangeCounter(Name(value.getKeyName()))
@@ -101,7 +101,7 @@ class KeyLocator(object):
 
         :param Name keyName: The key name which is copied.
         """
-        self._keyName.set(keyName if type(keyName) is Name else Name(keyName))
+        self._keyName.set(keyName if isinstance(keyName, Name) else Name(keyName))
         self._changeCount += 1
 
     def setKeyData(self, keyData):
@@ -141,9 +141,9 @@ class KeyLocator(object):
           otherwise False.
         :rtype: bool
         """
-        return (type(signature) is Sha256WithEcdsaSignature or
-                type(signature) is Sha256WithRsaSignature or
-                type(signature) is HmacWithSha256Signature)
+        return (isinstance(signature, Sha256WithEcdsaSignature) or
+                isinstance(signature, Sha256WithRsaSignature) or
+                isinstance(signature, HmacWithSha256Signature))
 
     @staticmethod
     def getFromSignature(signature):
@@ -156,9 +156,9 @@ class KeyLocator(object):
           have a KeyLocator.
         :rtype: KeyLocator
         """
-        if (type(signature) is Sha256WithEcdsaSignature or
-            type(signature) is Sha256WithRsaSignature or
-            type(signature) is HmacWithSha256Signature):
+        if (isinstance(signature, Sha256WithEcdsaSignature) or
+            isinstance(signature, Sha256WithRsaSignature) or
+            isinstance(signature, HmacWithSha256Signature)):
             return signature.getKeyLocator()
         else:
             raise RuntimeError(
@@ -207,7 +207,7 @@ class KeyLocator(object):
     # Python operators
 
     def __eq__(self, other):
-        return type(other) is KeyLocator and self.equals(other)
+        return isinstance(other, KeyLocator) and self.equals(other)
 
     def __ne__(self, other):
         return not self == other

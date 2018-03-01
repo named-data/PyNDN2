@@ -45,7 +45,7 @@ class SignedBlob(Blob):
         if self.isNull():
             self._signedPortionBeginOffset = 0
             self._signedPortionEndOffset = 0
-        elif type(blob) is SignedBlob:
+        elif isinstance(blob, SignedBlob):
             # Copy the SignedBlob, allowing override for offsets.
             self._signedPortionBeginOffset = (
               blob._signedPortionBeginOffset if signedPortionBeginOffset == None

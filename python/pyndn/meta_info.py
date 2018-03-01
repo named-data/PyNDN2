@@ -39,7 +39,7 @@ class MetaInfo(object):
             self._otherTypeCode = -1
             self._freshnessPeriod = None
             self._finalBlockId = Name.Component()
-        elif type(value) is MetaInfo:
+        elif isinstance(value, MetaInfo):
             # Copy its values.
             self._type = value._type
             self._otherTypeCode = value._otherTypeCode
@@ -147,7 +147,7 @@ class MetaInfo(object):
         :type finalBlockId: Name.Component or value for the Name.Component
           constructor
         """
-        self._finalBlockId = (finalBlockId if type(finalBlockId) is Name.Component
+        self._finalBlockId = (finalBlockId if isinstance(finalBlockId, Name.Component)
                               else Name.Component(finalBlockId))
         self._changeCount += 1
 
