@@ -560,7 +560,7 @@ class KeyChain(object):
             return self._signBuffer(
               buffer, keyName[0], params.getDigestAlgorithm())
 
-    def selfSign(self, key):
+    def selfSign(self, key, wireFormat = None):
         """
         Generate a self-signed certificate for the public key and add it to the
         PIB. This creates the certificate name from the key name by appending
@@ -569,9 +569,15 @@ class KeyChain(object):
         default for the key.
 
         :param PibKey key: The PibKey with the key name and public key.
+        :param WireFormat wireFormat: (optional) A WireFormat object used to
+          encode the certificate. If omitted, use WireFormat getDefaultWireFormat().
         :return: The new certificate.
         :rtype: CertificateV2
         """
+        if wireFormat == None:
+            # Don't use a default argument since getDefaultWireFormat can change.
+            wireFormat = WireFormat.getDefaultWireFormat()
+
         certificate = CertificateV2()
 
         # Set the name.
@@ -594,7 +600,7 @@ class KeyChain(object):
         signingInfo.setValidityPeriod(
           ValidityPeriod(now, now + 20 * 365 * 24 * 3600 * 1000.0))
 
-        self.sign(certificate, signingInfo)
+        self.sign(certificate, signingInfo, wireFormat)
 
         try:
             key._addCertificate(certificate)
