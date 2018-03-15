@@ -40,7 +40,7 @@ to the PyNDN root and enter:
 
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
-## OS X 10.10.2, OS X 10.11, macOS 10.12
+## OS X 10.10.2, OS X 10.11, macOS 10.12, macOS 10.13
 Install Xcode.  (Xcode seems to already have the Command Line Tools.)
 To install the cryptography package, in a terminal enter:
 
