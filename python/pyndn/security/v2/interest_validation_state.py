@@ -49,10 +49,10 @@ class InterestValidationState(ValidationState):
 
         # Make a copy.
         self._interest = Interest(interest)
-        self._successCallback = successCallback
+        self._successCallbacks = [successCallback] # of SuccessCallback function object
         self._failureCallback = failureCallback
 
-        if self._successCallback == None:
+        if successCallback == None:
             raise ValueError("The successCallback is None")
         if self._failureCallback == None:
             raise ValueError("The failureCallback is None")
@@ -81,6 +81,13 @@ class InterestValidationState(ValidationState):
         """
         return self._interest
 
+    def addSuccessCallback(self, successCallback):
+        """
+        :param successCallback: This calls successCallback(interest).
+        :type successCallback: function object
+        """
+        self._successCallbacks.append(successCallback)
+
     def _verifyOriginalPacket(self, trustedCertificate):
         """
         Verify the signature of the original packet. This is only called by the
@@ -93,10 +100,11 @@ class InterestValidationState(ValidationState):
               self._interest, trustedCertificate):
             logging.getLogger(__name__).info("OK signature for interest `" +
               self._interest.getName().toUri() + "`")
-            try:
-                self._successCallback(self._interest)
-            except:
-                logging.exception("Error in successCallback")
+            for i in range(len(self._successCallbacks)):
+                try:
+                    self._successCallbacks[i](self._interest)
+                except:
+                    logging.exception("Error in successCallback")
 
             self.setOutcome(True)
         else:
@@ -112,10 +120,11 @@ class InterestValidationState(ValidationState):
         logging.getLogger(__name__).info(
           "Signature verification bypassed for interest `" +
           self._interest.getName().toUri() + "`")
-        try:
-            self._successCallback(self._interest)
-        except:
-            logging.exception("Error in successCallback")
+        for i in range(len(self._successCallbacks)):
+            try:
+                self._successCallbacks[i](self._interest)
+            except:
+                logging.exception("Error in successCallback")
 
         self.setOutcome(True)
 
