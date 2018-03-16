@@ -150,7 +150,8 @@ class TpmBackEndOsx(TpmBackEnd):
             signature = osx._security.SecTransformExecute(
               signer, pointer(error))
             if error.value != None:
-                raise TpmBackEndOsx.Error("Failed to sign the data")
+                raise TpmBackEndOsx.Error(
+"Failed to sign the data. Try using the Keychain Access application to set the access control of the private key to \"Allow all applications to access this item\".")
 
             if signature == None:
                 raise TpmBackEndOsx.Error("Signature is NULL!")
@@ -206,7 +207,8 @@ class TpmBackEndOsx(TpmBackEnd):
 
             output = osx._security.SecTransformExecute(decryptor, pointer(error))
             if error.value != None:
-                raise TpmBackEndOsx.Error("Failed to decrypt the cipherText")
+                raise TpmBackEndOsx.Error(
+"Failed to decrypt the cipherText. Try using the Keychain Access application to set the access control of the private key to \"Allow all applications to access this item\".")
 
             if output == None:
                 raise TpmBackEndOsx.Error("The output is NULL")

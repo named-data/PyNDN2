@@ -267,7 +267,8 @@ class OSXPrivateKeyStorage(PrivateKeyStorage):
             signature = self._security.SecTransformExecute(
               signer, pointer(error))
             if error.value != None:
-                raise SecurityException("Failed to sign the data")
+                raise SecurityException(
+"Failed to sign the data. Try using the Keychain Access application to set the access control of the private key to \"Allow all applications to access this item\".")
 
             if signature == None:
                 raise SecurityException("Signature is NULL!")
