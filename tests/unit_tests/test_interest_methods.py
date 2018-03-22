@@ -65,6 +65,12 @@ codedInterest = Blob(bytearray([
 1
   ]))
 
+codedInterestNoSelectors = Blob(bytearray([
+0x05, 0x12, # Interest
+  0x07, 0x0A, 0x08, 0x03, 0x6E, 0x64, 0x6E, 0x08, 0x03, 0x61, 0x62, 0x63, # Name
+  0x0A, 0x04, 0x61, 0x62, 0x61, 0x62   # Nonce
+  ]))
+
 initialDump = ['name: /ndn/abc',
         'minSuffixComponents: 4',
         'maxSuffixComponents: 6',
@@ -189,6 +195,12 @@ class TestInterestDump(ut.TestCase):
         reDecodedFreshDump = dumpInterest(reDecodedFreshInterest)
 
         self.assertTrue(interestDumpsEqual(freshDump, reDecodedFreshDump), 'Redecoded fresh interest does not match original')
+
+    def test_no_selectors_must_be_fresh(self):
+        interest = Interest()
+        interest.wireDecode(codedInterestNoSelectors)
+        self.assertEqual(False, interest.getMustBeFresh(),
+          "MustBeFresh should be false if no selectors")
 
 class TestInterestMethods(ut.TestCase):
     def setUp(self):
