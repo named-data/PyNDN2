@@ -216,6 +216,14 @@ class Tlv0_2WireFormat(WireFormat):
         offsets = self._decodeName(interest.getName(), decoder, copy)
         if decoder.peekType(Tlv.Selectors, endOffset):
             self._decodeSelectors(interest, decoder, copy)
+        else:
+            # Set selectors to none.
+            interest.setMinSuffixComponents(None)
+            interest.setMaxSuffixComponents(None)
+            interest.getExclude().clear()
+            interest.setChildSelector(None)
+            interest.setMustBeFresh(False)
+
         # Require a Nonce, but don't force it to be 4 bytes.
         nonce = Blob(decoder.readBlobTlv(Tlv.Nonce), copy)
         interest.setInterestLifetimeMilliseconds(
