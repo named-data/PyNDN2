@@ -17,16 +17,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from pyndn.security import command_interest_signer
 from pyndn.security import key_chain, key_id_type, key_params, safe_bag
 from pyndn.security import security_exception, security_types, signing_info
 from pyndn.security import validator_config_error, validator_config, validator_null
-__all__ = ['key_chain', 'key_id_type', 'key_params', 'safe_bag', 'security_exception',
-  'security_types', 'signing_info', 'validator_config_error', 'validator_config',
-  'validator_null']
+__all__ = ['command_interest_signer', 'key_chain', 'key_id_type', 'key_params',
+  'safe_bag', 'security_exception', 'security_types', 'signing_info',
+  'validator_config_error', 'validator_config', 'validator_null']
 
 import sys as _sys
 
 try:
+    from pyndn.security.command_interest_signer import *
     from pyndn.security.key_chain import *
     from pyndn.security.key_id_type import *
     from pyndn.security.key_params import *
