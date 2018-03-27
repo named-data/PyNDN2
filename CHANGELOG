@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.7beta1 (2018-03-22)
+Interim changes since PyNDN v2.7beta1 (2018-03-27)
 --------------------------------------------------
 
 Bug fixes
@@ -8,6 +8,8 @@ Bug fixes
 Changes
 * https://redmine.named-data.net/issues/4064 Rename KeyType.ECDSA and EcdsaKeyParams
   to KeyType.EC and EcKeyParams. Deprecated KeyType.ECDSA and EcdsaKeyParams.
+* Added security CommandInterestSigner.
+* Added security ValidationPolicyCommandInterest.
 
 Deprecated
 * Deprecated KeyType.ECDSA. Use KeyType.EC.
