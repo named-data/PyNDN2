@@ -62,7 +62,7 @@ class ValidationPolicyConfig(ValidationPolicy):
 
         :param str filePath: The The path of the config file.
         :param str input: The contents of the configuration rules, with lines
-          separated by "\n" or "\r\n".
+          separated by NL or CR/NL.
         :param BoostInfoTree configSection: The configuration section loaded
           from the config file. It should have one "validator" section.
         :param str inputName: Used for log messages, etc.
