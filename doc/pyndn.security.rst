@@ -16,6 +16,14 @@ Subpackages
 Submodules
 ----------
 
+pyndn.security.command_interest_signer module
+---------------------------------------------
+
+.. automodule:: pyndn.security.command_interest_signer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.key_chain module
 -------------------------------
 

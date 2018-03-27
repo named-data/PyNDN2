@@ -147,6 +147,14 @@ pyndn.security.v2.validation_policy_accept_all module
     :undoc-members:
     :show-inheritance:
 
+pyndn.security.v2.validation_policy_command_interest module
+-----------------------------------------------------------
+
+.. automodule:: pyndn.security.v2.validation_policy_command_interest
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.v2.validation_policy_config module
 -------------------------------------------------
 
