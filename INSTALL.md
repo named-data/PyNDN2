@@ -78,33 +78,6 @@ http://www.macports.org/install.php . In a new terminal, enter:
 
 The python-dev headers are already installed.
 
-## Ubuntu 12.04 (64 bit and 32 bit)
-To install the cryptography package, in a terminal enter:
-
-    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
-    sudo pip install cryptography
-
-Optional: To install trollius (Python <= 3.2), in a terminal enter:
-
-    sudo apt-get install python-pip
-    sudo pip install trollius
-
-Optional: To install Sphinx, in a terminal enter:
-
-    sudo apt-get install python-pip
-    sudo pip install sphinx
-
-Optional: To install pytest and mock, in a terminal enter:
-
-    sudo apt-get install python-pip
-    sudo pip install pytest mock
-
-Optional: To install libcrypto, in a terminal enter:
-
-    sudo apt-get install build-essential libssl-dev
-
-(Protobuf is already installed.)
-
 ## Ubuntu 14.04 (64 bit and 32 bit), 15.04 (64 bit), 16.04 (64 bit and 32 bit) and 16.10 (64 bit)
 To install the cryptography package, in a terminal enter:
 
