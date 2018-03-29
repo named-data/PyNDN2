@@ -53,7 +53,7 @@ Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
 Optional: To install Protobuf in Python 2, in a terminal enter:
 
-    sudo pip install protobuf
+    sudo pip install --ignore-installed six protobuf
 
 Optional: To install Protobuf in Python 3, in a terminal enter:
 
