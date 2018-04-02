@@ -17,7 +17,7 @@ if sys.version_info[0] == 2:
     requirements.append('trollius')
     requirements.append('protobuf')
 elif sys.version_info[0] == 3:
-    requirements.append('protobuf-py3')
+    requirements.append('protobuf')
     if sys.version_info[1] < 3:
         requirements.append('trollius')
     elif sys.version_info[1] < 4:
