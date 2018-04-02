@@ -57,7 +57,7 @@ Optional: To install Protobuf in Python 2, in a terminal enter:
 
 Optional: To install Protobuf in Python 3, in a terminal enter:
 
-    sudo pip install protobuf-py3
+    sudo pip3 install protobuf
 
 Optional: To install Sphinx, in a terminal enter:
 
