@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='face-status.proto',
   package='ndn_message',
   syntax='proto2',
-  serialized_pb=_b('\n\x11\x66\x61\x63\x65-status.proto\x12\x0bndn_message\"\xa8\x03\n\x11\x46\x61\x63\x65StatusMessage\x12?\n\x0b\x66\x61\x63\x65_status\x18\x80\x01 \x03(\x0b\x32).ndn_message.FaceStatusMessage.FaceStatus\x1a\xd1\x02\n\nFaceStatus\x12\x0f\n\x07\x66\x61\x63\x65_id\x18i \x02(\x04\x12\x0b\n\x03uri\x18r \x02(\t\x12\x12\n\tlocal_uri\x18\x81\x01 \x02(\t\x12\x19\n\x11\x65xpiration_period\x18m \x01(\x04\x12\x13\n\nface_scope\x18\x84\x01 \x02(\x04\x12\x19\n\x10\x66\x61\x63\x65_persistency\x18\x85\x01 \x02(\x04\x12\x12\n\tlink_type\x18\x86\x01 \x02(\x04\x12\x17\n\x0en_in_interests\x18\x90\x01 \x02(\x04\x12\x13\n\nn_in_datas\x18\x91\x01 \x02(\x04\x12\x13\n\nn_in_nacks\x18\x97\x01 \x02(\x04\x12\x18\n\x0fn_out_interests\x18\x92\x01 \x02(\x04\x12\x14\n\x0bn_out_datas\x18\x93\x01 \x02(\x04\x12\x14\n\x0bn_out_nacks\x18\x98\x01 \x02(\x04\x12\x13\n\nn_in_bytes\x18\x94\x01 \x02(\x04\x12\x14\n\x0bn_out_bytes\x18\x95\x01 \x02(\x04')
+  serialized_pb=_b('\n\x11\x66\x61\x63\x65-status.proto\x12\x0bndn_message\"\xfa\x03\n\x11\x46\x61\x63\x65StatusMessage\x12?\n\x0b\x66\x61\x63\x65_status\x18\x80\x01 \x03(\x0b\x32).ndn_message.FaceStatusMessage.FaceStatus\x1a\xa3\x03\n\nFaceStatus\x12\x0f\n\x07\x66\x61\x63\x65_id\x18i \x02(\x04\x12\x0b\n\x03uri\x18r \x02(\t\x12\x12\n\tlocal_uri\x18\x81\x01 \x02(\t\x12\x19\n\x11\x65xpiration_period\x18m \x01(\x04\x12\x13\n\nface_scope\x18\x84\x01 \x02(\x04\x12\x19\n\x10\x66\x61\x63\x65_persistency\x18\x85\x01 \x02(\x04\x12\x12\n\tlink_type\x18\x86\x01 \x02(\x04\x12)\n base_congestion_marking_interval\x18\x87\x01 \x01(\x04\x12%\n\x1c\x64\x65\x66\x61ult_congestion_threshold\x18\x88\x01 \x01(\x04\x12\x17\n\x0en_in_interests\x18\x90\x01 \x02(\x04\x12\x13\n\nn_in_datas\x18\x91\x01 \x02(\x04\x12\x13\n\nn_in_nacks\x18\x97\x01 \x02(\x04\x12\x18\n\x0fn_out_interests\x18\x92\x01 \x02(\x04\x12\x14\n\x0bn_out_datas\x18\x93\x01 \x02(\x04\x12\x14\n\x0bn_out_nacks\x18\x98\x01 \x02(\x04\x12\x13\n\nn_in_bytes\x18\x94\x01 \x02(\x04\x12\x14\n\x0bn_out_bytes\x18\x95\x01 \x02(\x04')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -83,56 +83,70 @@ _FACESTATUSMESSAGE_FACESTATUS = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_in_interests', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_interests', index=7,
+      name='base_congestion_marking_interval', full_name='ndn_message.FaceStatusMessage.FaceStatus.base_congestion_marking_interval', index=7,
+      number=135, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='default_congestion_threshold', full_name='ndn_message.FaceStatusMessage.FaceStatus.default_congestion_threshold', index=8,
+      number=136, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='n_in_interests', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_interests', index=9,
       number=144, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_in_datas', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_datas', index=8,
+      name='n_in_datas', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_datas', index=10,
       number=145, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_in_nacks', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_nacks', index=9,
+      name='n_in_nacks', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_nacks', index=11,
       number=151, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_out_interests', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_interests', index=10,
+      name='n_out_interests', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_interests', index=12,
       number=146, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_out_datas', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_datas', index=11,
+      name='n_out_datas', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_datas', index=13,
       number=147, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_out_nacks', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_nacks', index=12,
+      name='n_out_nacks', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_nacks', index=14,
       number=152, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_in_bytes', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_bytes', index=13,
+      name='n_in_bytes', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_in_bytes', index=15,
       number=148, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='n_out_bytes', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_bytes', index=14,
+      name='n_out_bytes', full_name='ndn_message.FaceStatusMessage.FaceStatus.n_out_bytes', index=16,
       number=149, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -151,7 +165,7 @@ _FACESTATUSMESSAGE_FACESTATUS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=122,
-  serialized_end=459,
+  serialized_end=541,
 )
 
 _FACESTATUSMESSAGE = _descriptor.Descriptor(
@@ -181,7 +195,7 @@ _FACESTATUSMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=35,
-  serialized_end=459,
+  serialized_end=541,
 )
 
 _FACESTATUSMESSAGE_FACESTATUS.containing_type = _FACESTATUSMESSAGE
