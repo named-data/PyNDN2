@@ -1,9 +1,11 @@
-Interim changes since PyNDN v2.7beta1 (2018-03-27)
+Interim changes since PyNDN v2.7beta1 (2018-04-02)
 --------------------------------------------------
 
 Bug fixes
 * https://redmine.named-data.net/issues/4428 MustBeFresh should be false if the
   decoded Interest has no selectors.
+* https://redmine.named-data.net/issues/1860 Recompile Protobuf files with
+  protoc from protobuf 3, so that they work with Python 3.
 
 Changes
 * https://redmine.named-data.net/issues/4064 Rename KeyType.ECDSA and EcdsaKeyParams
