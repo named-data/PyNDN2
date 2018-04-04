@@ -29,7 +29,7 @@ http://named-data.net/doc/ndn-ccl-api/chrono-sync2013.html .
 
 # This include is produced by:
 # protoc --python_out=. sync-state.proto
-import sync_state_pb2
+from pyndn.sync.sync_state_pb2 import SyncState, SyncStateMsg
 import logging
 from pyndn.name import Name
 from pyndn.interest import Interest
@@ -40,7 +40,7 @@ from pyndn.sync.digest_tree import DigestTree
 
 # Define this here once and suppress pylint errors.
 #pylint: disable=E1103
-SyncState_UPDATE = sync_state_pb2.SyncState.UPDATE
+SyncState_UPDATE = SyncState.UPDATE
 #pylint: enable=E1103
 
 class ChronoSync2013(object):
@@ -116,7 +116,7 @@ class ChronoSync2013(object):
         self._sequenceNo = -1
         self._enabled = True
 
-        emptyContent = sync_state_pb2.SyncStateMsg()
+        emptyContent = SyncStateMsg()
         # Use getattr to avoid pylint errors.
         self._digestLog.append(self._DigestLogEntry("00", getattr(emptyContent, "ss")))
 
@@ -273,7 +273,7 @@ class ChronoSync2013(object):
 
         self._sequenceNo += 1
 
-        syncMessage = sync_state_pb2.SyncStateMsg()
+        syncMessage = SyncStateMsg()
         content = getattr(syncMessage, "ss").add()
         content.name = self._applicationDataPrefixUri
         content.type = SyncState_UPDATE
@@ -452,7 +452,7 @@ class ChronoSync2013(object):
         logging.getLogger(__name__).info(
             "name: %s", data.getName().toUri())
         # TODO: Check if this works in Python 3.
-        tempContent = sync_state_pb2.SyncStateMsg()
+        tempContent = SyncStateMsg()
 #pylint: disable=E1103
         tempContent.ParseFromString(data.getContent().toBytes())
 #pylint: enable=E1103
@@ -516,7 +516,7 @@ class ChronoSync2013(object):
             raise RuntimeError(
               "ChronoSync: sequenceNo_ is not the expected value of 0 for first use.")
 
-        tempContent = sync_state_pb2.SyncStateMsg()
+        tempContent = SyncStateMsg()
         content = getattr(tempContent, "ss").add()
         content.name = self._applicationDataPrefixUri
         content.type = SyncState_UPDATE
@@ -540,7 +540,7 @@ class ChronoSync2013(object):
     def _processRecoveryInterest(self, interest, syncDigest, face):
         logging.getLogger(__name__).info("processRecoveryInterest")
         if self._logFind(syncDigest) != -1:
-            tempContent = sync_state_pb2.SyncStateMsg()
+            tempContent = SyncStateMsg()
             for i in range(self._digestTree.size()):
                 content = getattr(tempContent, "ss").add()
                 content.name = self._digestTree.get(i).getDataPrefix()
@@ -606,7 +606,7 @@ class ChronoSync2013(object):
                         sequenceNoList[n] = syncState.seqno.seq
                         sessionNoList[n] = syncState.seqno.session
 
-        tempContent = sync_state_pb2.SyncStateMsg()
+        tempContent = SyncStateMsg()
         for i in range(len(nameList)):
             content = getattr(tempContent, "ss").add()
             content.name = nameList[i]
@@ -712,7 +712,7 @@ class ChronoSync2013(object):
                   syncState.seqno.session == self._sessionNo):
                 # If the user was an old comer, after add the static log he
                 #   needs to increase his sequence number by 1.
-                tempContent = sync_state_pb2.SyncStateMsg()
+                tempContent = SyncStateMsg()
                 # Use getattr to avoid pylint errors.
                 content2 = getattr(tempContent, "ss").add()
                 content2.name = self._applicationDataPrefixUri
@@ -726,7 +726,7 @@ class ChronoSync2013(object):
                     except:
                         logging.exception("Error in onInitialized")
 
-        tempContent2 = sync_state_pb2.SyncStateMsg()
+        tempContent2 = SyncStateMsg()
         if self._sequenceNo >= 0:
             # Send the data packet with the new sequence number back.
             content2 = getattr(tempContent2, "ss").add()
@@ -748,7 +748,7 @@ class ChronoSync2013(object):
             # The user hasn't put himself in the digest tree.
             logging.getLogger(__name__).info("initial state")
             self._sequenceNo += 1
-            tempContent = sync_state_pb2.SyncStateMsg()
+            tempContent = SyncStateMsg()
             content2 = getattr(tempContent, "ss").add()
             content2.name = self._applicationDataPrefixUri
             content2.type = SyncState_UPDATE
