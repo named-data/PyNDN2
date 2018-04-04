@@ -354,7 +354,7 @@ class MemoryContentCache(object):
                 content = self._noStaleTimeCache[i - len(self._staleTimeCache)]
 
             if (interest.matchesName(content.getName())):
-                if (interest.getChildSelector() < 0):
+                if (interest.getChildSelector() == None):
                     # No child selector, so send the first match that we have found.
                     face.send(content.getDataEncoding())
                     return
