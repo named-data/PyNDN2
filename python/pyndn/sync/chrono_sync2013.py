@@ -454,7 +454,7 @@ class ChronoSync2013(object):
         # TODO: Check if this works in Python 3.
         tempContent = sync_state_pb2.SyncStateMsg()
 #pylint: disable=E1103
-        tempContent.ParseFromString(data.getContent().toRawStr())
+        tempContent.ParseFromString(data.getContent().toBytes())
 #pylint: enable=E1103
         content = getattr(tempContent, "ss")
         if self._digestTree.getRoot() == "00":

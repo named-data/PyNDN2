@@ -202,7 +202,7 @@ class Chat(object):
         """
         # TODO: Check if this works in Python 3.
         content = chatbuf_pb2.ChatMessage()
-        content.ParseFromString(data.getContent().toRawStr())
+        content.ParseFromString(data.getContent().toBytes())
 
         if self.getNowMilliseconds() - content.timestamp * 1000.0 < 120000.0:
             # Use getattr because "from" is a reserved keyword.
