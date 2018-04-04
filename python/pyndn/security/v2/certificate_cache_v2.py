@@ -128,7 +128,7 @@ class CertificateCacheV2(object):
         else:
             interest = certificatePrefixOrInterest
 
-            if interest.getChildSelector() >= 0:
+            if interest.getChildSelector() != None:
                 logging.getLogger(__name__).error(
                   "Certificate search using a ChildSelector is not supported. Searching as if this selector not specified")
 
