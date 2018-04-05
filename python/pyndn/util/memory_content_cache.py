@@ -66,6 +66,7 @@ class MemoryContentCache(object):
         self._staleTimeCache = []
         self._emptyComponent = Name.Component()
         self._pendingInterestTable = [] # of PendingInterest
+        self._minimumCacheLifetime = 0.0
 
     def registerPrefix(
       self, prefix, onRegisterFailed, onRegisterSuccess = None,
@@ -237,10 +238,12 @@ class MemoryContentCache(object):
     def add(self, data):
         """
         Add the Data packet to the cache so that it is available to use to
-        answer interests. If data.getMetaInfo().getFreshnessPeriod() is not None,
-        set the staleness time to now plus data.getMetaInfo().getFreshnessPeriod(),
-        which is checked during cleanup to remove stale content. This also
-        checks if  cleanupIntervalMilliseconds milliseconds have passed and
+        answer interests. If data.getMetaInfo().getFreshnessPeriod() is not
+        None, set the staleness time to now plus the maximum of
+        data.getMetaInfo().getFreshnessPeriod() and minimumCacheLifetime, which
+        is checked during cleanup to remove stale content.
+        This also checks if cleanupIntervalMilliseconds
+        milliseconds have passed and
         removes stale content from the cache. After removing stale content,
         remove timed-out pending interests from storePendingInterest(), then if
         the added Data packet satisfies any interest, send it through the
@@ -255,7 +258,8 @@ class MemoryContentCache(object):
         if (data.getMetaInfo().getFreshnessPeriod() != None and
               data.getMetaInfo().getFreshnessPeriod() >= 0.0):
             # The content will go stale, so use staleTimeCache.
-            content = MemoryContentCache._StaleTimeContent(data, nowMilliseconds)
+            content = MemoryContentCache._StaleTimeContent(
+              data, nowMilliseconds, self._minimumCacheLifetime)
             # Insert into _staleTimeCache, sorted on
             # content._cacheRemovalTimeMilliseconds.
             # Search from the back since we expect it to go there.
@@ -321,6 +325,28 @@ class MemoryContentCache(object):
         :rtype: function object
         """
         return self._storePendingInterestCallback
+
+    def getMinimumCacheLifetime(self):
+        """
+        Get the minimum lifetime before removing stale content from the cache.
+
+        :return: The minimum cache lifetime in milliseconds.
+        :rtype: float
+        """
+        return self._minimumCacheLifetime
+
+    def setMinimumCacheLifetime(self, minimumCacheLifetime):
+        """
+        Set the minimum lifetime before removing stale content from the cache
+        which can keep content in the cache longer than the lifetime defined in
+        the meta info. This can be useful for matching interests where
+        MustBeFresh is False. The default minimum cache lifetime is zero,
+        meaning that content is removed when its lifetime expires.
+
+        :param float minimumCacheLifetime: The minimum cache lifetime in
+          milliseconds.
+        """
+        self._minimumCacheLifetime = minimumCacheLifetime
 
     def _storePendingInterestCallback(
           self, prefix, interest, face, interestFilterId, filter):
@@ -449,31 +475,37 @@ class MemoryContentCache(object):
     """
     class _StaleTimeContent(_Content):
         """
-        Create a new StaleTimeContent to hold data's name and wire encoding as
-        well as the _cacheRemovalTimeMilliseconds which is now plus
-        data.getMetaInfo().getFreshnessPeriod().
+        Create a new StaleTimeContent to hold data's name and wire encoding
+        as well as the cacheRemovalTimeMilliseconds_ which is now plus the
+        maximum of data.getMetaInfo().getFreshnessPeriod() and the
+        minimumCacheLifetime.
 
         :param Data data: The Data packet whose name and wire encoding are
           copied.
         :param float nowMilliseconds: The current time in milliseconds from
           Common.getNowMilliseconds().
+        :param float minimumCacheLifetime: The minimum cache lifetime in
+          milliseconds.
         """
-        def __init__(self, data, nowMilliseconds):
+        def __init__(self, data, nowMilliseconds, minimumCacheLifetime):
             super(MemoryContentCache._StaleTimeContent, self).__init__(data)
             # Set up _cacheRemovalTimeMilliseconds which is the time when the
             # content becomes stale and should be removed from the cache in
             # milliseconds according to Common.getNowMilliseconds().
-            self._cacheRemovalTimeMilliseconds = (nowMilliseconds +
-              data.getMetaInfo().getFreshnessPeriod())
+            self._cacheRemovalTimeMilliseconds = nowMilliseconds + max(
+              data.getMetaInfo().getFreshnessPeriod(), minimumCacheLifetime)
             # Set up freshnessExpiryTimeMilliseconds_ which is the time time
             # when the freshness period of the content expires (independent of
             # when to remove from the cache) in milliseconds according to
             # Common.getNowMilliseconds().
-            self._freshnessExpiryTimeMilliseconds = self._cacheRemovalTimeMilliseconds
+            self._freshnessExpiryTimeMilliseconds = (nowMilliseconds +
+              data.getMetaInfo().getFreshnessPeriod())
 
         def isPastRemovalTime(self, nowMilliseconds):
             """
-            Check if this content is stale and should be removed from the cache.
+            Check if this content is stale and should be removed from the cache,
+            according to the content freshness period and the
+            minimumCacheLifetime.
 
             :param float nowMilliseconds: The current time in milliseconds from
               Common.getNowMilliseconds().
