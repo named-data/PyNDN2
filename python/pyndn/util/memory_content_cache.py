@@ -256,17 +256,18 @@ class MemoryContentCache(object):
               data.getMetaInfo().getFreshnessPeriod() >= 0.0):
             # The content will go stale, so use staleTimeCache.
             content = MemoryContentCache._StaleTimeContent(data, nowMilliseconds)
-            # Insert into _staleTimeCache, sorted on content._staleTimeMilliseconds.
+            # Insert into _staleTimeCache, sorted on
+            # content._cacheRemovalTimeMilliseconds.
             # Search from the back since we expect it to go there.
             i = len(self._staleTimeCache) - 1
             while i >= 0:
-                if (self._staleTimeCache[i]._staleTimeMilliseconds <=
-                      content._staleTimeMilliseconds):
+                if (self._staleTimeCache[i]._cacheRemovalTimeMilliseconds <=
+                      content._cacheRemovalTimeMilliseconds):
                     break
                 i -= 1
 
             # Element i is the greatest less than or equal to
-            # content._staleTimeMilliseconds, so insert after it.
+            # content._cacheRemovalTimeMilliseconds, so insert after it.
             self._staleTimeCache.insert(i + 1, content)
         else:
             # The data does not go stale, so use _noStaleTimeCache.
@@ -343,18 +344,21 @@ class MemoryContentCache(object):
         nowMilliseconds = Common.getNowMilliseconds()
         self._doCleanup(nowMilliseconds)
 
-        selectedComponent = 0
+        selectedComponent = None
         selectedEncoding = None
         # We need to iterate over both arrays.
         totalSize = len(self._staleTimeCache) + len(self._noStaleTimeCache)
         for i in range(totalSize):
+            isFresh = True
             if i < len(self._staleTimeCache):
                 content = self._staleTimeCache[i]
+                isFresh = content.isFresh(nowMilliseconds)
             else:
                 # We have iterated over the first array. Get from the second.
                 content = self._noStaleTimeCache[i - len(self._staleTimeCache)]
 
-            if (interest.matchesName(content.getName())):
+            if (interest.matchesName(content.getName()) and
+                  not (interest.getMustBeFresh() and not isFresh)):
                 if (interest.getChildSelector() == None):
                     # No child selector, so send the first match that we have found.
                     face.send(content.getDataEncoding())
@@ -407,10 +411,10 @@ class MemoryContentCache(object):
           Common.getNowMilliseconds().
         """
         if nowMilliseconds >= self._nextCleanupTime:
-            # staleTimeCache is sorted on staleTimeMilliseconds, so we only need
+            # staleTimeCache is sorted on _cacheRemovalTimeMilliseconds, so we only need
             # to erase the stale entries at the front, then quit.
             while (len(self._staleTimeCache) > 0 and
-                   self._staleTimeCache[0].isStale(nowMilliseconds)):
+                   self._staleTimeCache[0].isPastRemovalTime(nowMilliseconds)):
                 del self._staleTimeCache[0]
 
             self._nextCleanupTime = nowMilliseconds + self._cleanupIntervalMilliseconds
@@ -439,13 +443,14 @@ class MemoryContentCache(object):
             return self._dataEncoding
 
     """
-    _StaleTimeContent extends _Content to include the staleTimeMilliseconds for
-    when this entry should be cleaned up from the cache.
+    _StaleTimeContent extends _Content to include the
+    _cacheRemovalTimeMilliseconds for when this entry should be cleaned up from
+    the cache.
     """
     class _StaleTimeContent(_Content):
         """
         Create a new StaleTimeContent to hold data's name and wire encoding as
-        well as the staleTimeMilliseconds which is now plus
+        well as the _cacheRemovalTimeMilliseconds which is now plus
         data.getMetaInfo().getFreshnessPeriod().
 
         :param Data data: The Data packet whose name and wire encoding are
@@ -455,22 +460,39 @@ class MemoryContentCache(object):
         """
         def __init__(self, data, nowMilliseconds):
             super(MemoryContentCache._StaleTimeContent, self).__init__(data)
-            # Set up staleTimeMilliseconds which is The time when the content
-            # becomse stale in milliseconds according to
-            # Common.getNowMilliseconds().
-            self._staleTimeMilliseconds = (nowMilliseconds +
+            # Set up _cacheRemovalTimeMilliseconds which is the time when the
+            # content becomes stale and should be removed from the cache in
+            # milliseconds according to Common.getNowMilliseconds().
+            self._cacheRemovalTimeMilliseconds = (nowMilliseconds +
               data.getMetaInfo().getFreshnessPeriod())
+            # Set up freshnessExpiryTimeMilliseconds_ which is the time time
+            # when the freshness period of the content expires (independent of
+            # when to remove from the cache) in milliseconds according to
+            # Common.getNowMilliseconds().
+            self._freshnessExpiryTimeMilliseconds = self._cacheRemovalTimeMilliseconds
 
-        def isStale(self, nowMilliseconds):
+        def isPastRemovalTime(self, nowMilliseconds):
             """
-            Check if this content is stale.
+            Check if this content is stale and should be removed from the cache.
 
             :param float nowMilliseconds: The current time in milliseconds from
               Common.getNowMilliseconds().
             :return: True if this content is stale, otherwise False.
             :rtype: bool
             """
-            return self._staleTimeMilliseconds <= nowMilliseconds
+            return self._cacheRemovalTimeMilliseconds <= nowMilliseconds
+
+        def isFresh(self, nowMilliseconds):
+            """
+            Check if the content is still fresh according to its freshness
+            period (independent of when to remove from the cache).
+
+            :param float nowMilliseconds: The current time in milliseconds from
+              Common.getNowMilliseconds().
+            :return: True if the content is still fresh, otherwise False.
+            :rtype: bool
+            """
+            return self._freshnessExpiryTimeMilliseconds > nowMilliseconds
 
     class _PendingInterest(object):
         """
