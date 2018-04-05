@@ -71,10 +71,15 @@ If you get an error like "Uninstalling six-1.4.1. Operation not permitted", try 
 
     sudo CFLAGS=-Qunused-arguments pip install pytest mock --ignore-installed six
 
-Optional: To install libcrypto, install Xcode and install MacPorts from
-http://www.macports.org/install.php . In a new terminal, enter:
+Optional: To install libcrypto, install Xcode. To install the command line tools, in a terminal enter:
 
-    sudo port install openssl
+    xcode-select --install
+
+Install Brew from https://brew.sh
+
+In a terminal, enter:
+
+    brew install openssl
 
 The python-dev headers are already installed.
 
@@ -217,9 +222,18 @@ The documentation output is in `doc/_build/html/index.html`.
 ### _pyndn C module
 
 To install the optional _pyndn C module, you need the prerequisites python-dev
-and libcrypto. To build in a terminal, change directory to the PyNDN2 root.  Enter:
+and libcrypto. To build in a terminal, change directory to the PyNDN2 root.
+
+To configure on macOS, enter:
+
+    ./configure CFLAGS="-I/usr/local/opt/openssl/include" CXXFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib"
+
+To configure on other systems, enter:
 
     ./configure
+
+Enter:
+
     make
     sudo make install
 
