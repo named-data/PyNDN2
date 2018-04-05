@@ -249,12 +249,13 @@ class MemoryContentCache(object):
         :param Data data: The Data packet object to put in the cache. This
           copies the fields from the object.
         """
-        self._doCleanup()
+        nowMilliseconds = Common.getNowMilliseconds()
+        self._doCleanup(nowMilliseconds)
 
         if (data.getMetaInfo().getFreshnessPeriod() != None and
               data.getMetaInfo().getFreshnessPeriod() >= 0.0):
             # The content will go stale, so use staleTimeCache.
-            content = MemoryContentCache._StaleTimeContent(data)
+            content = MemoryContentCache._StaleTimeContent(data, nowMilliseconds)
             # Insert into _staleTimeCache, sorted on content._staleTimeMilliseconds.
             # Search from the back since we expect it to go there.
             i = len(self._staleTimeCache) - 1
@@ -274,7 +275,6 @@ class MemoryContentCache(object):
         # Remove timed-out interests and check if the data packet matches any
         #   pending interest.
         # Go backwards through the list so we can erase entries.
-        nowMilliseconds = Common.getNowMilliseconds()
         for i in range(len(self._pendingInterestTable) - 1, -1, -1):
             pendingInterest = self._pendingInterestTable[i]
             if pendingInterest.isTimedOut(nowMilliseconds):
@@ -340,7 +340,8 @@ class MemoryContentCache(object):
         send the Data packet to the face. If no matching Data packet is in
         the cache, call the callback in onDataNotFoundForPrefix (if defined).
         """
-        self._doCleanup()
+        nowMilliseconds = Common.getNowMilliseconds()
+        self._doCleanup(nowMilliseconds)
 
         selectedComponent = 0
         selectedEncoding = None
@@ -395,23 +396,24 @@ class MemoryContentCache(object):
                 except:
                     logging.exception("Error in onDataNotFound")
 
-    def _doCleanup(self):
+    def _doCleanup(self, nowMilliseconds):
         """
         Check if now is greater than nextCleanupTime and, if so, remove stale
         content from staleTimeCache and reset nextCleanupTime based on
         cleanupIntervalMilliseconds. Since add(Data) does a sorted insert into
         staleTimeCache, the check for stale data is quick and does not require
         searching the entire staleTimeCache.
+        :param float nowMilliseconds: The current time in milliseconds from
+          Common.getNowMilliseconds().
         """
-        now = Common.getNowMilliseconds()
-        if now >= self._nextCleanupTime:
+        if nowMilliseconds >= self._nextCleanupTime:
             # staleTimeCache is sorted on staleTimeMilliseconds, so we only need
             # to erase the stale entries at the front, then quit.
             while (len(self._staleTimeCache) > 0 and
-                   self._staleTimeCache[0].isStale(now)):
+                   self._staleTimeCache[0].isStale(nowMilliseconds)):
                 del self._staleTimeCache[0]
 
-            self._nextCleanupTime = now + self._cleanupIntervalMilliseconds
+            self._nextCleanupTime = nowMilliseconds + self._cleanupIntervalMilliseconds
 
     """
     _Content is a private class to hold the name and encoding for each entry in
@@ -448,13 +450,15 @@ class MemoryContentCache(object):
 
         :param Data data: The Data packet whose name and wire encoding are
           copied.
+        :param float nowMilliseconds: The current time in milliseconds from
+          Common.getNowMilliseconds().
         """
-        def __init__(self, data):
+        def __init__(self, data, nowMilliseconds):
             super(MemoryContentCache._StaleTimeContent, self).__init__(data)
             # Set up staleTimeMilliseconds which is The time when the content
             # becomse stale in milliseconds according to
             # Common.getNowMilliseconds().
-            self._staleTimeMilliseconds = (Common.getNowMilliseconds() +
+            self._staleTimeMilliseconds = (nowMilliseconds +
               data.getMetaInfo().getFreshnessPeriod())
 
         def isStale(self, nowMilliseconds):
