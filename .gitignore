@@ -22,6 +22,7 @@ doc/_build
 /build
 
 # integration_test temporary files
+/.pytest_cache
 tests/integration_tests/policy_config/test-public-info.db
 tests/integration_tests/policy_config/ndnsec-key-file
 
