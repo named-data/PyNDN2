@@ -32,10 +32,8 @@ import inspect
 import logging
 from random import SystemRandom
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, ec
-from cryptography.hazmat.primitives.serialization import load_der_public_key
 from cryptography.hazmat.primitives import hashes, hmac
-from cryptography.exceptions import InvalidSignature
+from pyndn.security.verification_helpers import VerificationHelpers
 from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.data import Data
@@ -668,34 +666,8 @@ class KeyChain(object):
             self._tpm._deleteKey(keyName)
             raise KeyChain.Error("Error decoding public key " + str(ex))
 
-        # TODO: Move verify into PublicKey?
-        isVerified = False
         try:
-            if publicKey.getKeyType() == KeyType.EC:
-                cryptoPublicKey = load_der_public_key(
-                  publicKey.getKeyDer().toBytes(), backend = default_backend())
-                verifier = cryptoPublicKey.verifier(
-                  signatureBits.toBytes(), ec.ECDSA(hashes.SHA256()))
-                verifier.update(content.toBytes())
-                try:
-                    verifier.verify()
-                    isVerified = True
-                except InvalidSignature:
-                    isVerified = False
-            elif publicKey.getKeyType() == KeyType.RSA:
-                cryptoPublicKey = load_der_public_key(
-                  publicKey.getKeyDer().toBytes(), backend = default_backend())
-                verifier = cryptoPublicKey.verifier(
-                  signatureBits.toBytes(), padding.PKCS1v15(), hashes.SHA256())
-                verifier.update(content.toBytes())
-                try:
-                    verifier.verify()
-                    isVerified = True
-                except InvalidSignature:
-                    isVerified = False
-            else:
-              # We don't expect this.
-              raise ValueError("Unrecognized key type")
+            isVerified = VerificationHelpers.verifySignature(content, signatureBits, publicKey)
         except Exception as ex:
             # Promote to KeyChain.Error.
             self._tpm._deleteKey(keyName)
