@@ -21,12 +21,8 @@
 
 import unittest as ut
 import base64
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, ec
-from cryptography.hazmat.primitives.serialization import load_der_public_key
-from cryptography.hazmat.primitives import hashes
-from cryptography.exceptions import InvalidSignature
-from pyndn.security import RsaKeyParams, EcKeyParams, DigestAlgorithm, KeyType
+from pyndn.security import RsaKeyParams, EcKeyParams, DigestAlgorithm
+from pyndn.security.verification_helpers import VerificationHelpers
 from pyndn.security.tpm.tpm_private_key import TpmPrivateKey
 from pyndn.security.certificate import PublicKey
 from pyndn.util import Blob
@@ -236,33 +232,8 @@ class TestTpmPrivateKey(ut.TestCase):
             # Sign and verify.
             signature = key.sign(data.toBytes(), DigestAlgorithm.SHA256)
 
-            # TODO: Move verify into PublicKey?
-            if dataSet.keyParams.getKeyType() == KeyType.EC:
-                cryptoPublicKey = load_der_public_key(
-                  publicKeyBits.toBytes(), backend = default_backend())
-                verifier = cryptoPublicKey.verifier(
-                  signature.toBytes(), ec.ECDSA(hashes.SHA256()))
-                verifier.update(data.toBytes())
-                try:
-                    verifier.verify()
-                    result = True
-                except InvalidSignature:
-                    result = False
-            elif dataSet.keyParams.getKeyType() == KeyType.RSA:
-                cryptoPublicKey = load_der_public_key(
-                  publicKeyBits.toBytes(), backend = default_backend())
-                verifier = cryptoPublicKey.verifier(
-                  signature.toBytes(), padding.PKCS1v15(), hashes.SHA256())
-                verifier.update(data.toBytes())
-                try:
-                    verifier.verify()
-                    result = True
-                except InvalidSignature:
-                    result = False
-            else:
-                # We don't expect this.
-                self.fail("Unrecognized key type")
-
+            result = VerificationHelpers.verifySignature(
+              data, signature, publicKey)
             self.assertTrue(result)
 
             # Check that another generated private key is different.
