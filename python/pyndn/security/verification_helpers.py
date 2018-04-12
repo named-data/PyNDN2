@@ -80,11 +80,9 @@ class VerificationHelpers(object):
                 except:
                     return False
 
-                verifier = cryptoPublicKey.verifier(
-                  signature, padding.PKCS1v15(), hashes.SHA256())
-                verifier.update(buffer)
                 try:
-                    verifier.verify()
+                    cryptoPublicKey.verify(
+                      signature, buffer, padding.PKCS1v15(), hashes.SHA256())
                     return True
                 except:
                     return False
@@ -97,11 +95,9 @@ class VerificationHelpers(object):
                 except:
                     return False
 
-                verifier = cryptoPublicKey.verifier(
-                  signature, ec.ECDSA(hashes.SHA256()))
-                verifier.update(buffer)
                 try:
-                    verifier.verify()
+                    cryptoPublicKey.verify(
+                      signature, buffer, ec.ECDSA(hashes.SHA256()))
                     return True
                 except:
                     return False

@@ -224,14 +224,14 @@ class TpmPrivateKey(object):
               "TpmPrivateKey.sign: Unsupported digest algorithm")
 
         if self._keyType == KeyType.RSA:
-            signer = self._privateKey.signer(padding.PKCS1v15(), hashes.SHA256())
+            signature = self._privateKey.sign(
+              data, padding.PKCS1v15(), hashes.SHA256())
         elif self._keyType == KeyType.EC:
-            signer = self._privateKey.signer(ec.ECDSA(hashes.SHA256()))
+            signature = self._privateKey.sign(data, ec.ECDSA(hashes.SHA256()))
         else:
             return Blob()
 
-        signer.update(data)
-        return Blob(bytearray(signer.finalize()), False)
+        return Blob(bytearray(signature), False)
 
     def toPkcs1(self):
         """
