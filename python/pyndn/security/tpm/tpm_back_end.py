@@ -204,28 +204,6 @@ class TpmBackEnd(object):
         return not self.isTpmLocked()
 
     @staticmethod
-    def constructKeyName(identityName, params):
-        """
-        Construct the key name according to identityName and params.
-
-        :param Name identityName:
-        :param KeyParams params:
-        """
-        if params.getKeyIdType() == KeyIdType.USER_SPECIFIED:
-            keyId = params.getKeyId()
-        # We don't have the keyHandle, so we can't support KeyIdType.SHA256.
-        elif params.getKeyIdType() == KeyIdType.RANDOM:
-            if params.getKeyId().getValue().size() == 0:
-                raise TpmBackEnd.Error(
-                  "setKeyName: The keyId is empty for type RANDOM")
-            keyId = params.getKeyId()
-        else:
-            raise TpmBackEnd.Error(
-              "setKeyName: unrecognized params.getKeyIdType()")
-
-        return PibKey.constructKeyName(identityName, keyId)
-
-    @staticmethod
     def setKeyName(keyHandle, identityName, params):
         """
         Set the key name in keyHandle according to identityName and params.
