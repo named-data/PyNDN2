@@ -24,6 +24,7 @@ implement a TPM back-end using the macOS Keychain services.
 """
 
 import sys
+import ctypes
 if sys.platform == 'darwin':
     from pyndn.contrib.cocoapy import *
 from pyndn.util.blob import Blob
@@ -332,19 +333,12 @@ class TpmBackEndOsx(TpmBackEnd):
               None, kCFNumberIntType, byref(c_int(keySize))))
 
             attrDict = c_void_p(cf.CFDictionaryCreateMutable(
-              None, 3, cf.kCFTypeDictionaryKeyCallBacks, None))
+              None, 2, cf.kCFTypeDictionaryKeyCallBacks, None))
             cf.CFDictionaryAddValue(
               attrDict, osx._kSecAttrKeyType,
               TpmBackEndOsx._getAsymmetricKeyType(keyType))
             cf.CFDictionaryAddValue(
               attrDict, osx._kSecAttrKeySizeInBits, cfKeySize)
-            # TODO: Use TpmBackEnd.setKeyName after generating like in ndn-cpp
-            # because constructKeyName doesn't support KeyIdType.SHA256 .
-            # This requires calling SecKeychainItemModifyAttributesAndData.
-            keyName = TpmBackEnd.constructKeyName(identityName, params)
-            keyLabel = CFSTR(keyName.toUri())
-            cf.CFDictionaryAddValue(
-              attrDict, osx._kSecAttrLabel, keyLabel)
 
             publicKey = c_void_p()
             privateKey = c_void_p()
@@ -356,7 +350,19 @@ class TpmBackEndOsx(TpmBackEnd):
                 raise TpmBackEndOsx.Error("Failed to create a key pair")
 
             keyHandle = TpmKeyHandleOsx(privateKey)
-            keyHandle.setKeyName(keyName)
+            TpmBackEnd.setKeyName(keyHandle, identityName, params)
+
+            keyUri = keyHandle.getKeyName().toUri()
+            # There is only one attr, so we don't need to make a C array.
+            attr = SecKeychainAttribute(
+              osx._kSecKeyPrintName, len(keyUri), keyUri)
+            attrList = SecKeychainAttributeList(1, pointer(attr))
+
+            osx._security.SecKeychainItemModifyAttributesAndData(
+              privateKey, ctypes.byref(attrList), 0, None)
+            osx._security.SecKeychainItemModifyAttributesAndData(
+              publicKey, ctypes.byref(attrList), 0, None)
+
             return keyHandle
         finally:
             if keyLabel != None:
@@ -505,6 +511,15 @@ class TpmBackEndOsx(TpmBackEnd):
         unsignedArray = [(x if x >= 0 else x + 256) for x in array]
         return Blob(unsignedArray, False)
 
+class SecKeychainAttribute(Structure):
+    _fields_ = [("tag", c_uint32),
+                ("length", c_uint32),
+                ("data", c_char_p)]
+
+class SecKeychainAttributeList(Structure):
+    _fields_ = [("count", c_int),
+                ("attr", POINTER(SecKeychainAttribute))]
+
 class Osx(object):
     _instance = None
 
@@ -535,6 +550,10 @@ class Osx(object):
         self._security.SecKeychainSetUserInteractionAllowed.restype = c_void_p
         self._security.SecKeychainSetUserInteractionAllowed.argtypes = [c_void_p]
 
+        self._security.SecKeychainItemModifyAttributesAndData.restype = c_void_p
+        self._security.SecKeychainItemModifyAttributesAndData.argtypes = [
+          c_void_p, POINTER(SecKeychainAttributeList), c_uint32, c_void_p]
+
         self._kSecClass = c_void_p.in_dll(self._security, "kSecClass")
         self._kSecClassKey = c_void_p.in_dll(self._security, "kSecClassKey")
         self._kSecAttrKeyType = c_void_p.in_dll(self._security, "kSecAttrKeyType")
@@ -560,6 +579,8 @@ class Osx(object):
         self._kSecPaddingKey = c_void_p.in_dll(self._security, "kSecPaddingKey")
         self._kSecPaddingPKCS1Key = c_void_p.in_dll(self._security, "kSecPaddingPKCS1Key")
         self._kSecPaddingOAEPKey = c_void_p.in_dll(self._security, "kSecPaddingOAEPKey")
+
+        self._kSecKeyPrintName = 1
 #pylint: enable=E1103
 
         # enum values:
