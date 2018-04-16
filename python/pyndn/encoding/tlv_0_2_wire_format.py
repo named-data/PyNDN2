@@ -34,6 +34,7 @@ from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
 from pyndn.network_nack import NetworkNack
 from pyndn.lp.incoming_face_id import IncomingFaceId
+from pyndn.lp.congestion_mark import CongestionMark
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
@@ -575,6 +576,11 @@ class Tlv0_2WireFormat(WireFormat):
                 incomingFaceId = IncomingFaceId()
                 incomingFaceId.setFaceId(decoder.readNonNegativeInteger(fieldLength))
                 lpPacket.addHeaderField(incomingFaceId)
+            elif fieldType == Tlv.LpPacket_CongestionMark:
+                congestionMark = CongestionMark()
+                congestionMark.setCongestionMark(
+                  decoder.readNonNegativeInteger(fieldLength))
+                lpPacket.addHeaderField(congestionMark)
             else:
                 # Unrecognized field type. The conditions for ignoring are here:
                 # http://redmine.named-data.net/projects/nfd/wiki/NDNLPv2

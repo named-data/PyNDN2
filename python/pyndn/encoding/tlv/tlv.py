@@ -98,6 +98,7 @@ class Tlv(object):
     LpPacket_IncomingFaceId =  817
     LpPacket_CachePolicy =     820
     LpPacket_CachePolicyType = 821
+    LpPacket_CongestionMark =  832
     LpPacket_IGNORE_MIN =      800
     LpPacket_IGNORE_MAX =      959
 
