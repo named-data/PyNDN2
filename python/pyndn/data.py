@@ -31,6 +31,7 @@ from pyndn.name import Name
 from pyndn.meta_info import MetaInfo
 from pyndn.sha256_with_rsa_signature import Sha256WithRsaSignature
 from pyndn.lp.incoming_face_id import IncomingFaceId
+from pyndn.lp.congestion_mark import CongestionMark
 
 class Data(object):
     def __init__(self, value = None):
@@ -198,6 +199,17 @@ class Data(object):
         field = (None if self._lpPacket == None
                  else IncomingFaceId.getFirstHeader(self._lpPacket))
         return None if field == None else field.getFaceId()
+
+    def getCongestionMark(self):
+        """
+        Get the congestion mark according to the incoming packet header.
+
+        :return: The congestion mark. If not specified, return 0.
+        :rtype: int
+        """
+        field = (None if self._lpPacket == None
+                 else CongestionMark.getFirstHeader(self._lpPacket))
+        return 0 if field == None else field.getCongestionMark()
 
     def getFullName(self, wireFormat = None):
         """
