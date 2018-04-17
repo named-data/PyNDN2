@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.7beta1 (2018-04-17)
---------------------------------------------------
+PyNDN v2.8beta1 (2018-04-17)
+----------------------------
 
 Bug fixes
 * https://redmine.named-data.net/issues/4428 MustBeFresh should be false if the
