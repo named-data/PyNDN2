@@ -24,7 +24,7 @@ implement a TPM back-end using the macOS Keychain services.
 """
 
 import sys
-import ctypes
+from ctypes import *
 if sys.platform == 'darwin':
     from pyndn.contrib.cocoapy import *
 from pyndn.util.blob import Blob
@@ -359,9 +359,9 @@ class TpmBackEndOsx(TpmBackEnd):
             attrList = SecKeychainAttributeList(1, pointer(attr))
 
             osx._security.SecKeychainItemModifyAttributesAndData(
-              privateKey, ctypes.byref(attrList), 0, None)
+              privateKey, byref(attrList), 0, None)
             osx._security.SecKeychainItemModifyAttributesAndData(
-              publicKey, ctypes.byref(attrList), 0, None)
+              publicKey, byref(attrList), 0, None)
 
             return keyHandle
         finally:
