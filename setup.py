@@ -5,9 +5,9 @@
 
 # To build/upload the package, do the following as described in
 # https://python-packaging-user-guide.readthedocs.org/en/latest/distributing.html
-# sudo python setup.py sdist
-# sudo python setup.py bdist_wheel --universal
-# sudo python setup.py sdist bdist_wheel upload
+# sudo python3 setup.py sdist
+# sudo python3 setup.py bdist_wheel --universal
+# sudo python3 setup.py sdist bdist_wheel upload
 
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
 import sys
