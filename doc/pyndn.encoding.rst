@@ -12,8 +12,8 @@ Subpackages
 Submodules
 ----------
 
-pyndn.encoding.element_reader module
-------------------------------------
+pyndn.encoding.element\_reader module
+-------------------------------------
 
 .. automodule:: pyndn.encoding.element_reader
     :members:
@@ -28,48 +28,48 @@ pyndn.encoding.oid module
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.protobuf_tlv module
-----------------------------------
+pyndn.encoding.protobuf\_tlv module
+-----------------------------------
 
 .. automodule:: pyndn.encoding.protobuf_tlv
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv_0_1_1_wire_format module
--------------------------------------------
+pyndn.encoding.tlv\_0\_1\_1\_wire\_format module
+------------------------------------------------
 
 .. automodule:: pyndn.encoding.tlv_0_1_1_wire_format
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv_0_1_wire_format module
------------------------------------------
+pyndn.encoding.tlv\_0\_1\_wire\_format module
+---------------------------------------------
 
 .. automodule:: pyndn.encoding.tlv_0_1_wire_format
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv_0_2_wire_format module
------------------------------------------
+pyndn.encoding.tlv\_0\_2\_wire\_format module
+---------------------------------------------
 
 .. automodule:: pyndn.encoding.tlv_0_2_wire_format
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv_wire_format module
--------------------------------------
+pyndn.encoding.tlv\_wire\_format module
+---------------------------------------
 
 .. automodule:: pyndn.encoding.tlv_wire_format
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.wire_format module
----------------------------------
+pyndn.encoding.wire\_format module
+----------------------------------
 
 .. automodule:: pyndn.encoding.wire_format
     :members:

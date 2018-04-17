@@ -19,64 +19,64 @@ pyndn.security.pib.pib module
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_certificate_container module
----------------------------------------------------
+pyndn.security.pib.pib\_certificate\_container module
+-----------------------------------------------------
 
 .. automodule:: pyndn.security.pib.pib_certificate_container
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_identity module
---------------------------------------
+pyndn.security.pib.pib\_identity module
+---------------------------------------
 
 .. automodule:: pyndn.security.pib.pib_identity
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_identity_container module
-------------------------------------------------
+pyndn.security.pib.pib\_identity\_container module
+--------------------------------------------------
 
 .. automodule:: pyndn.security.pib.pib_identity_container
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_impl module
-----------------------------------
+pyndn.security.pib.pib\_impl module
+-----------------------------------
 
 .. automodule:: pyndn.security.pib.pib_impl
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_key module
----------------------------------
+pyndn.security.pib.pib\_key module
+----------------------------------
 
 .. automodule:: pyndn.security.pib.pib_key
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_key_container module
--------------------------------------------
+pyndn.security.pib.pib\_key\_container module
+---------------------------------------------
 
 .. automodule:: pyndn.security.pib.pib_key_container
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_memory module
-------------------------------------
+pyndn.security.pib.pib\_memory module
+-------------------------------------
 
 .. automodule:: pyndn.security.pib.pib_memory
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.pib.pib_sqlite3 module
--------------------------------------
+pyndn.security.pib.pib\_sqlite3 module
+--------------------------------------
 
 .. automodule:: pyndn.security.pib.pib_sqlite3
     :members:

@@ -16,96 +16,96 @@ Subpackages
 Submodules
 ----------
 
-pyndn.security.command_interest_signer module
----------------------------------------------
+pyndn.security.command\_interest\_signer module
+-----------------------------------------------
 
 .. automodule:: pyndn.security.command_interest_signer
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.key_chain module
--------------------------------
+pyndn.security.key\_chain module
+--------------------------------
 
 .. automodule:: pyndn.security.key_chain
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.key_id_type module
----------------------------------
+pyndn.security.key\_id\_type module
+-----------------------------------
 
 .. automodule:: pyndn.security.key_id_type
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.key_params module
---------------------------------
+pyndn.security.key\_params module
+---------------------------------
 
 .. automodule:: pyndn.security.key_params
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.safe_bag module
-------------------------------
+pyndn.security.safe\_bag module
+-------------------------------
 
 .. automodule:: pyndn.security.safe_bag
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.security_exception module
-----------------------------------------
+pyndn.security.security\_exception module
+-----------------------------------------
 
 .. automodule:: pyndn.security.security_exception
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.security_types module
-------------------------------------
+pyndn.security.security\_types module
+-------------------------------------
 
 .. automodule:: pyndn.security.security_types
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.signing_info module
-----------------------------------
+pyndn.security.signing\_info module
+-----------------------------------
 
 .. automodule:: pyndn.security.signing_info
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.validator_config module
---------------------------------------
+pyndn.security.validator\_config module
+---------------------------------------
 
 .. automodule:: pyndn.security.validator_config
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.validator_config_error module
---------------------------------------------
+pyndn.security.validator\_config\_error module
+----------------------------------------------
 
 .. automodule:: pyndn.security.validator_config_error
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.validator_null module
-------------------------------------
+pyndn.security.validator\_null module
+-------------------------------------
 
 .. automodule:: pyndn.security.validator_null
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.verification_helpers module
-------------------------------------------
+pyndn.security.verification\_helpers module
+-------------------------------------------
 
 .. automodule:: pyndn.security.verification_helpers
     :members:

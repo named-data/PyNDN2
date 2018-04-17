@@ -4,40 +4,40 @@ pyndn.transport package
 Submodules
 ----------
 
-pyndn.transport.async_socket_transport module
----------------------------------------------
+pyndn.transport.async\_socket\_transport module
+-----------------------------------------------
 
 .. automodule:: pyndn.transport.async_socket_transport
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.transport.async_tcp_transport module
-------------------------------------------
+pyndn.transport.async\_tcp\_transport module
+--------------------------------------------
 
 .. automodule:: pyndn.transport.async_tcp_transport
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.transport.async_unix_transport module
--------------------------------------------
+pyndn.transport.async\_unix\_transport module
+---------------------------------------------
 
 .. automodule:: pyndn.transport.async_unix_transport
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.transport.socket_poller module
-------------------------------------
+pyndn.transport.socket\_poller module
+-------------------------------------
 
 .. automodule:: pyndn.transport.socket_poller
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.transport.tcp_transport module
-------------------------------------
+pyndn.transport.tcp\_transport module
+-------------------------------------
 
 .. automodule:: pyndn.transport.tcp_transport
     :members:
@@ -52,16 +52,16 @@ pyndn.transport.transport module
     :undoc-members:
     :show-inheritance:
 
-pyndn.transport.udp_transport module
-------------------------------------
+pyndn.transport.udp\_transport module
+-------------------------------------
 
 .. automodule:: pyndn.transport.udp_transport
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.transport.unix_transport module
--------------------------------------
+pyndn.transport.unix\_transport module
+--------------------------------------
 
 .. automodule:: pyndn.transport.unix_transport
     :members:

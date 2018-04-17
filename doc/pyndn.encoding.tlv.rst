@@ -12,24 +12,24 @@ pyndn.encoding.tlv.tlv module
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv.tlv_decoder module
--------------------------------------
+pyndn.encoding.tlv.tlv\_decoder module
+--------------------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv_decoder
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv.tlv_encoder module
--------------------------------------
+pyndn.encoding.tlv.tlv\_encoder module
+--------------------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv_encoder
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.tlv.tlv_structure_decoder module
------------------------------------------------
+pyndn.encoding.tlv.tlv\_structure\_decoder module
+-------------------------------------------------
 
 .. automodule:: pyndn.encoding.tlv.tlv_structure_decoder
     :members:

@@ -12,16 +12,16 @@ pyndn.encoding.der.der module
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.der.der_exceptions module
-----------------------------------------
+pyndn.encoding.der.der\_exceptions module
+-----------------------------------------
 
 .. automodule:: pyndn.encoding.der.der_exceptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encoding.der.der_node module
-----------------------------------
+pyndn.encoding.der.der\_node module
+-----------------------------------
 
 .. automodule:: pyndn.encoding.der.der_node
     :members:

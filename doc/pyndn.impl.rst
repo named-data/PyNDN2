@@ -4,32 +4,32 @@ pyndn.impl package
 Submodules
 ----------
 
-pyndn.impl.delayed_call_table module
-------------------------------------
+pyndn.impl.delayed\_call\_table module
+--------------------------------------
 
 .. automodule:: pyndn.impl.delayed_call_table
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.impl.interest_filter_table module
----------------------------------------
+pyndn.impl.interest\_filter\_table module
+-----------------------------------------
 
 .. automodule:: pyndn.impl.interest_filter_table
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.impl.pending_interest_table module
-----------------------------------------
+pyndn.impl.pending\_interest\_table module
+------------------------------------------
 
 .. automodule:: pyndn.impl.pending_interest_table
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.impl.registered_prefix_table module
------------------------------------------
+pyndn.impl.registered\_prefix\_table module
+-------------------------------------------
 
 .. automodule:: pyndn.impl.registered_prefix_table
     :members:

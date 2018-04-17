@@ -18,16 +18,16 @@ Subpackages
 Submodules
 ----------
 
-pyndn.control_parameters module
--------------------------------
+pyndn.control\_parameters module
+--------------------------------
 
 .. automodule:: pyndn.control_parameters
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.control_response module
------------------------------
+pyndn.control\_response module
+------------------------------
 
 .. automodule:: pyndn.control_response
     :members:
@@ -42,16 +42,16 @@ pyndn.data module
     :undoc-members:
     :show-inheritance:
 
-pyndn.delegation_set module
----------------------------
+pyndn.delegation\_set module
+----------------------------
 
 .. automodule:: pyndn.delegation_set
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.digest_sha256_signature module
-------------------------------------
+pyndn.digest\_sha256\_signature module
+--------------------------------------
 
 .. automodule:: pyndn.digest_sha256_signature
     :members:
@@ -74,24 +74,24 @@ pyndn.face module
     :undoc-members:
     :show-inheritance:
 
-pyndn.forwarding_flags module
------------------------------
+pyndn.forwarding\_flags module
+------------------------------
 
 .. automodule:: pyndn.forwarding_flags
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.generic_signature module
-------------------------------
+pyndn.generic\_signature module
+-------------------------------
 
 .. automodule:: pyndn.generic_signature
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.hmac_with_sha256_signature module
----------------------------------------
+pyndn.hmac\_with\_sha256\_signature module
+------------------------------------------
 
 .. automodule:: pyndn.hmac_with_sha256_signature
     :members:
@@ -106,16 +106,16 @@ pyndn.interest module
     :undoc-members:
     :show-inheritance:
 
-pyndn.interest_filter module
-----------------------------
+pyndn.interest\_filter module
+-----------------------------
 
 .. automodule:: pyndn.interest_filter
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.key_locator module
-------------------------
+pyndn.key\_locator module
+-------------------------
 
 .. automodule:: pyndn.key_locator
     :members:
@@ -130,8 +130,8 @@ pyndn.link module
     :undoc-members:
     :show-inheritance:
 
-pyndn.meta_info module
-----------------------
+pyndn.meta\_info module
+-----------------------
 
 .. automodule:: pyndn.meta_info
     :members:
@@ -146,8 +146,8 @@ pyndn.name module
     :undoc-members:
     :show-inheritance:
 
-pyndn.network_nack module
--------------------------
+pyndn.network\_nack module
+--------------------------
 
 .. automodule:: pyndn.network_nack
     :members:
@@ -162,16 +162,16 @@ pyndn.node module
     :undoc-members:
     :show-inheritance:
 
-pyndn.sha256_with_ecdsa_signature module
-----------------------------------------
+pyndn.sha256\_with\_ecdsa\_signature module
+-------------------------------------------
 
 .. automodule:: pyndn.sha256_with_ecdsa_signature
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.sha256_with_rsa_signature module
---------------------------------------
+pyndn.sha256\_with\_rsa\_signature module
+-----------------------------------------
 
 .. automodule:: pyndn.sha256_with_rsa_signature
     :members:
@@ -186,16 +186,16 @@ pyndn.signature module
     :undoc-members:
     :show-inheritance:
 
-pyndn.threadsafe_face module
-----------------------------
+pyndn.threadsafe\_face module
+-----------------------------
 
 .. automodule:: pyndn.threadsafe_face
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.validity_period module
-----------------------------
+pyndn.validity\_period module
+-----------------------------
 
 .. automodule:: pyndn.validity_period
     :members:

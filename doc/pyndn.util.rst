@@ -19,24 +19,24 @@ pyndn.util.blob module
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.boost_info_parser module
------------------------------------
+pyndn.util.boost\_info\_parser module
+-------------------------------------
 
 .. automodule:: pyndn.util.boost_info_parser
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.change_counter module
---------------------------------
+pyndn.util.change\_counter module
+---------------------------------
 
 .. automodule:: pyndn.util.change_counter
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.command_interest_generator module
---------------------------------------------
+pyndn.util.command\_interest\_generator module
+----------------------------------------------
 
 .. automodule:: pyndn.util.command_interest_generator
     :members:
@@ -51,48 +51,48 @@ pyndn.util.common module
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.config_file module
------------------------------
+pyndn.util.config\_file module
+------------------------------
 
 .. automodule:: pyndn.util.config_file
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.dynamic_byte_array module
-------------------------------------
+pyndn.util.dynamic\_byte\_array module
+--------------------------------------
 
 .. automodule:: pyndn.util.dynamic_byte_array
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.exponential_re_express module
-----------------------------------------
+pyndn.util.exponential\_re\_express module
+------------------------------------------
 
 .. automodule:: pyndn.util.exponential_re_express
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.memory_content_cache module
---------------------------------------
+pyndn.util.memory\_content\_cache module
+----------------------------------------
 
 .. automodule:: pyndn.util.memory_content_cache
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.segment_fetcher module
----------------------------------
+pyndn.util.segment\_fetcher module
+----------------------------------
 
 .. automodule:: pyndn.util.segment_fetcher
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.util.signed_blob module
------------------------------
+pyndn.util.signed\_blob module
+------------------------------
 
 .. automodule:: pyndn.util.signed_blob
     :members:

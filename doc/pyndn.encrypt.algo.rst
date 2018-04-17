@@ -4,16 +4,16 @@ pyndn.encrypt.algo package
 Submodules
 ----------
 
-pyndn.encrypt.algo.aes_algorithm module
----------------------------------------
+pyndn.encrypt.algo.aes\_algorithm module
+----------------------------------------
 
 .. automodule:: pyndn.encrypt.algo.aes_algorithm
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.encrypt.algo.encrypt_params module
-----------------------------------------
+pyndn.encrypt.algo.encrypt\_params module
+-----------------------------------------
 
 .. automodule:: pyndn.encrypt.algo.encrypt_params
     :members:
@@ -28,8 +28,8 @@ pyndn.encrypt.algo.encryptor module
     :undoc-members:
     :show-inheritance:
 
-pyndn.encrypt.algo.rsa_algorithm module
----------------------------------------
+pyndn.encrypt.algo.rsa\_algorithm module
+----------------------------------------
 
 .. automodule:: pyndn.encrypt.algo.rsa_algorithm
     :members:

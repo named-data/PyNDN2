@@ -12,16 +12,16 @@ pyndn.security.certificate.certificate module
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.certificate.identity_certificate module
-------------------------------------------------------
+pyndn.security.certificate.identity\_certificate module
+-------------------------------------------------------
 
 .. automodule:: pyndn.security.certificate.identity_certificate
     :members:
     :undoc-members:
     :show-inheritance:
 
-pyndn.security.certificate.public_key module
---------------------------------------------
+pyndn.security.certificate.public\_key module
+---------------------------------------------
 
 .. automodule:: pyndn.security.certificate.public_key
     :members:
