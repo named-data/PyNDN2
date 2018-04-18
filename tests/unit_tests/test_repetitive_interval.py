@@ -20,7 +20,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import unittest as ut
-from test_utils import toIsoString, fromIsoString
+from .test_utils import toIsoString, fromIsoString
 from pyndn.encrypt import RepetitiveInterval
 
 class TestRepetitiveInterval(ut.TestCase):

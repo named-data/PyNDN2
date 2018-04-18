@@ -27,7 +27,7 @@ from pyndn import Sha256WithRsaSignature
 from pyndn import ValidityPeriod
 from pyndn.util import Blob
 from pyndn.security.v2 import CertificateV2
-from test_utils import fromIsoString
+from .test_utils import fromIsoString
 import unittest as ut
 
 # use Python 3's mock library if it's available

@@ -28,7 +28,7 @@ from pyndn import GenericSignature
 from pyndn.encoding import TlvWireFormat
 from pyndn.lp.lp_packet import LpPacket
 from pyndn.util import Blob
-from test_utils import dump, CredentialStorage
+from .test_utils import dump, CredentialStorage
 import unittest as ut
 
 # use Python 3's mock library if it's available

@@ -33,7 +33,7 @@ from pyndn.security.identity import MemoryIdentityStorage
 from pyndn.security.identity import MemoryPrivateKeyStorage
 from pyndn.security.policy import SelfVerifyPolicyManager
 
-from test_utils import dump
+from .test_utils import dump
 
 # use Python 3's mock library if it's available
 try:
