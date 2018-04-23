@@ -221,6 +221,7 @@ class Tlv0_2WireFormat(WireFormat):
             # Set selectors to none.
             interest.setMinSuffixComponents(None)
             interest.setMaxSuffixComponents(None)
+            interest.getKeyLocator().clear()
             interest.getExclude().clear()
             interest.setChildSelector(None)
             interest.setMustBeFresh(False)
