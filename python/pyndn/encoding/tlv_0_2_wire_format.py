@@ -211,6 +211,21 @@ class Tlv0_2WireFormat(WireFormat):
             # Use the C bindings.
             return _pyndn.Tlv0_1_1WireFormat_decodeInterest(interest, input)
 
+        try:
+            return self._decodeInterestV02(interest, input, copy)
+        except Exception as exceptionV02:
+            try:
+                # Failed to decode as format v0.2. Try to decode as v0.3.
+                return Tlv0_2WireFormat._decodeInterestV03(interest, input, copy)
+            except:
+                # Ignore the exception decoding as format v0.3 and raise the
+                # exception from trying to decode as format as format v0.2.
+                raise exceptionV02
+
+    def _decodeInterestV02(self, interest, input, copy):
+        """
+        Do the work of decodeInterest to decode strictly as format v0.2.
+        """
         decoder = TlvDecoder(input)
 
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
@@ -1306,6 +1321,78 @@ class Tlv0_2WireFormat(WireFormat):
             # Add unsorted to preserve the order so that Interest selected
             # delegation index will work.
             delegationSet.addUnsorted(preference, name)
+
+    @staticmethod
+    def _decodeInterestV03(interest, input, copy):
+        """
+        Decode input as an Interest in NDN-TLV format v0.3 and set the fields of
+        the Interest object. This private method is called if the main
+        decodeInterest fails to decode as v0.2. This ignores HopLimit and
+        Parameters, and interprets CanBePrefix using MaxSuffixComponents.
+
+        :param Interest interest: The Interest object whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
+        :return: A Tuple of (signedPortionBeginOffset, signedPortionEndOffset)
+          where signedPortionBeginOffset is the offset in the encoding of
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The
+          signed portion starts from the first name component and ends just
+          before the final name component (which is assumed to be a signature
+          for a signed interest).
+        :rtype: (int, int)
+        """
+        decoder = TlvDecoder(input)
+
+        endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
+        offsets = Tlv0_2WireFormat._decodeName(interest.getName(), decoder, copy)
+
+        if decoder.readBooleanTlv(Tlv.CanBePrefix, endOffset):
+            # No limit on MaxSuffixComponents.
+            interest.setMaxSuffixComponents(None)
+        else:
+            # The one suffix components is for the implicit digest.
+            interest.setMaxSuffixComponents(1)
+
+        interest.setMustBeFresh(
+          decoder.readBooleanTlv(Tlv.MustBeFresh, endOffset))
+
+        if decoder.peekType(Tlv.ForwardingHint, endOffset):
+            forwardingHintEndOffset = decoder.readNestedTlvsStart(
+              Tlv.ForwardingHint)
+            Tlv0_2WireFormat._decodeDelegationSet(
+              interest.getForwardingHint(), forwardingHintEndOffset, decoder,
+              copy)
+            decoder.finishNestedTlvs(forwardingHintEndOffset)
+        else:
+            interest.getForwardingHint().clear()
+
+        nonce = decoder.readOptionalBlobTlv(Tlv.Nonce, endOffset)
+        interest.setInterestLifetimeMilliseconds(
+           decoder.readOptionalNonNegativeIntegerTlvAsFloat
+           (Tlv.InterestLifetime, endOffset))
+
+        # Clear the unused fields.
+        interest.setMinSuffixComponents(None)
+        interest.getKeyLocator().clear()
+        interest.getExclude().clear()
+        interest.setChildSelector(None)
+        interest.unsetLink()
+        interest.setSelectedDelegationIndex(None)
+
+        # Ignore the HopLimit and Parameters.
+        decoder.readOptionalBlobTlv(Tlv.HopLimit, endOffset)
+        decoder.readOptionalBlobTlv(Tlv.Parameters, endOffset)
+
+        # Set the nonce last because setting other interest fields clears it.
+        interest.setNonce(Blob() if nonce == None else Blob(nonce, copy))
+
+        decoder.finishNestedTlvs(endOffset)
+        return offsets
 
     @staticmethod
     def toIsoString(msSince1970):
