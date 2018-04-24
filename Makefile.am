@@ -24,6 +24,7 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/encoding/element-reader-types.h \
   include/ndn-cpp/c/encrypt/encrypted-content-types.h \
   include/ndn-cpp/c/encrypt/algo/encrypt-params-types.h \
+  include/ndn-cpp/c/lp/congestion-mark-types.h \
   include/ndn-cpp/c/lp/incoming-face-id-types.h \
   include/ndn-cpp/c/lp/lp-packet-types.h \
   include/ndn-cpp/c/security/ec-private-key-types.h \
@@ -56,6 +57,7 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
+  include/ndn-cpp/lite/lp/congestion-mark-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
   include/ndn-cpp/lite/lp/lp-packet-lite.hpp \
   include/ndn-cpp/lite/security/ec-private-key-lite.hpp \
@@ -103,6 +105,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/encrypt/encrypted-content.h \
   src/c/encrypt/algo/aes-algorithm_c.c src/c/encrypt/algo/aes-algorithm.h \
   src/c/encrypt/algo/encrypt-params.h \
+  src/c/lp/congestion-mark_c.c src/c/lp/congestion-mark.h \
   src/c/lp/incoming-face-id_c.c src/c/lp/incoming-face-id.h \
   src/c/lp/lp-packet.h \
   src/c/security/ec-private-key.c src/c/util/ec-private-key.h \
@@ -140,6 +143,7 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/encrypt/encrypted-content-lite.cpp \
   src/lite/encrypt/algo/aes-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
+  src/lite/lp/congestion-mark-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
   src/lite/lp/lp-packet-lite.cpp \
   src/lite/security/ec-private-key-lite.cpp \
