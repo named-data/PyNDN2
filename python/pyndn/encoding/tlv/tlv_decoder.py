@@ -130,14 +130,18 @@ class TlvDecoder(object):
         """
         return self.readTypeAndLength(expectedType) + self._offset
 
-    def finishNestedTlvs(self, endOffset):
+    def finishNestedTlvs(self, endOffset, skipCritical = False):
         """
         Call this after reading all nested TLVs to skip any remaining
         unrecognized TLVs and to check if the offset after the final nested TLV
-        matches the endOffset returned by readNestedTlvsStart.
+        matches the endOffset returned by readNestedTlvsStart. Update the offset
+        as needed if skipping TLVs.
 
         :param int endOffset: The offset of the end of the parent TLV, returned
           by readNestedTlvsStart.
+        :param bool skipCritical: (optional) If omitted or False and the
+          unrecognized type code to skip is critical, throw an exception. If
+          True, then skip the unrecognized type code without error.
         :raises ValueError: if the TLV length does not equal the total length of
           the nested TLVs.
         """
@@ -148,7 +152,11 @@ class TlvDecoder(object):
         # Skip remaining TLVs.
         while self._offset < endOffset:
             # Skip the type VAR-NUMBER.
-            self.readVarNumber()
+            type = self.readVarNumber()
+            critical = (type <= 31 or (type & 1) == 1)
+            if critical and not skipCritical:
+                raise ValueError("Unrecognized critical type code " + str(type))
+
             # Read the length and update offset.
             length = self.readVarNumber()
             self._offset += length
