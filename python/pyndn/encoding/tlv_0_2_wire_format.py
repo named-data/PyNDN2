@@ -994,11 +994,12 @@ class Tlv0_2WireFormat(WireFormat):
                 decoder = TlvDecoder(encoding.buf())
                 endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
                 decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
-                decoder.finishNestedTlvs(endOffset)
+                # Skip unrecognized TLVs, even if they have a critical type code.
+                decoder.finishNestedTlvs(endOffset, True)
             except ValueError as ex:
                 raise ValueError(
                   "The GenericSignature encoding is not a valid NDN-TLV SignatureInfo: " +
-                   ex)
+                   str(ex))
 
             encoder.writeBuffer(encoding.buf())
             return
@@ -1077,6 +1078,8 @@ class Tlv0_2WireFormat(WireFormat):
             # Get the bytes of the SignatureInfo TLV.
             signatureInfo.setSignatureInfoEncoding(
               Blob(decoder.getSlice(beginOffset, endOffset), copy), signatureType)
+            # Skip the remaining TLVs now, allowing unrecognized critical type codes.
+            decoder.finishNestedTlvs(endOffset, True)
 
         decoder.finishNestedTlvs(endOffset)
 
