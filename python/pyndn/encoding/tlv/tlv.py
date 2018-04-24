@@ -50,6 +50,9 @@ class Tlv(object):
     KeyLocatorDigest = 29
     ForwardingHint =   30
     SelectedDelegation = 32
+    CanBePrefix =      33
+    HopLimit =         34
+    Parameters =       35
     FaceInstance =     128
     ForwardingEntry =  129
     StatusResponse =   130
