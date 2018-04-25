@@ -50,10 +50,14 @@ class UdpTransport(Transport):
         :param str host: The host for the connection.
         :param int port: (optional) The port number for the connection. If
           omitted, use 6363.
+        :param int localPort: (optional) If specified, bind the socket to
+          ("0.0.0.0", localPort) . (If you omit the port parameter, call this
+          constructor with a localPort named parameter.)
         """
-        def __init__(self, host, port = 6363):
+        def __init__(self, host, port = 6363, localPort = None):
             self._host = host
             self._port = port
+            self._localPort = localPort
 
         def getHost(self):
             """
@@ -72,6 +76,15 @@ class UdpTransport(Transport):
             :rtype: int
             """
             return self._port
+
+        def getLocalPort(self):
+            """
+            Get the local port given to the constructor.
+
+            :return: The local port, or None if not specified.
+            :rtype: int
+            """
+            return self._localPort
 
     def isLocal(self, connectionInfo):
         """
@@ -112,6 +125,8 @@ class UdpTransport(Transport):
         # Save the _address to use in sendto.
         self._address = (connectionInfo.getHost(), connectionInfo.getPort())
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if connectionInfo.getLocalPort() != None:
+            self._socket.bind(("0.0.0.0", connectionInfo.getLocalPort()))
 
         self._socketPoller = SocketPoller(self._socket)
         self._elementReader = ElementReader(elementListener)
