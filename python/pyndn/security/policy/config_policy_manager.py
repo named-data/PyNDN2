@@ -319,11 +319,25 @@ class ConfigPolicyManager(PolicyManager):
                       objectName.toUri() + "\" is not a prefix of \"" +
                       identityPrefix.toUri() + "\"")
                     return False
-            else:
-                failureReason[0] = ("The hierarchical identityRegex \"" +
-                  identityRegex + "\" does not match signatureName \"" +
-                  signatureName.toUri() + "\"")
-                return False
+
+            if not self._isSecurityV1:
+                # Check for a security v2 key name.
+                identityRegex2 = "^(<>*)<KEY><>$"
+                identityMatch2 = NdnRegexTopMatcher(identityRegex2)
+                if identityMatch2.match(signatureName):
+                    identityPrefix = identityMatch2.expand("\\1")
+                    if self._matchesRelation(objectName, identityPrefix, 'is-prefix-of'):
+                        return True
+                    else:
+                        failureReason[0] = ("The hierarchical objectName \"" +
+                          objectName.toUri() + "\" is not a prefix of \"" +
+                          identityPrefix.toUri() + "\"")
+                        return False
+
+            failureReason[0] = ("The hierarchical identityRegex \"" +
+              identityRegex + "\" does not match signatureName \"" +
+              signatureName.toUri() + "\"")
+            return False
         elif checkerType == 'customized':
             keyLocatorInfo = checker['key-locator'][0]
             # not checking type - only name is supported
