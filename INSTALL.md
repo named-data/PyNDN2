@@ -83,7 +83,7 @@ In a terminal, enter:
 
 The python-dev headers are already installed.
 
-## Ubuntu 14.04 (64 bit and 32 bit), 15.04 (64 bit), 16.04 (64 bit and 32 bit) and 16.10 (64 bit)
+## Ubuntu 14.04, 15.04, 16.04 and 16.10 and 18.04
 To install the cryptography package, in a terminal enter:
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
