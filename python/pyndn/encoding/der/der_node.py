@@ -20,6 +20,7 @@
 import math
 from pyndn.encoding.der.der import Der
 from pyndn.util.blob import Blob
+from pyndn.util.common import Common
 from pyndn.encoding.der.der_exceptions import NegativeLengthException, DerEncodingException, DerDecodingException
 
 from datetime import datetime
@@ -608,8 +609,7 @@ class DerGeneralizedTime(DerNode):
         :return: The time string
         :rtype: str
         """
-        secondsSince1970 = msSince1970/1000.0
-        utcTime = datetime.utcfromtimestamp(secondsSince1970)
+        utcTime = Common.datetimeFromTimestamp(msSince1970)
 
         derTime = utcTime.strftime("%Y%m%d%H%M%SZ")
         return derTime

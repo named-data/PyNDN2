@@ -79,8 +79,8 @@ class Certificate(Data):
         s += "Validity:\n"
 
         dateFormat = "%Y%m%dT%H%M%S"
-        notBeforeStr = datetime.utcfromtimestamp(self.getNotBefore()/1000).strftime(dateFormat)
-        notAfterStr = datetime.utcfromtimestamp(self.getNotAfter()/1000).strftime(dateFormat)
+        notBeforeStr = Common.datetimeFromTimestamp(self.getNotBefore()).strftime(dateFormat)
+        notAfterStr = Common.datetimeFromTimestamp(self.getNotAfter()).strftime(dateFormat)
 
         s += "  NotBefore: " + notBeforeStr+"\n"
         s += "  NotAfter: " + notAfterStr + "\n"

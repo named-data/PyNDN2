@@ -26,7 +26,7 @@ Note: This class is an experimental feature. The API may change.
 """
 
 import sys
-from datetime import datetime
+from pyndn.util.common import Common
 from pyndn.encrypt.interval import Interval
 
 class RepetitiveInterval(object):
@@ -271,9 +271,9 @@ class RepetitiveInterval(object):
             if durationDays % self._nRepeats == 0:
                 return True
         else:
-            timePointDate = datetime.utcfromtimestamp(
-              round(timePointDateMilliseconds / 1000.0))
-            startDate = datetime.utcfromtimestamp(self._startDate / 1000.0)
+            timePointDate = Common.datetimeFromTimestamp(
+              round(timePointDateMilliseconds / 1000.0) * 1000)
+            startDate = Common.datetimeFromTimestamp(self._startDate)
 
             if (self._repeatUnit == RepetitiveInterval.RepeatUnit.MONTH and
                   timePointDate.day == startDate.day):

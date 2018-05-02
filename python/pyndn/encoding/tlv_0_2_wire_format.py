@@ -32,6 +32,7 @@ from pyndn.generic_signature import GenericSignature
 from pyndn.hmac_with_sha256_signature import HmacWithSha256Signature
 from pyndn.control_parameters import ControlParameters
 from pyndn.util.blob import Blob
+from pyndn.util.common import Common
 from pyndn.network_nack import NetworkNack
 from pyndn.lp.incoming_face_id import IncomingFaceId
 from pyndn.lp.congestion_mark import CongestionMark
@@ -1405,8 +1406,8 @@ class Tlv0_2WireFormat(WireFormat):
         :rtype: str
         """
         dateFormat = "%Y%m%dT%H%M%S"
-        return datetime.utcfromtimestamp(
-          round(msSince1970 / 1000.0)).strftime(dateFormat)
+        return Common.datetimeFromTimestamp(
+          round(msSince1970 / 1000.0) * 1000).strftime(dateFormat)
 
     @staticmethod
     def fromIsoString(timeString):

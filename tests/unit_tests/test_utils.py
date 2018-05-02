@@ -25,6 +25,7 @@ from pyndn.security.identity import MemoryPrivateKeyStorage
 from pyndn.security.policy import SelfVerifyPolicyManager
 from pyndn import Name
 from pyndn.util import Blob
+from pyndn.util.common import Common
 from pyndn.security import KeyType
 
 def dump(*list):
@@ -200,8 +201,8 @@ def toIsoString(msSince1970):
     :rtype: str
     """
     dateFormat = "%Y%m%dT%H%M%S"
-    return datetime.utcfromtimestamp(
-      round(msSince1970 / 1000.0)).strftime(dateFormat)
+    return Common.datetimeFromTimestamp(
+      round(msSince1970 / 1000.0) * 1000).strftime(dateFormat)
 
 def fromIsoString(timeString):
     """

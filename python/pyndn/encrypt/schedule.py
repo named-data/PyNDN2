@@ -30,6 +30,7 @@ from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.util.blob import Blob
+from pyndn.util.common import Common
 from pyndn.encrypt.interval import Interval
 from pyndn.encrypt.repetitive_interval import RepetitiveInterval
 
@@ -323,8 +324,8 @@ class Schedule(object):
         :rtype: str
         """
         dateFormat = "%Y%m%dT%H%M%S"
-        return datetime.utcfromtimestamp(
-          round(msSince1970 / 1000.0)).strftime(dateFormat)
+        return Common.datetimeFromTimestamp(
+          round(msSince1970 / 1000.0) * 1000).strftime(dateFormat)
 
     @staticmethod
     def fromIsoString(timeString):
