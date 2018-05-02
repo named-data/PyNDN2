@@ -64,6 +64,21 @@ class Common(object):
         return (datetime.datetime.utcnow() - Common.epoch_).total_seconds() * 1000.0
 
     @staticmethod
+    def datetimeFromTimestamp(msSince1970):
+        """
+        Get the Python datetime.datetime object for the UTC timestamp. We use
+        this common implementation for consistency throughout the library which
+        uses milliseconds.
+
+        :param msSince1970: time in milliseconds since 1/1/1970 UTC, including
+          fractions of a millisecond.
+        :type msSince1970: float or int
+        :return: The Python datetime.datetime object
+        :rtype: datetime.datetime
+        """
+        return datetime.datetime.utcfromtimestamp(msSince1970 / 1000.0)
+
+    @staticmethod
     def getBytesIOString(bytesIO):
         """
         Return bytesIO.getvalue(), making sure the result is a str.  This is
