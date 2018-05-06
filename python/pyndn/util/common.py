@@ -76,7 +76,9 @@ class Common(object):
         :return: The Python datetime.datetime object
         :rtype: datetime.datetime
         """
-        return datetime.datetime.utcfromtimestamp(msSince1970 / 1000.0)
+        # Use timedelta because it works on platforms where time_t is 32 bits.
+        return datetime.datetime.utcfromtimestamp(0) + datetime.timedelta(
+          seconds = msSince1970 / 1000.0)
 
     @staticmethod
     def getBytesIOString(bytesIO):
