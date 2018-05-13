@@ -66,6 +66,7 @@ from pyndn.security.tpm.tpm_back_end_file import TpmBackEndFile
 from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
 from pyndn.security.tpm.tpm_back_end_osx import TpmBackEndOsx
 from pyndn.security.v2.certificate_v2 import CertificateV2
+from pyndn.hmac_with_sha256_signature import HmacWithSha256Signature
 from pyndn.encoding.wire_format import WireFormat
 
 class KeyChain(object):
@@ -1238,20 +1239,32 @@ class KeyChain(object):
         self._face = face
 
     @staticmethod
-    def signWithHmacWithSha256(target, key, wireFormat = None):
+    def signWithHmacWithSha256(target, key, keyName = None, wireFormat = None):
         """
         Wire encode the target, compute an HmacWithSha256 and update the
-        signature value.
+        object.
         Note: This method is an experimental feature. The API may change.
 
-        :param target: If this is a Data object, update its signature and wire
-          encoding.
-        :type target: Data
+        :param target: If the target is a Data object (which should already have
+          an HmacWithSha256Signature with a KeyLocator for the key name), then
+          update its signature and wire encoding. If the target is an Interest,
+          then append a SignatureInfo to the Interest name, compute an
+          HmacWithSha256 signature for the name components and append a final
+          name component with the signature bits.
+        :type target: Data or Interest
         :param Blob key: The key for the HmacWithSha256.
-        :param wireFormat: (optional) The WireFormat for calling encodeData,
-          etc., or WireFormat.getDefaultWireFormat() if omitted.
+        :param Name keyName: (needed if target is an Interest) The name of the
+          key for the KeyLocator in the SignatureInfo which is added to the
+          Interest name.
+        :param wireFormat: (optional) The WireFormat for encoding the target, or
+          WireFormat.getDefaultWireFormat() if omitted.
         :type wireFormat: A subclass of WireFormat
         """
+        if isinstance(keyName, WireFormat):
+            # The keyName is omitted, so shirt arguments.
+            wireFormat = keyName
+            keyName = None
+
         if wireFormat == None:
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
@@ -1266,6 +1279,33 @@ class KeyChain(object):
             signer.update(encoding.toSignedBytes())
             data.getSignature().setSignature(
               Blob(bytearray(signer.finalize()), False))
+        elif isinstance(target, Interest):
+            interest = target
+
+            if keyName == None:
+                raise SecurityException(
+                  "signWithHmacWithSha256: keyName is required to sign an Interest")
+
+            signature = HmacWithSha256Signature()
+            signature.getKeyLocator().setType(KeyLocatorType.KEYNAME)
+            signature.getKeyLocator().setKeyName(keyName)
+
+            # Append the encoded SignatureInfo.
+            interest.getName().append(wireFormat.encodeSignatureInfo(signature))
+            # Append an empty signature so that the "signedPortion" is correct.
+            interest.getName().append(Name.Component())
+
+            # Encode once to get the signed portion and sign.
+            encoding = interest.wireEncode(wireFormat)
+
+            signer = hmac.HMAC(key.toBytes(), hashes.SHA256(),
+              backend = default_backend())
+            signer.update(encoding.toSignedBytes())
+            signature.setSignature(Blob(bytearray(signer.finalize()), False))
+
+            # Remove the empty signature and append the real one.
+            interest.setName(interest.getName().getPrefix(-1).append
+              (wireFormat.encodeSignatureValue(signature)))
         else:
             raise SecurityException("signWithHmacWithSha256: Unrecognized target type")
 
