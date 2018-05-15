@@ -1261,7 +1261,7 @@ class KeyChain(object):
         :type wireFormat: A subclass of WireFormat
         """
         if isinstance(keyName, WireFormat):
-            # The keyName is omitted, so shirt arguments.
+            # The keyName is omitted, so shift arguments.
             wireFormat = keyName
             keyName = None
 
