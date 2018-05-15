@@ -18,9 +18,9 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This decodes and verifies a hard-coded data packet with an HMAC signature. Then
-this creates a fresh data packet with an HMAC signature, signs and verifies it.
-For testing, this uses a hard-coded shared secret.
+This decodes and verifies a hard-coded interest packet with an HMAC signature.
+Then this creates a fresh interest packet with an HMAC signature, signs and
+verifies it. For testing, this uses a hard-coded shared secret.
 """
 
 from pyndn import Name, Interest
