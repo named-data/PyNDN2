@@ -69,7 +69,8 @@ class Counter(object):
 
 def main():
     loop = asyncio.get_event_loop()
-    face = ThreadsafeFace(loop, "memoria.ndn.ucla.edu")
+    # Connect to the demo host at memoria.ndn.ucla.edu .
+    face = ThreadsafeFace(loop, "128.97.98.8")
 
     # Counter will stop the ioService after callbacks for all expressInterest.
     counter = Counter(loop, 3)
