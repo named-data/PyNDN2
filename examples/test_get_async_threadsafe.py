@@ -82,7 +82,7 @@ def main():
     face.expressInterest(name1, counter.onData, counter.onTimeout)
 
     # Try to fetch using a known name.
-    name2 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDX%DC5%1F")
+    name2 = Name("/ndn/edu/ucla/remap/demo/ndn-js-test/hello.txt/%FDU%8D%9DM")
     dump("Express name ", name2.toUri())
     face.expressInterest(name2, counter.onData, counter.onTimeout)
 
