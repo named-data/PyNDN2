@@ -338,7 +338,12 @@ class Name(object):
             :return: True if the components are equal, otherwise False.
             :rtype: bool
             """
-            return self._value.equals(other._value) and self._type == other._type
+            if self._type == ComponentType.OTHER_CODE:
+                return (self._value.equals(other._value) and
+                  other._type == ComponentType.OTHER_CODE and
+                  self._otherTypeCode == other._otherTypeCode)
+            else:
+                return self._value.equals(other._value) and self._type == other._type
 
         def compare(self, other):
             """
@@ -351,9 +356,14 @@ class Name(object):
             :rtype: int
             :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
             """
-            if self._type < other._type:
+            myTypeCode = (self._otherTypeCode
+              if self._type == ComponentType.OTHER_CODE else self._type)
+            otherTypeCode = (other._otherTypeCode
+              if other._type == ComponentType.OTHER_CODE else other._type)
+
+            if myTypeCode < otherTypeCode:
                 return -1
-            if self._type > other._type:
+            if myTypeCode > otherTypeCode:
                 return 1
 
             if self._value.size() < other._value.size():
@@ -552,7 +562,10 @@ class Name(object):
             return self.toEscapedString()
 
         def __hash__(self):
-            return hash(self._value)
+            return (37 * 
+              (self._otherTypeCode if self._type == ComponentType.OTHER_CODE 
+                                   else self._type) + 
+              hash(self._value))
 
     def set(self, uri):
         """
