@@ -365,18 +365,27 @@ class Name(object):
             return self._value.compare(other._value)
 
         @staticmethod
-        def fromNumber(number):
+        def fromNumber(number, type = None, otherTypeCode = None):
             """
             Create a component whose value is the nonNegativeInteger encoding of
             the number.
 
             :param int number: The number to be encoded.
-            :return: The component value.
+            :param int type: (optional) The component type as an int from the
+              ComponentType enum. If name component type is not a recognized
+              ComponentType enum value, then set this to ComponentType.OTHER_CODE
+              and use the otherTypeCode parameter. If omitted, use
+              ComponentType.GENERIC.
+            :param int otherTypeCode: (optional) If type is
+              ComponentType.OTHER_CODE, then this is the packet's unrecognized
+              content type code, which must be non-negative.
+            :return: The new component value.
             :rtype: Name.Component
             """
             encoder = TlvEncoder(8)
             encoder.writeNonNegativeInteger(number)
-            return Name.Component(Blob(encoder.getOutput(), False))
+            return Name.Component(
+              Blob(encoder.getOutput(), False), type, otherTypeCode)
 
         @staticmethod
         def fromNumberWithMarker(number, marker):
