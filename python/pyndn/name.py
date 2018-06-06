@@ -51,18 +51,28 @@ class Name(object):
 
     class Component(object):
         """
-        Create a new GENERIC Name.Component.
+        Create a new Name.Component with a copy of the given value.
+        (To create an ImplicitSha256Digest component, use fromImplicitSha256Digest.)
 
         :param value: (optional) If value is already a Blob or Name.Component,
           then take another pointer to the value.  Otherwise, create a new
           Blob with a copy of the value.  If omitted, create an empty component.
         :type value: Blob or Name.Component or value for Blob constructor
+        :param int type: (optional) The component type as an int from the
+          ComponentType enum. If name component type is not a recognized
+          ComponentType enum value, then set this to ComponentType.OTHER_CODE
+          and use the otherTypeCode parameter. If omitted, use
+          ComponentType.GENERIC.
+        :param int otherTypeCode: (optional) If type is ComponentType.OTHER_CODE,
+          then this is the packet's unrecognized content type code, which must
+          be non-negative.
         """
-        def __init__(self, value = None):
+        def __init__(self, value = None, type = None, otherTypeCode = None):
             if isinstance(value, Name.Component):
                 # Copy constructor. Use the existing Blob in the other Component.
                 self._value = value._value
                 self._type = value._type
+                self._otherTypeCode = value._otherTypeCode
                 return
 
             if value == None:
@@ -71,7 +81,19 @@ class Name(object):
                 # Blob will make a copy.
                 self._value = value if isinstance(value, Blob) else Blob(value)
 
-            self._type = ComponentType.GENERIC
+            if type == ComponentType.OTHER_CODE:
+                if otherTypeCode == None:
+                  raise ValueError(
+                    "To use an other code, call Name.Component(value, ComponentType.OTHER_CODE, otherTypeCode)")
+
+                if otherTypeCode < 0:
+                    raise ValueError(
+                      "Name.Component other type code must be non-negative");
+                self._otherTypeCode = otherTypeCode
+            else:
+                self._otherTypeCode = -1
+
+            self._type = ComponentType.GENERIC if type == None else type
 
         def getValue(self):
             """
@@ -81,6 +103,28 @@ class Name(object):
             :rtype: Blob
             """
             return self._value
+
+        def getType(self):
+            """
+            Get the name component type.
+
+            :return: The name component type as an int from the ComponentType
+              enum. If this is ComponentType.OTHER_CODE, then call
+              getOtherTypeCode() to get the unrecognized component type code.
+            :rtype: int
+            """
+            return self._type
+
+        def getOtherTypeCode(self):
+            """
+            Get the component type code from the packet which is other than a
+              recognized ComponentType enum value. This is only meaningful if
+              getType() is ComponentType.OTHER_CODE.
+
+            :return: The type code.
+            :rtype: int
+            """
+            return self._otherTypeCode
 
         def toEscapedString(self, result = None):
             """
