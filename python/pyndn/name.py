@@ -522,7 +522,8 @@ class Name(object):
                 # We didn't need the extra byte.
                 result = result[0:self._value.size()]
 
-            return Name.Component(Blob(result, False))
+            return Name.Component(
+             Blob(result, False), self._type, self._otherTypeCode)
 
         # Python operators
 
