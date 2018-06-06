@@ -20,7 +20,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import unittest as ut
-from pyndn import Name
+from pyndn import Name, ComponentType
 from pyndn.util import Blob
 from pyndn.encoding import TlvWireFormat
 
@@ -335,16 +335,21 @@ class TestNameMethods(ut.TestCase):
           "28BAD4B5275BD392DBB670C75CF0B66F13F7942B21E80F55C0E86B374753A548")
         self.assertEqual(name.get(0), name2.get(1))
 
-        # This is not a valid sha256digest component. It should be treated as generic.
-        name2 = Name(
-          "/hello/SHA256DIGEST=" +
-          "28BAD4B5275BD392DBB670C75CF0B66F13F7942B21E80F55C0E86B374753A548")
-        self.assertNotEqual(name.get(0), name2.get(1))
-        self.assertTrue(name2.get(1).isGeneric())
+    def test_typed_name_component(self):
+        otherTypeCode = 99
+        uri = "/ndn/" + str(otherTypeCode) + "=value"
+        name = Name()
+        name.append("ndn").append("value", ComponentType.OTHER_CODE, otherTypeCode)
+        self.assertEqual(uri, name.toUri())
 
-#   def test_component_constructor(self):
-#       name1 = Name([self.entree, self.comp1, self.comp2])
-#       self.assertEqual(name1.toUri(), self.expectedURI)
+        nameFromUri = Name(uri)
+        self.assertEqual("value", str(nameFromUri.get(1).getValue()))
+        self.assertEqual(otherTypeCode, nameFromUri.get(1).getOtherTypeCode())
+
+        decodedName = Name()
+        decodedName.wireDecode(name.wireEncode())
+        self.assertEqual("value", str(decodedName.get(1).getValue()))
+        self.assertEqual(otherTypeCode, decodedName.get(1).getOtherTypeCode())
 
 if __name__ == '__main__':
     ut.main(verbosity=2)
