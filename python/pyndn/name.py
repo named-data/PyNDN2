@@ -88,7 +88,7 @@ class Name(object):
 
                 if otherTypeCode < 0:
                     raise ValueError(
-                      "Name.Component other type code must be non-negative");
+                      "Name.Component other type code must be non-negative")
                 self._otherTypeCode = otherTypeCode
             else:
                 self._otherTypeCode = -1
@@ -142,12 +142,18 @@ class Name(object):
                 result = BytesIO()
                 self.toEscapedString(result)
                 return Common.getBytesIOString(result)
-            else:
-                if self._type == ComponentType.IMPLICIT_SHA256_DIGEST:
-                    result.write("sha256digest=".encode('utf-8'))
-                    self._value.toHex(result)
-                else:
-                    Name.toEscapedString(self._value.buf(), result)
+
+            if self._type == ComponentType.IMPLICIT_SHA256_DIGEST:
+                result.write("sha256digest=".encode('utf-8'))
+                self._value.toHex(result)
+                return
+
+            if self._type != ComponentType.GENERIC:
+                result.write(str(self._otherTypeCode)
+                  if self._type == ComponentType.OTHER_CODE else str(self._type))
+                result.write("=")
+
+            Name.toEscapedString(self._value.buf(), result)
 
         def isSegment(self):
             """
@@ -616,8 +622,30 @@ class Name(object):
               component = Name.Component.fromImplicitSha256Digest(
                 Blob(bytearray.fromhex(hexString), False))
             else:
+                type = ComponentType.GENERIC
+                otherTypeCode = -1
+
+                # Check for a component type.
+                iTypeCodeEnd = uri.find("=", iComponentStart)
+                if iTypeCodeEnd >= 0 and iTypeCodeEnd < iComponentEnd:
+                    typeString = uri[iComponentStart : iTypeCodeEnd]
+                    try:
+                        otherTypeCode = int(typeString)
+                    except ValueError:
+                        raise ValueError("Can't parse decimal Name Component type: " +
+                           typeString + " in URI " + uri)
+
+                    if (otherTypeCode == ComponentType.GENERIC or
+                        otherTypeCode == ComponentType.IMPLICIT_SHA256_DIGEST):
+                        raise ValueError("Unexpected Name Component type: " +
+                          typeString + " in URI " + uri)
+
+                    type = ComponentType.OTHER_CODE
+                    iComponentStart = iTypeCodeEnd + 1
+
                 component = Name.Component(
-                  Name.fromEscapedString(uri, iComponentStart, iComponentEnd))
+                  Name.fromEscapedString(uri, iComponentStart, iComponentEnd),
+                  type, otherTypeCode)
 
             # Ignore illegal components.  This also gets rid of a trailing '/'.
             if not component.getValue().isNull():
