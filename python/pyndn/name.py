@@ -625,22 +625,42 @@ class Name(object):
 
             iComponentStart = iComponentEnd + 1
 
-    def append(self, value):
+    def append(self, value, type = None, otherTypeCode = None):
         """
-        Append a new GENERIC component.
+        Append a new component to this Name.
 
         :param value: If value is another Name, append all its components.
           If value is another Name.Component, use its value.
           Otherwise pass value to the Name.Component constructor.
         :type value: Name, Name.Component or value for Name.Component constructor
+        :param int type: (optional) The component type as an int from the
+          ComponentType enum. If name component type is not a recognized
+          ComponentType enum value, then set this to ComponentType.OTHER_CODE
+          and use the otherTypeCode parameter. If omitted, use
+          ComponentType.GENERIC. If the component param is a Name or another
+          Name.Component, then this is ignored.
+        :param int otherTypeCode: (optional) If type is ComponentType.OTHER_CODE,
+          then this is the packet's unrecognized content type code, which must
+          be non-negative. If the component param is a Name or another
+          Name.Component, then this is ignored.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
         """
         if isinstance(value, Name):
-            for component in value._components:
+            if value == self:
+                # Special case, when we need to create a copy before appending to self.
+                components = self._components[:]
+            else:
+                components = value._components
+
+            for component in components:
                 self._components.append(component)
         elif isinstance(value, Name.Component):
+            # The Name.Component is immutable, so use it as is.
             self._components.append(value)
         else:
-            self._components.append(Name.Component(value))
+            # Just use the Name.Component constructor.
+            self._components.append(Name.Component(value, type, otherTypeCode))
 
         self._changeCount += 1
         return self
