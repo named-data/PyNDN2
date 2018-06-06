@@ -71,15 +71,7 @@ class Name(object):
                 # Blob will make a copy.
                 self._value = value if isinstance(value, Blob) else Blob(value)
 
-            self._type = Name.Component.ComponentType.GENERIC
-
-        class ComponentType(object):
-            """
-            A Name.Component.ComponentType specifies the recognized types of a
-            name component.
-            """
-            IMPLICIT_SHA256_DIGEST = 1
-            GENERIC                = 8
+            self._type = ComponentType.GENERIC
 
         def getValue(self):
             """
@@ -107,7 +99,7 @@ class Name(object):
                 self.toEscapedString(result)
                 return Common.getBytesIOString(result)
             else:
-                if self._type == Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST:
+                if self._type == ComponentType.IMPLICIT_SHA256_DIGEST:
                     result.write("sha256digest=".encode('utf-8'))
                     self._value.toHex(result)
                 else:
@@ -180,7 +172,7 @@ class Name(object):
             :return: True if this is an generic component.
             :rtype: bool
             """
-            return self._type == Name.Component.ComponentType.GENERIC
+            return self._type == ComponentType.GENERIC
 
         def isImplicitSha256Digest(self):
             """
@@ -189,7 +181,7 @@ class Name(object):
             :return: True if this is an ImplicitSha256Digest component.
             :rtype: bool
             """
-            return self._type == Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST
+            return self._type == ComponentType.IMPLICIT_SHA256_DIGEST
 
         def toNumber(self):
             """
@@ -446,7 +438,7 @@ class Name(object):
                 "Name.Component.fromImplicitSha256Digest: The digest length must be 32 bytes")
 
             result = Name.Component(digestBlob)
-            result._type = Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST
+            result._type = ComponentType.IMPLICIT_SHA256_DIGEST
             return result
 
         def getSuccessor(self):
@@ -1157,6 +1149,18 @@ class Name(object):
             i += 1
 
         return bytearray(result.getvalue())
+
+class ComponentType(object):
+    """
+    A ComponentType specifies the recognized types of a name component. If the
+    component type in the packet is not a recognized enum value, then we use
+    ComponentType.OTHER_CODE and you can call Name.Component.getOtherTypeCode().
+    We do this to keep the recognized component type values independent of
+    packet encoding details.
+    """
+    IMPLICIT_SHA256_DIGEST = 1
+    GENERIC                = 8
+    OTHER_CODE             = 0x7fff
 
 # Import these at the end of the file to avoid circular references.
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
