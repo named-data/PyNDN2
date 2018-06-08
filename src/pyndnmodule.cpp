@@ -353,7 +353,9 @@ toNameComponentLite(PyObject* nameComponent, NameLite::Component& componentLite)
       (toBlobLiteByMethod(nameComponent, str.getValue));
   else
     componentLite = NameLite::Component
-      (toBlobLiteByMethod(nameComponent, str.getValue));
+      (toBlobLiteByMethod(nameComponent, str.getValue),
+       (ndn_NameComponentType)(int)toLongByMethod(nameComponent, str.getType),
+        (int)toLongByMethod(nameComponent, str.getOtherTypeCode));
 }
 
 // Imitate Name::get(NameLite& nameLite).
@@ -380,13 +382,10 @@ setName(PyObject* name, const NameLite& nameLite)
 
   for (size_t i = 0; i < nameLite.size(); ++i) {
     PyObjectRef blob(makeBlob(nameLite.get(i).getValue()));
-    // Imitate Name::Component::set(const NameLite::Component& componentLite).
-    if (nameLite.get(i).isImplicitSha256Digest())
-      PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
-        (name, str.appendImplicitSha256Digest, blob.obj, NULL));
-    else
-      PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
-        (name, str.append, blob.obj, NULL));
+    PyObjectRef type(PyLong_FromLong((int)nameLite.get(i).getType()));
+    PyObjectRef otherTypeCode(PyLong_FromLong(nameLite.get(i).getOtherTypeCode()));
+    PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
+      (name, str.append, blob.obj, type.obj, otherTypeCode.obj, NULL));
   }
 }
 
