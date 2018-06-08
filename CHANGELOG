@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.8beta1 (2018-05-06)
+Interim changes since PyNDN v2.8beta1 (2018-06-08)
 --------------------------------------------------
 
 Bug fixes
@@ -7,6 +7,7 @@ Bug fixes
 Changes
 * https://redmine.named-data.net/issues/4591 Accept Interests encoded with
   packet format v0.3.
+* https://redmine.named-data.net/issues/4397 In Name, API for typed name components.
 
 PyNDN v2.8beta1 (2018-04-17)
 ----------------------------

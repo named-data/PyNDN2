@@ -51,18 +51,28 @@ class Name(object):
 
     class Component(object):
         """
-        Create a new GENERIC Name.Component.
+        Create a new Name.Component with a copy of the given value.
+        (To create an ImplicitSha256Digest component, use fromImplicitSha256Digest.)
 
         :param value: (optional) If value is already a Blob or Name.Component,
           then take another pointer to the value.  Otherwise, create a new
           Blob with a copy of the value.  If omitted, create an empty component.
         :type value: Blob or Name.Component or value for Blob constructor
+        :param int type: (optional) The component type as an int from the
+          ComponentType enum. If name component type is not a recognized
+          ComponentType enum value, then set this to ComponentType.OTHER_CODE
+          and use the otherTypeCode parameter. If omitted, use
+          ComponentType.GENERIC.
+        :param int otherTypeCode: (optional) If type is ComponentType.OTHER_CODE,
+          then this is the packet's unrecognized content type code, which must
+          be non-negative.
         """
-        def __init__(self, value = None):
+        def __init__(self, value = None, type = None, otherTypeCode = None):
             if isinstance(value, Name.Component):
                 # Copy constructor. Use the existing Blob in the other Component.
                 self._value = value._value
                 self._type = value._type
+                self._otherTypeCode = value._otherTypeCode
                 return
 
             if value == None:
@@ -71,15 +81,19 @@ class Name(object):
                 # Blob will make a copy.
                 self._value = value if isinstance(value, Blob) else Blob(value)
 
-            self._type = Name.Component.ComponentType.GENERIC
+            if type == ComponentType.OTHER_CODE:
+                if otherTypeCode == None:
+                  raise ValueError(
+                    "To use an other code, call Name.Component(value, ComponentType.OTHER_CODE, otherTypeCode)")
 
-        class ComponentType(object):
-            """
-            A Name.Component.ComponentType specifies the recognized types of a
-            name component.
-            """
-            IMPLICIT_SHA256_DIGEST = 1
-            GENERIC                = 8
+                if otherTypeCode < 0:
+                    raise ValueError(
+                      "Name.Component other type code must be non-negative")
+                self._otherTypeCode = otherTypeCode
+            else:
+                self._otherTypeCode = -1
+
+            self._type = ComponentType.GENERIC if type == None else type
 
         def getValue(self):
             """
@@ -89,6 +103,28 @@ class Name(object):
             :rtype: Blob
             """
             return self._value
+
+        def getType(self):
+            """
+            Get the name component type.
+
+            :return: The name component type as an int from the ComponentType
+              enum. If this is ComponentType.OTHER_CODE, then call
+              getOtherTypeCode() to get the unrecognized component type code.
+            :rtype: int
+            """
+            return self._type
+
+        def getOtherTypeCode(self):
+            """
+            Get the component type code from the packet which is other than a
+              recognized ComponentType enum value. This is only meaningful if
+              getType() is ComponentType.OTHER_CODE.
+
+            :return: The type code.
+            :rtype: int
+            """
+            return self._otherTypeCode
 
         def toEscapedString(self, result = None):
             """
@@ -106,12 +142,18 @@ class Name(object):
                 result = BytesIO()
                 self.toEscapedString(result)
                 return Common.getBytesIOString(result)
-            else:
-                if self._type == Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST:
-                    result.write("sha256digest=".encode('utf-8'))
-                    self._value.toHex(result)
-                else:
-                    Name.toEscapedString(self._value.buf(), result)
+
+            if self._type == ComponentType.IMPLICIT_SHA256_DIGEST:
+                result.write("sha256digest=".encode('utf-8'))
+                self._value.toHex(result)
+                return
+
+            if self._type != ComponentType.GENERIC:
+                result.write(str(self._otherTypeCode)
+                  if self._type == ComponentType.OTHER_CODE else str(self._type))
+                result.write("=")
+
+            Name.toEscapedString(self._value.buf(), result)
 
         def isSegment(self):
             """
@@ -180,7 +222,7 @@ class Name(object):
             :return: True if this is an generic component.
             :rtype: bool
             """
-            return self._type == Name.Component.ComponentType.GENERIC
+            return self._type == ComponentType.GENERIC
 
         def isImplicitSha256Digest(self):
             """
@@ -189,7 +231,7 @@ class Name(object):
             :return: True if this is an ImplicitSha256Digest component.
             :rtype: bool
             """
-            return self._type == Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST
+            return self._type == ComponentType.IMPLICIT_SHA256_DIGEST
 
         def toNumber(self):
             """
@@ -302,7 +344,12 @@ class Name(object):
             :return: True if the components are equal, otherwise False.
             :rtype: bool
             """
-            return self._value.equals(other._value) and self._type == other._type
+            if self._type == ComponentType.OTHER_CODE:
+                return (self._value.equals(other._value) and
+                  other._type == ComponentType.OTHER_CODE and
+                  self._otherTypeCode == other._otherTypeCode)
+            else:
+                return self._value.equals(other._value) and self._type == other._type
 
         def compare(self, other):
             """
@@ -315,9 +362,14 @@ class Name(object):
             :rtype: int
             :see: http://named-data.net/doc/0.2/technical/CanonicalOrder.html
             """
-            if self._type < other._type:
+            myTypeCode = (self._otherTypeCode
+              if self._type == ComponentType.OTHER_CODE else self._type)
+            otherTypeCode = (other._otherTypeCode
+              if other._type == ComponentType.OTHER_CODE else other._type)
+
+            if myTypeCode < otherTypeCode:
                 return -1
-            if self._type > other._type:
+            if myTypeCode > otherTypeCode:
                 return 1
 
             if self._value.size() < other._value.size():
@@ -329,18 +381,27 @@ class Name(object):
             return self._value.compare(other._value)
 
         @staticmethod
-        def fromNumber(number):
+        def fromNumber(number, type = None, otherTypeCode = None):
             """
             Create a component whose value is the nonNegativeInteger encoding of
             the number.
 
             :param int number: The number to be encoded.
-            :return: The component value.
+            :param int type: (optional) The component type as an int from the
+              ComponentType enum. If name component type is not a recognized
+              ComponentType enum value, then set this to ComponentType.OTHER_CODE
+              and use the otherTypeCode parameter. If omitted, use
+              ComponentType.GENERIC.
+            :param int otherTypeCode: (optional) If type is
+              ComponentType.OTHER_CODE, then this is the packet's unrecognized
+              content type code, which must be non-negative.
+            :return: The new component value.
             :rtype: Name.Component
             """
             encoder = TlvEncoder(8)
             encoder.writeNonNegativeInteger(number)
-            return Name.Component(Blob(encoder.getOutput(), False))
+            return Name.Component(
+              Blob(encoder.getOutput(), False), type, otherTypeCode)
 
         @staticmethod
         def fromNumberWithMarker(number, marker):
@@ -446,7 +507,7 @@ class Name(object):
                 "Name.Component.fromImplicitSha256Digest: The digest length must be 32 bytes")
 
             result = Name.Component(digestBlob)
-            result._type = Name.Component.ComponentType.IMPLICIT_SHA256_DIGEST
+            result._type = ComponentType.IMPLICIT_SHA256_DIGEST
             return result
 
         def getSuccessor(self):
@@ -477,7 +538,8 @@ class Name(object):
                 # We didn't need the extra byte.
                 result = result[0:self._value.size()]
 
-            return Name.Component(Blob(result, False))
+            return Name.Component(
+             Blob(result, False), self._type, self._otherTypeCode)
 
         # Python operators
 
@@ -506,7 +568,10 @@ class Name(object):
             return self.toEscapedString()
 
         def __hash__(self):
-            return hash(self._value)
+            return (37 * 
+              (self._otherTypeCode if self._type == ComponentType.OTHER_CODE 
+                                   else self._type) + 
+              hash(self._value))
 
     def set(self, uri):
         """
@@ -557,8 +622,30 @@ class Name(object):
               component = Name.Component.fromImplicitSha256Digest(
                 Blob(bytearray.fromhex(hexString), False))
             else:
+                type = ComponentType.GENERIC
+                otherTypeCode = -1
+
+                # Check for a component type.
+                iTypeCodeEnd = uri.find("=", iComponentStart)
+                if iTypeCodeEnd >= 0 and iTypeCodeEnd < iComponentEnd:
+                    typeString = uri[iComponentStart : iTypeCodeEnd]
+                    try:
+                        otherTypeCode = int(typeString)
+                    except ValueError:
+                        raise ValueError("Can't parse decimal Name Component type: " +
+                           typeString + " in URI " + uri)
+
+                    if (otherTypeCode == ComponentType.GENERIC or
+                        otherTypeCode == ComponentType.IMPLICIT_SHA256_DIGEST):
+                        raise ValueError("Unexpected Name Component type: " +
+                          typeString + " in URI " + uri)
+
+                    type = ComponentType.OTHER_CODE
+                    iComponentStart = iTypeCodeEnd + 1
+
                 component = Name.Component(
-                  Name.fromEscapedString(uri, iComponentStart, iComponentEnd))
+                  Name.fromEscapedString(uri, iComponentStart, iComponentEnd),
+                  type, otherTypeCode)
 
             # Ignore illegal components.  This also gets rid of a trailing '/'.
             if not component.getValue().isNull():
@@ -566,22 +653,42 @@ class Name(object):
 
             iComponentStart = iComponentEnd + 1
 
-    def append(self, value):
+    def append(self, value, type = None, otherTypeCode = None):
         """
-        Append a new GENERIC component.
+        Append a new component to this Name.
 
         :param value: If value is another Name, append all its components.
           If value is another Name.Component, use its value.
           Otherwise pass value to the Name.Component constructor.
         :type value: Name, Name.Component or value for Name.Component constructor
+        :param int type: (optional) The component type as an int from the
+          ComponentType enum. If name component type is not a recognized
+          ComponentType enum value, then set this to ComponentType.OTHER_CODE
+          and use the otherTypeCode parameter. If omitted, use
+          ComponentType.GENERIC. If the component param is a Name or another
+          Name.Component, then this is ignored.
+        :param int otherTypeCode: (optional) If type is ComponentType.OTHER_CODE,
+          then this is the packet's unrecognized content type code, which must
+          be non-negative. If the component param is a Name or another
+          Name.Component, then this is ignored.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
         """
         if isinstance(value, Name):
-            for component in value._components:
+            if value == self:
+                # Special case, when we need to create a copy before appending to self.
+                components = self._components[:]
+            else:
+                components = value._components
+
+            for component in components:
                 self._components.append(component)
         elif isinstance(value, Name.Component):
+            # The Name.Component is immutable, so use it as is.
             self._components.append(value)
         else:
-            self._components.append(Name.Component(value))
+            # Just use the Name.Component constructor.
+            self._components.append(Name.Component(value, type, otherTypeCode))
 
         self._changeCount += 1
         return self
@@ -1157,6 +1264,18 @@ class Name(object):
             i += 1
 
         return bytearray(result.getvalue())
+
+class ComponentType(object):
+    """
+    A ComponentType specifies the recognized types of a name component. If the
+    component type in the packet is not a recognized enum value, then we use
+    ComponentType.OTHER_CODE and you can call Name.Component.getOtherTypeCode().
+    We do this to keep the recognized component type values independent of
+    packet encoding details.
+    """
+    IMPLICIT_SHA256_DIGEST = 1
+    GENERIC                = 8
+    OTHER_CODE             = 0x7fff
 
 # Import these at the end of the file to avoid circular references.
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder

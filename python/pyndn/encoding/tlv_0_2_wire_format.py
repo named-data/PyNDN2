@@ -21,7 +21,7 @@ from datetime import datetime
 from random import SystemRandom
 from pyndn.name import Name
 from pyndn.exclude import Exclude
-from pyndn.name import Name
+from pyndn.name import ComponentType
 from pyndn.meta_info import ContentType
 from pyndn.forwarding_flags import ForwardingFlags
 from pyndn.key_locator import KeyLocatorType
@@ -731,8 +731,12 @@ class Tlv0_2WireFormat(WireFormat):
         :param Name.Component component: The name component to encode.
         :param TlvEncoder encoder: The encoder to receive the encoding.
         """
-        type = (Tlv.ImplicitSha256DigestComponent if
-          component.isImplicitSha256Digest() else Tlv.NameComponent)
+        if component.getType() == ComponentType.OTHER_CODE:
+            type = component.getOtherTypeCode()
+        else:
+            # The enum values are the same as the TLV type codes.
+            type = component.getType()
+
         encoder.writeBlobTlv(type, component.getValue().buf())
 
     @staticmethod
@@ -755,9 +759,12 @@ class Tlv0_2WireFormat(WireFormat):
 
         value = Blob(decoder.readBlobTlv(type), copy)
         if type == Tlv.ImplicitSha256DigestComponent:
-          return Name.Component.fromImplicitSha256Digest(value)
+            return Name.Component.fromImplicitSha256Digest(value)
+        elif type == Tlv.NameComponent:
+            return Name.Component(value)
         else:
-          return Name.Component(value)
+            # Unrecognized type code.
+            return Name.Component(value, ComponentType.OTHER_CODE, type)
 
     @staticmethod
     def _encodeName(name, encoder):
