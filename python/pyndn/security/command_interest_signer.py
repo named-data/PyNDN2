@@ -26,28 +26,20 @@ Interests protocol. See makeCommandInterest() for details.
 https://redmine.named-data.net/projects/ndn-cxx/wiki/CommandInterest
 """
 
-from random import SystemRandom
 from pyndn.interest import Interest
-from pyndn.util.blob import Blob
-from pyndn.util.common import Common
-from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.wire_format import WireFormat
+from pyndn.security.command_interest_preparer import CommandInterestPreparer
 
-# The Python documentation says "Use SystemRandom if you require a
-#   cryptographically secure pseudo-random number generator."
-# http://docs.python.org/2/library/random.html
-_systemRandom = SystemRandom()
-
-class CommandInterestSigner(object):
+class CommandInterestSigner(CommandInterestPreparer):
     """
     Create a CommandInterestSigner to use the keyChain to sign.
 
     :param KeyChain keyChain: The KeyChain used to sign.
     """
     def __init__(self, keyChain):
+        super(CommandInterestSigner, self).__init__()
+
         self._keyChain = keyChain
-        self._lastUsedTimestamp = round(Common.getNowMilliseconds())
-        self._nowOffsetMilliseconds = 0
 
     POS_SIGNATURE_VALUE = -1
     POS_SIGNATURE_INFO =  -2
@@ -95,39 +87,10 @@ class CommandInterestSigner(object):
         # This copies the Name.
         commandInterest = Interest(name)
 
-        # _nowOffsetMilliseconds is only used for testing.
-        now = Common.getNowMilliseconds() + self._nowOffsetMilliseconds
-        timestamp =  round(now)
-        while timestamp <= self._lastUsedTimestamp:
-          timestamp += 1.0
-
-        # The timestamp is encoded as a TLV nonNegativeInteger.
-        encoder = TlvEncoder(8)
-        encoder.writeNonNegativeInteger(int(timestamp))
-        commandInterest.getName().append(Blob(encoder.getOutput(), False))
-
-        # The random value is a TLV nonNegativeInteger too, but we know it is 8
-        # bytes, so we don't need to call the nonNegativeInteger encoder.
-        randomBuffer = bytearray(8)
-        for i in range(len(randomBuffer)):
-            randomBuffer[i] = _systemRandom.randint(0, 0xff)
-        commandInterest.getName().append(Blob(randomBuffer, False))
-
+        self.prepareCommandInterestName(commandInterest, wireFormat)
         self._keyChain.sign(commandInterest, params, wireFormat)
 
-        # We successfully signed the interest, so update the timestamp.
-        self._lastUsedTimestamp = timestamp
-
         return commandInterest
-
-    def _setNowOffsetMilliseconds(self, nowOffsetMilliseconds):
-        """
-        Set the offset when makeCommandInterest() gets the current time, which
-        should only be used for testing.
-
-        :param float nowOffsetMilliseconds: The offset in milliseconds.
-        """
-        self._nowOffsetMilliseconds = nowOffsetMilliseconds
 
 # Import this at the end of the file to avoid circular references.
 from pyndn.security.signing_info import SigningInfo
