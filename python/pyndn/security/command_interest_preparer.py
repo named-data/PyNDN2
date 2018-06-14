@@ -41,7 +41,7 @@ _systemRandom = SystemRandom()
 
 class CommandInterestPreparer(object):
     """
-    Create a CommandInterestSigner and initialize the timestamp to now.
+    Create a CommandInterestPreparer and initialize the timestamp to now.
     """
     def __init__(self):
         self._lastUsedTimestamp = round(Common.getNowMilliseconds())
