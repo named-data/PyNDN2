@@ -42,8 +42,7 @@ class Counter(object):
         dump("Time out for interest", interest.getName().toUri())
 
 def main():
-    # Connect to the demo host at memoria.ndn.ucla.edu .
-    face = Face("128.97.98.8")
+    face = Face("memoria.ndn.ucla.edu")
 
     counter = Counter()
 
