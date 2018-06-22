@@ -1,8 +1,10 @@
-Interim changes since PyNDN v2.8beta1 (2018-06-08)
+Interim changes since PyNDN v2.8beta1 (2018-06-22)
 --------------------------------------------------
 
 Bug fixes
 * https://redmine.named-data.net/issues/4605 Support years > 2038 on 32-bit processors.
+* In ChronoSync2013 timeout, get the digest component based on the broadcast
+  prefix size instead of a hard-coded value.
 
 Changes
 * https://redmine.named-data.net/issues/4591 Accept Interests encoded with
