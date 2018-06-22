@@ -687,7 +687,8 @@ class ChronoSync2013(object):
         logging.getLogger(__name__).info("Sync Interest time out.")
         logging.getLogger(__name__).info(
           "Sync Interest name: %s", interest.getName().toUri())
-        component = interest.getName().get(4).toEscapedString()
+        component = interest.getName().get(
+          self._applicationBroadcastPrefix.size()).toEscapedString()
         if component == self._digestTree.getRoot():
             name = Name(interest.getName())
             retryInterest = Interest(interest.getName())
