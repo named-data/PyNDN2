@@ -1359,12 +1359,9 @@ class Tlv0_2WireFormat(WireFormat):
         endOffset = decoder.readNestedTlvsStart(Tlv.Interest)
         offsets = Tlv0_2WireFormat._decodeName(interest.getName(), decoder, copy)
 
-        if decoder.readBooleanTlv(Tlv.CanBePrefix, endOffset):
-            # No limit on MaxSuffixComponents.
-            interest.setMaxSuffixComponents(None)
-        else:
-            # The one suffix components is for the implicit digest.
-            interest.setMaxSuffixComponents(1)
+        # In v0.2 semantics, this calls setMaxSuffixComponents.
+        interest.setCanBePrefix(
+          decoder.readBooleanTlv(Tlv.CanBePrefix, endOffset))
 
         interest.setMustBeFresh(
           decoder.readBooleanTlv(Tlv.MustBeFresh, endOffset))
