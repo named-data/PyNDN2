@@ -42,7 +42,7 @@ class PibKey(object):
         """
         Get the key name.
 
-        :return: The key name. You must not modify the Key object. If you need
+        :return: The key name. You must not modify the Name object. If you need
           to modify it, make a copy.
         :rtype: Name
         :raises ValueError: If the backend implementation instance is invalid.
