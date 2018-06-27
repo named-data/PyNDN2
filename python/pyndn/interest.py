@@ -109,6 +109,17 @@ class Interest(object):
         """
         return self._maxSuffixComponents
 
+    def getCanBePrefix(self):
+        """
+        Get the CanBePrefix flag. If not specified, the default is true.
+
+        :return: The CanBePrefix flag.
+        :rtype: bool
+        """
+        # Use the closest v0.2 semantics. CanBePrefix is the opposite of exact
+        # match where MaxSuffixComponents is 1 (for the implicit digest).
+        return self._maxSuffixComponents != 1
+
     def getKeyLocator(self):
         """
         Get the interest key locator.
@@ -303,6 +314,21 @@ class Interest(object):
         :rtype: Interest
         """
         self._maxSuffixComponents = Common.nonNegativeIntOrNone(maxSuffixComponents)
+        self._changeCount += 1
+        return self
+
+    def setCanBePrefix(self, canBePrefix):
+        """
+        Set the CanBePrefix flag.
+
+        :param int canBePrefix: True if the Interest name can be a prefix. If
+          you do not set this flag, the default value is True.
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        # Use the closest v0.2 semantics. CanBePrefix is the opposite of exact
+        # match where MaxSuffixComponents is 1 (for the implicit digest).
+        self._maxSuffixComponents = None if canBePrefix else 1
         self._changeCount += 1
         return self
 
