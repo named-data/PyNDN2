@@ -26,9 +26,11 @@ for use by the security library.
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_node import DerNode
 from pyndn.encoding.der.der_exceptions import DerDecodingException
+from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
 from pyndn.security.security_exception import UnrecognizedKeyFormatException
@@ -123,6 +125,42 @@ class PublicKey(object):
         :rtype: Blob
         """
         return self._keyDer
+
+    def encrypt(self, plainData, algorithmType):
+        """
+        Encrypt the plainData using the keyBits according the encrypt algorithm
+        type.
+
+        :param plainData: The data to encrypt.
+        :type plainData: Blob or an object which is the same as the bytes() operator
+        :param int algorithmType: The algorithm type from EncryptAlgorithmType.
+          This encrypts according to the algorithm type, e.g., RsaOaep.
+        :return: The encrypted data.
+        :rtype: Blob
+        """
+        if isinstance(plainData, Blob):
+            plainData = plainData.toBytes()
+
+        publicKey = serialization.load_der_public_key(
+          self._keyDer.toBytes(), backend = default_backend())
+
+        if algorithmType == EncryptAlgorithmType.RsaOaep:
+            if self._keyType != KeyType.RSA:
+                raise RuntimeError("The key type must be RSA")
+
+            paddingObject = padding.OAEP(
+              mgf = padding.MGF1(algorithm = hashes.SHA1()),
+              algorithm = hashes.SHA1(), label = None)
+        elif algorithmType == EncryptAlgorithmType.RsaPkcs:
+            if self._keyType != KeyType.RSA:
+                raise RuntimeError("The key type must be RSA")
+
+            paddingObject = padding.PKCS1v15()
+        else:
+            raise RuntimeError("unsupported encryption mode")
+
+        result = publicKey.encrypt(plainData, paddingObject)
+        return Blob(result, False)
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
     EC_ENCRYPTION_OID = "1.2.840.10045.2.1"
