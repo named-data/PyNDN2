@@ -26,19 +26,11 @@ manipulate keys, encrypt and decrypt using RSA.
 # (This is ported from ndn::gep::algo::Rsa, and named RsaAlgorithm because
 # "Rsa" is very short and not all the Common Client Libraries have namespaces.)
 
-from random import SystemRandom
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_node import *
-from pyndn.encrypt.algo.encrypt_params import EncryptAlgorithmType
+from pyndn.security.certificate.public_key import PublicKey
 from pyndn.encrypt.decrypt_key import DecryptKey
 from pyndn.encrypt.encrypt_key import EncryptKey
 from pyndn.security.tpm.tpm_private_key import TpmPrivateKey
-
-_systemRandom = SystemRandom()
 
 class RsaAlgorithm(object):
     @staticmethod
@@ -96,20 +88,7 @@ class RsaAlgorithm(object):
         :return: The encrypted data.
         :rtype: Blob
         """
-        publicKey = serialization.load_der_public_key(
-          keyBits.toBytes(), backend = default_backend())
-
-        if params.getAlgorithmType() == EncryptAlgorithmType.RsaOaep:
-            paddingObject = padding.OAEP(
-              mgf = padding.MGF1(algorithm = hashes.SHA1()),
-              algorithm = hashes.SHA1(), label = None)
-        elif params.getAlgorithmType() == EncryptAlgorithmType.RsaPkcs:
-            paddingObject = padding.PKCS1v15()
-        else:
-            raise RuntimeError("unsupported encryption mode")
-
-        result = publicKey.encrypt(plainData.toBytes(), paddingObject)
-        return Blob(result, False)
+        return PublicKey(keyBits).encrypt(plainData, params.getAlgorithmType())
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
 
