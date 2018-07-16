@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.8beta1 (2018-06-22)
+Interim changes since PyNDN v2.8beta1 (2018-07-16)
 --------------------------------------------------
 
 Bug fixes
@@ -10,6 +10,7 @@ Changes
 * https://redmine.named-data.net/issues/4591 Accept Interests encoded with
   packet format v0.3.
 * https://redmine.named-data.net/issues/4397 In Name, API for typed name components.
+* https://redmine.named-data.net/issues/4593 UdpTransport: specify local port.
 
 PyNDN v2.8beta1 (2018-04-17)
 ----------------------------
