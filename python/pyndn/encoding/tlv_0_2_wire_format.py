@@ -603,7 +603,7 @@ class Tlv0_2WireFormat(WireFormat):
                 # http://redmine.named-data.net/projects/nfd/wiki/NDNLPv2
                 canIgnore = (fieldType >= Tlv.LpPacket_IGNORE_MIN and
                              fieldType <= Tlv.LpPacket_IGNORE_MAX and
-                             (fieldType & 0x01) == 1)
+                             (fieldType & 0x03) == 0)
                 if not canIgnore:
                     raise ValueError("Did not get the expected TLV type")
 
