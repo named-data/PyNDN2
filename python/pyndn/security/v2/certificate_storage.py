@@ -143,7 +143,7 @@ class CertificateStorage(object):
 
     def _setCacheNowOffsetMilliseconds(self, nowOffsetMilliseconds):
         """
-        Set the offset when the cache insert() and refresh() get the current 
+        Set the offset when the cache insert() and refresh() get the current
           time, which should only be used for testing.
 
         :param float nowOffsetMilliseconds: The offset in milliseconds.

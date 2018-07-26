@@ -73,7 +73,7 @@ class Tpm(object):
     def hasKey(self, keyName):
         """
         Check if the key with name keyName exists in the TPM.
-        
+
         :param Name keyName: The name of the key.
         :return: True if the key exists.
         :rtype: bool

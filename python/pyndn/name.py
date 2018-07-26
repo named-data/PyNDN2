@@ -568,9 +568,9 @@ class Name(object):
             return self.toEscapedString()
 
         def __hash__(self):
-            return (37 * 
-              (self._otherTypeCode if self._type == ComponentType.OTHER_CODE 
-                                   else self._type) + 
+            return (37 *
+              (self._otherTypeCode if self._type == ComponentType.OTHER_CODE
+                                   else self._type) +
               hash(self._value))
 
     def set(self, uri):

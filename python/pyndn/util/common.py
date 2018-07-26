@@ -177,7 +177,7 @@ class Common(object):
         base64Str = base64.b64encode(input)
         if not type(base64Str) is str:
             base64Str = "".join(map(chr, base64Str))
-            
+
         if not addNewlines:
             return base64Str
 

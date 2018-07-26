@@ -30,7 +30,7 @@ __all__ = ['certificate_v2', 'certificate_cache_v2',
   'certificate_fetcher', 'certificate_fetcher_from_network',
   'certificate_fetcher_offline', 'data_validation_state',
   'interest_validation_state', 'validation_error', 'validation_policy',
-  'validation_policy_accept_all', 'validation_policy_command_interest', 
+  'validation_policy_accept_all', 'validation_policy_command_interest',
   'validation_policy_config', 'validation_policy_from_pib',
   'validation_policy_simple_hierarchy', 'validation_state']
 

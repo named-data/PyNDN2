@@ -38,7 +38,7 @@ class NdnRegexRepeatMatcher(NdnRegexMatcherBase):
         self._indicator = indicator
 
         self._compile()
-        
+
     def match(self, name, offset, length):
         """
         :param Name name:

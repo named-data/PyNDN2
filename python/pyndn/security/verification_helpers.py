@@ -211,7 +211,7 @@ class VerificationHelpers(object):
         return VerificationHelpers.verifySignature(
           encoding.toSignedBytes(), signature.getSignature(), publicKey,
           digestAlgorithm)
-    
+
     @staticmethod
     def verifyDigest(buffer, digest, digestAlgorithm):
         """

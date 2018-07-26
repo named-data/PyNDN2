@@ -58,7 +58,7 @@ class KeyParams(object):
             self._keyId = keyId
         else:
             keyIdType = keyIdTypeOrKeyId
-            
+
             if keyIdType == KeyIdType.USER_SPECIFIED:
                 raise ValueError("KeyParams: KeyIdType is USER_SPECIFIED")
 

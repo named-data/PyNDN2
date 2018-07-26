@@ -114,9 +114,9 @@ class ValidationState(object):
 
     def addCertificate(self, certificate):
         """
-        Add the certificate to the top of the certificate chain. If the 
-        certificate chain is empty, then the certificate should be the signer of 
-        the original packet. If the certificate chain is not empty, then the 
+        Add the certificate to the top of the certificate chain. If the
+        certificate chain is empty, then the certificate should be the signer of
+        the original packet. If the certificate chain is not empty, then the
         certificate should be the signer of the front of the certificate chain.
         Note: This function does not verify the signature bits.
 

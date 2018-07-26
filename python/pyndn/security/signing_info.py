@@ -313,7 +313,7 @@ class SigningInfo(object):
     def __str__(self):
         """
         Get the string representation of this SigningInfo.
-        
+
         :return: The string representation.
         :rtype: str
         """
@@ -334,9 +334,9 @@ class SigningInfo(object):
     @staticmethod
     def getDigestSha256Identity():
         """
-        Get the localhost identity which indicates that the signature is 
+        Get the localhost identity which indicates that the signature is
         generated using SHA-256.
-        
+
         :return: A new Name of the SHA-256 identity.
         :rtype: Name
         """

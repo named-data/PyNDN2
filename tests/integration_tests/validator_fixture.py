@@ -60,8 +60,8 @@ class ValidatorFixture(IdentityManagementFixture):
             """
             If _processInterest is not None, call
             processInterest_(interest, onData, onTimeout, onNetworkNack)
-            which must call one of the callbacks to simulate the response. 
-            Otherwise, just call onTimeout(interest) to simulate a timeout. 
+            which must call one of the callbacks to simulate the response.
+            Otherwise, just call onTimeout(interest) to simulate a timeout.
             This adds a copy of the interest to _sentInterests .
             """
             # Make a copy of the interest.

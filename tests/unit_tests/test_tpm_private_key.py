@@ -167,7 +167,7 @@ class TestTpmPrivateKey(ut.TestCase):
         self.keyTestData = [None]
         self.keyTestData[0] = self.rsaKeyTestData
         # debug self.keyTestData[1] = self.ecKeyTestData
-        
+
     def test_save_load(self):
         for dataSet in self.keyTestData:
             # Load the key in PKCS #1 format.

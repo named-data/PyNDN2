@@ -53,7 +53,7 @@ class LpPacket(object):
     def getHeaderField(self, index):
         """
         Get the header field at the given index.
-        
+
         :param int index: The index, starting from 0. It is an error if index is
            greater to or equal to countHeaderFields().
         :return: The header field at the index.
@@ -82,7 +82,7 @@ class LpPacket(object):
     def addHeaderField(self, headerField):
         """
         Add a header field. To add the fragment, use setFragmentWireEncoding().
-        
+
         :param object headerField: The header field to add.
         """
         self._headerFields.append(headerField)

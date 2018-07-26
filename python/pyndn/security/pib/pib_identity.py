@@ -72,8 +72,8 @@ class PibIdentity(object):
 
     def _addKey(self,  key, keyName):
         """
-        Add the key. If a key with the same name already exists, overwrite the 
-        key. If no default key for the identity has been set, then set the added 
+        Add the key. If a key with the same name already exists, overwrite the
+        key. If no default key for the identity has been set, then set the added
         key as default for the identity. This should only be called by KeyChain.
 
         :param key: The public key bits. This copies the buffer.

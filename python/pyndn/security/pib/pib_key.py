@@ -30,7 +30,7 @@ from pyndn.name import Name
 
 class PibKey(object):
     """
-    Create a PibKey which uses the impl backend implementation. This constructor 
+    Create a PibKey which uses the impl backend implementation. This constructor
     should only be called by PibKeyContainer.
 
     :param PibKeyImpl impl: An object of a subclass of  PibKeyImpl.

@@ -408,7 +408,7 @@ class ConfigPolicyManager(PolicyManager):
                           keyMatchPrefix.toUri() + "\" using relation " +
                           relationType)
                         return False
-    
+
         failureReason[0] = "Unrecognized checkerType: " + checkerType
         return False
 
@@ -754,7 +754,7 @@ class ConfigPolicyManager(PolicyManager):
             except:
                 logging.exception("Error in onValidationFailed")
 
-    def _getCertificateInterest(self, stepCount, matchType, objectName, 
+    def _getCertificateInterest(self, stepCount, matchType, objectName,
            signature, failureReason):
         """
         This is a helper for checkVerificationPolicy to verify the rule and

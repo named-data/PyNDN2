@@ -29,7 +29,7 @@ from .identity_management_fixture import IdentityManagementFixture
 class TestKeyChain(ut.TestCase):
     def setUp(self):
         self._fixture = IdentityManagementFixture()
-        
+
     def test_management(self):
         identityName = Name("/test/id")
         identity2Name = Name("/test/id2")

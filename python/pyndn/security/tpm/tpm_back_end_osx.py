@@ -55,7 +55,7 @@ class TpmBackEndOsx(TpmBackEnd):
         return "tpm-osxkeychain"
 
     # Management
-    
+
     def isTerminalMode(self):
         """
         Check if the TPM is in terminal mode.

@@ -184,7 +184,7 @@ class KeyChain(object):
             pibImpl = arg1
             tpmBackEnd = arg2
             policyManager = arg3
-            
+
             self._isSecurityV1 = False
             self._policyManager = policyManager
 
@@ -388,11 +388,11 @@ class KeyChain(object):
     def addCertificate(self, key, certificate):
         """
         Add a certificate for the key. If the key had no default certificate
-        selected, the added certificate will be set as the default certificate 
+        selected, the added certificate will be set as the default certificate
         for this key.
-        
+
         :param PibKey key: A valid PibKey object.
-        :param CertificateV2 certificate: The certificate to add. This copies 
+        :param CertificateV2 certificate: The certificate to add. This copies
           the object.
         :raises ValueError: If the key does not match the certificate.
         :note: This method overwrites a certificate with the same name, without
