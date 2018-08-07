@@ -25,16 +25,16 @@ from pyndn.name import Name
 from pyndn.security.pib.pib_memory import PibMemory
 from pyndn.security.pib.pib_sqlite3 import PibSqlite3
 from pyndn.security.pib.pib import Pib
-from .pib_data_fixture import PibDataFixture
+from .pib_data_fixture2 import PibDataFixture2
 
-class PibMemoryFixture(PibDataFixture):
+class PibMemoryFixture(PibDataFixture2):
     def __init__(self):
         super(PibMemoryFixture, self).__init__()
 
         self._myPib = PibMemory()
         self.pib = self._myPib
 
-class PibSqlite3Fixture(PibDataFixture):
+class PibSqlite3Fixture(PibDataFixture2):
     def __init__(self, databaseDirectoryPath, databaseFilename):
         super(PibSqlite3Fixture, self).__init__()
 

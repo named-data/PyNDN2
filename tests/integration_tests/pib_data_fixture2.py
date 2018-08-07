@@ -21,7 +21,9 @@
 
 from pyndn.security.v2.certificate_v2 import CertificateV2
 
-class PibDataFixture(object):
+# PibDataFixture2 is identical to PibDataFixture in the unit_tests folder, but
+# we can't access it there, so use a copy here.
+class PibDataFixture2(object):
     ID1_KEY1_CERT1 = bytearray([
       0x06, 0xfd, 0x02, 0xb8, 0x07, 0x2b, 0x08, 0x03, 0x70, 0x69, 0x62, 0x08, 0x09, 0x69, 0x6e, 0x74,
       0x65, 0x72, 0x66, 0x61, 0x63, 0x65, 0x08, 0x02, 0x69, 0x64, 0x08, 0x01, 0x31, 0x08, 0x03, 0x4b,
@@ -405,15 +407,15 @@ class PibDataFixture(object):
         return result
 
     def __init__(self):
-        self.id1Key1Cert1 = PibDataFixture.encodeCertificate(PibDataFixture.ID1_KEY1_CERT1)
-        self.id1Key1Cert2 = PibDataFixture.encodeCertificate(PibDataFixture.ID1_KEY1_CERT2)
-        self.id1Key2Cert1 = PibDataFixture.encodeCertificate(PibDataFixture.ID1_KEY2_CERT1)
-        self.id1Key2Cert2 = PibDataFixture.encodeCertificate(PibDataFixture.ID1_KEY2_CERT2)
+        self.id1Key1Cert1 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID1_KEY1_CERT1)
+        self.id1Key1Cert2 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID1_KEY1_CERT2)
+        self.id1Key2Cert1 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID1_KEY2_CERT1)
+        self.id1Key2Cert2 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID1_KEY2_CERT2)
 
-        self.id2Key1Cert1 = PibDataFixture.encodeCertificate(PibDataFixture.ID2_KEY1_CERT1)
-        self.id2Key1Cert2 = PibDataFixture.encodeCertificate(PibDataFixture.ID2_KEY1_CERT2)
-        self.id2Key2Cert1 = PibDataFixture.encodeCertificate(PibDataFixture.ID2_KEY2_CERT1)
-        self.id2Key2Cert2 = PibDataFixture.encodeCertificate(PibDataFixture.ID2_KEY2_CERT2)
+        self.id2Key1Cert1 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID2_KEY1_CERT1)
+        self.id2Key1Cert2 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID2_KEY1_CERT2)
+        self.id2Key2Cert1 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID2_KEY2_CERT1)
+        self.id2Key2Cert2 = PibDataFixture2.encodeCertificate(PibDataFixture2.ID2_KEY2_CERT2)
 
         self.id1 = self.id1Key1Cert1.getIdentity()
         self.id2 = self.id2Key1Cert1.getIdentity()
