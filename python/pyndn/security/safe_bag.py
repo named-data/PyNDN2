@@ -36,18 +36,24 @@ from pyndn.security.v2.certificate_v2 import CertificateV2
 from pyndn.security.certificate.public_key import PublicKey
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.util.common import Common
+from pyndn.util.blob import Blob
 from pyndn.security.tpm.tpm import Tpm
 from pyndn.security.tpm.tpm_back_end_memory import TpmBackEndMemory
 from pyndn.encoding.wire_format import WireFormat
+from pyndn.encoding.tlv_wire_format import TlvWireFormat
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
+from pyndn.encoding.tlv.tlv import Tlv
 
 class SafeBag(object):
     """
-    There are two forms of the SafeBag constructor:
+    There are three forms of the SafeBag constructor:
     SafeBag(certificate, privateKeyBag) - Create a SafeBag with the given
     certificate and private key.
     SafeBag(keyName, privateKeyBag, publicKeyEncoding [, password,
     digestAlgorithm, wireFormat]) - Create a SafeBag with given private key
     and a new self-signed certificate for the given public key.
+    SafeBag(input) - Create a SafeBag by decoding the input as an NDN-TLV SafeBag.
 
     :param Data certificate: The certificate data packet (used only for
       SafeBag(certificate, privateKeyBag)). This copies the object.
@@ -65,8 +71,10 @@ class SafeBag(object):
     :param WireFormat wireFormat: (optional) A WireFormat object used to encode
       the self-signed certificate in order to sign it. If omitted, use
       WireFormat.getDefaultWireFormat().
+    :param input: The array with the bytes to decode.
+    :type input: A Blob or an array type with int elements
     """
-    def __init__(self, keyNameOrCertificate, privateKeyBag,
+    def __init__(self, keyNameOrCertificate, privateKeyBag = None,
       publicKeyEncoding = None, password = None,
       digestAlgorithm = DigestAlgorithm.SHA256, wireFormat = None):
         if isinstance(keyNameOrCertificate, Name):
@@ -79,10 +87,13 @@ class SafeBag(object):
               keyName, privateKeyBag, publicKeyEncoding, password,
               digestAlgorithm, wireFormat)
             self._privateKeyBag = privateKeyBag
-        else:
+        elif isinstance(keyNameOrCertificate, Data):
             # The certificate is supplied.
             self._certificate = Data(keyNameOrCertificate)
             self._privateKeyBag = privateKeyBag
+        else:
+            # Assume the first argument is the encoded SafeBag.
+            self.wireDecode(keyNameOrCertificate)
 
     def getCertificate(self):
         """
@@ -104,6 +115,59 @@ class SafeBag(object):
         :rtype: Blob
         """
         return self._privateKeyBag
+
+    def wireDecode(self, input):
+        """
+        Decode the input as an NDN-TLV SafeBag and update this object.
+
+        :param input: The array with the bytes to decode.
+        :type input: A Blob or an array type with int elements
+        """
+        if isinstance(input, Blob):
+          input = input.buf()
+
+        # Decode directly as TLV. We don't support the WireFormat abstraction
+        # because this isn't meant to go directly on the wire.
+        decoder = TlvDecoder(input)
+        endOffset = decoder.readNestedTlvsStart(Tlv.SafeBag_SafeBag)
+
+        # Get the bytes of the certificate and decode.
+        certificateBeginOffset = decoder.getOffset()
+        certificateEndOffset = decoder.readNestedTlvsStart(Tlv.Data)
+        decoder.seek(certificateEndOffset)
+        self._certificate = Data()
+        self._certificate.wireDecode(
+          decoder.getSlice(certificateBeginOffset, certificateEndOffset),
+          TlvWireFormat.get())
+
+        self._privateKeyBag = Blob(
+          decoder.readBlobTlv(Tlv.SafeBag_EncryptedKeyBag), True)
+
+        decoder.finishNestedTlvs(endOffset)
+
+    def wireEncode(self, wireFormat = None):
+        """
+        Encode this as an NDN-TLV SafeBag.
+
+        :return: The encoded byte array as a Blob.
+        :rtype: Blob
+        """
+        # Encode directly as TLV. We don't support the WireFormat abstraction
+        # because this isn't meant to go directly on the wire.
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        encoder.writeBlobTlv(
+          Tlv.SafeBag_EncryptedKeyBag, self._privateKeyBag.buf())
+        # Add the entire Data packet encoding as is.
+        encoder.writeBuffer(
+          self._certificate.wireEncode(TlvWireFormat.get()).buf())
+
+        encoder.writeTypeAndLength(
+          Tlv.SafeBag_SafeBag, len(encoder) - saveLength)
+
+        return Blob(encoder.getOutput(), False)
 
     @staticmethod
     def _makeSelfSignedCertificate(

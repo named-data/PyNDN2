@@ -113,6 +113,9 @@ class Tlv(object):
     Encrypt_EncryptedPayload = 132
     Encrypt_InitialVector = 133
 
+    SafeBag_SafeBag = 128
+    SafeBag_EncryptedKeyBag = 129
+
     # For RepetitiveInterval.
     Encrypt_StartDate = 134
     Encrypt_EndDate = 135
