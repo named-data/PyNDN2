@@ -51,6 +51,7 @@ from pyndn.security.key_params import RsaKeyParams
 from pyndn.security.security_types import KeyType
 from pyndn.security.signing_info import SigningInfo
 from pyndn.security.security_types import DigestAlgorithm
+from pyndn.security.safe_bag import SafeBag
 from pyndn.security.identity.identity_manager import IdentityManager
 from pyndn.security.identity.basic_identity_storage import BasicIdentityStorage
 from pyndn.security.policy.no_verify_policy_manager import NoVerifyPolicyManager
@@ -613,6 +614,32 @@ class KeyChain(object):
 
     # Import and export
 
+    def exportSafeBag(self, certificate, password = None):
+        """
+        Export a certificate and its corresponding private key in a SafeBag.
+
+        :param CertificateV2 certificate: The certificate to export. This gets
+          the key from the TPM using certificate.getKeyName().
+        :param password: (optional) The password for encrypting the private key.
+          If the password is supplied, use it to put a PKCS #8
+          EncryptedPrivateKeyInfo in the SafeBag. If the password is omitted or
+          None, put an unencrypted PKCS #8 PrivateKeyInfo in the SafeBag.
+        :type password: an array which implements the buffer protocol
+        :raises KeyChain.Error: if the certificate.getKeyName() key does not
+          exist, if the TPM does not support exporting an unencrypted private
+          key, or for other errors exporting the private key.
+        """
+        keyName = certificate.getKeyName()
+
+        encryptedKey = None
+        try:
+          encryptedKey = self._tpm._exportPrivateKey(keyName, password)
+        except Exception as ex:
+            raise KeyChain.Error("Failed to export private key `" +
+            keyName.toUri() + "`: " + str(ex))
+
+        return SafeBag(certificate, encryptedKey)
+
     def importSafeBag(self, safeBag, password = None):
         """
         Import a certificate and its corresponding private key encapsulated in a
@@ -627,6 +654,9 @@ class KeyChain(object):
           EncryptedPrivateKeyInfo. If the password is omitted or None, import an
           unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
+        :raises KeyChain.Error: if the private key cannot be imported, or if a
+          public key or private key of the same name already exists, or if a
+          certificate of the same name already exists.
         """
         certificate = CertificateV2(safeBag.getCertificate())
         identity = certificate.getIdentity()
