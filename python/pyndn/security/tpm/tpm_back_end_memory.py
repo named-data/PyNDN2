@@ -120,18 +120,17 @@ class TpmBackEndMemory(TpmBackEnd):
         :raises TpmBackEnd.Error: If the key does not exist or if the key cannot
           be exported, e.g., insufficient privileges.
         """
-        if password != None:
-            raise TpmBackEnd.Error(
-              "Private key password-encryption is not implemented")
-        else:
-            if not self.hasKey(keyName):
-                raise TpmBackEnd.Error("exportKey: The key does not exist")
+        if not self.hasKey(keyName):
+            raise TpmBackEnd.Error("exportKey: The key does not exist")
 
-            try:
+        try:
+            if password != None:
+                return self._keys[keyName].toEncryptedPkcs8(password)
+            else:
                 return self._keys[keyName].toPkcs8()
-            except TpmPrivateKey.Error as ex:
-                raise TpmBackEnd.Error(
-                  "Error in TpmPrivateKey.toPkcs8: " + str(ex))
+        except TpmPrivateKey.Error as ex:
+            raise TpmBackEnd.Error(
+              "Error in TpmPrivateKey.toPkcs8: " + str(ex))
 
     def _doImportKey(self, keyName, pkcs8, password):
         """
@@ -151,13 +150,12 @@ class TpmBackEndMemory(TpmBackEnd):
         :raises TpmBackEnd.Error: For an error importing the key.
         """
         try:
+            key = TpmPrivateKey()
             if password != None:
-                raise TpmBackEnd.Error(
-                  "Private key password-encryption is not implemented")
+                key.loadEncryptedPkcs8(pkcs8, password)
             else:
-                key = TpmPrivateKey()
                 key.loadPkcs8(pkcs8)
-                # Copy the Name.
-                self._keys[Name(keyName)] = key
+            # Copy the Name.
+            self._keys[Name(keyName)] = key
         except TpmPrivateKey.Error as ex:
             raise TpmBackEnd.Error("Cannot import private key: " + str(ex))

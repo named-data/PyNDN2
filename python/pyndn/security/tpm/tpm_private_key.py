@@ -23,15 +23,25 @@ This module defines the TpmPrivateKey class which holds an in-memory private key
 and provides cryptographic operations such as for signing by the in-memory TPM.
 """
 
+import sys
+from random import SystemRandom
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding, rsa, ec
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from pyndn.security.security_types import DigestAlgorithm
 from pyndn.security.security_types import KeyType
 from pyndn.util.blob import Blob
 from pyndn.encoding.der.der_node import DerNode, DerInteger
+from pyndn.encoding.der.der_node import DerSequence, DerOctetString, DerOid
 from pyndn.encoding.der.der_exceptions import DerDecodingException
+
+# The Python documentation says "Use SystemRandom if you require a
+#   cryptographically secure pseudo-random number generator."
+# http://docs.python.org/2/library/random.html
+_systemRandom = SystemRandom()
 
 class TpmPrivateKey(object):
     """
@@ -143,6 +153,132 @@ class TpmPrivateKey(object):
               "loadPkcs8: Unrecognized keyType: " + str(keyType))
 
         self._keyType = keyType
+
+    def loadEncryptedPkcs8(self, encoding, password):
+        """
+        Load the encrypted private key from a buffer with the PKCS #8 encoding
+        of the EncryptedPrivateKeyInfo. This replaces any existing private key
+        in this object. This partially decodes the private key to determine the
+        key type.
+
+        :param encoding: The byte buffer with the private key encoding.
+        :type encoding: str, or an array type with int elements which is
+          converted to str
+        :param password: The password for decrypting the private key.
+        :type password: an array which implements the buffer protocol
+        :raises TpmPrivateKey.Error: For errors decoding the key.
+        """
+        # Decode the PKCS #8 EncryptedPrivateKeyInfo.
+        # See https://tools.ietf.org/html/rfc5208.
+        oidString = None
+        parameters = None
+        encryptedKey = None
+        try:
+            parsedNode = DerNode.parse(Blob(encoding, False).buf())
+            encryptedPkcs8Children = parsedNode.getChildren()
+            algorithmIdChildren = DerNode.getSequence(
+              encryptedPkcs8Children, 0).getChildren()
+            oidString = algorithmIdChildren[0].toVal()
+            parameters = algorithmIdChildren[1]
+
+            encryptedKey = encryptedPkcs8Children[1].toVal()
+        except Exception as ex:
+            raise TpmPrivateKey.Error(
+              "Cannot decode the PKCS #8 EncryptedPrivateKeyInfo: " + str(ex))
+
+        if oidString == TpmPrivateKey.PBES2_OID:
+            # Decode the PBES2 parameters. See https://www.ietf.org/rfc/rfc2898.txt .
+            keyDerivationOidString = None
+            keyDerivationParameters = None
+            encryptionSchemeOidString = None
+            encryptionSchemeParameters = None
+            try:
+                parametersChildren = parameters.getChildren()
+
+                keyDerivationAlgorithmIdChildren = DerNode.getSequence(
+                  parametersChildren, 0).getChildren()
+                keyDerivationOidString = keyDerivationAlgorithmIdChildren[0].toVal()
+                keyDerivationParameters = keyDerivationAlgorithmIdChildren[1]
+
+                encryptionSchemeAlgorithmIdChildren = DerNode.getSequence(
+                  parametersChildren, 1).getChildren()
+                encryptionSchemeOidString = encryptionSchemeAlgorithmIdChildren[0].toVal()
+                encryptionSchemeParameters = encryptionSchemeAlgorithmIdChildren[1]
+            except Exception as ex:
+                raise TpmPrivateKey.Error(
+                  "Cannot decode the PBES2 parameters: " + str(ex))
+
+            # Get the derived key from the password.
+            derivedKey = None
+            if keyDerivationOidString == TpmPrivateKey.PBKDF2_OID:
+                # Decode the PBKDF2 parameters.
+                salt = None
+                nIterations = None
+                try:
+                  pbkdf2ParametersChildren = keyDerivationParameters.getChildren()
+                  salt = pbkdf2ParametersChildren[0].toVal()
+                  nIterations = pbkdf2ParametersChildren[1].toVal()
+                except Exception as ex:
+                    raise TpmPrivateKey.Error(
+                      "Cannot decode the PBES2 parameters: " + str(ex))
+
+                # Check the encryption scheme here to get the needed result length.
+                resultLength = None
+                if encryptionSchemeOidString == TpmPrivateKey.DES_EDE3_CBC_OID:
+                  resultLength = TpmPrivateKey.DES_EDE3_KEY_LENGTH
+                else:
+                    raise TpmPrivateKey.Error(
+                      "Unrecognized PBES2 encryption scheme OID: " +
+                      encryptionSchemeOidString)
+
+            else:
+                raise TpmPrivateKey.Error(
+                  "Unrecognized PBES2 key derivation OID: " + keyDerivationOidString)
+
+            pbkdf2 = PBKDF2HMAC(algorithm = hashes.SHA1(), length = resultLength,
+              salt = Blob(salt, False).toBytes(), iterations = nIterations,
+              backend = default_backend())
+            derivedKey = pbkdf2.derive(Blob(password, False).toBytes())
+
+            # Use the derived key to get the unencrypted pkcs8Encoding.
+            if encryptionSchemeOidString == TpmPrivateKey.DES_EDE3_CBC_OID:
+                # Decode the DES-EDE3-CBC parameters.
+                initialVector = None
+                try:
+                    initialVector = encryptionSchemeParameters.toVal()
+                except Exception as ex:
+                    raise TpmPrivateKey.Error(
+                      "Cannot decode the DES-EDE3-CBC parameters: " + str(ex))
+
+                try:
+                    cipher = Cipher(algorithms.TripleDES(
+                      Blob(derivedKey, False).toBytes()),
+                      modes.CBC(Blob(initialVector, False).toBytes()),
+                      backend = default_backend())
+
+                    # For the cryptography package, we have to remove the padding.
+                    decryptor = cipher.decryptor()
+                    resultWithPad = decryptor.update(
+                      Blob(encryptedKey, False).toBytes()) + decryptor.finalize()
+                    if sys.version_info[0] <= 2:
+                        padLength = ord(resultWithPad[-1])
+                    else:
+                        padLength = resultWithPad[-1]
+
+                    pkcs8Encoding = resultWithPad[:-padLength]
+                except Exception as ex:
+                    raise TpmPrivateKey.Error(
+                      "Error decrypting the PKCS #8 key with DES-EDE3-CBC: " + str(ex))
+            else:
+                raise TpmPrivateKey.Error(
+                  "Unrecognized PBES2 encryption scheme OID: " +
+                  encryptionSchemeOidString)
+
+        else:
+            raise TpmPrivateKey.Error(
+              "Unrecognized PKCS #8 EncryptedPrivateKeyInfo OID: " + oidString)
+
+        self.loadPkcs8(pkcs8Encoding)
 
     def derivePublicKey(self):
         """
@@ -272,6 +408,94 @@ class TpmPrivateKey(object):
           encryption_algorithm = serialization.NoEncryption())
         return Blob(privateKeyDer, False)
 
+    def toEncryptedPkcs8(self, password):
+        """
+        Get the encoded encrypted private key in PKCS #8.
+
+        :param password: The password for encrypting the private key.
+        :type password: an array which implements the buffer protocol
+        :return: The encoding Blob of the EncryptedPrivateKeyInfo.
+        :rtype: Blob
+        :raises TpmPrivateKey.Error: If no private key is loaded, or error
+          encoding.
+        """
+        if self._keyType == None:
+            raise TpmPrivateKey.Error(
+              "toEncryptedPkcs8: The private key is not loaded")
+
+        # Create the derivedKey from the password.
+        nIterations = 2048
+        salt = bytearray(8)
+        for i in range(len(salt)):
+            salt[i] = _systemRandom.randint(0, 0xff)
+        pbkdf2 = PBKDF2HMAC(algorithm = hashes.SHA1(),
+          length = TpmPrivateKey.DES_EDE3_KEY_LENGTH,
+          salt = Blob(salt, False).toBytes(), iterations = nIterations,
+          backend = default_backend())
+        derivedKey = pbkdf2.derive(Blob(password, False).toBytes())
+
+        pkcs8Encoding = self.toPkcs8()
+
+        # Use the derived key to get the encrypted pkcs8Encoding.
+        encryptedEncoding = None
+        initialVector = bytearray(8)
+        for i in range(len(initialVector)):
+            initialVector[i] = _systemRandom.randint(0, 0xff)
+        try:
+            # For the cryptography package, we have to do the padding.
+            padLength = 16 - (pkcs8Encoding.size() % 16)
+            if sys.version_info[0] <= 2:
+                pad = chr(padLength) * padLength
+            else:
+                pad = bytes([padLength]) * padLength
+
+            cipher = Cipher(algorithms.TripleDES(
+              Blob(derivedKey, False).toBytes()),
+              modes.CBC(Blob(initialVector, False).toBytes()),
+              backend = default_backend())
+
+            encryptor = cipher.encryptor()
+            encryptedEncoding = encryptor.update(
+              pkcs8Encoding.toBytes() + pad) + encryptor.finalize()
+        except Exception as ex:
+            raise TpmPrivateKey.Error(
+              "Error encrypting the PKCS #8 key with DES-EDE3-CBC: " + str(ex))
+
+        try:
+            # Encode the PBES2 parameters. See https://www.ietf.org/rfc/rfc2898.txt .
+            keyDerivationParameters = DerSequence()
+            keyDerivationParameters.addChild(DerOctetString(Blob(salt, False)))
+            keyDerivationParameters.addChild(DerInteger(nIterations))
+            keyDerivationAlgorithmIdentifier = DerSequence()
+            keyDerivationAlgorithmIdentifier.addChild(
+              DerOid(TpmPrivateKey.PBKDF2_OID))
+            keyDerivationAlgorithmIdentifier.addChild(keyDerivationParameters)
+
+            encryptionSchemeAlgorithmIdentifier = DerSequence()
+            encryptionSchemeAlgorithmIdentifier.addChild(
+              DerOid(TpmPrivateKey.DES_EDE3_CBC_OID))
+            encryptionSchemeAlgorithmIdentifier.addChild(
+              DerOctetString(Blob(initialVector, False)))
+
+            encryptedKeyParameters = DerSequence()
+            encryptedKeyParameters.addChild(keyDerivationAlgorithmIdentifier)
+            encryptedKeyParameters.addChild(encryptionSchemeAlgorithmIdentifier)
+            encryptedKeyAlgorithmIdentifier = DerSequence()
+            encryptedKeyAlgorithmIdentifier.addChild(
+              DerOid(TpmPrivateKey.PBES2_OID))
+            encryptedKeyAlgorithmIdentifier.addChild(encryptedKeyParameters)
+
+            # Encode the PKCS #8 EncryptedPrivateKeyInfo.
+            # See https://tools.ietf.org/html/rfc5208.
+            encryptedKey = DerSequence()
+            encryptedKey.addChild(encryptedKeyAlgorithmIdentifier)
+            encryptedKey.addChild(DerOctetString(Blob(encryptedEncoding, False)))
+
+            return encryptedKey.encode()
+        except Exception as ex:
+            raise TpmPrivateKey.Error(
+              "Error encoding the encryped PKCS #8 private key: " + str(ex))
+
     @staticmethod
     def generatePrivateKey(keyParams):
         """
@@ -325,3 +549,7 @@ class TpmPrivateKey(object):
 
     RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
     EC_ENCRYPTION_OID = "1.2.840.10045.2.1"
+    PBES2_OID = "1.2.840.113549.1.5.13"
+    PBKDF2_OID = "1.2.840.113549.1.5.12"
+    DES_EDE3_CBC_OID = "1.2.840.113549.3.7"
+    DES_EDE3_KEY_LENGTH = 24
