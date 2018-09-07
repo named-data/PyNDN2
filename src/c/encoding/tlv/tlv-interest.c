@@ -303,7 +303,7 @@ ndn_decodeTlvInterestV02
 
 /**
  * Decode input as an Interest in NDN-TLV format v0.3 and set the fields of
- * the Interest object. This private method is called if the main 
+ * the Interest object. This private method is called if the main
  * decodeTlvInterest fails to decode as v0.2. This ignores HopLimit and
  * Parameters, and interprets CanBePrefix using MaxSuffixComponents.
  */
@@ -425,7 +425,7 @@ ndn_decodeTlvInterestV03
 {
   ndn_Error error;
   size_t endOffset;
-  int gotExpectedType, canBePrefix;
+  int canBePrefix, mustBeFresh;
   struct ndn_Blob dummyBlob;
 
   if ((error = ndn_TlvDecoder_readNestedTlvsStart
@@ -440,16 +440,12 @@ ndn_decodeTlvInterestV03
   if ((error = ndn_TlvDecoder_readBooleanTlv
        (decoder, ndn_Tlv_CanBePrefix, endOffset, &canBePrefix)))
     return error;
-  if (canBePrefix)
-    // No limit on MaxSuffixComponents.
-    interest->maxSuffixComponents = -1;
-  else
-    // The one suffix components is for the implicit digest.
-    interest->maxSuffixComponents = 1;
+  ndn_Interest_setCanBePrefix(interest, canBePrefix);
 
   if ((error = ndn_TlvDecoder_readBooleanTlv
-       (decoder, ndn_Tlv_MustBeFresh, endOffset, &interest->mustBeFresh)))
+       (decoder, ndn_Tlv_MustBeFresh, endOffset, &mustBeFresh)))
     return error;
+  ndn_Interest_setMustBeFresh(interest, mustBeFresh);
 
   // Get the encoded sequence of delegations as is.
   if ((error = ndn_TlvDecoder_readOptionalBlobTlv
