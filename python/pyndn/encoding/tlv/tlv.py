@@ -26,6 +26,7 @@ class Tlv(object):
     Data =             6
     Name =             7
     ImplicitSha256DigestComponent = 1
+    ParametersSha256DigestComponent = 2
     NameComponent =    8
     Selectors =        9
     Nonce =            10
