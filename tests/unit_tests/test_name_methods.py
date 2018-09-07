@@ -47,6 +47,19 @@ TEST_NAME_IMPLICIT_DIGEST = Blob(bytearray([
       0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
   ]))
 
+TEST_NAME_PARAMETERS_DIGEST = Blob(bytearray([
+  0x7,  0x36, # Name
+    0x8,  0x5, # NameComponent
+        0x6c,  0x6f,  0x63,  0x61,  0x6c,
+    0x8,  0x3, # NameComponent
+        0x6e,  0x64,  0x6e,
+    0x8,  0x6, # NameComponent
+        0x70,  0x72,  0x65,  0x66,  0x69,  0x78,
+    0x02, 0x20, # ParametersSha256DigestComponent
+      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
+  ]))
+
 class TestNameComponentMethods(ut.TestCase):
     def setUp(self):
         pass
@@ -264,6 +277,18 @@ class TestNameMethods(ut.TestCase):
         decodedName2.wireDecode(Blob(TEST_NAME_IMPLICIT_DIGEST), TlvWireFormat.get())
         self.assertEqual(decodedName2, name2)
 
+        # Test ParametersSha256Digest.
+        name3 = Name(
+          "/local/ndn/prefix/params-sha256=" +
+          "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+
+        encoding3 = name3.wireEncode(TlvWireFormat.get())
+        self.assertTrue(encoding3.equals(Blob(TEST_NAME_PARAMETERS_DIGEST)))
+
+        decodedName3 = Name()
+        decodedName3.wireDecode(Blob(TEST_NAME_PARAMETERS_DIGEST), TlvWireFormat.get())
+        self.assertEqual(decodedName3, name3)
+
     def test_implicit_sha256_digest(self):
         name = Name()
 
@@ -332,6 +357,77 @@ class TestNameMethods(ut.TestCase):
         # Check that it will accept a hex value in upper case too.
         name2 = Name(
           "/hello/sha256digest=" +
+          "28BAD4B5275BD392DBB670C75CF0B66F13F7942B21E80F55C0E86B374753A548")
+        self.assertEqual(name.get(0), name2.get(1))
+
+    def test_parameters_sha256_digest(self):
+        name = Name()
+
+        digest = bytearray([
+          0x28, 0xba, 0xd4, 0xb5, 0x27, 0x5b, 0xd3, 0x92,
+          0xdb, 0xb6, 0x70, 0xc7, 0x5c, 0xf0, 0xb6, 0x6f,
+          0x13, 0xf7, 0x94, 0x2b, 0x21, 0xe8, 0x0f, 0x55,
+          0xc0, 0xe8, 0x6b, 0x37, 0x47, 0x53, 0xa5, 0x48,
+          0x00, 0x00
+        ])
+
+        name.appendParametersSha256Digest(digest[0:32])
+        name.appendParametersSha256Digest(digest[0:32])
+        self.assertEqual(name.get(0), name.get(1))
+
+        gotError = True
+        try:
+            name.appendParametersSha256Digest(digest[0:34])
+            gotError = False
+        except:
+            pass
+        if not gotError:
+          self.fail("Expected error in appendParametersSha256Digest")
+
+        gotError = True
+        try:
+            name.appendParametersSha256Digest(digest[0:30])
+            gotError = False
+        except:
+            pass
+        if not gotError:
+          self.fail("Expected error in appendParametersSha256Digest")
+
+        # Add name.get(2) as a generic component.
+        name.append(digest[0:32])
+        self.assertTrue(name.get(0).compare(name.get(2)) < 0)
+        self.assertEqual(name.get(0).getValue(), name.get(2).getValue())
+
+        # Add name.get(3) as a generic component whose first byte is greater.
+        name.append(digest[1:32])
+        self.assertTrue(name.get(0).compare(name.get(3)) < 0)
+
+        self.assertEqual(
+          name.get(0).toEscapedString(),
+          "params-sha256=" +
+          "28bad4b5275bd392dbb670c75cf0b66f13f7942b21e80f55c0e86b374753a548")
+
+        self.assertEqual(name.get(0).isParametersSha256Digest(), True)
+        self.assertEqual(name.get(2).isParametersSha256Digest(), False)
+
+        gotError = True
+        try:
+            Name("/hello/params-sha256=hmm")
+            gotError = False
+        except:
+            pass
+        if not gotError:
+          self.fail("Expected error in new Name from URI")
+
+        # Check canonical URI encoding (lower case).
+        name2 = Name(
+          "/hello/params-sha256=" +
+          "28bad4b5275bd392dbb670c75cf0b66f13f7942b21e80f55c0e86b374753a548")
+        self.assertEqual(name.get(0), name2.get(1))
+
+        # Check that it will accept a hex value in upper case too.
+        name2 = Name(
+          "/hello/params-sha256=" +
           "28BAD4B5275BD392DBB670C75CF0B66F13F7942B21E80F55C0E86B374753A548")
         self.assertEqual(name.get(0), name2.get(1))
 
