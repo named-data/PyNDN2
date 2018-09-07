@@ -636,6 +636,10 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+ADD_LDFLAGS
+ADD_CPPFLAGS
+ADD_CXXFLAGS
+ADD_CFLAGS
 PYTHON_EXTRA_LIBS
 PYTHON_EXTRA_LDFLAGS
 PYTHON_SITE_PKG
@@ -812,7 +816,11 @@ CXXCPP
 OBJCXX
 OBJCXXFLAGS
 PYTHON
-PYTHON_VERSION'
+PYTHON_VERSION
+ADD_CFLAGS
+ADD_CXXFLAGS
+ADD_CPPFLAGS
+ADD_LDFLAGS'
 
 
 # Initialize some variables set by options.
@@ -1479,6 +1487,12 @@ Some influential environment variables:
               The installed Python version to use, for example '2.3'. This
               string will be appended to the Python interpreter canonical
               name.
+  ADD_CFLAGS  Append this to CFLAGS
+  ADD_CXXFLAGS
+              Append this to CXXFLAGS
+  ADD_CPPFLAGS
+              Append this to CPPFLAGS
+  ADD_LDFLAGS Append this to LDFLAGS
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -17306,6 +17320,15 @@ See \`config.log' for more details" "$LINENO" 5; }
 	# all done!
 	#
 
+
+
+CFLAGS="$CFLAGS $ADD_CFLAGS"
+
+CXXFLAGS="$CXXFLAGS $ADD_CXXFLAGS"
+
+CPPFLAGS="$CPPFLAGS $ADD_CPPFLAGS"
+
+LDFLAGS="$LDFLAGS $ADD_LDFLAGS"
 
 ac_fn_cxx_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
 if test "x$ac_cv_type_size_t" = xyes; then :
