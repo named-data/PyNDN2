@@ -252,7 +252,7 @@ class TestNameMethods(ut.TestCase):
         self.assertEqual(Name("ndn:/%00%01/%01%03"), Name("ndn:/%00%01/%01%02").getSuccessor())
         self.assertEqual(Name("ndn:/%00%01/%02%00"), Name("ndn:/%00%01/%01%FF").getSuccessor())
         self.assertEqual(Name("ndn:/%00%01/%00%00%00"), Name("ndn:/%00%01/%FF%FF").getSuccessor())
-        self.assertEqual(Name("/%00"), Name().getSuccessor())
+        self.assertEqual(Name("/sha256digest=0000000000000000000000000000000000000000000000000000000000000000"), Name().getSuccessor())
         self.assertEqual(Name("/%00%01/%00"), Name("/%00%01/...").getSuccessor())
 
     def test_encode_decode(self):

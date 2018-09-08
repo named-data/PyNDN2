@@ -1035,7 +1035,7 @@ class Name(object):
 
         Examples:
 
-        - The successor of / is /%00
+        - The successor of / is /sha256digest=0000000000000000000000000000000000000000000000000000000000000000
         - The successor of /%00%01/%01%02 is /%00%01/%01%03
         - The successor of /%00%01/%01%FF is /%00%01/%02%00
         - The successor of /%00%01/%FF%FF is /%00%01/%00%00%00
@@ -1044,10 +1044,7 @@ class Name(object):
         :rtype: Name
         """
         if self.size() == 0:
-            # Return "/%00".
-            result = Name()
-            result.append(Name.Component(Blob(bytearray([0]), False)))
-            return result
+            return Name("/sha256digest=0000000000000000000000000000000000000000000000000000000000000000")
         else:
             return self.getPrefix(-1).append(self.get(-1).getSuccessor())
 
