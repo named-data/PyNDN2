@@ -1,5 +1,13 @@
-Interim changes since PyNDN v2.8beta1 (2018-07-26)
+Interim changes since PyNDN v2.8beta1 (2018-09-07)
 --------------------------------------------------
+
+Changes
+* https://redmine.named-data.net/issues/4591 Accept Interests encoded with
+  packet format v0.3.
+* https://redmine.named-data.net/issues/4397 In Name, API for typed name components.
+* https://redmine.named-data.net/issues/4593 UdpTransport: specify local port.
+* https://redmine.named-data.net/issues/4701 Added ComponentType.PARAMETERS_SHA256_DIGEST,
+  and support params-sha256=<hex-value> in the name URI.
 
 Bug fixes
 * https://redmine.named-data.net/issues/4605 Support years > 2038 on 32-bit processors.
@@ -7,12 +15,6 @@ Bug fixes
   prefix size instead of a hard-coded value.
 * https://github.com/named-data/jndn/pull/22 In decodeLpPacket, fix the check for
   ignoring an unrecognized field type.
-
-Changes
-* https://redmine.named-data.net/issues/4591 Accept Interests encoded with
-  packet format v0.3.
-* https://redmine.named-data.net/issues/4397 In Name, API for typed name components.
-* https://redmine.named-data.net/issues/4593 UdpTransport: specify local port.
 
 PyNDN v2.8beta1 (2018-04-17)
 ----------------------------

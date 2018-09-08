@@ -760,6 +760,8 @@ class Tlv0_2WireFormat(WireFormat):
         value = Blob(decoder.readBlobTlv(type), copy)
         if type == Tlv.ImplicitSha256DigestComponent:
             return Name.Component.fromImplicitSha256Digest(value)
+        elif type == Tlv.ParametersSha256DigestComponent:
+            return Name.Component.fromParametersSha256Digest(value)
         elif type == Tlv.NameComponent:
             return Name.Component(value)
         else:

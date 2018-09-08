@@ -53,6 +53,7 @@ class Name(object):
         """
         Create a new Name.Component with a copy of the given value.
         (To create an ImplicitSha256Digest component, use fromImplicitSha256Digest.)
+        (To create a ParametersSha256Digest component, use fromParametersSha256Digest.)
 
         :param value: (optional) If value is already a Blob or Name.Component,
           then take another pointer to the value.  Otherwise, create a new
@@ -148,6 +149,11 @@ class Name(object):
                 self._value.toHex(result)
                 return
 
+            if self._type == ComponentType.PARAMETERS_SHA256_DIGEST:
+                result.write("params-sha256=".encode('utf-8'))
+                self._value.toHex(result)
+                return
+
             if self._type != ComponentType.GENERIC:
                 result.write(str(self._otherTypeCode)
                   if self._type == ComponentType.OTHER_CODE else str(self._type))
@@ -232,6 +238,15 @@ class Name(object):
             :rtype: bool
             """
             return self._type == ComponentType.IMPLICIT_SHA256_DIGEST
+
+        def isParametersSha256Digest(self):
+            """
+            Check if this component is a ParametersSha256Digest component.
+
+            :return: True if this is a ParametersSha256Digest component.
+            :rtype: bool
+            """
+            return self._type == ComponentType.PARAMETERS_SHA256_DIGEST
 
         def toNumber(self):
             """
@@ -510,6 +525,27 @@ class Name(object):
             result._type = ComponentType.IMPLICIT_SHA256_DIGEST
             return result
 
+        @staticmethod
+        def fromParametersSha256Digest(digest):
+            """
+            Create a component of type ParametersSha256DigestComponent, so that
+            isParametersSha256Digest() is true.
+
+            :param digest: The SHA-256 digest value.
+            :type digest: Blob or value for Blob constructor
+            :return: The new Component.
+            :rtype: Name.Component
+            :raises RuntimeError: If the digest length is not 32 bytes.
+            """
+            digestBlob = digest if isinstance(digest, Blob) else Blob(digest)
+            if digestBlob.size() != 32:
+              raise RuntimeError(
+                "Name.Component.fromParametersSha256Digest: The digest length must be 32 bytes")
+
+            result = Name.Component(digestBlob)
+            result._type = ComponentType.PARAMETERS_SHA256_DIGEST
+            return result
+
         def getSuccessor(self):
             """
             Get the successor of this component, as described in
@@ -611,6 +647,7 @@ class Name(object):
 
         # Unescape the components.
         sha256digestPrefix = "sha256digest="
+        paramsSha256Prefix = "params-sha256="
         while iComponentStart < len(uri):
             iComponentEnd = uri.find('/', iComponentStart)
             if iComponentEnd < 0:
@@ -620,6 +657,11 @@ class Name(object):
                 sha256digestPrefix):
               hexString = uri[iComponentStart + len(sha256digestPrefix):].strip()
               component = Name.Component.fromImplicitSha256Digest(
+                Blob(bytearray.fromhex(hexString), False))
+            elif (uri[iComponentStart:iComponentStart + len(paramsSha256Prefix)] ==
+                paramsSha256Prefix):
+              hexString = uri[iComponentStart + len(paramsSha256Prefix):].strip()
+              component = Name.Component.fromParametersSha256Digest(
                 Blob(bytearray.fromhex(hexString), False))
             else:
                 type = ComponentType.GENERIC
@@ -635,12 +677,15 @@ class Name(object):
                         raise ValueError("Can't parse decimal Name Component type: " +
                            typeString + " in URI " + uri)
 
+                    # Allow for a decimal value of recognized component types.
                     if (otherTypeCode == ComponentType.GENERIC or
-                        otherTypeCode == ComponentType.IMPLICIT_SHA256_DIGEST):
-                        raise ValueError("Unexpected Name Component type: " +
-                          typeString + " in URI " + uri)
+                        otherTypeCode == ComponentType.IMPLICIT_SHA256_DIGEST or
+                        otherTypeCode == ComponentType.PARAMETERS_SHA256_DIGEST):
+                        # The enum values are the same as the TLV type codes.
+                        type = otherTypeCode
+                    else:
+                        type = ComponentType.OTHER_CODE
 
-                    type = ComponentType.OTHER_CODE
                     iComponentStart = iTypeCodeEnd + 1
 
                 component = Name.Component(
@@ -656,6 +701,8 @@ class Name(object):
     def append(self, value, type = None, otherTypeCode = None):
         """
         Append a new component to this Name.
+        (To append an ImplicitSha256Digest component, use appendImplicitSha256Digest.)
+        (To append a ParametersSha256Digest component, use appendParametersSha256Digest.)
 
         :param value: If value is another Name, append all its components.
           If value is another Name.Component, use its value.
@@ -861,6 +908,19 @@ class Name(object):
         :raises RuntimeError: If the digest length is not 32 bytes.
         """
         return self.append(Name.Component.fromImplicitSha256Digest(digest))
+
+    def appendParametersSha256Digest(self, digest):
+        """
+        Append a component of type ParametersSha256DigestComponent, so that
+        isParametersSha256Digest() is true.
+
+        :param digest: The SHA-256 digest value.
+        :type digest: Blob or value for Blob constructor
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        :raises RuntimeError: If the digest length is not 32 bytes.
+        """
+        return self.append(Name.Component.fromParametersSha256Digest(digest))
 
     def equals(self, name):
         """
@@ -1274,6 +1334,7 @@ class ComponentType(object):
     packet encoding details.
     """
     IMPLICIT_SHA256_DIGEST = 1
+    PARAMETERS_SHA256_DIGEST = 2
     GENERIC                = 8
     OTHER_CODE             = 0x7fff
 
