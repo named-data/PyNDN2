@@ -24,6 +24,7 @@ public:
     appendAny = Py_BuildValue("s", "appendAny");
     appendComponent = Py_BuildValue("s", "appendComponent");
     appendImplicitSha256Digest = Py_BuildValue("s", "appendImplicitSha256Digest");
+    appendParametersSha256Digest = Py_BuildValue("s", "appendParametersSha256Digest");
     clear = Py_BuildValue("s", "clear");
     getChildSelector = Py_BuildValue("s", "getChildSelector");
     getContent = Py_BuildValue("s", "getContent");
@@ -55,6 +56,7 @@ public:
     getValue = Py_BuildValue("s", "getValue");
     hasPeriod = Py_BuildValue("s", "hasPeriod");
     isImplicitSha256Digest = Py_BuildValue("s", "isImplicitSha256Digest");
+    isParametersSha256Digest = Py_BuildValue("s", "isParametersSha256Digest");
     setChildSelector = Py_BuildValue("s", "setChildSelector");
     setContent = Py_BuildValue("s", "setContent");
     setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
@@ -91,6 +93,7 @@ public:
   PyObject* appendAny;
   PyObject* appendComponent;
   PyObject* appendImplicitSha256Digest;
+  PyObject* appendParametersSha256Digest;
   PyObject* getChildSelector;
   PyObject* clear;
   PyObject* getComponent;
@@ -122,6 +125,7 @@ public:
   PyObject* getValue;
   PyObject* hasPeriod;
   PyObject* isImplicitSha256Digest;
+  PyObject* isParametersSha256Digest;
   PyObject* setChildSelector;
   PyObject* setContent;
   PyObject* setFinalBlockId;
@@ -351,6 +355,9 @@ toNameComponentLite(PyObject* nameComponent, NameLite::Component& componentLite)
   if (toBoolByMethod(nameComponent, str.isImplicitSha256Digest))
     componentLite.setImplicitSha256Digest
       (toBlobLiteByMethod(nameComponent, str.getValue));
+  else if (toBoolByMethod(nameComponent, str.isParametersSha256Digest))
+    componentLite.setParametersSha256Digest
+      (toBlobLiteByMethod(nameComponent, str.getValue));
   else
     componentLite = NameLite::Component
       (toBlobLiteByMethod(nameComponent, str.getValue),
@@ -430,6 +437,9 @@ setExclude(PyObject* exclude, const ExcludeLite& excludeLite)
       if (entry.getComponent().isImplicitSha256Digest())
         PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
           (exclude, str.appendImplicitSha256Digest, blob.obj, NULL));
+      else if (entry.getComponent().isParametersSha256Digest())
+        PyObjectRef ignoreResult2(PyObject_CallMethodObjArgs
+          (exclude, str.appendParametersSha256Digest, blob.obj, NULL));
       else
         PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
           (exclude, str.appendComponent, blob.obj, NULL));
