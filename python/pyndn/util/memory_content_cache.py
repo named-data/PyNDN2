@@ -545,9 +545,10 @@ class MemoryContentCache(object):
             self._face = face
 
             # Set up _timeoutTimeMilliseconds.
-            if self._interest.getInterestLifetimeMilliseconds() >= 0.0:
-              self._timeoutTimeMilliseconds = (Common.getNowMilliseconds() +
-                self._interest.getInterestLifetimeMilliseconds())
+            interestLifetime = self._interest.getInterestLifetimeMilliseconds()
+            interestLifetime = 4000.0 if interestLifetime is None else interestLifetime
+            if interestLifetime >= 0.0:
+              self._timeoutTimeMilliseconds = Common.getNowMilliseconds() + interestLifetime
             else:
               # No timeout.
               self._timeoutTimeMilliseconds = -1.0
