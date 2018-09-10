@@ -113,6 +113,7 @@ class Tlv(object):
     Encrypt_EncryptionAlgorithm = 131
     Encrypt_EncryptedPayload = 132
     Encrypt_InitialVector = 133
+    Encrypt_EncryptedPayloadKey = 134
 
     SafeBag_SafeBag = 128
     SafeBag_EncryptedKeyBag = 129

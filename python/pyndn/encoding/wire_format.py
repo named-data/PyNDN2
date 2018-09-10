@@ -309,7 +309,7 @@ class WireFormat(object):
 
     def encodeEncryptedContent(self, encryptedContent):
         """
-        Encode the EncryptedContent and return the encoding.
+        Encode the EncryptedContent v1 and return the encoding.
         Your derived class should override.
 
         :param EncryptedContent encryptedContent: The EncryptedContent object to
@@ -323,7 +323,7 @@ class WireFormat(object):
 
     def decodeEncryptedContent(self, encryptedContent, input, copy = True):
         """
-        Decode input as an EncryptedContent and set the fields of the
+        Decode input as an EncryptedContent v1 and set the fields of the
         encryptedContent object.
         Your derived class should override.
 
@@ -339,6 +339,42 @@ class WireFormat(object):
           override.
         """
         raise RuntimeError("decodeEncryptedContent is not implemented")
+
+    def encodeEncryptedContentV2(self, encryptedContent):
+        """
+        Encode the EncryptedContent v2 (used in Name-based Access Control v2)
+        and return the encoding.
+        See https://github.com/named-data/name-based-access-control/blob/new/docs/spec.rst .
+        Your derived class should override.
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object to
+          encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("encodeEncryptedContentV2 is not implemented")
+
+    def decodeEncryptedContentV2(self, encryptedContent, input, copy = True):
+        """
+        Decode input as an EncryptedContent v2 (used in Name-based Access
+        Control v2) and set the fields of the encryptedContent object.
+        See https://github.com/named-data/name-based-access-control/blob/new/docs/spec.rst .
+        Your derived class should override.
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
+        :raises RuntimeError: for unimplemented if the derived class does not
+          override.
+        """
+        raise RuntimeError("decodeEncryptedContentV2 is not implemented")
 
     @classmethod
     def setDefaultWireFormat(self, wireFormat):
