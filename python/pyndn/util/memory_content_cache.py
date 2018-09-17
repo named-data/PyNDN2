@@ -546,12 +546,11 @@ class MemoryContentCache(object):
 
             # Set up _timeoutTimeMilliseconds.
             interestLifetime = self._interest.getInterestLifetimeMilliseconds()
-            interestLifetime = 4000.0 if interestLifetime is None else interestLifetime
-            if interestLifetime >= 0.0:
-              self._timeoutTimeMilliseconds = Common.getNowMilliseconds() + interestLifetime
-            else:
-              # No timeout.
-              self._timeoutTimeMilliseconds = -1.0
+            if interestLifetime is None or interestLifetime < 0.0:
+                # The InterestLifetime is omitted, so use a default.
+                interestLifetime = 4000.0
+
+            self._timeoutTimeMilliseconds = Common.getNowMilliseconds() + interestLifetime
 
         def getInterest(self):
             """
@@ -574,5 +573,4 @@ class MemoryContentCache(object):
             :return: True if this interest timed out, otherwise False.
             :rtype: bool
             """
-            return (self._timeoutTimeMilliseconds >= 0.0 and
-                    nowMilliseconds >= self._timeoutTimeMilliseconds)
+            return nowMilliseconds >= self._timeoutTimeMilliseconds
