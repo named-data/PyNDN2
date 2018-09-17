@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.8beta1 (2018-09-07)
+Interim changes since PyNDN v2.8beta1 (2018-09-17)
 --------------------------------------------------
 
 Changes
@@ -15,6 +15,8 @@ Bug fixes
   prefix size instead of a hard-coded value.
 * https://github.com/named-data/jndn/pull/22 In decodeLpPacket, fix the check for
   ignoring an unrecognized field type.
+* https://redmine.named-data.net/issues/4729 In MemoryContentCache.storePendingInterest,
+  use 4000 milliseconds if the InterestLifetime is omitted.
 
 PyNDN v2.8beta1 (2018-04-17)
 ----------------------------
