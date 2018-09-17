@@ -143,7 +143,8 @@ class TlvDecoder(object):
           unrecognized type code to skip is critical, throw an exception. If
           True, then skip the unrecognized type code without error.
         :raises ValueError: if the TLV length does not equal the total length of
-          the nested TLVs.
+          the nested TLVs, or if skipCritical is false and the unrecognized type
+          code to skip is critical.
         """
         # We expect _offset to be endOffset, so check this first.
         if self._offset == endOffset:
