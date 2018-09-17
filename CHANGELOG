@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.8beta1 (2018-09-17)
---------------------------------------------------
+PyNDN v2.9beta1 (2018-09-17)
+----------------------------
 
 Changes
 * https://redmine.named-data.net/issues/4591 Accept Interests encoded with
