@@ -353,6 +353,31 @@ class TlvDecoder(object):
         else:
             return False
 
+    def skipTlv(self, expectedType):
+        """
+        Decode the type and length from the input starting at the input buffer
+        position, expecting the type to be expectedType, then skip (and ignore)
+        the value. Update offset.
+
+        :param int expectedType: The expected type.
+        :raises ValueError: if did not get the expected TLV type.
+        """
+        length = self.readTypeAndLength(expectedType)
+        # readTypeAndLength already checked if length exceeds the input buffer.
+        self._offset += length
+
+    def skipOptionalTlv(self, expectedType, endOffset):
+        """
+        Peek at the next TLV, and if it has the expectedType then call skipTlv
+        to skip (and ignore) it.
+
+        :param int expectedType: The expected type.
+        :param int endOffset: The offset of the end of the parent TLV, returned
+          by readNestedTlvsStart.
+        """
+        if self.peekType(expectedType, endOffset):
+            self.skipTlv(expectedType)
+
     def getOffset(self):
         """
         Get the offset into the input buffer, used for the next read.
