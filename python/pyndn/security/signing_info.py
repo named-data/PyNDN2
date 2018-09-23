@@ -36,6 +36,9 @@ class SigningInfo(object):
     The SigningInfo constructor has multiple forms:
     SigningInfo() - Create a default SigningInfo with
     SigningInfo.SignerType.NULL and an empty Name.
+    SigningInfo(signingInfo) - Create a SigningInfo as a copy of the given
+      signingInfo (taking a pointer to the given signingInfo PibIdentity and
+      PibKey without copying).
     SigningInfo(signerType, signerName) - Create a SigningInfo with the
     signerType and optional signer Name.
     Signinginfo(identity) - Create a SigningInfo of type
@@ -47,6 +50,7 @@ class SigningInfo(object):
     SigningInfo(signingString) - Create a SigningInfo from its string
     representation, where the digest algorithm is set to DigestAlgorithm.SHA256.
 
+    :param SigningInfo signingInfo: The SigningInfo to copy.
     :param signerType: The type of signer.
     :type signerType: An int from the SigningInfo.SignerType enum.
     :param Name signerName: The name of signer. The interpretation of the
@@ -72,6 +76,16 @@ class SigningInfo(object):
         if arg1 is None:
             self.reset(SigningInfo.SignerType.NULL)
             self._digestAlgorithm = DigestAlgorithm.SHA256
+        elif isinstance(arg1, SigningInfo):
+            # The copy constructor.
+            signingInfo = arg1
+
+            self._type = signingInfo._type
+            self._name = Name(signingInfo._name)
+            self._identity = signingInfo._identity
+            self._key = signingInfo._key
+            self._digestAlgorithm = signingInfo._digestAlgorithm
+            self._validityPeriod = ValidityPeriod(signingInfo._validityPeriod)
         elif type(arg1) is int:
             signerType = arg1
 
