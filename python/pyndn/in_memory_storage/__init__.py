@@ -18,12 +18,13 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 # Don't include internal modules.
-__all__ = []
+from pyndn.in_memory_storage import in_memory_storage_retaining
+__all__ = ['in_memory_storage_retaining']
 
 import sys as _sys
 
 try:
-    pass
+    from pyndn.in_memory_storage.in_memory_storage_retaining import *
 except ImportError:
     del _sys.modules[__name__]
     raise
