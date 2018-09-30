@@ -155,9 +155,11 @@ class Name(object):
                 return
 
             if self._type != ComponentType.GENERIC:
-                result.write(str(self._otherTypeCode)
+                text = (str(self._otherTypeCode)
                   if self._type == ComponentType.OTHER_CODE else str(self._type))
-                result.write("=")
+                text += "="
+                # write requires the encoded buffer.
+                result.write(text.encode('utf-8'))
 
             Name.toEscapedString(self._value.buf(), result)
 

@@ -16,6 +16,14 @@ Subpackages
 Submodules
 ----------
 
+pyndn.security.command\_interest\_preparer module
+-------------------------------------------------
+
+.. automodule:: pyndn.security.command_interest_preparer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.security.command\_interest\_signer module
 -----------------------------------------------
 

@@ -84,10 +84,17 @@ class Tlv(object):
     ControlParameters_ControlParameters =   104
     ControlParameters_FaceId =              105
     ControlParameters_Uri =                 114
+    ControlParameters_LocalUri =            129
     ControlParameters_LocalControlFeature = 110
     ControlParameters_Origin =              111
     ControlParameters_Cost =                106
+    ControlParameters_Capacity =            131
+    ControlParameters_Count =               132
+    ControlParameters_BaseCongestionMarkingInterval = 135
+    ControlParameters_DefaultCongestionThreshold = 136
+    ControlParameters_Mtu =                 137
     ControlParameters_Flags =               108
+    ControlParameters_Mask =                112
     ControlParameters_Strategy =            107
     ControlParameters_ExpirationPeriod =    109
 

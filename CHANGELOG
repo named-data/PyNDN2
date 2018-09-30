@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.8beta1 (2018-09-07)
---------------------------------------------------
+PyNDN v2.9beta1 (2018-09-17)
+----------------------------
 
 Changes
 * https://redmine.named-data.net/issues/4591 Accept Interests encoded with
@@ -15,6 +15,8 @@ Bug fixes
   prefix size instead of a hard-coded value.
 * https://github.com/named-data/jndn/pull/22 In decodeLpPacket, fix the check for
   ignoring an unrecognized field type.
+* https://redmine.named-data.net/issues/4736 In MemoryContentCache, use a default
+  InterestLifetime and removed support for infinite lifetime.
 
 PyNDN v2.8beta1 (2018-04-17)
 ----------------------------

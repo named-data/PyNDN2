@@ -355,7 +355,7 @@ class TpmBackEndOsx(TpmBackEnd):
             keyUri = keyHandle.getKeyName().toUri()
             # There is only one attr, so we don't need to make a C array.
             attr = SecKeychainAttribute(
-              osx._kSecKeyPrintName, len(keyUri), keyUri)
+              osx._kSecKeyPrintName, len(keyUri), keyUri.encode('utf-8'))
             attrList = SecKeychainAttributeList(1, pointer(attr))
 
             osx._security.SecKeychainItemModifyAttributesAndData(

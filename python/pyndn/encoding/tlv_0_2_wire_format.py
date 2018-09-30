@@ -1315,6 +1315,8 @@ class Tlv0_2WireFormat(WireFormat):
               False)
             controlParameters.setUri(str(uri))
 
+        decoder.skipOptionalTlv(Tlv.ControlParameters_LocalUri, endOffset)
+
         # decode integers
         controlParameters.setLocalControlFeature(
           decoder.readOptionalNonNegativeIntegerTlv
@@ -1326,12 +1328,22 @@ class Tlv0_2WireFormat(WireFormat):
           decoder.readOptionalNonNegativeIntegerTlv
             (Tlv.ControlParameters_Cost, endOffset))
 
+        decoder.skipOptionalTlv(Tlv.ControlParameters_Capacity, endOffset)
+        decoder.skipOptionalTlv(Tlv.ControlParameters_Count, endOffset)
+        decoder.skipOptionalTlv(
+          Tlv.ControlParameters_BaseCongestionMarkingInterval, endOffset)
+        decoder.skipOptionalTlv(
+          Tlv.ControlParameters_DefaultCongestionThreshold, endOffset)
+        decoder.skipOptionalTlv(Tlv.ControlParameters_Mtu, endOffset)
+
         # set forwarding flags
         if decoder.peekType(Tlv.ControlParameters_Flags, endOffset):
             flags = ForwardingFlags()
             flags.setNfdForwardingFlags(
               decoder.readNonNegativeIntegerTlv(Tlv.ControlParameters_Flags))
             controlParameters.setForwardingFlags(flags)
+
+        decoder.skipOptionalTlv(Tlv.ControlParameters_Mask, endOffset)
 
         # decode strategy
         if decoder.peekType(Tlv.ControlParameters_Strategy, endOffset):
