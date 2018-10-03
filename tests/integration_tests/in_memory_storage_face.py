@@ -62,7 +62,8 @@ class InMemoryStorageFace(Face):
         return 0
 
     def registerPrefix(self,
-      prefix, onInterest, onRegisterFailed, onRegisterSuccess, flags, wireFormat):
+      prefix, onInterest, onRegisterFailed, onRegisterSuccess = None,
+      flags = None, wireFormat = None):
         self._interestFilterTable.setInterestFilter(
           0, InterestFilter(prefix), onInterest, self)
 
@@ -71,7 +72,7 @@ class InMemoryStorageFace(Face):
 
         return 0
 
-    def putData(self, data, wireFormat):
+    def putData(self, data, wireFormat = None):
         self._sentData.append(Data(data))
 
     def callLater(self, delayMilliseconds, callback):
