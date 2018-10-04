@@ -146,3 +146,6 @@ class TestEncryptorV2(ut.TestCase):
                 nCk += 1
 
         self.assertEqual(3, nCk)
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)

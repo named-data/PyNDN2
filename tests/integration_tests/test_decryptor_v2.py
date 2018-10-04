@@ -102,3 +102,6 @@ class TestDecryptorV2(ut.TestCase):
 
         self.assertEqual(0, nSuccesses[0])
         self.assertEqual(1, nFailures[0])
+
+if __name__ == '__main__':
+    ut.main(verbosity=2)
