@@ -654,7 +654,7 @@ class Tlv0_2WireFormat(WireFormat):
 
     def encodeEncryptedContent(self, encryptedContent):
         """
-        Encode the EncryptedContent in NDN-TLV and return the encoding.
+        Encode the EncryptedContent v1 in NDN-TLV and return the encoding.
 
         :param EncryptedContent encryptedContent: The EncryptedContent object to
           encode.
@@ -682,7 +682,7 @@ class Tlv0_2WireFormat(WireFormat):
 
     def decodeEncryptedContent(self, encryptedContent, input, copy = True):
         """
-        Decode input as an EncryptedContent in NDN-TLV and set the fields of the
+        Decode input as an EncryptedContent v1 in NDN-TLV and set the fields of the
         encryptedContent object.
 
         :param EncryptedContent encryptedContent: The EncryptedContent object
@@ -697,6 +697,7 @@ class Tlv0_2WireFormat(WireFormat):
         decoder = TlvDecoder(input)
         endOffset = decoder.readNestedTlvsStart(Tlv.Encrypt_EncryptedContent)
 
+        encryptedContent.clear()
         Tlv0_2WireFormat._decodeKeyLocator(
           Tlv.KeyLocator, encryptedContent.getKeyLocator(), decoder, copy)
         encryptedContent.setAlgorithmType(
@@ -706,6 +707,71 @@ class Tlv0_2WireFormat(WireFormat):
            (Tlv.Encrypt_InitialVector, endOffset), copy))
         encryptedContent.setPayload(
           Blob(decoder.readBlobTlv(Tlv.Encrypt_EncryptedPayload), copy))
+
+        decoder.finishNestedTlvs(endOffset)
+
+    def encodeEncryptedContentV2(self, encryptedContent):
+        """
+        Encode the EncryptedContent v2 (used in Name-based Access Control v2) in
+        NDN-TLV and return the encoding.
+        See https://github.com/named-data/name-based-access-control/blob/new/docs/spec.rst .
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object to
+          encode.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        if encryptedContent.getKeyLocator().getType() == KeyLocatorType.KEYNAME:
+            Tlv0_2WireFormat._encodeName(
+              encryptedContent.getKeyLocator().getKeyName(), encoder)
+        encoder.writeOptionalBlobTlv(
+          Tlv.Encrypt_EncryptedPayloadKey, encryptedContent.getPayloadKey().buf())
+        encoder.writeOptionalBlobTlv(
+          Tlv.Encrypt_InitialVector, encryptedContent.getInitialVector().buf())
+        encoder.writeBlobTlv(
+          Tlv.Encrypt_EncryptedPayload, encryptedContent.getPayload().buf())
+
+        encoder.writeTypeAndLength(
+          Tlv.Encrypt_EncryptedContent, len(encoder) - saveLength)
+
+        return Blob(encoder.getOutput(), False)
+
+    def decodeEncryptedContentV2(self, encryptedContent, input, copy = True):
+        """
+        Decode input as an EncryptedContent v2 (used in Name-based Access
+        Control v2) in NDN-TLV and set the fields of the encryptedContent object.
+        See https://github.com/named-data/name-based-access-control/blob/new/docs/spec.rst .
+
+        :param EncryptedContent encryptedContent: The EncryptedContent object
+          whose fields are updated.
+        :param input: The array with the bytes to decode.
+        :type input: An array type with int elements
+        :param bool copy: (optional) If True, copy from the input when making
+          new Blob values. If False, then Blob values share memory with the
+          input, which must remain unchanged while the Blob values are used.
+          If omitted, use True.
+        """
+        decoder = TlvDecoder(input)
+        endOffset = decoder.readNestedTlvsStart(Tlv.Encrypt_EncryptedContent)
+
+        encryptedContent.clear()
+        encryptedContent.setPayload(
+          Blob(decoder.readBlobTlv(Tlv.Encrypt_EncryptedPayload), copy))
+        encryptedContent.setInitialVector(
+          Blob(decoder.readOptionalBlobTlv
+           (Tlv.Encrypt_InitialVector, endOffset), copy))
+        encryptedContent.setPayloadKey(
+          Blob(decoder.readOptionalBlobTlv
+           (Tlv.Encrypt_EncryptedPayloadKey, endOffset), copy))
+
+        if decoder.peekType(Tlv.Name, endOffset):
+            Tlv0_2WireFormat._decodeName(
+              encryptedContent.getKeyLocator().getKeyName(), decoder, copy)
+            encryptedContent.getKeyLocator().setType(KeyLocatorType.KEYNAME)
 
         decoder.finishNestedTlvs(endOffset)
 

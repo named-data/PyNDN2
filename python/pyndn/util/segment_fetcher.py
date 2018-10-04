@@ -104,7 +104,7 @@ class SegmentFetcher(object):
       for better error handling the callback should catch and properly
       handle any exceptions.
     :type onComplete: function object
-    :param onError: Call onError.onError(errorCode, message) for timeout or an
+    :param onError: Call onError(errorCode, message) for timeout or an
       error processing segments. errorCode is a value from
       SegmentFetcher.ErrorCode and message is a related string.
       NOTE: The library will log any exceptions raised by this callback, but
@@ -174,7 +174,7 @@ class SegmentFetcher(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onComplete: function object
-        :param onError: Call onError.onError(errorCode, message) for timeout or an
+        :param onError: Call onError(errorCode, message) for timeout or an
           error processing segments. errorCode is a value from
           SegmentFetcher.ErrorCode and message is a related string.
           NOTE: The library will log any exceptions raised by this callback, but

@@ -27,6 +27,7 @@ from pyndn.util.common import Common
 class DelayedCallTable(object):
     def __init__(self):
         self._table = [] # of _Entry
+        self._nowOffsetMilliseconds = 0
 
     def callLater(self, delayMilliseconds, callback):
         """
@@ -56,13 +57,23 @@ class DelayedCallTable(object):
         sorted insert into the delayed call table, the check for timed-out
         entries is quick and does not require searching the entire table.
         """
-        now = Common.getNowMilliseconds()
+        # nowOffsetMilliseconds_ is only used for testing.
+        now = Common.getNowMilliseconds() + self._nowOffsetMilliseconds
         # _table is sorted on _callTime, so we only need to process the
         # timed-out entries at the front, then quit.
         while (len(self._table) > 0 and self._table[0].getCallTime() <= now):
             entry = self._table[0]
             del self._table[0]
             entry.callCallback()
+
+    def _setNowOffsetMilliseconds(self, nowOffsetMilliseconds):
+        """
+        Set the offset when prepareCommandInterestName() gets the current time,
+        which should only be used for testing.
+
+        :param float nowOffsetMilliseconds: The offset in milliseconds.
+        """
+        self._nowOffsetMilliseconds = nowOffsetMilliseconds
 
     class _Entry(object):
         """
