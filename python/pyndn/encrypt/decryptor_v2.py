@@ -253,7 +253,7 @@ class DecryptorV2(object):
         kdkName.append(EncryptorV2.NAME_COMPONENT_ENCRYPTED_BY).append(
           self._credentialsKey.getName())
 
-        logging.getLogger(__name__).info("Fetching KDK {0}" + kdkName.toUri())
+        logging.getLogger(__name__).info("Fetching KDK " + kdkName.toUri())
 
         def onData(kdkInterest, kdkData):
             try:
