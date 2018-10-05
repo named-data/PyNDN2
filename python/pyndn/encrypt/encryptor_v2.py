@@ -243,11 +243,11 @@ class EncryptorV2(object):
             if nTriesLeft > 1:
                 def callback():
                     self._fetchKekAndPublishCkData(onReady, onError, nTriesLeft - 1)
-                face_.callLater(EncryptorV2.RETRY_DELAY_AFTER_NACK_MS, callback)
+                self._face.callLater(EncryptorV2.RETRY_DELAY_AFTER_NACK_MS, callback)
             else:
                 onError(EncryptError.ErrorCode.KekRetrievalFailure,
                   "Retrieval of KEK [" + interest.getName().toUri() +
-                  "] failed. Got NACK (" + networkNack.getReason() + ")")
+                  "] failed. Got NACK (" + str(networkNack.getReason()) + ")")
                 logging.getLogger(__name__).info("Scheduling retry from NACK")
                 self._face.callLater(
                   EncryptorV2.RETRY_DELAY_KEK_RETRIEVAL_MS, self._retryFetchingKek)
