@@ -286,6 +286,22 @@ class Node(object):
         """
         self._interestFilterTable.unsetInterestFilter(interestFilterId)
 
+    def putData(self, data, wireFormat = None):
+        """
+        The OnInterest callback calls this to put a Data packet which satisfies
+        an Interest.
+
+        :param Data data: The Data packet which satisfies the interest.
+        :param WireFormat wireFormat: A WireFormat object used to encode the
+          Data packet.
+        """
+        encoding = data.wireEncode(wireFormat)
+        # Check the encoding size here so that the error message is explicit.
+        if encoding.size() > self.getMaxNdnPacketSize():
+            raise RuntimeError(
+              "The encoded Data packet size exceeds the maximum limit getMaxNdnPacketSize()")
+        self.send(encoding.buf())
+
     def send(self, encoding):
         """
         Send the encoded packet out through the transport.

@@ -442,14 +442,7 @@ class Face(object):
             # Don't use a default argument since getDefaultWireFormat can change.
             wireFormat = WireFormat.getDefaultWireFormat()
 
-        # We get the encoding now before calling send because it may dispatch to
-        # asyncio to be called later, and the caller may modify data before then.
-        encoding = data.wireEncode(wireFormat)
-        if encoding.size() > self.getMaxNdnPacketSize():
-            raise RuntimeError(
-              "The encoded Data packet size exceeds the maximum limit getMaxNdnPacketSize()")
-
-        self.send(encoding)
+        self._node.putData(data, wireFormat)
 
     def send(self, encoding):
         """
