@@ -108,7 +108,7 @@ class KeyChain(object):
     """
     def __init__(self, arg1 = None, arg2 = None, arg3 = None):
         self._identityManager_ = None  # for security v1
-        self._policyManager = None     # for security v1
+        self._policyManager = NoVerifyPolicyManager() # for security v1
         self._face = None              # for security v1
 
         self._pib = None
