@@ -173,6 +173,13 @@ class ThreadsafeFace(Face):
         putData to be called in a thread-safe manner. See
         Face.putData for calling details.
         """
+        # Check the encoding size here so that the error message happens before
+        # dispatch. The encoding should be cached in the Data object.
+        encoding = data.wireEncode(wireFormat)
+        if encoding.size() > self.getMaxNdnPacketSize():
+            raise RuntimeError(
+              "The encoded Data packet size exceeds the maximum limit getMaxNdnPacketSize()")
+
         self._loop.call_soon_threadsafe(
             super(ThreadsafeFace, self).putData, data, wireFormat)
 
