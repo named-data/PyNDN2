@@ -58,8 +58,7 @@ class Interest(object):
             self._defaultWireEncoding = value.getDefaultWireEncoding()
             self._defaultWireEncodingFormat = value._defaultWireEncodingFormat
         else:
-            self._name = ChangeCounter(Name(value) if isinstance(value, Name)
-                                                   else Name())
+            self._name = ChangeCounter(Name(value))
             self._minSuffixComponents = None
             self._maxSuffixComponents = None
             self._keyLocator = ChangeCounter(KeyLocator())
