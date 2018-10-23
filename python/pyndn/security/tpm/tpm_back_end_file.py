@@ -140,6 +140,64 @@ class TpmBackEndFile(TpmBackEnd):
         if os.path.isfile(filePath):
             os.remove(filePath)
 
+    def _doExportKey(self, keyName, password):
+        """
+        A protected method to get the encoded private key with name keyName in
+        PKCS #8 format, possibly password-encrypted.
+
+        :param Name keyName: The name of the key in the TPM.
+        :param password: The password for encrypting the private key. If the
+          password is supplied, use it to return a PKCS #8
+          EncryptedPrivateKeyInfo. If the password is None, return an
+          unencrypted PKCS #8 PrivateKeyInfo.
+        :type password: an array which implements the buffer protocol
+        :return: The encoded private key.
+        :rtype: Blob
+        :raises TpmBackEnd.Error: If the key does not exist or if the key cannot
+          be exported, e.g., insufficient privileges.
+        """
+        try:
+            key = self._loadKey(keyName)
+        except TpmBackEnd.Error as ex:
+            raise TpmBackEnd.Error("Cannot export private key: " + str(ex))
+
+        try:
+            if password != None:
+                return key.toEncryptedPkcs8(password)
+            else:
+                return key.toPkcs8()
+        except TpmPrivateKey.Error as ex:
+            raise TpmBackEnd.Error(
+              "Error PKCS#8 encoding private key: " + str(ex))
+
+    def _doImportKey(self, keyName, pkcs8, password):
+        """
+        A protected method to import an encoded private key with name keyName in
+          PKCS #8 format, possibly password-encrypted.
+
+        :param Name keyName: The name of the key to use in the TPM.
+        :param pkcs8: The input byte buffer. If the password is supplied, this
+          is a PKCS #8 EncryptedPrivateKeyInfo. If the password is none, this is
+          an unencrypted PKCS #8 PrivateKeyInfo.
+        :type pkcs8: an array which implements the buffer protocol
+        :param password: The password for decrypting the private key. If the
+          password is supplied, use it to decrypt the PKCS #8
+          EncryptedPrivateKeyInfo. If the password is None, import an
+          unencrypted PKCS #8 PrivateKeyInfo.
+        :type password: an array which implements the buffer protocol
+        :raises TpmBackEnd.Error: For an error importing the key.
+        """
+        try:
+            key = TpmPrivateKey()
+            if password != None:
+                key.loadEncryptedPkcs8(pkcs8, password)
+            else:
+                key.loadPkcs8(pkcs8)
+        except TpmPrivateKey.Error as ex:
+            raise TpmBackEnd.Error("Cannot import private key: " + str(ex))
+
+        self._saveKey(keyName, key)
+
     def _loadKey(self, keyName):
         """
         Load the private key with name keyName from the key file directory.
