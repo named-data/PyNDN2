@@ -164,7 +164,8 @@ class TpmPrivateKey(object):
         :param encoding: The byte buffer with the private key encoding.
         :type encoding: str, or an array type with int elements which is
           converted to str
-        :param password: The password for decrypting the private key.
+        :param password: The password for decrypting the private key, which
+          should have characters in the range of 1 to 127..
         :type password: an array which implements the buffer protocol
         :raises TpmPrivateKey.Error: For errors decoding the key.
         """
@@ -412,7 +413,8 @@ class TpmPrivateKey(object):
         """
         Get the encoded encrypted private key in PKCS #8.
 
-        :param password: The password for encrypting the private key.
+        :param password: The password for encrypting the private key, which
+          should have characters in the range of 1 to 127..
         :type password: an array which implements the buffer protocol
         :return: The encoding Blob of the EncryptedPrivateKeyInfo.
         :rtype: Blob

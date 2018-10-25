@@ -620,7 +620,8 @@ class KeyChain(object):
 
         :param CertificateV2 certificate: The certificate to export. This gets
           the key from the TPM using certificate.getKeyName().
-        :param password: (optional) The password for encrypting the private key.
+        :param password: (optional) The password for encrypting the private key,
+          which should have characters in the range of 1 to 127.
           If the password is supplied, use it to put a PKCS #8
           EncryptedPrivateKeyInfo in the SafeBag. If the password is omitted or
           None, put an unencrypted PKCS #8 PrivateKeyInfo in the SafeBag.
@@ -649,7 +650,8 @@ class KeyChain(object):
 
         :param SafeBag safeBag: The SafeBag containing the certificate and
           private key. This copies the values from the SafeBag.
-        :param password: (optional) The password for decrypting the private key.
+        :param password: (optional) The password for decrypting the private key,
+          which should have characters in the range of 1 to 127.
           If the password is supplied, use it to decrypt the PKCS #8
           EncryptedPrivateKeyInfo. If the password is omitted or None, import an
           unencrypted PKCS #8 PrivateKeyInfo.

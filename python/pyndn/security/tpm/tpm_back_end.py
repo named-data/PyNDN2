@@ -126,10 +126,10 @@ class TpmBackEnd(object):
         possibly password-encrypted.
 
         :param Name keyName: The name of the key in the TPM.
-        :param password: The password for encrypting the private key. If the
-          password is supplied, use it to return a PKCS #8
-          EncryptedPrivateKeyInfo. If the password is None, return an
-          unencrypted PKCS #8 PrivateKeyInfo.
+        :param password: The password for encrypting the private key, which
+          should have characters in the range of 1 to 127. If the password is
+          supplied, use it to return a PKCS #8 EncryptedPrivateKeyInfo. If the
+          password is None, return an unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
         :return: The encoded private key.
         :rtype: Blob
@@ -151,10 +151,10 @@ class TpmBackEnd(object):
           is a PKCS #8 EncryptedPrivateKeyInfo. If the password is None, this is
           an unencrypted PKCS #8 PrivateKeyInfo.
         :type pkcs8: an array which implements the buffer protocol
-        :param password: The password for decrypting the private key. If the
-          password is supplied, use it to decrypt the PKCS #8
-          EncryptedPrivateKeyInfo. If the password is None, import an
-          unencrypted PKCS #8 PrivateKeyInfo.
+        :param password: The password for decrypting the private key, which
+          should have characters in the range of 1 to 127. If the password is
+          supplied, use it to decrypt the PKCS #8 EncryptedPrivateKeyInfo. If
+          the password is None, import an unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
         :raises TpmBackEnd.Error: For an error importing the key.
         """
@@ -286,10 +286,10 @@ class TpmBackEnd(object):
         Your subclass must implement it.
 
         :param Name keyName: The name of the key in the TPM.
-        :param password: The password for encrypting the private key. If the
-          password is supplied, use it to return a PKCS #8
-          EncryptedPrivateKeyInfo. If the password is None, return an
-          unencrypted PKCS #8 PrivateKeyInfo.
+        :param password: The password for encrypting the private key, which
+          should have characters in the range of 1 to 127. If the password is
+          supplied, use it to return a PKCS #8 EncryptedPrivateKeyInfo. If the
+          password is None, return an unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
         :return: The encoded private key.
         :rtype: Blob
@@ -309,10 +309,10 @@ class TpmBackEnd(object):
           is a PKCS #8 EncryptedPrivateKeyInfo. If the password is none, this is
           an unencrypted PKCS #8 PrivateKeyInfo.
         :type pkcs8: an array which implements the buffer protocol
-        :param password: The password for decrypting the private key. If the
-          password is supplied, use it to decrypt the PKCS #8
-          EncryptedPrivateKeyInfo. If the password is None, import an
-          unencrypted PKCS #8 PrivateKeyInfo.
+        :param password: The password for decrypting the private key, which
+          should have characters in the range of 1 to 127. If the password is
+          supplied, use it to decrypt the PKCS #8 EncryptedPrivateKeyInfo. If
+          the password is None, import an unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
         :raises TpmBackEnd.Error: if a key with name keyName already exists, or
           for an error importing the key.
