@@ -75,11 +75,11 @@ class SafeBag(object):
     :param input: The array with the bytes to decode.
     :type input: A Blob or an array type with int elements
     """
-    def __init__(self, keyNameOrCertificate, privateKeyBag = None,
+    def __init__(self, arg1, privateKeyBag = None,
       publicKeyEncoding = None, password = None,
       digestAlgorithm = DigestAlgorithm.SHA256, wireFormat = None):
-        if isinstance(keyNameOrCertificate, Name):
-            keyName = keyNameOrCertificate
+        if isinstance(arg1, Name):
+            keyName = arg1
             if wireFormat == None:
                 # Don't use a default argument since getDefaultWireFormat can change.
                 wireFormat = WireFormat.getDefaultWireFormat()
@@ -88,13 +88,13 @@ class SafeBag(object):
               keyName, privateKeyBag, publicKeyEncoding, password,
               digestAlgorithm, wireFormat)
             self._privateKeyBag = privateKeyBag
-        elif isinstance(keyNameOrCertificate, Data):
+        elif isinstance(arg1, Data):
             # The certificate is supplied.
-            self._certificate = Data(keyNameOrCertificate)
+            self._certificate = Data(arg1)
             self._privateKeyBag = privateKeyBag
         else:
             # Assume the first argument is the encoded SafeBag.
-            self.wireDecode(keyNameOrCertificate)
+            self.wireDecode(arg1)
 
     def getCertificate(self):
         """
