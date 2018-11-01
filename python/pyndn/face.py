@@ -75,6 +75,21 @@ class Face(object):
         self._commandKeyChain = None
         self._commandCertificateName = Name()
 
+    def setInterestLoopbackEnabled(self, interestLoopbackEnabled):
+        """
+        Enable or disable Interest loopback. If Interest loopback is enabled,
+        then an Interest to expressInterest is also sent to each of the matching
+        OnInterest callbacks that the application gave to registerPrefix or
+        setInterestFilter, and a Data that the application gives to putData can
+        satisfy pending Interests. This way one part of an application can do
+        Interest/Data exchange with another part through the same Face. Interest
+        loopback is disabled by default.
+
+        :param bool interestLoopbackEnabled: If True, enable Interest loopback,
+          otherwise disable it.
+        """
+        self._node.setInterestLoopbackEnabled(interestLoopbackEnabled)
+
     def expressInterest(
       self, interestOrName, arg2, arg3 = None, arg4 = None, arg5 = None,
       arg6 = None):

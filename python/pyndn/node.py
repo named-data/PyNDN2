@@ -71,6 +71,16 @@ class Node(object):
         self._lastEntryId = 0
         self._lastEntryIdLock = threading.Lock()
         self._connectStatus = Node._ConnectStatus.UNCONNECTED
+        self._interestLoopbackEnabled = False
+
+    def setInterestLoopbackEnabled(self, interestLoopbackEnabled):
+        """
+        Enable or disable Interest loopback.
+
+        :param bool interestLoopbackEnabled: If True, enable Interest loopback,
+          otherwise disable it.
+        """
+        self._interestLoopbackEnabled = interestLoopbackEnabled
 
     def expressInterest(
       self, pendingInterestId, interestCopy, onData, onTimeout, onNetworkNack,
@@ -295,6 +305,20 @@ class Node(object):
         :param WireFormat wireFormat: A WireFormat object used to encode the
           Data packet.
         """
+        if self._interestLoopbackEnabled:
+            hasApplicationMatch = self._satisfyPendingInterests(data)
+            if hasApplicationMatch:
+                # _satisfyPendingInterests called the OnData callback for one of
+                # the pending Interests from the application, so we don't need
+                # to send the Data packet to the forwarder. There is a
+                # possibility that we also received an overlapping  matching
+                # Interest from the forwarder within the Interest lifetime which
+                # we won't satisfy by sending the Data to the forwarder. To fix
+                # this case we could just send the Data to the forwarder anyway,
+                # or we can make the pending Interest table more complicated by
+                # also tracking the Interests that we receive from the forwarder.
+                return
+
         encoding = data.wireEncode(wireFormat)
         # Check the encoding size here so that the error message is explicit.
         if encoding.size() > self.getMaxNdnPacketSize():
@@ -454,7 +478,8 @@ class Node(object):
       wireFormat, face):
         """
         Do the work of expressInterest once we know we are connected. Add the
-        entry to the PIT, encode and send the interest.
+        entry to the PIT, encode and send the interest. If Interest loopback is
+        enabled, then also call _dispatchInterest.
 
         :param int pendingInterestId: The getNextEntryId() for the pending
           interest ID which Face got so it could return it to the caller.
@@ -503,6 +528,9 @@ class Node(object):
                   "The encoded interest size exceeds the maximum limit getMaxNdnPacketSize()")
 
             self._transport.send(encoding.toBuffer())
+
+            if self._interestLoopbackEnabled:
+                self._dispatchInterest(interestCopy)
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
