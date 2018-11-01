@@ -417,53 +417,9 @@ class Node(object):
 
         # Now process as Interest or Data.
         if interest != None:
-            # Call all interest filter callbacks which match.
-            matchedFilters = []
-            self._interestFilterTable.getMatchedFilters(interest, matchedFilters)
-            for i in range(len(matchedFilters)):
-                entry = matchedFilters[i]
-                includeFilter = True
-                onInterestCall = entry.getOnInterest()
-                # If onInterest is not a function nor a method assumes it is a
-                # calleable object
-                if (not inspect.isfunction(onInterestCall) and
-                    not inspect.ismethod(onInterestCall)):
-                    onInterestCall = onInterestCall.__call__
-                # Use getcallargs to test if onInterest accepts 5 args.
-                try:
-                    inspect.getcallargs(onInterestCall,
-                      None, None, None, None, None)
-                except TypeError:
-                    # Assume onInterest is old-style with 4 arguments.
-                    includeFilter = False
-
-                if includeFilter:
-                    try:
-                        entry.getOnInterest()(
-                          entry.getFilter().getPrefix(), interest,
-                          entry.getFace(), entry.getInterestFilterId(),
-                          entry.getFilter())
-                    except:
-                        logging.exception("Error in onInterest")
-                else:
-                    # Old-style onInterest without the filter argument. We
-                    # still pass a Face instead of Transport since Face also
-                    # has a send method.
-                    try:
-                        entry.getOnInterest()(
-                          entry.getFilter().getPrefix(), interest,
-                          entry.getFace(), entry.getInterestFilterId())
-                    except:
-                        logging.exception("Error in onInterest")
+            self._dispatchInterest(interest)
         elif data != None:
-            pendingInterests = []
-            self._pendingInterestTable.extractEntriesForExpressedInterest(
-              data, pendingInterests)
-            for pendingInterest in pendingInterests:
-                try:
-                    pendingInterest.getOnData()(pendingInterest.getInterest(), data)
-                except:
-                    logging.exception("Error in onData")
+            self._satisfyPendingInterests(data)
 
     def isLocal(self):
         """
@@ -626,6 +582,74 @@ class Node(object):
         with self._lastEntryIdLock:
             self._lastEntryId += 1
             return self._lastEntryId
+
+    def _dispatchInterest(self, interest):
+        """
+        Call the OnInterest callback for all entries in the _interestFilterTable
+        that match the interest.
+
+        :param Interest interest: The Interest to match.
+        """
+        # Call all interest filter callbacks which match.
+        matchedFilters = []
+        self._interestFilterTable.getMatchedFilters(interest, matchedFilters)
+        for i in range(len(matchedFilters)):
+            entry = matchedFilters[i]
+            includeFilter = True
+            onInterestCall = entry.getOnInterest()
+            # If onInterest is not a function nor a method assumes it is a
+            # callable object
+            if (not inspect.isfunction(onInterestCall) and
+                not inspect.ismethod(onInterestCall)):
+                onInterestCall = onInterestCall.__call__
+            # Use getcallargs to test if onInterest accepts 5 args.
+            try:
+                inspect.getcallargs(onInterestCall,
+                  None, None, None, None, None)
+            except TypeError:
+                # Assume onInterest is old-style with 4 arguments.
+                includeFilter = False
+
+            if includeFilter:
+                try:
+                    entry.getOnInterest()(
+                      entry.getFilter().getPrefix(), interest,
+                      entry.getFace(), entry.getInterestFilterId(),
+                      entry.getFilter())
+                except:
+                    logging.exception("Error in onInterest")
+            else:
+                # Old-style onInterest without the filter argument. We
+                # still pass a Face instead of Transport since Face also
+                # has a send method.
+                try:
+                    entry.getOnInterest()(
+                      entry.getFilter().getPrefix(), interest,
+                      entry.getFace(), entry.getInterestFilterId())
+                except:
+                    logging.exception("Error in onInterest")
+
+    def _satisfyPendingInterests(self, data):
+        """
+        Extract entries from the _pendingInterestTable which match data, and
+        call each OnData callback.
+
+        :param Data data: The Data packet to match.
+        :return: True if the data matched an entry in the _pendingInterestTable.
+        :rtype: bool
+        """
+        hasMatch = False
+        pendingInterests = []
+        self._pendingInterestTable.extractEntriesForExpressedInterest(
+          data, pendingInterests)
+        for pendingInterest in pendingInterests:
+            hasMatch = True
+            try:
+                pendingInterest.getOnData()(pendingInterest.getInterest(), data)
+            except:
+                logging.exception("Error in onData")
+
+        return hasMatch
 
     class _ConnectStatus(object):
         UNCONNECTED = 1
