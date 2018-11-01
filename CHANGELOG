@@ -1,9 +1,10 @@
-Interim changes since PyNDN v2.9beta1 (2018-09-17)
+Interim changes since PyNDN v2.9beta1 (2018-11-01)
 --------------------------------------------------
 
 Changes
 * https://redmine.named-data.net/issues/4655 Added name-based access control v2,
   EncryptorV2, DecryptorV2 and AccessControlV2, with integration tests.
+* In Face, added method setInterestLoopbackEnabled.
 
 PyNDN v2.9beta1 (2018-09-17)
 ----------------------------
