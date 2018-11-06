@@ -346,8 +346,8 @@ class DecryptorV2(object):
               content.getPayload().toBytes(), kdkKeyName)
         except Exception as ex:
             # We don't expect this from the in-memory KeyChain.
-            onError(EncryptError.ErrorCode.EncryptionFailure,
-              "Error decrypting CK EncryptedContent " + repr(ex))
+            onError(EncryptError.ErrorCode.DecryptionFailure,
+              "Error decrypting the CK EncryptedContent " + repr(ex))
             return
 
         if ckBits.isNull():
