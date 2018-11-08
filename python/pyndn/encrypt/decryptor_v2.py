@@ -224,7 +224,7 @@ class DecryptorV2(object):
             contentKey.pendingInterest = 0
             onError(EncryptError.ErrorCode.CkRetrievalFailure,
               "Retrieval of CK [" + interest.getName().toUri() +
-              "] failed. Got NACK (" + networkNack.getReason() + ")")
+              "] failed. Got NACK (" + str(networkNack.getReason()) + ")")
 
         try:
             contentKey.pendingInterest = self._face.expressInterest(
@@ -286,7 +286,7 @@ class DecryptorV2(object):
             contentKey.pendingInterest = 0
             onError(EncryptError.ErrorCode.KdkRetrievalFailure,
               "Retrieval of KDK [" + interest.getName().toUri() +
-              "] failed. Got NACK (" + networkNack.getReason() + ")")
+              "] failed. Got NACK (" + str(networkNack.getReason()) + ")")
 
         try:
             contentKey.pendingInterest = self._face.expressInterest(
