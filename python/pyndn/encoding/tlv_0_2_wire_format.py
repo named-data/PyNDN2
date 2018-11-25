@@ -1469,9 +1469,11 @@ class Tlv0_2WireFormat(WireFormat):
         interest.unsetLink()
         interest.setSelectedDelegationIndex(None)
 
-        # Ignore the HopLimit and Parameters.
+        # Ignore the HopLimit.
         decoder.readOptionalBlobTlv(Tlv.HopLimit, endOffset)
-        decoder.readOptionalBlobTlv(Tlv.Parameters, endOffset)
+
+        interest.setParameters(
+          Blob(readOptionalBlobTlv(Tlv.Parameters, endOffset), copy))
 
         # Set the nonce last because setting other interest fields clears it.
         interest.setNonce(Blob() if nonce == None else Blob(nonce, copy))
