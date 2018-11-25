@@ -47,6 +47,7 @@ public:
     getNotAfter = Py_BuildValue("s", "getNotAfter");
     getNotBefore = Py_BuildValue("s", "getNotBefore");
     getOtherTypeCode = Py_BuildValue("s", "getOtherTypeCode");
+    getParameters = Py_BuildValue("s", "getParameters");
     getSelectedDelegationIndex = Py_BuildValue("s", "getSelectedDelegationIndex");
     getSignature = Py_BuildValue("s", "getSignature");
     getSignatureInfoEncoding = Py_BuildValue("s", "getSignatureInfoEncoding");
@@ -69,6 +70,7 @@ public:
     setMustBeFresh = Py_BuildValue("s", "setMustBeFresh");
     setNonce = Py_BuildValue("s", "setNonce");
     setOtherTypeCode = Py_BuildValue("s", "setOtherTypeCode");
+    setParameters = Py_BuildValue("s", "setParameters");
     setPeriod = Py_BuildValue("s", "setPeriod");
     setSelectedDelegationIndex = Py_BuildValue("s", "setSelectedDelegationIndex");
     setSignature = Py_BuildValue("s", "setSignature");
@@ -116,6 +118,7 @@ public:
   PyObject* getNotAfter;
   PyObject* getNotBefore;
   PyObject* getOtherTypeCode;
+  PyObject* getParameters;
   PyObject* getSelectedDelegationIndex;
   PyObject* getSignature;
   PyObject* getSignatureInfoEncoding;
@@ -138,6 +141,7 @@ public:
   PyObject* setMustBeFresh;
   PyObject* setNonce;
   PyObject* setOtherTypeCode;
+  PyObject* setParameters;
   PyObject* setPeriod;
   PyObject* setSelectedDelegationIndex;
   PyObject* setSignature;
@@ -548,6 +552,7 @@ toInterestLite
   interestLite.setMustBeFresh(toBoolByMethod(interest, str.getMustBeFresh));
   interestLite.setInterestLifetimeMilliseconds
     (toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
+  interestLite.setParameters(toBlobLiteByMethod(interest, str.getParameters));
 
   PyObjectRef forwardingHint
     (PyObject_CallMethodObjArgs(interest, str.getForwardingHint, NULL));
@@ -606,6 +611,9 @@ setInterest(PyObject* interest, const InterestLite& interestLite)
   callMethodFromDouble
     (interest, str.setInterestLifetimeMilliseconds,
      interestLite.getInterestLifetimeMilliseconds());
+  PyObjectRef parameters(makeBlob(interestLite.getParameters()));
+  PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
+    (interest, str.setParameters, parameters.obj, NULL));
 
   if (interestLite.getForwardingHintWireEncoding().buf()) {
     // InterestLite only stores the encoded delegation set.
