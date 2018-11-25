@@ -438,6 +438,36 @@ class TestInterestMethods(ut.TestCase):
         self.assertEqual(False, InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b")))
         self.assertEqual(True,  InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b/c")))
 
+    def test_set_parameters(self):
+        interest = Interest()
+        self.assertTrue(not interest.hasParameters())
+        interest.setParameters(Blob(bytearray([ 0x23, 0x00 ])))
+        self.assertTrue(interest.hasParameters())
+        self.assertTrue(interest.getParameters().equals(Blob(bytearray([ 0x23, 0x00 ]))))
+
+        interest.setParameters(Blob())
+        self.assertTrue(not interest.hasParameters())
+
+    def test_append_parameters_digest(self):
+        name = Name("/local/ndn/prefix")
+        interest = Interest(name)
+
+        self.assertTrue(not interest.hasParameters())
+        # No parameters yet, so it should do nothing.
+        interest.appendParametersDigestToName()
+        self.assertEqual("/local/ndn/prefix", interest.getName().toUri())
+
+        interest.setParameters(Blob(bytearray([ 0x23, 0x01, 0xC0 ])))
+        self.assertTrue(interest.hasParameters())
+        interest.appendParametersDigestToName()
+        self.assertEqual(name.size() + 1, interest.getName().size())
+        self.assertTrue(interest.getName().getPrefix(-1).equals(name))
+        SHA256_LENGTH = 32
+        self.assertTrue(SHA256_LENGTH, interest.getName().get(-1).getValue().size())
+        
+        self.assertEqual(interest.getName().toUri(), "/local/ndn/prefix/" +
+          "params-sha256=a16cc669b4c9ef6801e1569488513f9523ffb28a39e53aa6e11add8d00a413fc")
+
 if __name__ == '__main__':
     ut.main(verbosity=2)
 
