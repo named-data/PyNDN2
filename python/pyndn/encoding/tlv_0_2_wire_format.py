@@ -274,6 +274,9 @@ class Tlv0_2WireFormat(WireFormat):
             raise RuntimeError(
               "Interest has a selected delegation, but no link object")
 
+        # Format v0.2 doesn't have Interest parameters.
+        interest.setParameters(Blob())
+
         # Set the nonce last because setting other interest fields clears it.
         interest.setNonce(nonce)
 
