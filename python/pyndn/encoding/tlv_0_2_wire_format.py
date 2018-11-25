@@ -1473,7 +1473,7 @@ class Tlv0_2WireFormat(WireFormat):
         decoder.readOptionalBlobTlv(Tlv.HopLimit, endOffset)
 
         interest.setParameters(
-          Blob(readOptionalBlobTlv(Tlv.Parameters, endOffset), copy))
+          Blob(decoder.readOptionalBlobTlv(Tlv.Parameters, endOffset), copy))
 
         # Set the nonce last because setting other interest fields clears it.
         interest.setNonce(Blob() if nonce == None else Blob(nonce, copy))
