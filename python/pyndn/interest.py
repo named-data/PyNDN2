@@ -194,7 +194,7 @@ class Interest(object):
         :return:  True if the Interest parameters are specified, False if not.
         :rtype: bool
         """
-        return not self._parameters.isNull()
+        return self._parameters.size() > 0
 
     def getParameters(self):
         """
