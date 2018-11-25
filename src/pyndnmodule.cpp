@@ -552,6 +552,7 @@ toInterestLite
   interestLite.setMustBeFresh(toBoolByMethod(interest, str.getMustBeFresh));
   interestLite.setInterestLifetimeMilliseconds
     (toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
+  interestLite.setNonce(toBlobLiteByMethod(interest, str.getNonce));
   interestLite.setParameters(toBlobLiteByMethod(interest, str.getParameters));
 
   PyObjectRef forwardingHint
