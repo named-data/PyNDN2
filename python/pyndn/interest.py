@@ -21,6 +21,8 @@
 This module defines the NDN Interest class.
 """
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from random import SystemRandom
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.util.blob import Blob
@@ -49,6 +51,7 @@ class Interest(object):
             self._nonce = value.getNonce()
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
             self._forwardingHint = ChangeCounter(DelegationSet(value.getForwardingHint()))
+            self._parameters = value._parameters
             self._linkWireEncoding = value._linkWireEncoding
             self._linkWireEncodingFormat = value._linkWireEncodingFormat
             self._link = ChangeCounter(None)
@@ -69,6 +72,7 @@ class Interest(object):
             self._nonce = Blob()
             self._interestLifetimeMilliseconds = None
             self._forwardingHint = ChangeCounter(DelegationSet())
+            self._parameters = Blob()
             self._linkWireEncoding = Blob()
             self._linkWireEncodingFormat = None
             self._link = ChangeCounter(None)
@@ -182,6 +186,24 @@ class Interest(object):
         :rtype: DelegationSet
         """
         return self._forwardingHint.get()
+
+    def hasParameters(self):
+        """
+        Check if the Interest parameters are specified.
+
+        :return:  True if the Interest parameters are specified, False if not.
+        :rtype: bool
+        """
+        return not self._parameters.isNull()
+
+    def getParameters(self):
+        """
+        Get the Interest parameters.
+
+        :return: The parameters as a Blob, which isNull() if unspecified.
+        :rtype: Blob
+        """
+        return self._parameters
 
     def hasLink(self):
         """
@@ -384,6 +406,21 @@ class Interest(object):
         self._changeCount += 1
         return self
 
+    def setParameters(self, parameters):
+        """
+        Set the Interest parameters to the given value.
+
+        :param parameters: The array with the Interest parameters bytes. If
+          parameters is not a Blob, then this creates a new Blob to copy the
+          bytes (otherwise this takes another pointer to the same Blob).
+        :type parameters: A Blob or an array type with int elements
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        self._parameters = parameters if isinstance(parameters, Blob) else Blob(parameters)
+        self._changeCount += 1
+        return self
+
     def setLinkWireEncoding(self, encoding, wireFormat = None):
         """
         Set the link wire encoding bytes, without decoding them. If there is a
@@ -486,6 +523,27 @@ class Interest(object):
         self._interestLifetimeMilliseconds = Common.nonNegativeFloatOrNone(
           interestLifetimeMilliseconds)
         self._changeCount += 1
+        return self
+
+    def appendParametersDigestToName(self):
+        """
+        Append the digest of the Interest parameters to the Name as a
+        ParametersSha256DigestComponent. However, if the Interest parameters is
+        unspecified, do nothing. This does not check if the Name already has a
+        parameters digest component, so calling again will append another
+        component.
+
+        :return: This Interest so that you can chain calls to update values.
+        :rtype: Interest
+        """
+        if not self.hasParameters():
+            return self
+
+        sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        sha256.update(self._parameters.toBytes())
+        self.getName().appendParametersSha256Digest(
+          Blob(bytearray(sha256.finalize()), False))
+
         return self
 
     def wireEncode(self, wireFormat = None):
