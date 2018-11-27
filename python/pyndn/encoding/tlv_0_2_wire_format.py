@@ -118,6 +118,12 @@ class Tlv0_2WireFormat(WireFormat):
             result = _pyndn.Tlv0_1_1WireFormat_encodeInterest(interest)
             return (Blob(result[0], False), result[1], result[2])
 
+        if interest.hasParameters():
+            # The application has specified a format v0.3 field. As we
+            # transition to format v0.3, encode as format v0.3 even though the
+            # application default is Tlv0_2WireFormat.
+            return self._encodeInterestV03(interest)
+
         encoder = TlvEncoder(256)
         saveLength = len(encoder)
 
@@ -1412,6 +1418,92 @@ class Tlv0_2WireFormat(WireFormat):
             # Add unsorted to preserve the order so that Interest selected
             # delegation index will work.
             delegationSet.addUnsorted(preference, name)
+
+    @staticmethod
+    def _encodeInterestV03(interest):
+        """
+        Encode interest in NDN-TLV format v0.3 and return the encoding.
+
+        :param Interest interest: The Interest object to encode.
+        :return: A Tuple of (encoding, signedPortionBeginOffset,
+          signedPortionEndOffset) where encoding is a Blob containing the
+          encoding, signedPortionBeginOffset is the offset in the encoding of
+          the beginning of the signed portion, and signedPortionEndOffset is
+          the offset in the encoding of the end of the signed portion. The
+          signed portion starts from the first name component and ends just
+          before the final name component (which is assumed to be a signature
+          for a signed interest).
+        :rtype: (Blob, int, int)
+        """
+        # TODO: Throw error if the interest speficies V02 fields.
+
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        encoder.writeOptionalBlobTlv(
+          Tlv.Parameters, interest.getParameters().buf())
+        # TODO: HopLimit.
+        encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
+          Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
+
+        # Encode the Nonce as 4 bytes.
+        if interest.getNonce().size() == 0:
+            # This is the most common case. Generate a nonce.
+            nonce = bytearray(4)
+            for i in range(4):
+                nonce[i] = _systemRandom.randint(0, 0xff)
+            encoder.writeBlobTlv(Tlv.Nonce, nonce)
+        elif interest.getNonce().size() < 4:
+            nonce = bytearray(4)
+            # Copy existing nonce bytes.
+            nonce[:interest.getNonce().size()] = interest.getNonce().buf()
+
+            # Generate random bytes for remaining bytes in the nonce.
+            for i in range(interest.getNonce().size(), 4):
+                nonce[i] = _systemRandom.randint(0, 0xff)
+
+            encoder.writeBlobTlv(Tlv.Nonce, nonce)
+        elif interest.getNonce().size() == 4:
+            # Use the nonce as-is.
+            encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf())
+        else:
+            # Truncate.
+            encoder.writeBlobTlv(Tlv.Nonce, interest.getNonce().buf()[:4])
+
+        if interest.getForwardingHint().size() > 0:
+            if interest.getSelectedDelegationIndex() != None:
+                raise RuntimeError(
+                  "An Interest may not have a selected delegation when encoding a forwarding hint")
+            if interest.hasLink():
+                raise RuntimeError(
+                  "An Interest may not have a link object when encoding a forwarding hint")
+
+            forwardingHintSaveLength = len(encoder)
+            Tlv0_2WireFormat._encodeDelegationSet(
+              interest.getForwardingHint(), encoder)
+            encoder.writeTypeAndLength(
+              Tlv.ForwardingHint, len(encoder) - forwardingHintSaveLength)
+
+        if interest.getMustBeFresh():
+            encoder.writeTypeAndLength(Tlv.MustBeFresh, 0)
+        if interest.getCanBePrefix():
+            encoder.writeTypeAndLength(Tlv.CanBePrefix, 0)
+
+        (tempSignedPortionBeginOffset, tempSignedPortionEndOffset) = \
+          Tlv0_2WireFormat._encodeName(interest.getName(), encoder)
+        signedPortionBeginOffsetFromBack = (len(encoder) -
+                                            tempSignedPortionBeginOffset)
+        signedPortionEndOffsetFromBack = (len(encoder) -
+                                          tempSignedPortionEndOffset)
+
+        encoder.writeTypeAndLength(Tlv.Interest, len(encoder) - saveLength)
+        signedPortionBeginOffset = (len(encoder) -
+                                    signedPortionBeginOffsetFromBack)
+        signedPortionEndOffset = len(encoder) - signedPortionEndOffsetFromBack
+
+        return (Blob(encoder.getOutput(), False), signedPortionBeginOffset,
+                signedPortionEndOffset)
 
     @staticmethod
     def _decodeInterestV03(interest, input, copy):
