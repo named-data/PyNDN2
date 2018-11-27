@@ -861,5 +861,5 @@ class Interest(object):
     mustBeFresh = property(getMustBeFresh, setMustBeFresh)
     nonce = property(getNonce, setNonce)
     interestLifetimeMilliseconds = property(getInterestLifetimeMilliseconds, setInterestLifetimeMilliseconds)
-
-
+    forwardingHint = property(getForwardingHint, setForwardingHint)
+    parameters = property(getParameters, setParameters)
