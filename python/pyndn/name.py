@@ -477,7 +477,7 @@ class Name(object):
             :return: The new Component.
             :rtype: Name.Component
             """
-            return Name.Component.fromNumberWithMarker(version, 0xFD)
+            return Name.Component.fromNumberWithMarker(int(version), 0xFD)
 
         @staticmethod
         def fromTimestamp(timestamp):
@@ -491,7 +491,7 @@ class Name(object):
             :return: The new Component.
             :rtype: Name.Component
             """
-            return Name.Component.fromNumberWithMarker(timestamp, 0xFC)
+            return Name.Component.fromNumberWithMarker(int(timestamp), 0xFC)
 
         @staticmethod
         def fromSequenceNumber(sequenceNumber):
