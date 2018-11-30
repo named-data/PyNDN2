@@ -212,6 +212,9 @@ class Blob(object):
             # One of the blobs is None and the other isn't.
             return False
 
+        if self._array is other._array:
+            # The other is the same Blob.
+            return True
         if len(self._array) != len(other._array):
             return False
 
