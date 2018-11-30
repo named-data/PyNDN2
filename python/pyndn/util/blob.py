@@ -173,50 +173,6 @@ class Blob(object):
                 # For Python 2, just return the raw string.
                 return self.toRawStr()
 
-    # Python operators
-
-    def __eq__(self, other):
-        return isinstance(other, Blob) and self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __str__(self):
-        """
-        For Python 3, decode the buffer as UTF8 and return the Unicode string
-        Otherwise, for Python 2, return the buffer as a raw string.
-        (For both Python 2 and 3, this is the reverse of calling the Blob
-        constructor with a str.)
-
-        :return: The array as a str, or "" if isNull().
-        :rtype: str
-        """
-        if self._array == None:
-            return ""
-        else:
-            if sys.version_info[0] > 2:
-                # Decode the UTF8 byte array.
-                return str(self.toBuffer(), 'utf8')
-            else:
-                # For Python 2, make a raw string.
-                return "".join(map(chr, self.buf()))
-
-    def __hash__(self):
-        """
-        If the hash code is already computed then return it, otherwise compute
-        and return the hash code.
-
-        :return: The hash code for the buffer, or 0 if the buffer is None.
-        :rtype: int
-        """
-        if self._hash == None:
-            if self._array == None:
-                self._hash = 0
-            else:
-                self._hash = hash(self.toBytes())
-
-        return self._hash
-
     @staticmethod
     def fromRawStr(rawStr):
         """
@@ -328,6 +284,50 @@ class Blob(object):
             hexBuffer[0] = ord(hex[0])
             hexBuffer[1] = ord(hex[1])
             result.write(hexBuffer)
+
+    # Python operators
+
+    def __eq__(self, other):
+        return isinstance(other, Blob) and self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __str__(self):
+        """
+        For Python 3, decode the buffer as UTF8 and return the Unicode string
+        Otherwise, for Python 2, return the buffer as a raw string.
+        (For both Python 2 and 3, this is the reverse of calling the Blob
+        constructor with a str.)
+
+        :return: The array as a str, or "" if isNull().
+        :rtype: str
+        """
+        if self._array == None:
+            return ""
+        else:
+            if sys.version_info[0] > 2:
+                # Decode the UTF8 byte array.
+                return str(self.toBuffer(), 'utf8')
+            else:
+                # For Python 2, make a raw string.
+                return "".join(map(chr, self.buf()))
+
+    def __hash__(self):
+        """
+        If the hash code is already computed then return it, otherwise compute
+        and return the hash code.
+
+        :return: The hash code for the buffer, or 0 if the buffer is None.
+        :rtype: int
+        """
+        if self._hash == None:
+            if self._array == None:
+                self._hash = 0
+            else:
+                self._hash = hash(self.toBytes())
+
+        return self._hash
 
 # Set this up once at the module level for the constructor to use.
 # Expect that this is True for Python version 3.3 or later.
