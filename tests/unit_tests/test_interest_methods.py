@@ -463,7 +463,7 @@ class TestInterestMethods(ut.TestCase):
         self.assertEqual(name.size() + 1, interest.getName().size())
         self.assertTrue(interest.getName().getPrefix(-1).equals(name))
         SHA256_LENGTH = 32
-        self.assertTrue(SHA256_LENGTH, interest.getName().get(-1).getValue().size())
+        self.assertEqual(SHA256_LENGTH, interest.getName().get(-1).getValue().size())
         
         self.assertEqual(interest.getName().toUri(), "/local/ndn/prefix/" +
           "params-sha256=a16cc669b4c9ef6801e1569488513f9523ffb28a39e53aa6e11add8d00a413fc")
