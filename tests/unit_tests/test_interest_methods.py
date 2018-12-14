@@ -439,11 +439,16 @@ class TestInterestMethods(ut.TestCase):
         self.assertEqual(True,  InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b/c")))
 
     def test_set_parameters(self):
-        interest = Interest()
+        interest = Interest("/ndn")
         self.assertTrue(not interest.hasParameters())
         interest.setParameters(Blob(bytearray([ 0x23, 0x00 ])))
         self.assertTrue(interest.hasParameters())
         self.assertTrue(interest.getParameters().equals(Blob(bytearray([ 0x23, 0x00 ]))))
+
+        decodedInterest = Interest()
+        decodedInterest.wireDecode(interest.wireEncode())
+        self.assertTrue(decodedInterest.getParameters().equals
+                        (Blob(bytearray([ 0x23, 0x00 ]))))
 
         interest.setParameters(Blob())
         self.assertTrue(not interest.hasParameters())
