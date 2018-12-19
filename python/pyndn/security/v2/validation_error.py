@@ -71,7 +71,7 @@ class ValidationError(object):
         """
         return self._info
 
-    def __str__(self):
+    def toString(self):
         """
         Get a string representation of this ValidationError.
 
@@ -109,3 +109,6 @@ class ValidationError(object):
             result += " (" + self._info + ")"
 
         return result
+
+    def __str__(self):
+        return self.toString()
