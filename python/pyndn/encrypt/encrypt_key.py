@@ -1,7 +1,7 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 # Author: From ndn-group-encrypt src/encrypt-key https://github.com/named-data/ndn-group-encrypt
 #
-# Copyright (C) 2015-2018 Regents of the University of California.
+# Copyright (C) 2015-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 #
 # This program is free software: you can redistribute it and/or modify

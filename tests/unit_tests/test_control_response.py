@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2016-2018 Regents of the University of California.
+# Copyright (C) 2016-2019 Regents of the University of California.
 # Author: Andrew Brown <andrew.brown@intel.com>
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From jNDN TestControlResponse.

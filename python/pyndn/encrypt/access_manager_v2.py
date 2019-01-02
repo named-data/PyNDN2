@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2018 Regents of the University of California.
+# Copyright (C) 2018-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # Author: From the NAC library https://github.com/named-data/name-based-access-control/blob/new/src/access-manager.cpp
 #

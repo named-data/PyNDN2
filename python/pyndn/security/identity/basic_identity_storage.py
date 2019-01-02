@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2018 Regents of the University of California.
+# Copyright (C) 2014-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # Author: Adeola Bannis <thecodemaiden@gmail.com>
 # From ndn-cxx security by Yingdi Yu <yingdi@cs.ucla.edu>.
