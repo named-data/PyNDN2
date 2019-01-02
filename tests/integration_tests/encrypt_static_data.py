@@ -20,7 +20,7 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 """
-This module defines the EncryptStaticData class which has static data blocs used
+This module defines the EncryptStaticData class which has static data blocks used
 by TestEncryptorV2, etc.
 """
 class EncryptStaticData(object):
