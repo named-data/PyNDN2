@@ -290,6 +290,8 @@ class MemoryContentCache(object):
                 try:
                     # Send to the same face from the original call to onInterest.
                     # wireEncode returns the cached encoding if available.
+                    logging.getLogger(__name__).info(
+                      "MemoryContentCache:  Reply w/ add Data " + data.getName().toUri())
                     pendingInterest.getFace().send(data.wireEncode())
                 except Exception as ex:
                     logging.getLogger(__name__).error(
@@ -367,6 +369,9 @@ class MemoryContentCache(object):
         send the Data packet to the face. If no matching Data packet is in
         the cache, call the callback in onDataNotFoundForPrefix (if defined).
         """
+        logging.getLogger(__name__).info(
+          "MemoryContentCache:  Received Interest " + interest.toUri())
+
         nowMilliseconds = Common.getNowMilliseconds()
         self._doCleanup(nowMilliseconds)
 
@@ -387,6 +392,8 @@ class MemoryContentCache(object):
                   not (interest.getMustBeFresh() and not isFresh)):
                 if (interest.getChildSelector() == None):
                     # No child selector, so send the first match that we have found.
+                    logging.getLogger(__name__).info(
+                      "MemoryContentCache:         Reply Data " + content.getName().toUri())
                     face.send(content.getDataEncoding())
                     return
                 else:
@@ -416,8 +423,12 @@ class MemoryContentCache(object):
 
         if selectedEncoding != None:
             # We found the leftmost or rightmost child.
+            logging.getLogger(__name__).info(
+              "MemoryContentCache: Reply Data to Interest " + interest.toUri())
             face.send(selectedEncoding)
         else:
+            logging.getLogger(__name__).info(
+              "MemoryContentCache: onDataNotFound for " + interest.toUri())
             # Call the onDataNotFound callback (if defined).
             if prefix.toUri() in self._onDataNotFoundForPrefix:
                 try:
