@@ -53,7 +53,6 @@ class Counter(object):
 
     def onData(self, interest, data):
         dump("Got data packet with name", data.getName().toUri())
-        # Use join to convert each byte to chr.
         dump(data.getContent().toRawStr())
 
         self._callbackCount += 1
