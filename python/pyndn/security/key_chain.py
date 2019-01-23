@@ -626,6 +626,8 @@ class KeyChain(object):
           EncryptedPrivateKeyInfo in the SafeBag. If the password is omitted or
           None, put an unencrypted PKCS #8 PrivateKeyInfo in the SafeBag.
         :type password: an array which implements the buffer protocol
+        :return: A SafeBag carrying the certificate and private key.
+        :rtype: SafeBag
         :raises KeyChain.Error: if the certificate.getKeyName() key does not
           exist, if the TPM does not support exporting an unencrypted private
           key, or for other errors exporting the private key.
