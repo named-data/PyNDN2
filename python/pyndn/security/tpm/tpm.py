@@ -233,8 +233,7 @@ class Tpm(object):
           supplied, use it to return a PKCS #8 EncryptedPrivateKeyInfo. If the
           password is None, return an unencrypted PKCS #8 PrivateKeyInfo.
         :type password: an array which implements the buffer protocol
-        :return: The private key encoded in PKCS #8 format, or an isNull Blob if
-          the key does not exist.
+        :return: The private key encoded in PKCS #8 format.
         :rtype: Blob
         :raises TpmBackEnd.Error: If the key does not exist or if the key cannot
           be exported, e.g., insufficient privileges.
