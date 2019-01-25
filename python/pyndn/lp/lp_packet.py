@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2016-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# Author: From ndn-cxx packet.hpp https://github.com/named-data/ndn-cxx/blob/master/src/lp/packet.hpp
+# Author: From ndn-cxx packet.hpp https://github.com/named-data/ndn-cxx/blob/master/ndn-cxx/lp/packet.hpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by

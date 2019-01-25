@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2018-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# Author: From ndn-cxx security https://github.com/named-data/ndn-cxx/blob/master/src/ims/in-memory-storage-persistent.cpp
+# Author: From ndn-cxx security https://github.com/named-data/ndn-cxx/blob/master/ndn-cxx/ims/in-memory-storage-persistent.cpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by

@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2016-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# Author: From https://github.com/named-data/ndn-cxx/blob/master/src/util/config-file.hpp
+# Author: From https://github.com/named-data/ndn-cxx/blob/master/ndn-cxx/util/config-file.hpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
