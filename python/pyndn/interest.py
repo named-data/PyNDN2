@@ -51,7 +51,7 @@ class Interest(object):
             self._nonce = value.getNonce()
             self._interestLifetimeMilliseconds = value._interestLifetimeMilliseconds
             self._forwardingHint = ChangeCounter(DelegationSet(value.getForwardingHint()))
-            self._parameters = value._parameters
+            self._applicationParameters = value._applicationParameters
             self._linkWireEncoding = value._linkWireEncoding
             self._linkWireEncodingFormat = value._linkWireEncodingFormat
             self._link = ChangeCounter(None)
@@ -72,7 +72,7 @@ class Interest(object):
             self._nonce = Blob()
             self._interestLifetimeMilliseconds = None
             self._forwardingHint = ChangeCounter(DelegationSet())
-            self._parameters = Blob()
+            self._applicationParameters = Blob()
             self._linkWireEncoding = Blob()
             self._linkWireEncodingFormat = None
             self._link = ChangeCounter(None)
@@ -194,7 +194,7 @@ class Interest(object):
         :return:  True if the Interest parameters are specified, False if not.
         :rtype: bool
         """
-        return self._parameters.size() > 0
+        return self._applicationParameters.size() > 0
 
     def getParameters(self):
         """
@@ -203,7 +203,7 @@ class Interest(object):
         :return: The parameters as a Blob, which isNull() if unspecified.
         :rtype: Blob
         """
-        return self._parameters
+        return self._applicationParameters
 
     def hasLink(self):
         """
@@ -417,7 +417,8 @@ class Interest(object):
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
-        self._parameters = parameters if isinstance(parameters, Blob) else Blob(parameters)
+        self._applicationParameters = (
+          parameters if isinstance(parameters, Blob) else Blob(parameters))
         self._changeCount += 1
         return self
 
@@ -540,7 +541,7 @@ class Interest(object):
             return self
 
         sha256 = hashes.Hash(hashes.SHA256(), backend=default_backend())
-        sha256.update(self._parameters.toBytes())
+        sha256.update(self._applicationParameters.toBytes())
         self.getName().appendParametersSha256Digest(
           Blob(bytearray(sha256.finalize()), False))
 
