@@ -53,7 +53,7 @@ class Tlv(object):
     SelectedDelegation = 32
     CanBePrefix =      33
     HopLimit =         34
-    Parameters =       35
+    ApplicationParameters = 35
     FaceInstance =     128
     ForwardingEntry =  129
     StatusResponse =   130

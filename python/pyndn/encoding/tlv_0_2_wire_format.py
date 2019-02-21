@@ -1442,7 +1442,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         # Encode backwards.
         encoder.writeOptionalBlobTlv(
-          Tlv.Parameters, interest.getParameters().buf())
+          Tlv.ApplicationParameters, interest.getParameters().buf())
         # TODO: HopLimit.
         encoder.writeOptionalNonNegativeIntegerTlvFromFloat(
           Tlv.InterestLifetime, interest.getInterestLifetimeMilliseconds())
@@ -1568,7 +1568,7 @@ class Tlv0_2WireFormat(WireFormat):
         decoder.readOptionalBlobTlv(Tlv.HopLimit, endOffset)
 
         interest.setParameters(
-          Blob(decoder.readOptionalBlobTlv(Tlv.Parameters, endOffset), copy))
+          Blob(decoder.readOptionalBlobTlv(Tlv.ApplicationParameters, endOffset), copy))
 
         # Set the nonce last because setting other interest fields clears it.
         interest.setNonce(Blob() if nonce == None else Blob(nonce, copy))
