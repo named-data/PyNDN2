@@ -187,23 +187,36 @@ class Interest(object):
         """
         return self._forwardingHint.get()
 
-    def hasParameters(self):
+    def hasApplicationParameters(self):
         """
-        Check if the Interest parameters are specified.
+        Check if the application parameters are specified.
 
-        :return:  True if the Interest parameters are specified, False if not.
+        :return: True if the application parameters are specified, False if not.
         :rtype: bool
         """
         return self._applicationParameters.size() > 0
 
-    def getParameters(self):
+    def hasParameters(self):
         """
-        Get the Interest parameters.
+        :deprecated: Use hasApplicationParameters.
+        """
+        return self.hasApplicationParameters()
 
-        :return: The parameters as a Blob, which isNull() if unspecified.
+    def getApplicationParameters(self):
+        """
+        Get the application parameters.
+
+        :return: The application parameters as a Blob, which isNull() if
+          unspecified.
         :rtype: Blob
         """
         return self._applicationParameters
+
+    def getParameters(self):
+        """
+        :deprecated: Use getApplicationParameters.
+        """
+        return self.getApplicationParameters()
 
     def hasLink(self):
         """
@@ -406,21 +419,29 @@ class Interest(object):
         self._changeCount += 1
         return self
 
-    def setParameters(self, parameters):
+    def setApplicationParameters(self, applicationParameters):
         """
-        Set the Interest parameters to the given value.
+        Set the application parameters to the given value.
 
-        :param parameters: The array with the Interest parameters bytes. If
-          parameters is not a Blob, then this creates a new Blob to copy the
-          bytes (otherwise this takes another pointer to the same Blob).
-        :type parameters: A Blob or an array type with int elements
+        :param applicationParameters: The array with the application parameters
+          bytes. If applicationParameters is not a Blob, then this creates a new
+          Blob to copy the bytes (otherwise this takes another pointer to the
+          same Blob).
+        :type applicationParameters: A Blob or an array type with int elements
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """
         self._applicationParameters = (
-          parameters if isinstance(parameters, Blob) else Blob(parameters))
+          applicationParameters if isinstance(applicationParameters, Blob)
+          else Blob(applicationParameters))
         self._changeCount += 1
         return self
+
+    def setParameters(self, applicationParameters):
+        """
+        :deprecated: Use setApplicationParameters.
+        """
+        return self.setApplicationParameters(applicationParameters)
 
     def setLinkWireEncoding(self, encoding, wireFormat = None):
         """
@@ -528,8 +549,8 @@ class Interest(object):
 
     def appendParametersDigestToName(self):
         """
-        Append the digest of the Interest parameters to the Name as a
-        ParametersSha256DigestComponent. However, if the Interest parameters is
+        Append the digest of the application parameters to the Name as a
+        ParametersSha256DigestComponent. However, if the application parameters is
         unspecified, do nothing. This does not check if the Name already has a
         parameters digest component, so calling again will append another
         component.
@@ -863,4 +884,4 @@ class Interest(object):
     nonce = property(getNonce, setNonce)
     interestLifetimeMilliseconds = property(getInterestLifetimeMilliseconds, setInterestLifetimeMilliseconds)
     forwardingHint = property(getForwardingHint, setForwardingHint)
-    parameters = property(getParameters, setParameters)
+    applicationParameters = property(getApplicationParameters, setApplicationParameters)

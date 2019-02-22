@@ -1,10 +1,14 @@
-Interim changes since PyNDN v2.9beta1 (2018-11-01)
+Interim changes since PyNDN v2.9beta1 (2019-02-22)
 --------------------------------------------------
 
 Changes
 * https://redmine.named-data.net/issues/4655 Added name-based access control v2,
   EncryptorV2, DecryptorV2 and AccessControlV2, with integration tests.
 * In Face, added method setInterestLoopbackEnabled.
+
+Deprecated
+* In Interest, deprecated getParameters, setParameters and hasParameters. Use
+  getApplicationParameters, setApplicationParameters and hasApplicationParameters.
 
 PyNDN v2.9beta1 (2018-09-17)
 ----------------------------
