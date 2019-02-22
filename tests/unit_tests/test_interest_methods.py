@@ -438,32 +438,35 @@ class TestInterestMethods(ut.TestCase):
         self.assertEqual(False, InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b")))
         self.assertEqual(True,  InterestFilter("/a", "<b><>+").doesMatch(Name("/a/b/c")))
 
-    def test_set_parameters(self):
+    def test_set_application_parameters(self):
         interest = Interest("/ndn")
-        self.assertTrue(not interest.hasParameters())
-        interest.setParameters(Blob(bytearray([ 0x23, 0x00 ])))
-        self.assertTrue(interest.hasParameters())
-        self.assertTrue(interest.getParameters().equals(Blob(bytearray([ 0x23, 0x00 ]))))
+        self.assertTrue(not interest.hasApplicationParameters())
+        applicationParameters = Blob(bytearray([ 0x23, 0x00 ]))
+        interest.setApplicationParameters(applicationParameters)
+        self.assertTrue(interest.hasApplicationParameters())
+        self.assertTrue(interest.getApplicationParameters().equals
+                        (applicationParameters))
 
         decodedInterest = Interest()
         decodedInterest.wireDecode(interest.wireEncode())
-        self.assertTrue(decodedInterest.getParameters().equals
-                        (Blob(bytearray([ 0x23, 0x00 ]))))
+        self.assertTrue(decodedInterest.getApplicationParameters().equals
+                        (applicationParameters))
 
-        interest.setParameters(Blob())
-        self.assertTrue(not interest.hasParameters())
+        interest.setApplicationParameters(Blob())
+        self.assertTrue(not interest.hasApplicationParameters())
 
     def test_append_parameters_digest(self):
         name = Name("/local/ndn/prefix")
         interest = Interest(name)
 
-        self.assertTrue(not interest.hasParameters())
+        self.assertTrue(not interest.hasApplicationParameters())
         # No parameters yet, so it should do nothing.
         interest.appendParametersDigestToName()
         self.assertEqual("/local/ndn/prefix", interest.getName().toUri())
 
-        interest.setParameters(Blob(bytearray([ 0x23, 0x01, 0xC0 ])))
-        self.assertTrue(interest.hasParameters())
+        applicationParameters = Blob(bytearray([ 0x23, 0x01, 0xC0 ]))
+        interest.setApplicationParameters(applicationParameters)
+        self.assertTrue(interest.hasApplicationParameters())
         interest.appendParametersDigestToName()
         self.assertEqual(name.size() + 1, interest.getName().size())
         self.assertTrue(interest.getName().getPrefix(-1).equals(name))
