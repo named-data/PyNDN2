@@ -65,6 +65,15 @@ public:
   generateRandomBytes(uint8_t* buffer, size_t bufferLength);
 
   /**
+   * Generate a random value from 0.0 to 1.0.
+   * @param value Set value to the random value.
+   * @return 0 for success, else NDN_ERROR_Error_in_generate_operation for an
+   * error including if the random number generator is not seeded.
+   */
+  static ndn_Error
+  generateRandomFloat(float& value);
+
+  /**
    * Compute the HMAC with sha-256 of data, as defined in
    * http://tools.ietf.org/html/rfc2104#section-2 .
    * @param key A pointer to buffer with the key.
@@ -193,6 +202,40 @@ public:
       (password.buf(), password.size(), salt.buf(), salt.size(), nIterations,
        resultLength, result);
   }
+
+  /**
+   * Compute the MurmurHash3 of the data.
+   * @param nHashSeed The hash seed.
+   * @param dataToHash A pointer to the input byte array to hash.
+   * @param dataToHashLength The length of the data to hash.
+   * @return The hash value.
+   */
+  static uint32_t
+  murmurHash3
+    (uint32_t nHashSeed, const uint8_t* dataToHash, size_t dataToHashLength);
+
+  /**
+   * Compute the MurmurHash3 of the data.
+   * @param nHashSeed The hash seed.
+   * @param dataToHash A pointer to the input byte array to hash.
+   * @param dataToHashLength The length of the data to hash.
+   * @return The hash value.
+   */
+  static uint32_t
+  murmurHash3
+    (uint32_t nHashSeed, const char* dataToHash, size_t dataToHashLength)
+  {
+    return murmurHash3(nHashSeed, (const uint8_t*)dataToHash, dataToHashLength);
+  }
+
+  /**
+   * Compute the MurmurHash3 of the integer value.
+   * @param nHashSeed The hash seed.
+   * @param value The integer value, interpreted as a 4-byte array.
+   * @return The hash value.
+   */
+  static uint32_t
+  murmurHash3(uint32_t nHashSeed, uint32_t value);
 };
 
 }

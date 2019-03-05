@@ -20,6 +20,7 @@
  */
 
 #include "../../c/util/crypto.h"
+#include "../../../contrib/murmur-hash/murmur-hash.h"
 #include <ndn-cpp/lite/util/crypto-lite.hpp>
 
 #ifdef ARDUINO
@@ -53,6 +54,18 @@ ndn_Error
 CryptoLite::generateRandomBytes(uint8_t *buffer, size_t bufferLength)
 {
   return ndn_generateRandomBytes(buffer, bufferLength);
+}
+
+ndn_Error
+CryptoLite::generateRandomFloat(float& value)
+{
+  ndn_Error error;
+  uint32_t random;
+  if ((error = generateRandomBytes((uint8_t*)&random, sizeof(random))))
+    return error;
+
+  value = ((float)random) / 0xffffffff;
+  return NDN_ERROR_success;
 }
 
 #if NDN_CPP_HAVE_LIBCRYPTO
@@ -93,6 +106,19 @@ CryptoLite::verifyDigestSha256Signature
 {
   return ndn_verifyDigestSha256Signature
     (signature, signatureLength, data, dataLength) != 0;
+}
+
+uint32_t
+CryptoLite::murmurHash3
+  (uint32_t nHashSeed, const uint8_t* dataToHash, size_t dataToHashLength)
+{
+  return ndn_murmurHash3(nHashSeed, dataToHash, dataToHashLength);
+}
+
+uint32_t
+CryptoLite::murmurHash3(uint32_t nHashSeed, uint32_t value)
+{
+  return ndn_murmurHash3(nHashSeed, (const uint8_t*)&value, sizeof(uint32_t));
 }
 
 }
