@@ -75,6 +75,7 @@ ndn_cpp_cpp_headers = \
 
 # Just the C code.
 ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
+  contrib/murmur-hash/murmur-hash.c contrib/murmur-hash/murmur-hash.h \
   src/c/control-parameters_c.c src/c/control-parameters.h \
   src/c/control-response.h \
   src/c/data.h \

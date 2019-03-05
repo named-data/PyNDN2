@@ -138,6 +138,7 @@ _pyndn_la_LIBADD =
 am__objects_1 =
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = $(am__objects_1) \
+	contrib/murmur-hash/_pyndn_la-murmur-hash.lo \
 	src/c/_pyndn_la-control-parameters_c.lo \
 	src/c/_pyndn_la-errors.lo src/c/_pyndn_la-forwarding-flags.lo \
 	src/c/_pyndn_la-interest_c.lo src/c/_pyndn_la-name_c.lo \
@@ -229,7 +230,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo \
+am__depfiles_remade =  \
+	contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Plo \
+	src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-errors.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo \
@@ -600,6 +603,7 @@ ndn_cpp_cpp_headers = \
 
 # Just the C code.
 ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
+  contrib/murmur-hash/murmur-hash.c contrib/murmur-hash/murmur-hash.h \
   src/c/control-parameters_c.c src/c/control-parameters.h \
   src/c/control-response.h \
   src/c/data.h \
@@ -779,6 +783,15 @@ clean-pyexecLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+contrib/murmur-hash/$(am__dirstamp):
+	@$(MKDIR_P) contrib/murmur-hash
+	@: > contrib/murmur-hash/$(am__dirstamp)
+contrib/murmur-hash/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) contrib/murmur-hash/$(DEPDIR)
+	@: > contrib/murmur-hash/$(DEPDIR)/$(am__dirstamp)
+contrib/murmur-hash/_pyndn_la-murmur-hash.lo:  \
+	contrib/murmur-hash/$(am__dirstamp) \
+	contrib/murmur-hash/$(DEPDIR)/$(am__dirstamp)
 src/c/$(am__dirstamp):
 	@$(MKDIR_P) src/c
 	@: > src/c/$(am__dirstamp)
@@ -1065,6 +1078,8 @@ _pyndn.la: $(_pyndn_la_OBJECTS) $(_pyndn_la_DEPENDENCIES) $(EXTRA__pyndn_la_DEPE
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f contrib/murmur-hash/*.$(OBJEXT)
+	-rm -f contrib/murmur-hash/*.lo
 	-rm -f src/*.$(OBJEXT)
 	-rm -f src/*.lo
 	-rm -f src/c/*.$(OBJEXT)
@@ -1103,6 +1118,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-errors.Plo@am__quote@ # am--include-marker
@@ -1202,6 +1218,13 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+contrib/murmur-hash/_pyndn_la-murmur-hash.lo: contrib/murmur-hash/murmur-hash.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT contrib/murmur-hash/_pyndn_la-murmur-hash.lo -MD -MP -MF contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Tpo -c -o contrib/murmur-hash/_pyndn_la-murmur-hash.lo `test -f 'contrib/murmur-hash/murmur-hash.c' || echo '$(srcdir)/'`contrib/murmur-hash/murmur-hash.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Tpo contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='contrib/murmur-hash/murmur-hash.c' object='contrib/murmur-hash/_pyndn_la-murmur-hash.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o contrib/murmur-hash/_pyndn_la-murmur-hash.lo `test -f 'contrib/murmur-hash/murmur-hash.c' || echo '$(srcdir)/'`contrib/murmur-hash/murmur-hash.c
 
 src/c/_pyndn_la-control-parameters_c.lo: src/c/control-parameters_c.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-control-parameters_c.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Tpo -c -o src/c/_pyndn_la-control-parameters_c.lo `test -f 'src/c/control-parameters_c.c' || echo '$(srcdir)/'`src/c/control-parameters_c.c
@@ -1715,6 +1738,7 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf contrib/murmur-hash/.libs contrib/murmur-hash/_libs
 	-rm -rf src/.libs src/_libs
 	-rm -rf src/c/.libs src/c/_libs
 	-rm -rf src/c/encoding/.libs src/c/encoding/_libs
@@ -1994,6 +2018,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f contrib/murmur-hash/$(DEPDIR)/$(am__dirstamp)
+	-rm -f contrib/murmur-hash/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
 	-rm -f src/c/$(DEPDIR)/$(am__dirstamp)
@@ -2039,7 +2065,8 @@ clean-am: clean-generic clean-libtool clean-pyexecLTLIBRARIES \
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-		-rm -f src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
+		-rm -f contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Plo
+	-rm -f src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-errors.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo
@@ -2155,7 +2182,8 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-		-rm -f src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
+		-rm -f contrib/murmur-hash/$(DEPDIR)/_pyndn_la-murmur-hash.Plo
+	-rm -f src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-errors.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo
