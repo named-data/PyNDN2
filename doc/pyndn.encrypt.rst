@@ -11,6 +11,14 @@ Subpackages
 Submodules
 ----------
 
+pyndn.encrypt.access\_manager\_v2 module
+----------------------------------------
+
+.. automodule:: pyndn.encrypt.access_manager_v2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.encrypt.consumer module
 -----------------------------
 
@@ -35,6 +43,14 @@ pyndn.encrypt.decrypt\_key module
     :undoc-members:
     :show-inheritance:
 
+pyndn.encrypt.decryptor\_v2 module
+----------------------------------
+
+.. automodule:: pyndn.encrypt.decryptor_v2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.encrypt.encrypt\_error module
 -----------------------------------
 
@@ -55,6 +71,14 @@ pyndn.encrypt.encrypted\_content module
 ---------------------------------------
 
 .. automodule:: pyndn.encrypt.encrypted_content
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyndn.encrypt.encryptor\_v2 module
+----------------------------------
+
+.. automodule:: pyndn.encrypt.encryptor_v2
     :members:
     :undoc-members:
     :show-inheritance:

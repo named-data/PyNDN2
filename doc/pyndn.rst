@@ -9,6 +9,7 @@ Subpackages
     pyndn.encoding
     pyndn.encrypt
     pyndn.impl
+    pyndn.in_memory_storage
     pyndn.lp
     pyndn.security
     pyndn.sync
