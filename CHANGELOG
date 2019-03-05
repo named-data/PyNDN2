@@ -1,5 +1,5 @@
-Interim changes since PyNDN v2.9beta1 (2019-02-22)
---------------------------------------------------
+PyNDN v2.10beta1 (2019-03-05)
+----------------------------
 
 Changes
 * https://redmine.named-data.net/issues/4655 Added name-based access control v2,
