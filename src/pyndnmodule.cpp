@@ -47,6 +47,7 @@ public:
     appendImplicitSha256Digest = Py_BuildValue("s", "appendImplicitSha256Digest");
     appendParametersSha256Digest = Py_BuildValue("s", "appendParametersSha256Digest");
     clear = Py_BuildValue("s", "clear");
+    getApplicationParameters = Py_BuildValue("s", "getApplicationParameters");
     getChildSelector = Py_BuildValue("s", "getChildSelector");
     getContent = Py_BuildValue("s", "getContent");
     getComponent = Py_BuildValue("s", "getComponent");
@@ -68,7 +69,6 @@ public:
     getNotAfter = Py_BuildValue("s", "getNotAfter");
     getNotBefore = Py_BuildValue("s", "getNotBefore");
     getOtherTypeCode = Py_BuildValue("s", "getOtherTypeCode");
-    getParameters = Py_BuildValue("s", "getParameters");
     getSelectedDelegationIndex = Py_BuildValue("s", "getSelectedDelegationIndex");
     getSignature = Py_BuildValue("s", "getSignature");
     getSignatureInfoEncoding = Py_BuildValue("s", "getSignatureInfoEncoding");
@@ -79,6 +79,7 @@ public:
     hasPeriod = Py_BuildValue("s", "hasPeriod");
     isImplicitSha256Digest = Py_BuildValue("s", "isImplicitSha256Digest");
     isParametersSha256Digest = Py_BuildValue("s", "isParametersSha256Digest");
+    setApplicationParameters = Py_BuildValue("s", "setApplicationParameters");
     setChildSelector = Py_BuildValue("s", "setChildSelector");
     setContent = Py_BuildValue("s", "setContent");
     setFinalBlockId = Py_BuildValue("s", "setFinalBlockId");
@@ -91,7 +92,6 @@ public:
     setMustBeFresh = Py_BuildValue("s", "setMustBeFresh");
     setNonce = Py_BuildValue("s", "setNonce");
     setOtherTypeCode = Py_BuildValue("s", "setOtherTypeCode");
-    setParameters = Py_BuildValue("s", "setParameters");
     setPeriod = Py_BuildValue("s", "setPeriod");
     setSelectedDelegationIndex = Py_BuildValue("s", "setSelectedDelegationIndex");
     setSignature = Py_BuildValue("s", "setSignature");
@@ -119,6 +119,7 @@ public:
   PyObject* appendParametersSha256Digest;
   PyObject* getChildSelector;
   PyObject* clear;
+  PyObject* getApplicationParameters;
   PyObject* getComponent;
   PyObject* getExclude;
   PyObject* getContent;
@@ -139,7 +140,6 @@ public:
   PyObject* getNotAfter;
   PyObject* getNotBefore;
   PyObject* getOtherTypeCode;
-  PyObject* getParameters;
   PyObject* getSelectedDelegationIndex;
   PyObject* getSignature;
   PyObject* getSignatureInfoEncoding;
@@ -150,6 +150,7 @@ public:
   PyObject* hasPeriod;
   PyObject* isImplicitSha256Digest;
   PyObject* isParametersSha256Digest;
+  PyObject* setApplicationParameters;
   PyObject* setChildSelector;
   PyObject* setContent;
   PyObject* setFinalBlockId;
@@ -162,7 +163,6 @@ public:
   PyObject* setMustBeFresh;
   PyObject* setNonce;
   PyObject* setOtherTypeCode;
-  PyObject* setParameters;
   PyObject* setPeriod;
   PyObject* setSelectedDelegationIndex;
   PyObject* setSignature;
@@ -574,7 +574,7 @@ toInterestLite
   interestLite.setInterestLifetimeMilliseconds
     (toDoubleByMethod(interest, str.getInterestLifetimeMilliseconds));
   interestLite.setNonce(toBlobLiteByMethod(interest, str.getNonce));
-  interestLite.setParameters(toBlobLiteByMethod(interest, str.getParameters));
+  interestLite.setApplicationParameters(toBlobLiteByMethod(interest, str.getApplicationParameters));
 
   PyObjectRef forwardingHint
     (PyObject_CallMethodObjArgs(interest, str.getForwardingHint, NULL));
@@ -633,9 +633,9 @@ setInterest(PyObject* interest, const InterestLite& interestLite)
   callMethodFromDouble
     (interest, str.setInterestLifetimeMilliseconds,
      interestLite.getInterestLifetimeMilliseconds());
-  PyObjectRef parameters(makeBlob(interestLite.getParameters()));
+  PyObjectRef parameters(makeBlob(interestLite.getApplicationParameters()));
   PyObjectRef ignoreResult3(PyObject_CallMethodObjArgs
-    (interest, str.setParameters, parameters.obj, NULL));
+    (interest, str.setApplicationParameters, parameters.obj, NULL));
 
   if (interestLite.getForwardingHintWireEncoding().buf()) {
     // InterestLite only stores the encoded delegation set.
