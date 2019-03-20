@@ -60,6 +60,8 @@ with the NDN-TLV wire format, version 0.2.
 class Tlv0_2WireFormat(WireFormat):
     _instance = None
 
+    _didCanBePrefixWarning = False
+
     def encodeName(self, name):
         """
         Encode name in NDN-TLV and return the encoding.
@@ -113,6 +115,11 @@ class Tlv0_2WireFormat(WireFormat):
           for a signed interest).
         :rtype: (Blob, int, int)
         """
+        if not interest._didSetCanBePrefix and not self._didCanBePrefixWarning:
+            print(
+              "WARNING: The default CanBePrefix will change. See Interest.setDefaultCanBePrefix() for details.")
+            self._didCanBePrefixWarning = True
+
         if haveModule_pyndn:
             # Use the C bindings.
             result = _pyndn.Tlv0_1_1WireFormat_encodeInterest(interest)
