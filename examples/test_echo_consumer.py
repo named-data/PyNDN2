@@ -21,6 +21,7 @@ import sys
 import time
 from pyndn import Name
 from pyndn import Face
+from pyndn import Interest
 
 def dump(*list):
     result = ""
@@ -42,6 +43,9 @@ class Counter(object):
         dump("Time out for interest", interest.getName().toUri())
 
 def main():
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     # The default Face will connect using a Unix socket, or to "localhost".
     face = Face()
 

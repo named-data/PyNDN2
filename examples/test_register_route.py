@@ -47,6 +47,9 @@ def dump(*list):
     print(result)
 
 def main():
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     prefix = Name("/nfd/edu/ucla/remap/test")
     # Route to aleph.ndn.ucla.edu.  Have to use the canonical name with an IP
     # address and port.

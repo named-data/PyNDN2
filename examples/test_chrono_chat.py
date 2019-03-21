@@ -468,6 +468,9 @@ def main():
     # logging.getLogger('').addHandler(logging.StreamHandler(sys.stdout))
     # logging.getLogger('').setLevel(logging.INFO)
 
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     screenName = promptAndInput("Enter your chat username: ")
 
     defaultHubPrefix = "ndn/edu/ucla/remap"

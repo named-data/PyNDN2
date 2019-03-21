@@ -213,6 +213,9 @@ def makeFailureCallback(prefix):
     return failureCallback
 
 def main():
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     interest = Interest()
     interest.wireDecode(TlvInterest)
     dump("Interest:")

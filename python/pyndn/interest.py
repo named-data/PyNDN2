@@ -43,6 +43,7 @@ class Interest(object):
             self._name = ChangeCounter(Name(value.getName()))
             self._minSuffixComponents = value._minSuffixComponents
             self._maxSuffixComponents = value._maxSuffixComponents
+            self._didSetCanBePrefix = value._didSetCanBePrefix
             self._keyLocator = ChangeCounter(KeyLocator(value.getKeyLocator()))
             self._exclude = ChangeCounter(Exclude(value.getExclude()))
             self._childSelector = value._childSelector
@@ -63,7 +64,9 @@ class Interest(object):
         else:
             self._name = ChangeCounter(Name(value))
             self._minSuffixComponents = None
-            self._maxSuffixComponents = None
+            self._maxSuffixComponents = None if Interest._defaultCanBePrefix else 1
+            # _didSetCanBePrefix is True if the app already called setDefaultCanBePrefix().
+            self._didSetCanBePrefix = Interest._didSetDefaultCanBePrefix
             self._keyLocator = ChangeCounter(KeyLocator())
             self._exclude = ChangeCounter(Exclude())
             self._childSelector = None
@@ -84,6 +87,34 @@ class Interest(object):
         self._getDefaultWireEncodingChangeCount = 0
         self._changeCount = 0
         self._lpPacket = None
+
+    @staticmethod
+    def getDefaultCanBePrefix():
+        """
+        Get the default value of the CanBePrefix flag used in the Interest
+        constructor. You can change this with Interest.setDefaultCanBePrefix().
+
+        :return: The default value of the CanBePrefix flag.
+        :rtype: bool
+        """
+        return Interest._defaultCanBePrefix
+
+    @staticmethod
+    def setDefaultCanBePrefix(defaultCanBePrefix):
+        """
+        Set the default value of the CanBePrefix flag used in the Interest
+        constructor. The default is currently True, but will be changed at a
+        later date. The application should call this before creating any
+        Interest (even to set the default again to True), or the application
+        should explicitly call setCanBePrefix() after creating the Interest.
+        Otherwise wireEncode will print a warning message. This is to avoid
+        breaking any code when the library default for CanBePrefix is changed at
+        a later date.
+
+        :param bool defaultCanBePrefix: The default value of the CanBePrefix flag.
+        """
+        Interest._defaultCanBePrefix = defaultCanBePrefix
+        Interest._didSetDefaultCanBePrefix = True
 
     def getName(self):
         """
@@ -363,6 +394,7 @@ class Interest(object):
         # Use the closest v0.2 semantics. CanBePrefix is the opposite of exact
         # match where MaxSuffixComponents is 1 (for the implicit digest).
         self._maxSuffixComponents = None if canBePrefix else 1
+        self._didSetCanBePrefix = True
         self._changeCount += 1
         return self
 
@@ -873,10 +905,14 @@ class Interest(object):
 
     _systemRandom = SystemRandom()
 
+    _defaultCanBePrefix = True
+    _didSetDefaultCanBePrefix = False
+
     # Create managed properties for read/write properties of the class for more pythonic syntax.
     name = property(getName, setName)
     minSuffixComponents = property(getMinSuffixComponents, setMinSuffixComponents)
     maxSuffixComponents = property(getMaxSuffixComponents, setMaxSuffixComponents)
+    canBePrefix = property(getCanBePrefix, setCanBePrefix)
     keyLocator = property(getKeyLocator, setKeyLocator)
     exclude = property(getExclude, setExclude)
     childSelector = property(getChildSelector, setChildSelector)
