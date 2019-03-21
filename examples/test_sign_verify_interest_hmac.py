@@ -54,6 +54,9 @@ def dump(*list):
     print(result)
 
 def main():
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     interest = Interest()
     interest.wireDecode(TlvInterest)
 

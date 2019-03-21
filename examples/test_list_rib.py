@@ -40,6 +40,9 @@ def dump(*list):
     print(result)
 
 def main():
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     # The default Face connects to the local NFD.
     face = Face()
 

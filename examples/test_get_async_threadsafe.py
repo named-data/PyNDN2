@@ -30,6 +30,7 @@ except ImportError:
     # Use Trollius on Python <= 3.2
     import trollius as asyncio
 from pyndn import Name
+from pyndn import Interest
 # We must explicitly import from threadsafe_face. The pyndn module doesn't
 # automatically load it since asyncio is optional.
 from pyndn.threadsafe_face import ThreadsafeFace
@@ -67,6 +68,9 @@ class Counter(object):
             self._loop.stop()
 
 def main():
+    # Silence the warning from Interest wire encode.
+    Interest.setDefaultCanBePrefix(True)
+
     loop = asyncio.get_event_loop()
     face = ThreadsafeFace(loop, "memoria.ndn.ucla.edu")
 
