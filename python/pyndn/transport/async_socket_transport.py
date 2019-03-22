@@ -60,7 +60,7 @@ class AsyncSocketTransport(Transport):
         :type onConnected: function object
         """
         self.close()
-        asyncio.async(connectCoroutine, loop = self._loop)
+        asyncio.ensure_future(connectCoroutine, loop = self._loop)
         self._elementReader = ElementReader(elementListener)
 
     class _ReceiveProtocol(asyncio.Protocol):
