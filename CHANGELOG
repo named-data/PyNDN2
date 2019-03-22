@@ -5,6 +5,10 @@ Changes
 * https://redmine.named-data.net/issues/4807 Print a warning if the application
   didn't call Interest.setDefaultCanBePrefix() or set the Interest's CanBePrefix.
 
+Bug fixes
+* https://github.com/named-data/PyNDN2/pull/6 Change asyncio.async to ensure_future
+  for compatibility with Python 3. (Thanks to Nabil Schear!)
+
 PyNDN v2.10beta1 (2019-03-05)
 ----------------------------
 
