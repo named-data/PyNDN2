@@ -37,10 +37,12 @@ class ForwardingFlags(object):
         if value == None:
             self._childInherit = True
             self._capture = False
+            self._origin = None
         elif isinstance(value, ForwardingFlags):
             # Copy its values.
             self._childInherit = value._childInherit
             self._capture = value._capture
+            self._origin = value._origin
         else:
             raise RuntimeError(
               "Unrecognized type for ForwardingFlags constructor: " +
@@ -70,6 +72,7 @@ class ForwardingFlags(object):
         """
         Set the flags according to the NFD forwarding flags as used in the
         ControlParameters of the command interest.
+        This ignores the origin value.
 
         :param int nfdForwardingFlags: An integer with the bits set.
         :return: This ForwardingFlags so that you can chain calls to update values.
@@ -86,6 +89,15 @@ class ForwardingFlags(object):
 
     def getCapture(self):
         return self._capture
+
+    def getOrigin(self):
+        """
+        Get the origin value.
+
+        :return: The origin value, or None if not specified.
+        :rtype: int
+        """
+        return self._origin
 
     def setChildInherit(self, childInherit):
         """
@@ -110,6 +122,18 @@ class ForwardingFlags(object):
         self._capture = capture
         return self
 
+    def setOrigin(self, origin):
+        """
+        Set the origin value. This is used to set the origin value of the
+        ControlParameters for the register prefix command.
+
+        :param int origin: The new origin value, or None for not specified.
+        :return: This ForwardingFlags so that you can chain calls to update values.
+        :rtype: ForwardingFlags
+        """
+        self._origin = origin
+        return self
+
     # Support property-based equivalence check
     # TODO: Desired syntax?
     def equals(self, other):
@@ -122,3 +146,4 @@ class ForwardingFlags(object):
     # Create managed properties for read/write properties of the class for more pythonic syntax.
     childInherit = property(getChildInherit, setChildInherit)
     capture = property(getCapture, setCapture)
+    origin = property(getOrigin, setOrigin)
