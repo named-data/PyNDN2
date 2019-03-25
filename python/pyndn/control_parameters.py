@@ -61,6 +61,8 @@ class ControlParameters(object):
     def wireEncode(self, wireFormat = None):
         """
         Encode this ControlParameters for a particular wire format.
+        This ignores getForwardingFlags().getOrigin(). To encode an origin
+        value, you must use setOrigin().
 
         :param wireFormat: (optional) A WireFormat object used to encode this
            ControlParameters. If omitted, use WireFormat.getDefaultWireFormat().
