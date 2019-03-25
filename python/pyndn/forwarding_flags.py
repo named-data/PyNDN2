@@ -72,11 +72,14 @@ class ForwardingFlags(object):
         ControlParameters of the command interest.
 
         :param int nfdForwardingFlags: An integer with the bits set.
+        :return: This ForwardingFlags so that you can chain calls to update values.
+        :rtype: ForwardingFlags
         """
         self._childInherit = True if (nfdForwardingFlags &
                                       ForwardingFlags.NfdForwardingFlags_CHILD_INHERIT) else False
         self._capture = True if (nfdForwardingFlags &
                                  ForwardingFlags.NfdForwardingFlags_CAPTURE) else False
+        return self
 
     def getChildInherit(self):
         return self._childInherit
@@ -84,11 +87,28 @@ class ForwardingFlags(object):
     def getCapture(self):
         return self._capture
 
-    def setChildInherit(self, value):
-        self._childInherit = value
+    def setChildInherit(self, childInherit):
+        """
+        Set the value of the "childInherit" flag.
 
-    def setCapture(self, value):
-        self._capture = value
+        :param bool childInherit: True to set the "childInherit" flag, False to
+          clear it.
+        :return: This ForwardingFlags so that you can chain calls to update values.
+        :rtype: ForwardingFlags
+        """
+        self._childInherit = childInherit
+        return self
+
+    def setCapture(self, capture):
+        """
+        Set the value of the "capture" flag.
+
+        :param bool capture: True to set the "capture" flag, False to clear it.
+        :return: This ForwardingFlags so that you can chain calls to update values.
+        :rtype: ForwardingFlags
+        """
+        self._capture = capture
+        return self
 
     # Support property-based equivalence check
     # TODO: Desired syntax?
@@ -98,7 +118,6 @@ class ForwardingFlags(object):
             return True
         else:
             return False
-
 
     # Create managed properties for read/write properties of the class for more pythonic syntax.
     childInherit = property(getChildInherit, setChildInherit)
