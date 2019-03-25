@@ -552,6 +552,10 @@ class Node(object):
         controlParameters = ControlParameters()
         controlParameters.setName(prefix)
         controlParameters.setForwardingFlags(flags)
+        if (flags.getOrigin() != None and flags.getOrigin() >= 0):
+            controlParameters.setOrigin(flags.getOrigin())
+            # Remove the origin value from the flags since it is not used to encode.
+            controlParameters.getForwardingFlags().setOrigin(None)
 
         commandInterest = Interest()
         commandInterest.setCanBePrefix(True)
