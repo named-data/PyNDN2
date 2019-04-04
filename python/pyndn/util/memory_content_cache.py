@@ -28,7 +28,7 @@ http://named-data.net/doc/ndn-ccl-api/memory-content-cache.html .
 
 import logging
 import collections
-from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.registration_options import RegistrationOptions
 from pyndn.interest_filter import InterestFilter
 from pyndn.encoding.wire_format import WireFormat
 from pyndn.name import Name
@@ -70,7 +70,7 @@ class MemoryContentCache(object):
 
     def registerPrefix(
       self, prefix, onRegisterFailed, onRegisterSuccess = None,
-        onDataNotFound = None, flags = None, wireFormat = None):
+        onDataNotFound = None, registrationOptions = None, wireFormat = None):
         """
         Call registerPrefix on the Face given to the constructor so that this
         MemoryContentCache will answer interests whose name has the prefix.
@@ -111,31 +111,31 @@ class MemoryContentCache(object):
           for better error handling the callback should catch and properly
           handle any exceptions.
         :type onDataNotFound: function object
-        :param ForwardingFlags flags: (optional) See Face.registerPrefix.
+        :param RegistrationOptions registrationOptions: (optional) See Face.registerPrefix.
         :param wireFormat: (optional) See Face.registerPrefix.
         :type wireFormat: A subclass of WireFormat
         """
         arg3 = onRegisterSuccess
         arg4 = onDataNotFound
-        arg5 = flags
+        arg5 = registrationOptions
         arg6 = wireFormat
-        # arg3,                arg4,            arg5,            arg6 may be:
-        # [OnRegisterSuccess], OnDataNotFound,  ForwardingFlags, WireFormat
-        # [OnRegisterSuccess], OnDataNotFound,  ForwardingFlags, None
-        # [OnRegisterSuccess], OnDataNotFound,  WireFormat,      None
-        # [OnRegisterSuccess], OnDataNotFound,  None,            None
-        # [OnRegisterSuccess], ForwardingFlags, WireFormat,      None
-        # [OnRegisterSuccess], ForwardingFlags, None,            None
-        # [OnRegisterSuccess], WireFormat,      None,            None
-        # [OnRegisterSuccess], None,            None,            None
-        # OnDataNotFound,      ForwardingFlags, WireFormat,      None
-        # OnDataNotFound,      ForwardingFlags, None,            None
-        # OnDataNotFound,      WireFormat,      None,            None
-        # OnDataNotFound,      None,            None,            None
-        # ForwardingFlags,     WireFormat,      None,            None
-        # ForwardingFlags,     None,            None,            None
-        # WireFormat,          None,            None,            None
-        # None,                None,            None,            None
+        # arg3,                arg4,                arg5,                arg6 may be:
+        # [OnRegisterSuccess], OnDataNotFound,      RegistrationOptions, WireFormat
+        # [OnRegisterSuccess], OnDataNotFound,      RegistrationOptions, None
+        # [OnRegisterSuccess], OnDataNotFound,      WireFormat,          None
+        # [OnRegisterSuccess], OnDataNotFound,      None,                None
+        # [OnRegisterSuccess], RegistrationOptions, WireFormat,          None
+        # [OnRegisterSuccess], RegistrationOptions, None,                None
+        # [OnRegisterSuccess], WireFormat,          None,                None
+        # [OnRegisterSuccess], None,                None,                None
+        # OnDataNotFound,      RegistrationOptions, WireFormat,          None
+        # OnDataNotFound,      RegistrationOptions, None,                None
+        # OnDataNotFound,      WireFormat,          None,                None
+        # OnDataNotFound,      None,                None,                None
+        # RegistrationOptions, WireFormat,          None,                None
+        # RegistrationOptions, None,                None,                None
+        # WireFormat,          None,                None,                None
+        # None,                None,                None,                None
         if type(arg3) is list and len(arg3) == 1:
           onRegisterSuccess = arg3[0]
         else:
@@ -148,14 +148,14 @@ class MemoryContentCache(object):
         else:
           onDataNotFound = None
 
-        if isinstance(arg3, ForwardingFlags):
-            flags = arg3
-        elif isinstance(arg4, ForwardingFlags):
-            flags = arg4
-        elif isinstance(arg5, ForwardingFlags):
-            flags = arg5
+        if isinstance(arg3, RegistrationOptions):
+            registrationOptions = arg3
+        elif isinstance(arg4, RegistrationOptions):
+            registrationOptions = arg4
+        elif isinstance(arg5, RegistrationOptions):
+            registrationOptions = arg5
         else:
-            flags = ForwardingFlags()
+            registrationOptions = RegistrationOptions()
 
         if isinstance(arg3, WireFormat):
             wireFormat = arg3
@@ -173,7 +173,7 @@ class MemoryContentCache(object):
             self._onDataNotFoundForPrefix[prefix.toUri()] = onDataNotFound
         registeredPrefixId = self._face.registerPrefix(
           prefix, self._onInterest, onRegisterFailed, onRegisterSuccess,
-          flags, wireFormat)
+          registrationOptions, wireFormat)
         self._registeredPrefixIdList.append(registeredPrefixId)
 
     def setInterestFilter(self, filterOrPrefix, onDataNotFound = None):
