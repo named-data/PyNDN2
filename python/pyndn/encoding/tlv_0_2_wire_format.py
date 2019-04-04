@@ -23,7 +23,7 @@ from pyndn.name import Name
 from pyndn.exclude import Exclude
 from pyndn.name import ComponentType
 from pyndn.meta_info import ContentType
-from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.registration_options import RegistrationOptions
 from pyndn.key_locator import KeyLocatorType
 from pyndn.digest_sha256_signature import DigestSha256Signature
 from pyndn.sha256_with_ecdsa_signature import Sha256WithEcdsaSignature
@@ -1281,7 +1281,7 @@ class Tlv0_2WireFormat(WireFormat):
               len(encoder) - strategySaveLength)
 
         flags = controlParameters.getForwardingFlags().getNfdForwardingFlags()
-        if (flags != ForwardingFlags().getNfdForwardingFlags()):
+        if (flags != RegistrationOptions().getNfdForwardingFlags()):
             # The flags are not the default value.
             encoder.writeNonNegativeIntegerTlv(
               Tlv.ControlParameters_Flags, flags)
@@ -1354,7 +1354,7 @@ class Tlv0_2WireFormat(WireFormat):
 
         # set forwarding flags
         if decoder.peekType(Tlv.ControlParameters_Flags, endOffset):
-            flags = ForwardingFlags()
+            flags = RegistrationOptions()
             flags.setNfdForwardingFlags(
               decoder.readNonNegativeIntegerTlv(Tlv.ControlParameters_Flags))
             controlParameters.setForwardingFlags(flags)

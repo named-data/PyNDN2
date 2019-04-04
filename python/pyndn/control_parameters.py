@@ -33,7 +33,7 @@ class ControlParameters(object):
             self._localControlFeature = value._localControlFeature
             self._origin = value._origin
             self._cost = value._cost
-            self._forwardingFlags = ForwardingFlags(value._forwardingFlags)
+            self._flags = RegistrationOptions(value._flags)
             self._strategy = Name(value._strategy)
             self._expirationPeriod = value._expirationPeriod
         else:
@@ -43,7 +43,7 @@ class ControlParameters(object):
             self._localControlFeature = None
             self._origin = None
             self._cost = None
-            self._forwardingFlags = ForwardingFlags()
+            self._flags = RegistrationOptions()
             self._strategy = Name()
             self._expirationPeriod = None
 
@@ -54,7 +54,7 @@ class ControlParameters(object):
         self._localControlFeature = None
         self._origin = None
         self._cost = None
-        self._forwardingFlags = ForwardingFlags()
+        self._flags = RegistrationOptions()
         self._strategy = Name()
         self._expirationPeriod = None
 
@@ -153,12 +153,12 @@ class ControlParameters(object):
 
     def getForwardingFlags(self):
         """
-        Get the ForwardingFlags object.
+        Get the RegistrationOptions object containing the flags.
 
-        :return: the ForwardingFlags object.
-        :rtype: ForwardingFlags
+        :return: the RegistrationOptions object.
+        :rtype: RegistrationOptions
         """
-        return self._forwardingFlags
+        return self._flags
 
     def getStrategy(self):
         """
@@ -228,17 +228,18 @@ class ControlParameters(object):
         """
         self._cost = cost
 
-    def setForwardingFlags(self, forwardingFlags):
+    def setForwardingFlags(self, flags):
         """
-        Set the ForwardingFlags object to a copy of forwardingFlags.
+        Set the RegistrationOptions object to a copy of flags.
         You can use getForwardingFlags() and change the existing
-        ForwardingFlags object.
+        RegistrationOptions object.
 
-        :param ForwardingFlags forwardingFlags: The new ForwardingFlace object.
+        :param RegistrationOptions flags: The new RegistrationOptions object
+          containing the flags, or None if not specified.
         """
-        self._forwardingFlags = (ForwardingFlags(forwardingFlags)
-                                 if isinstance(forwardingFlags, ForwardingFlags)
-                                 else ForwardingFlags())
+        self._flags = (RegistrationOptions(flags)
+                       if isinstance(flags, RegistrationOptions)
+                       else RegistrationOptions())
 
     def setStrategy(self, strategy):
         """
@@ -267,7 +268,7 @@ class ControlParameters(object):
         and self._localControlFeature == other._localControlFeature
         and self._origin == other._origin
         and self._cost == other._cost
-        and self._forwardingFlags == other._forwardingFlags
+        and self._flags == other._flags
         and self._strategy == other._strategy
         and self._expirationPeriod == other._expirationPerion):
             return True
@@ -286,7 +287,7 @@ class ControlParameters(object):
     expirationPeriod = property(getExpirationPeriod, setExpirationPeriod)
 
 # Import these at the end of the file to avoid circular references.
-from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.registration_options import RegistrationOptions
 from pyndn.name import Name
 from pyndn.util.blob import Blob
 from pyndn.encoding.wire_format import WireFormat

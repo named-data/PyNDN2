@@ -63,7 +63,7 @@ class InMemoryStorageFace(Face):
 
     def registerPrefix(self,
       prefix, onInterest, onRegisterFailed, onRegisterSuccess = None,
-      flags = None, wireFormat = None):
+      registrationOptions = None, wireFormat = None):
         self._interestFilterTable.setInterestFilter(
           0, InterestFilter(prefix), onInterest, self)
 

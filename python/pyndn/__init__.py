@@ -23,13 +23,13 @@ from pyndn import control_parameters, control_response, data, delegation_set
 from pyndn import digest_sha256_signature, exclude, face, forwarding_flags
 from pyndn import generic_signature, hmac_with_sha256_signature, interest
 from pyndn import interest_filter, key_locator, link, meta_info, name, network_nack
-from pyndn import sha256_with_ecdsa_signature, sha256_with_rsa_signature
+from pyndn import registration_options, sha256_with_ecdsa_signature, sha256_with_rsa_signature
 from pyndn import signature, validity_period
 __all__ = ['control_parameters', 'control_response', 'data', 'delegation_set',
            'digest_sha256_signature', 'exclude', 'face', 'forwarding_flags',
            'generic_signature', 'hmac_with_sha256_signature', 'interest',
            'interest_filter', 'key_locator', 'link', 'meta_info', 'name', 'network_nack',
-           'sha256_with_ecdsa_signature', 'sha256_with_rsa_signature',
+           'registration_options', 'sha256_with_ecdsa_signature', 'sha256_with_rsa_signature',
            'signature', 'validity_period']
 
 import sys as _sys
@@ -52,6 +52,7 @@ try:
     from pyndn.name import *
     from pyndn.network_nack import *
     from pyndn.digest_sha256_signature import *
+    from pyndn.registration_options import *
     from pyndn.sha256_with_ecdsa_signature import *
     from pyndn.sha256_with_rsa_signature import *
     from pyndn.signature import *
