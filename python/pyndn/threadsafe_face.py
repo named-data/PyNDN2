@@ -112,7 +112,7 @@ class ThreadsafeFace(Face):
 
     def registerPrefix(
       self, prefix, onInterest, onRegisterFailed, onRegisterSuccess = None,
-      flags = None, wireFormat = None):
+      registrationOptions = None, wireFormat = None):
         """
         Override to use the event loop given to the constructor to schedule
         registerPrefix to be called in a thread-safe manner. See
@@ -125,7 +125,8 @@ class ThreadsafeFace(Face):
         # call_soon_threadsafe is waiting to process.
         self._loop.call_soon_threadsafe(
           self._registerPrefixHelper, registeredPrefixId, Name(prefix),
-          onInterest, onRegisterFailed, onRegisterSuccess, flags, wireFormat)
+          onInterest, onRegisterFailed, onRegisterSuccess, registrationOptions,
+          wireFormat)
 
         return registeredPrefixId
 

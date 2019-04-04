@@ -206,7 +206,7 @@ class Node(object):
 
     def registerPrefix(
       self, registeredPrefixId, prefixCopy, onInterest, onRegisterFailed,
-      onRegisterSuccess, flags, wireFormat, commandKeyChain,
+      onRegisterSuccess, registrationOptions, wireFormat, commandKeyChain,
       commandCertificateName, face):
         """
         Register prefix with the connected NDN hub and call onInterest when a
@@ -234,8 +234,8 @@ class Node(object):
           success message from the forwarder. If onRegisterSuccess is None, this
           does not use it.
         :type onRegisterSuccess: function object
-        :param ForwardingFlags flags: The flags for finer control of which
-          interests are forwardedto the application.
+        :param RegistrationOptions registrationOptions: The registration options
+          for finer control of how to forward an interest and other options.
         :param wireFormat: A WireFormat object used to encode the message.
         :type wireFormat: a subclass of WireFormat
         :param KeyChain commandKeyChain: The KeyChain object for signing
@@ -247,7 +247,7 @@ class Node(object):
         """
         self._nfdRegisterPrefix(
           registeredPrefixId, prefixCopy, onInterest,
-          onRegisterFailed, onRegisterSuccess, flags, commandKeyChain,
+          onRegisterFailed, onRegisterSuccess, registrationOptions, commandKeyChain,
           commandCertificateName, face)
 
     def removeRegisteredPrefix(self, registeredPrefixId):
@@ -534,7 +534,8 @@ class Node(object):
 
     def _nfdRegisterPrefix(
       self, registeredPrefixId, prefix, onInterest, onRegisterFailed,
-      onRegisterSuccess, flags, commandKeyChain, commandCertificateName, face):
+      onRegisterSuccess, registrationOptions, commandKeyChain,
+      commandCertificateName, face):
         """
         Do the work of registerPrefix to register with NFD.
 
@@ -551,9 +552,10 @@ class Node(object):
 
         controlParameters = ControlParameters()
         controlParameters.setName(prefix)
-        controlParameters.setForwardingFlags(flags)
-        if (flags.getOrigin() != None and flags.getOrigin() >= 0):
-            controlParameters.setOrigin(flags.getOrigin())
+        controlParameters.setForwardingFlags(registrationOptions)
+        if (registrationOptions.getOrigin() != None and
+              registrationOptions.getOrigin() >= 0):
+            controlParameters.setOrigin(registrationOptions.getOrigin())
             # Remove the origin value from the flags since it is not used to encode.
             controlParameters.getForwardingFlags().setOrigin(None)
 
