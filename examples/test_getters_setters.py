@@ -72,8 +72,8 @@ def testPropertyRW( obj, p, vals, onlyCheckPresence=False ):
 #
 from pyndn.name import Name
 from pyndn.control_parameters import ControlParameters
-from pyndn.forwarding_flags import ForwardingFlags
-for p in [("name",Name("yes"),Name("another")), ("faceId", 32, None), ("localControlFeature", 1, None), ("origin", 2, 9), ("cost", 1, None), ("forwardingFlags", ForwardingFlags(), ForwardingFlags()), ("expirationPeriod", 1000.1, None)]:
+from pyndn.registration_options import RegistrationOptions
+for p in [("name",Name("yes"),Name("another")), ("faceId", 32, None), ("localControlFeature", 1, None), ("origin", 2, 9), ("cost", 1, None), ("forwardingFlags", RegistrationOptions(), RegistrationOptions()), ("expirationPeriod", 1000.1, None)]:
     res = testPropertyRW( ControlParameters(), p[0], [p[1],p[2]])
     if not res[0]: print(res)
 
@@ -90,12 +90,12 @@ for p in [("name",Name("yes"),Name("another")), ("metaInfo", MetaInfo(), MetaInf
     res = testPropertyRW( Data(), p[0], [p[1],p[2]])
     if not res[0]: print(res)
 
-# ForwardingFlags
+# RegistrationOptions
 # All boolean, so use shortcut below
 #
-from pyndn.forwarding_flags import ForwardingFlags
+from pyndn.registration_options import RegistrationOptions
 for p in ["active", "childInherit", "advertise", "last", "capture", "local", "tap", "captureOk"]:
-    res = testPropertyRW( ForwardingFlags(), p, [True, False] )
+    res = testPropertyRW( RegistrationOptions(), p, [True, False] )
     if not res[0]: print(res)
 
 # Interest
