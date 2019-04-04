@@ -54,19 +54,6 @@ class Tlv(object):
     CanBePrefix =      33
     HopLimit =         34
     ApplicationParameters = 35
-    FaceInstance =     128
-    ForwardingEntry =  129
-    StatusResponse =   130
-    Action =           131
-    FaceID =           132
-    IPProto =          133
-    Host =             134
-    Port =             135
-    MulticastInterface = 136
-    MulticastTTL =     137
-    ForwardingFlags =  138
-    StatusCode =       139
-    StatusText =       140
 
     SignatureType_DigestSha256 = 0
     SignatureType_SignatureSha256WithRsa = 1
