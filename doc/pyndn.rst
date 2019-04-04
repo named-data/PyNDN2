@@ -163,6 +163,14 @@ pyndn.node module
     :undoc-members:
     :show-inheritance:
 
+pyndn.registration\_options module
+----------------------------------
+
+.. automodule:: pyndn.registration_options
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyndn.sha256\_with\_ecdsa\_signature module
 -------------------------------------------
 
