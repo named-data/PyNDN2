@@ -21,6 +21,7 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/key-types.h \
   include/ndn-cpp/c/name-types.h \
   include/ndn-cpp/c/network-nack-types.h \
+  include/ndn-cpp/c/registration-options-types.h \
   include/ndn-cpp/c/encoding/element-reader-types.h \
   include/ndn-cpp/c/encrypt/encrypted-content-types.h \
   include/ndn-cpp/c/encrypt/algo/encrypt-params-types.h \
@@ -50,12 +51,14 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/meta-info-lite.hpp \
   include/ndn-cpp/lite/name-lite.hpp \
   include/ndn-cpp/lite/network-nack-lite.hpp \
+  include/ndn-cpp/lite/registration-options-lite.hpp \
   include/ndn-cpp/lite/signature-lite.hpp \
   include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_2-wire-format-lite.hpp \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
+  include/ndn-cpp/lite/encrypt/algo/des-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
   include/ndn-cpp/lite/lp/congestion-mark-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
@@ -81,11 +84,12 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/data.h \
   src/c/delegation-set.h \
   src/c/errors.c src/c/errors.h \
-  src/c/forwarding-flags.c src/c/forwarding-flags-impl.h \
+  src/c/forwarding-flags-impl.h \
   src/c/interest_c.c src/c/interest.h \
   src/c/key-locator.h \
   src/c/name_c.c src/c/name.h \
   src/c/network-nack_c.c src/c/network-nack.h \
+  src/c/registration-options.c src/c/registration-options.h \
   src/c/encoding/element-listener.h \
   src/c/encoding/element-reader.c src/c/encoding/element-reader.h \
   src/c/encoding/tlv-0_2-wire-format_c.c src/c/encoding/tlv-0_2-wire-format.h \
@@ -105,6 +109,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/encoding/tlv/tlv.h \
   src/c/encrypt/encrypted-content.h \
   src/c/encrypt/algo/aes-algorithm_c.c src/c/encrypt/algo/aes-algorithm.h \
+  src/c/encrypt/algo/des-algorithm_c.c src/c/encrypt/algo/des-algorithm.h \
   src/c/encrypt/algo/encrypt-params.h \
   src/c/lp/congestion-mark_c.c src/c/lp/congestion-mark.h \
   src/c/lp/incoming-face-id_c.c src/c/lp/incoming-face-id.h \
@@ -132,17 +137,18 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/data-lite.cpp \
   src/lite/delegation-set-lite.cpp \
   src/lite/exclude-lite.cpp \
-  src/lite/forwarding-flags-lite.cpp \
   src/lite/interest-lite.cpp \
   src/lite/key-locator-lite.cpp \
   src/lite/meta-info-lite.cpp \
   src/lite/name-lite.cpp \
   src/lite/network-nack-lite.cpp \
+  src/lite/registration-options-lite.cpp \
   src/lite/signature-lite.cpp \
   src/lite/encoding/element-listener-lite.cpp \
   src/lite/encoding/tlv-0_2-wire-format-lite.cpp \
   src/lite/encrypt/encrypted-content-lite.cpp \
   src/lite/encrypt/algo/aes-algorithm-lite.cpp \
+  src/lite/encrypt/algo/des-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/congestion-mark-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \

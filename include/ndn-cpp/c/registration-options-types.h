@@ -1,6 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 /**
- * Copyright (C) 2015-2019 Regents of the University of California.
+ * Copyright (C) 2019 Regents of the University of California.
  * @author: Jeff Thompson <jefft0@remap.ucla.edu>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,26 +18,28 @@
  * A copy of the GNU Lesser General Public License is in the file COPYING.
  */
 
-#include "../c/forwarding-flags-impl.h"
-#include <ndn-cpp/lite/forwarding-flags-lite.hpp>
+#ifndef NDN_REGISTRATION_OPTIONS_TYPES_H
+#define NDN_REGISTRATION_OPTIONS_TYPES_H
 
-namespace ndn {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-ForwardingFlagsLite::ForwardingFlagsLite()
-{
-  ndn_ForwardingFlags_initialize(this);
+/**
+ * An ndn_RegistrationOptions holds the options used when registering with the
+ * forwarder to specify how to forward an interest and other options. We use a
+ * separate ndn_RegistrationOptions to retain future compatibility if the
+ * format of the registration command is changed.
+ * (This was renamed from ndn_ForwardingFlags, which is deprecated.)
+ */
+struct ndn_RegistrationOptions {
+  int childInherit;
+  int capture;
+  int origin; /**< -1 for none. */
+};
+
+#ifdef __cplusplus
 }
+#endif
 
-int
-ForwardingFlagsLite::getNfdForwardingFlags() const
-{
-  return ndn_ForwardingFlags_getNfdForwardingFlags(this);
-}
-
-void
-ForwardingFlagsLite::setNfdForwardingFlags(int nfdForwardingFlags)
-{
-  ndn_ForwardingFlags_setNfdForwardingFlags(this, nfdForwardingFlags);
-}
-
-}
+#endif

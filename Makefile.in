@@ -140,9 +140,9 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = $(am__objects_1) \
 	contrib/murmur-hash/_pyndn_la-murmur-hash.lo \
 	src/c/_pyndn_la-control-parameters_c.lo \
-	src/c/_pyndn_la-errors.lo src/c/_pyndn_la-forwarding-flags.lo \
-	src/c/_pyndn_la-interest_c.lo src/c/_pyndn_la-name_c.lo \
-	src/c/_pyndn_la-network-nack_c.lo \
+	src/c/_pyndn_la-errors.lo src/c/_pyndn_la-interest_c.lo \
+	src/c/_pyndn_la-name_c.lo src/c/_pyndn_la-network-nack_c.lo \
+	src/c/_pyndn_la-registration-options.lo \
 	src/c/encoding/_pyndn_la-element-reader.lo \
 	src/c/encoding/_pyndn_la-tlv-0_2-wire-format_c.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-control-parameters.lo \
@@ -159,6 +159,7 @@ am__objects_2 = $(am__objects_1) \
 	src/c/encoding/tlv/_pyndn_la-tlv-signature-info.lo \
 	src/c/encoding/tlv/_pyndn_la-tlv-structure-decoder.lo \
 	src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo \
+	src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo \
 	src/c/lp/_pyndn_la-congestion-mark_c.lo \
 	src/c/lp/_pyndn_la-incoming-face-id_c.lo \
 	src/c/security/_pyndn_la-ec-private-key.lo \
@@ -178,17 +179,18 @@ am__objects_3 = $(am__objects_2) $(am__objects_1) \
 	src/lite/_pyndn_la-data-lite.lo \
 	src/lite/_pyndn_la-delegation-set-lite.lo \
 	src/lite/_pyndn_la-exclude-lite.lo \
-	src/lite/_pyndn_la-forwarding-flags-lite.lo \
 	src/lite/_pyndn_la-interest-lite.lo \
 	src/lite/_pyndn_la-key-locator-lite.lo \
 	src/lite/_pyndn_la-meta-info-lite.lo \
 	src/lite/_pyndn_la-name-lite.lo \
 	src/lite/_pyndn_la-network-nack-lite.lo \
+	src/lite/_pyndn_la-registration-options-lite.lo \
 	src/lite/_pyndn_la-signature-lite.lo \
 	src/lite/encoding/_pyndn_la-element-listener-lite.lo \
 	src/lite/encoding/_pyndn_la-tlv-0_2-wire-format-lite.lo \
 	src/lite/encrypt/_pyndn_la-encrypted-content-lite.lo \
 	src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo \
+	src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo \
 	src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo \
 	src/lite/lp/_pyndn_la-congestion-mark-lite.lo \
 	src/lite/lp/_pyndn_la-incoming-face-id-lite.lo \
@@ -235,10 +237,10 @@ am__depfiles_remade =  \
 	src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-errors.Plo \
-	src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-interest_c.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-name_c.Plo \
 	src/c/$(DEPDIR)/_pyndn_la-network-nack_c.Plo \
+	src/c/$(DEPDIR)/_pyndn_la-registration-options.Plo \
 	src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Plo \
 	src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Plo \
 	src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Plo \
@@ -255,6 +257,7 @@ am__depfiles_remade =  \
 	src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Plo \
 	src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Plo \
 	src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Plo \
+	src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Plo \
 	src/c/lp/$(DEPDIR)/_pyndn_la-congestion-mark_c.Plo \
 	src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Plo \
 	src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Plo \
@@ -274,17 +277,18 @@ am__depfiles_remade =  \
 	src/lite/$(DEPDIR)/_pyndn_la-data-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-delegation-set-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-exclude-lite.Plo \
-	src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-key-locator-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-meta-info-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-name-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-network-nack-lite.Plo \
+	src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Plo \
 	src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Plo \
 	src/lite/encoding/$(DEPDIR)/_pyndn_la-element-listener-lite.Plo \
 	src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Plo \
 	src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Plo \
 	src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo \
+	src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Plo \
 	src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo \
 	src/lite/lp/$(DEPDIR)/_pyndn_la-congestion-mark-lite.Plo \
 	src/lite/lp/$(DEPDIR)/_pyndn_la-incoming-face-id-lite.Plo \
@@ -547,6 +551,7 @@ ndn_cpp_c_headers = \
   include/ndn-cpp/c/key-types.h \
   include/ndn-cpp/c/name-types.h \
   include/ndn-cpp/c/network-nack-types.h \
+  include/ndn-cpp/c/registration-options-types.h \
   include/ndn-cpp/c/encoding/element-reader-types.h \
   include/ndn-cpp/c/encrypt/encrypted-content-types.h \
   include/ndn-cpp/c/encrypt/algo/encrypt-params-types.h \
@@ -577,12 +582,14 @@ ndn_cpp_cpp_headers = \
   include/ndn-cpp/lite/meta-info-lite.hpp \
   include/ndn-cpp/lite/name-lite.hpp \
   include/ndn-cpp/lite/network-nack-lite.hpp \
+  include/ndn-cpp/lite/registration-options-lite.hpp \
   include/ndn-cpp/lite/signature-lite.hpp \
   include/ndn-cpp/lite/encoding/element-listener-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_1_1-wire-format-lite.hpp \
   include/ndn-cpp/lite/encoding/tlv-0_2-wire-format-lite.hpp \
   include/ndn-cpp/lite/encrypt/encrypted-content-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/aes-algorithm-lite.hpp \
+  include/ndn-cpp/lite/encrypt/algo/des-algorithm-lite.hpp \
   include/ndn-cpp/lite/encrypt/algo/encrypt-params-lite.hpp \
   include/ndn-cpp/lite/lp/congestion-mark-lite.hpp \
   include/ndn-cpp/lite/lp/incoming-face-id-lite.hpp \
@@ -609,11 +616,12 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/data.h \
   src/c/delegation-set.h \
   src/c/errors.c src/c/errors.h \
-  src/c/forwarding-flags.c src/c/forwarding-flags-impl.h \
+  src/c/forwarding-flags-impl.h \
   src/c/interest_c.c src/c/interest.h \
   src/c/key-locator.h \
   src/c/name_c.c src/c/name.h \
   src/c/network-nack_c.c src/c/network-nack.h \
+  src/c/registration-options.c src/c/registration-options.h \
   src/c/encoding/element-listener.h \
   src/c/encoding/element-reader.c src/c/encoding/element-reader.h \
   src/c/encoding/tlv-0_2-wire-format_c.c src/c/encoding/tlv-0_2-wire-format.h \
@@ -633,6 +641,7 @@ ndn_cpp_c_sources = ${ndn_cpp_c_headers} \
   src/c/encoding/tlv/tlv.h \
   src/c/encrypt/encrypted-content.h \
   src/c/encrypt/algo/aes-algorithm_c.c src/c/encrypt/algo/aes-algorithm.h \
+  src/c/encrypt/algo/des-algorithm_c.c src/c/encrypt/algo/des-algorithm.h \
   src/c/encrypt/algo/encrypt-params.h \
   src/c/lp/congestion-mark_c.c src/c/lp/congestion-mark.h \
   src/c/lp/incoming-face-id_c.c src/c/lp/incoming-face-id.h \
@@ -661,17 +670,18 @@ ndn_cpp_cpp_sources = ${ndn_cpp_c_sources} ${ndn_cpp_cpp_headers} \
   src/lite/data-lite.cpp \
   src/lite/delegation-set-lite.cpp \
   src/lite/exclude-lite.cpp \
-  src/lite/forwarding-flags-lite.cpp \
   src/lite/interest-lite.cpp \
   src/lite/key-locator-lite.cpp \
   src/lite/meta-info-lite.cpp \
   src/lite/name-lite.cpp \
   src/lite/network-nack-lite.cpp \
+  src/lite/registration-options-lite.cpp \
   src/lite/signature-lite.cpp \
   src/lite/encoding/element-listener-lite.cpp \
   src/lite/encoding/tlv-0_2-wire-format-lite.cpp \
   src/lite/encrypt/encrypted-content-lite.cpp \
   src/lite/encrypt/algo/aes-algorithm-lite.cpp \
+  src/lite/encrypt/algo/des-algorithm-lite.cpp \
   src/lite/encrypt/algo/encrypt-params-lite.cpp \
   src/lite/lp/congestion-mark-lite.cpp \
   src/lite/lp/incoming-face-id-lite.cpp \
@@ -802,13 +812,13 @@ src/c/_pyndn_la-control-parameters_c.lo: src/c/$(am__dirstamp) \
 	src/c/$(DEPDIR)/$(am__dirstamp)
 src/c/_pyndn_la-errors.lo: src/c/$(am__dirstamp) \
 	src/c/$(DEPDIR)/$(am__dirstamp)
-src/c/_pyndn_la-forwarding-flags.lo: src/c/$(am__dirstamp) \
-	src/c/$(DEPDIR)/$(am__dirstamp)
 src/c/_pyndn_la-interest_c.lo: src/c/$(am__dirstamp) \
 	src/c/$(DEPDIR)/$(am__dirstamp)
 src/c/_pyndn_la-name_c.lo: src/c/$(am__dirstamp) \
 	src/c/$(DEPDIR)/$(am__dirstamp)
 src/c/_pyndn_la-network-nack_c.lo: src/c/$(am__dirstamp) \
+	src/c/$(DEPDIR)/$(am__dirstamp)
+src/c/_pyndn_la-registration-options.lo: src/c/$(am__dirstamp) \
 	src/c/$(DEPDIR)/$(am__dirstamp)
 src/c/encoding/$(am__dirstamp):
 	@$(MKDIR_P) src/c/encoding
@@ -874,6 +884,9 @@ src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/c/encrypt/algo/$(DEPDIR)
 	@: > src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
 src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo:  \
+	src/c/encrypt/algo/$(am__dirstamp) \
+	src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
+src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo:  \
 	src/c/encrypt/algo/$(am__dirstamp) \
 	src/c/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
 src/c/lp/$(am__dirstamp):
@@ -951,8 +964,6 @@ src/lite/_pyndn_la-delegation-set-lite.lo: src/lite/$(am__dirstamp) \
 	src/lite/$(DEPDIR)/$(am__dirstamp)
 src/lite/_pyndn_la-exclude-lite.lo: src/lite/$(am__dirstamp) \
 	src/lite/$(DEPDIR)/$(am__dirstamp)
-src/lite/_pyndn_la-forwarding-flags-lite.lo: src/lite/$(am__dirstamp) \
-	src/lite/$(DEPDIR)/$(am__dirstamp)
 src/lite/_pyndn_la-interest-lite.lo: src/lite/$(am__dirstamp) \
 	src/lite/$(DEPDIR)/$(am__dirstamp)
 src/lite/_pyndn_la-key-locator-lite.lo: src/lite/$(am__dirstamp) \
@@ -963,6 +974,8 @@ src/lite/_pyndn_la-name-lite.lo: src/lite/$(am__dirstamp) \
 	src/lite/$(DEPDIR)/$(am__dirstamp)
 src/lite/_pyndn_la-network-nack-lite.lo: src/lite/$(am__dirstamp) \
 	src/lite/$(DEPDIR)/$(am__dirstamp)
+src/lite/_pyndn_la-registration-options-lite.lo:  \
+	src/lite/$(am__dirstamp) src/lite/$(DEPDIR)/$(am__dirstamp)
 src/lite/_pyndn_la-signature-lite.lo: src/lite/$(am__dirstamp) \
 	src/lite/$(DEPDIR)/$(am__dirstamp)
 src/lite/encoding/$(am__dirstamp):
@@ -993,6 +1006,9 @@ src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/lite/encrypt/algo/$(DEPDIR)
 	@: > src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
 src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo:  \
+	src/lite/encrypt/algo/$(am__dirstamp) \
+	src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
+src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo:  \
 	src/lite/encrypt/algo/$(am__dirstamp) \
 	src/lite/encrypt/algo/$(DEPDIR)/$(am__dirstamp)
 src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo:  \
@@ -1122,10 +1138,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-errors.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-interest_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-name_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-network-nack_c.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/$(DEPDIR)/_pyndn_la-registration-options.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Plo@am__quote@ # am--include-marker
@@ -1142,6 +1158,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/lp/$(DEPDIR)/_pyndn_la-congestion-mark_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Plo@am__quote@ # am--include-marker
@@ -1161,17 +1178,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-data-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-delegation-set-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-exclude-lite.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-key-locator-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-meta-info-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-name-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-network-nack-lite.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-element-listener-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/lp/$(DEPDIR)/_pyndn_la-congestion-mark-lite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/lite/lp/$(DEPDIR)/_pyndn_la-incoming-face-id-lite.Plo@am__quote@ # am--include-marker
@@ -1240,13 +1258,6 @@ src/c/_pyndn_la-errors.lo: src/c/errors.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-errors.lo `test -f 'src/c/errors.c' || echo '$(srcdir)/'`src/c/errors.c
 
-src/c/_pyndn_la-forwarding-flags.lo: src/c/forwarding-flags.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-forwarding-flags.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Tpo -c -o src/c/_pyndn_la-forwarding-flags.lo `test -f 'src/c/forwarding-flags.c' || echo '$(srcdir)/'`src/c/forwarding-flags.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Tpo src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/forwarding-flags.c' object='src/c/_pyndn_la-forwarding-flags.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-forwarding-flags.lo `test -f 'src/c/forwarding-flags.c' || echo '$(srcdir)/'`src/c/forwarding-flags.c
-
 src/c/_pyndn_la-interest_c.lo: src/c/interest_c.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-interest_c.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-interest_c.Tpo -c -o src/c/_pyndn_la-interest_c.lo `test -f 'src/c/interest_c.c' || echo '$(srcdir)/'`src/c/interest_c.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-interest_c.Tpo src/c/$(DEPDIR)/_pyndn_la-interest_c.Plo
@@ -1267,6 +1278,13 @@ src/c/_pyndn_la-network-nack_c.lo: src/c/network-nack_c.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/network-nack_c.c' object='src/c/_pyndn_la-network-nack_c.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-network-nack_c.lo `test -f 'src/c/network-nack_c.c' || echo '$(srcdir)/'`src/c/network-nack_c.c
+
+src/c/_pyndn_la-registration-options.lo: src/c/registration-options.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/_pyndn_la-registration-options.lo -MD -MP -MF src/c/$(DEPDIR)/_pyndn_la-registration-options.Tpo -c -o src/c/_pyndn_la-registration-options.lo `test -f 'src/c/registration-options.c' || echo '$(srcdir)/'`src/c/registration-options.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/$(DEPDIR)/_pyndn_la-registration-options.Tpo src/c/$(DEPDIR)/_pyndn_la-registration-options.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/registration-options.c' object='src/c/_pyndn_la-registration-options.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/_pyndn_la-registration-options.lo `test -f 'src/c/registration-options.c' || echo '$(srcdir)/'`src/c/registration-options.c
 
 src/c/encoding/_pyndn_la-element-reader.lo: src/c/encoding/element-reader.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encoding/_pyndn_la-element-reader.lo -MD -MP -MF src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Tpo -c -o src/c/encoding/_pyndn_la-element-reader.lo `test -f 'src/c/encoding/element-reader.c' || echo '$(srcdir)/'`src/c/encoding/element-reader.c
@@ -1379,6 +1397,13 @@ src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo: src/c/encrypt/algo/aes-algorith
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encrypt/algo/aes-algorithm_c.c' object='src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encrypt/algo/_pyndn_la-aes-algorithm_c.lo `test -f 'src/c/encrypt/algo/aes-algorithm_c.c' || echo '$(srcdir)/'`src/c/encrypt/algo/aes-algorithm_c.c
+
+src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo: src/c/encrypt/algo/des-algorithm_c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo -MD -MP -MF src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Tpo -c -o src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo `test -f 'src/c/encrypt/algo/des-algorithm_c.c' || echo '$(srcdir)/'`src/c/encrypt/algo/des-algorithm_c.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Tpo src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/c/encrypt/algo/des-algorithm_c.c' object='src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -c -o src/c/encrypt/algo/_pyndn_la-des-algorithm_c.lo `test -f 'src/c/encrypt/algo/des-algorithm_c.c' || echo '$(srcdir)/'`src/c/encrypt/algo/des-algorithm_c.c
 
 src/c/lp/_pyndn_la-congestion-mark_c.lo: src/c/lp/congestion-mark_c.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(_pyndn_la_CFLAGS) $(CFLAGS) -MT src/c/lp/_pyndn_la-congestion-mark_c.lo -MD -MP -MF src/c/lp/$(DEPDIR)/_pyndn_la-congestion-mark_c.Tpo -c -o src/c/lp/_pyndn_la-congestion-mark_c.lo `test -f 'src/c/lp/congestion-mark_c.c' || echo '$(srcdir)/'`src/c/lp/congestion-mark_c.c
@@ -1537,13 +1562,6 @@ src/lite/_pyndn_la-exclude-lite.lo: src/lite/exclude-lite.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/_pyndn_la-exclude-lite.lo `test -f 'src/lite/exclude-lite.cpp' || echo '$(srcdir)/'`src/lite/exclude-lite.cpp
 
-src/lite/_pyndn_la-forwarding-flags-lite.lo: src/lite/forwarding-flags-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/_pyndn_la-forwarding-flags-lite.lo -MD -MP -MF src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Tpo -c -o src/lite/_pyndn_la-forwarding-flags-lite.lo `test -f 'src/lite/forwarding-flags-lite.cpp' || echo '$(srcdir)/'`src/lite/forwarding-flags-lite.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Tpo src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/forwarding-flags-lite.cpp' object='src/lite/_pyndn_la-forwarding-flags-lite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/_pyndn_la-forwarding-flags-lite.lo `test -f 'src/lite/forwarding-flags-lite.cpp' || echo '$(srcdir)/'`src/lite/forwarding-flags-lite.cpp
-
 src/lite/_pyndn_la-interest-lite.lo: src/lite/interest-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/_pyndn_la-interest-lite.lo -MD -MP -MF src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Tpo -c -o src/lite/_pyndn_la-interest-lite.lo `test -f 'src/lite/interest-lite.cpp' || echo '$(srcdir)/'`src/lite/interest-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Tpo src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Plo
@@ -1579,6 +1597,13 @@ src/lite/_pyndn_la-network-nack-lite.lo: src/lite/network-nack-lite.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/_pyndn_la-network-nack-lite.lo `test -f 'src/lite/network-nack-lite.cpp' || echo '$(srcdir)/'`src/lite/network-nack-lite.cpp
 
+src/lite/_pyndn_la-registration-options-lite.lo: src/lite/registration-options-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/_pyndn_la-registration-options-lite.lo -MD -MP -MF src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Tpo -c -o src/lite/_pyndn_la-registration-options-lite.lo `test -f 'src/lite/registration-options-lite.cpp' || echo '$(srcdir)/'`src/lite/registration-options-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Tpo src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/registration-options-lite.cpp' object='src/lite/_pyndn_la-registration-options-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/_pyndn_la-registration-options-lite.lo `test -f 'src/lite/registration-options-lite.cpp' || echo '$(srcdir)/'`src/lite/registration-options-lite.cpp
+
 src/lite/_pyndn_la-signature-lite.lo: src/lite/signature-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/_pyndn_la-signature-lite.lo -MD -MP -MF src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Tpo -c -o src/lite/_pyndn_la-signature-lite.lo `test -f 'src/lite/signature-lite.cpp' || echo '$(srcdir)/'`src/lite/signature-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Tpo src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Plo
@@ -1613,6 +1638,13 @@ src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo: src/lite/encrypt/algo/aes
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/encrypt/algo/aes-algorithm-lite.cpp' object='src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encrypt/algo/_pyndn_la-aes-algorithm-lite.lo `test -f 'src/lite/encrypt/algo/aes-algorithm-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/aes-algorithm-lite.cpp
+
+src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo: src/lite/encrypt/algo/des-algorithm-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo -MD -MP -MF src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Tpo -c -o src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo `test -f 'src/lite/encrypt/algo/des-algorithm-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/des-algorithm-lite.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Tpo src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/lite/encrypt/algo/des-algorithm-lite.cpp' object='src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/lite/encrypt/algo/_pyndn_la-des-algorithm-lite.lo `test -f 'src/lite/encrypt/algo/des-algorithm-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/des-algorithm-lite.cpp
 
 src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo: src/lite/encrypt/algo/encrypt-params-lite.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(_pyndn_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo -MD -MP -MF src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Tpo -c -o src/lite/encrypt/algo/_pyndn_la-encrypt-params-lite.lo `test -f 'src/lite/encrypt/algo/encrypt-params-lite.cpp' || echo '$(srcdir)/'`src/lite/encrypt/algo/encrypt-params-lite.cpp
@@ -2069,10 +2101,10 @@ distclean: distclean-am
 	-rm -f src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-errors.Plo
-	-rm -f src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-interest_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-name_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-network-nack_c.Plo
+	-rm -f src/c/$(DEPDIR)/_pyndn_la-registration-options.Plo
 	-rm -f src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Plo
 	-rm -f src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Plo
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Plo
@@ -2089,6 +2121,7 @@ distclean: distclean-am
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Plo
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Plo
 	-rm -f src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Plo
+	-rm -f src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Plo
 	-rm -f src/c/lp/$(DEPDIR)/_pyndn_la-congestion-mark_c.Plo
 	-rm -f src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Plo
 	-rm -f src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Plo
@@ -2108,17 +2141,18 @@ distclean: distclean-am
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-data-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-delegation-set-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-exclude-lite.Plo
-	-rm -f src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-key-locator-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-meta-info-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-name-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-network-nack-lite.Plo
+	-rm -f src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Plo
 	-rm -f src/lite/encoding/$(DEPDIR)/_pyndn_la-element-listener-lite.Plo
 	-rm -f src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Plo
 	-rm -f src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Plo
 	-rm -f src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo
+	-rm -f src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Plo
 	-rm -f src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo
 	-rm -f src/lite/lp/$(DEPDIR)/_pyndn_la-congestion-mark-lite.Plo
 	-rm -f src/lite/lp/$(DEPDIR)/_pyndn_la-incoming-face-id-lite.Plo
@@ -2186,10 +2220,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/$(DEPDIR)/_pyndn_la-pyndnmodule.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-control-parameters_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-errors.Plo
-	-rm -f src/c/$(DEPDIR)/_pyndn_la-forwarding-flags.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-interest_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-name_c.Plo
 	-rm -f src/c/$(DEPDIR)/_pyndn_la-network-nack_c.Plo
+	-rm -f src/c/$(DEPDIR)/_pyndn_la-registration-options.Plo
 	-rm -f src/c/encoding/$(DEPDIR)/_pyndn_la-element-reader.Plo
 	-rm -f src/c/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format_c.Plo
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-control-parameters.Plo
@@ -2206,6 +2240,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-signature-info.Plo
 	-rm -f src/c/encoding/tlv/$(DEPDIR)/_pyndn_la-tlv-structure-decoder.Plo
 	-rm -f src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm_c.Plo
+	-rm -f src/c/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm_c.Plo
 	-rm -f src/c/lp/$(DEPDIR)/_pyndn_la-congestion-mark_c.Plo
 	-rm -f src/c/lp/$(DEPDIR)/_pyndn_la-incoming-face-id_c.Plo
 	-rm -f src/c/security/$(DEPDIR)/_pyndn_la-ec-private-key.Plo
@@ -2225,17 +2260,18 @@ maintainer-clean: maintainer-clean-am
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-data-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-delegation-set-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-exclude-lite.Plo
-	-rm -f src/lite/$(DEPDIR)/_pyndn_la-forwarding-flags-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-interest-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-key-locator-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-meta-info-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-name-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-network-nack-lite.Plo
+	-rm -f src/lite/$(DEPDIR)/_pyndn_la-registration-options-lite.Plo
 	-rm -f src/lite/$(DEPDIR)/_pyndn_la-signature-lite.Plo
 	-rm -f src/lite/encoding/$(DEPDIR)/_pyndn_la-element-listener-lite.Plo
 	-rm -f src/lite/encoding/$(DEPDIR)/_pyndn_la-tlv-0_2-wire-format-lite.Plo
 	-rm -f src/lite/encrypt/$(DEPDIR)/_pyndn_la-encrypted-content-lite.Plo
 	-rm -f src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-aes-algorithm-lite.Plo
+	-rm -f src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-des-algorithm-lite.Plo
 	-rm -f src/lite/encrypt/algo/$(DEPDIR)/_pyndn_la-encrypt-params-lite.Plo
 	-rm -f src/lite/lp/$(DEPDIR)/_pyndn_la-congestion-mark-lite.Plo
 	-rm -f src/lite/lp/$(DEPDIR)/_pyndn_la-incoming-face-id-lite.Plo
