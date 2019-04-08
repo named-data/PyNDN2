@@ -71,8 +71,11 @@ class NetworkNack(object):
           reason code is not a recognized Reason enum value, use
           Reason.OTHER_CODE and call setOtherReasonCode().
         :type reason: an int from NetworkNack.Reason
+        :return: This NetworkNack so that you can chain calls to update values.
+        :rtype: NetworkNack
         """
         self._reason = reason
+        return self
 
     def setOtherReasonCode(self, otherReasonCode):
         """
@@ -82,10 +85,13 @@ class NetworkNack(object):
 
         :param int otherReasonCode: The packet's unrecognized reason code, which
           must be non-negative.
+        :return: This NetworkNack so that you can chain calls to update values.
+        :rtype: NetworkNack
         """
         if otherReasonCode < 0:
           raise RuntimeError("NetworkNack other reason code must be non-negative")
         self._otherReasonCode = otherReasonCode
+        return self
 
     @staticmethod
     def getFirstHeader(lpPacket):
