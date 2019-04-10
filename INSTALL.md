@@ -46,6 +46,7 @@ If you are using Python 3, change the python command to python3 in the following
 
 Install Xcode.  (Xcode seems to already have the Command Line Tools.)
 To install the pip module, in a terminal enter:
+
     curl https://bootstrap.pypa.io/get-pip.py | sudo python
 
 To install the cryptography package, in a terminal enter:
