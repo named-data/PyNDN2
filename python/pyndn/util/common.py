@@ -21,9 +21,15 @@
 This module defines the Common class which has static utility functions.
 """
 
+import sys
 import datetime
 import base64
 from io import BytesIO
+have_mmh3 = True
+try:
+    import mmh3
+except ImportError:
+    have_mmh3 = False
 
 # _BytesIOValueIsStr is True if BytesIO.getvalue would return a str.
 _BytesIOValueIsStr = type(BytesIO().getvalue()) is str
@@ -187,6 +193,34 @@ class Common(object):
             result += base64Str[i:i + 64] + "\n"
             i += 64
         return result
+
+    @staticmethod
+    def murmurHash3Uint32(nHashSeed, value):
+        """
+        Interpret the unsigned integer value as a 4-byte little endian array for
+        MurmurHash3.
+
+        :param int nHashSeed: The hash seed.
+        :param int value: The integer value, interpreted as a 4-byte array.
+        :return: The hash value.
+        :rtype: int
+        """
+        if not have_mmh3:
+            raise RuntimeError(
+              "murmurHash3Uint32: Need to 'sudo python -m pip install mmh3'")
+
+        buffer = [ value & 0xff,
+                  (value >> 8) & 0xff,
+                  (value >> 16) & 0xff,
+                  (value >> 24) & 0xff]
+
+        # Imitate Blob.toBytes.
+        if sys.version_info[0] > 2:
+            valueBytes = bytes(buffer)
+        else:
+            valueBytes = "".join(map(chr, buffer))
+
+        return mmh3.hash(valueBytes, nHashSeed, signed = False)
 
     """
     The practical limit of the size of a network-layer packet. If a packet is
