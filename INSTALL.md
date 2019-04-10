@@ -12,6 +12,7 @@ Prerequisites
 * Required: The cryptography package
 * Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
+# Optional: Murmur hash 3 (for PSync)
 * Optional: Sphinx (to make documentation)
 * Optional: pytest and mock (for running unit tests)
 * Optional: python-dev, libcrypto (for the _pyndn C module)
@@ -60,6 +61,10 @@ Optional: To install trollius (Python <= 3.2), in a terminal enter:
 Optional: To install Protobuf, in a terminal enter:
 
     sudo python -m pip install --ignore-installed six protobuf
+
+Optional: To install Murmur hash 3, in a terminal enter:
+
+    sudo python -m pip install mmh3
 
 Optional: To install Sphinx, in a terminal enter:
 
@@ -116,6 +121,10 @@ Optional: To install Protobuf in Python 2, in a terminal enter:
 Optional: To install Protobuf in Python 3, in a terminal enter:
 
     sudo python -m pip3 install protobuf
+
+Optional: To install Murmur hash 3, in a terminal enter:
+
+    sudo python -m pip install mmh3
 
 Optional: To install pytest and mock, in a terminal enter:
 
