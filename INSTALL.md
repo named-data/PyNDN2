@@ -8,6 +8,7 @@ from the [README.md](https://github.com/named-data/PyNDN2/blob/master/README.md)
 Prerequisites
 =============
 * Required: Python 2.7 or later
+* Required: The pip module
 * Required: The cryptography package
 * Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
@@ -41,35 +42,35 @@ to the PyNDN root and enter:
 Otherwise, following are the detailed steps for each platform to manually install the prerequisites.
 
 ## OS X 10.10.2, OS X 10.11, macOS 10.12, macOS 10.13 and macOS 10.14
+If you are using Python 3, change the python command to python3 in the following.
+
 Install Xcode.  (Xcode seems to already have the Command Line Tools.)
+To install the pip module, in a terminal enter:
+    curl https://bootstrap.pypa.io/get-pip.py | sudo python
+
 To install the cryptography package, in a terminal enter:
 
-    sudo easy_install pip
-    sudo CFLAGS=-Qunused-arguments pip install cryptography
+    sudo CFLAGS=-Qunused-arguments python -m pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
-    sudo pip install trollius
+    sudo python -m pip install trollius
 
-Optional: To install Protobuf in Python 2, in a terminal enter:
+Optional: To install Protobuf, in a terminal enter:
 
-    sudo pip install --ignore-installed six protobuf
-
-Optional: To install Protobuf in Python 3, in a terminal enter:
-
-    sudo pip3 install protobuf
+    sudo python -m pip install --ignore-installed six protobuf
 
 Optional: To install Sphinx, in a terminal enter:
 
-    sudo pip install sphinx
+    sudo python -m pip install sphinx
 
 Optional: To install pytest and mock, in a terminal enter:
 
-    sudo CFLAGS=-Qunused-arguments pip install pytest mock
+    sudo CFLAGS=-Qunused-arguments python -m pip install pytest mock
 
 If you get an error like "Uninstalling six-1.4.1. Operation not permitted", try this instead:
 
-    sudo CFLAGS=-Qunused-arguments pip install pytest mock --ignore-installed six
+    sudo CFLAGS=-Qunused-arguments python -m pip install pytest mock --ignore-installed six
 
 Optional: To install libcrypto, install Xcode. To install the command line tools, in a terminal enter:
 
@@ -84,35 +85,40 @@ In a terminal, enter:
 The python-dev headers are already installed.
 
 ## Ubuntu 14.04, 15.04, 16.04 and 16.10 and 18.04
+If you are using Python 3, change the python command to python3 in the following.
+
+To install the pip module for Python 2, in a terminal enter:
+
+    sudo apt-get install python-pip
+
+To install the pip module for Python 3, in a terminal enter:
+
+    sudo apt-get install python3-pip
+
 To install the cryptography package, in a terminal enter:
 
-    sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip
-    sudo pip install cryptography
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+    sudo python -m pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
-    sudo apt-get install python-pip
-    sudo pip install trollius
+    sudo python -m pip install trollius
 
 Optional: To install Sphinx, in a terminal enter:
 
-    sudo apt-get install python-pip
-    sudo pip install sphinx
+    sudo python -m pip install sphinx
 
 Optional: To install Protobuf in Python 2, in a terminal enter:
 
-    sudo apt-get install python-pip
-    sudo pip install protobuf
+    sudo python -m pip install protobuf
 
 Optional: To install Protobuf in Python 3, in a terminal enter:
 
-    sudo apt-get install python3-pip
-    sudo pip3 install protobuf
+    sudo python -m pip3 install protobuf
 
 Optional: To install pytest and mock, in a terminal enter:
 
-    sudo apt-get install python-pip
-    sudo pip install pytest mock
+    sudo python -m pip install pytest mock
 
 Optional: To install python-dev and libcrypto, in a terminal enter:
 
@@ -122,36 +128,40 @@ Optional: To install python-dev and libcrypto, in a terminal enter:
 (pip is already installed.) To install the cryptography package, in a terminal, enter:
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev
-    sudo pip install cryptography
+    sudo python -m pip install cryptography
 
 Optional: To install trollius (Python <= 3.2), in a terminal enter:
 
-    sudo pip install trollius
+    sudo python -m pip install trollius
 
 Optional: To install Sphinx, in a terminal enter:
 
-    sudo pip install sphinx
+    sudo python -m pip install sphinx
 
 Optional: To install Protobuf in Python 2, in a terminal enter:
 
-    sudo pip install protobuf
+    sudo python -m pip install protobuf
 
 Optional: To install pytest and mock, in a terminal enter:
 
-    sudo pip install pytest mock
+    sudo python -m pip install pytest mock
 
 ## Windows Cygwin
 Cygwin is tested on Windows 7 64-bit. 
 
 In the Cygwin installer, select and install the "Devel" packages at the top level of the installer.  
-To install the cryptography package, in a Cygwin terminal, enter:
+
+To install the pip module for Python 2, in a terminal enter:
 
     easy_install pip
-    pip install cryptography
+
+To install the cryptography package, in a Cygwin terminal, enter:
+
+    python -m pip install cryptography
 
 Optional: To install trollius (Python 2.7), in a terminal enter:
 
-    pip install trollius
+    python -m pip install trollius
 
 ## Windows 7 (no Cygwin)
 In the following, change `c:\Python27\` or `c:\Python34\` to your correct Python directory
