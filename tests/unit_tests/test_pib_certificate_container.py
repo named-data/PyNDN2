@@ -36,27 +36,27 @@ class TestPibCertificateContainer(ut.TestCase):
 
         # Start with an empty container.
         container = PibCertificateContainer(fixture.id1Key1Name, pibImpl)
-        self.assertEquals(0, container.size())
-        self.assertEquals(0, len(container._certificates))
+        self.assertEqual(0, container.size())
+        self.assertEqual(0, len(container._certificates))
 
         # Add a certificate.
         container.add(fixture.id1Key1Cert1)
-        self.assertEquals(1, container.size())
-        self.assertEquals(1, len(container._certificates))
+        self.assertEqual(1, container.size())
+        self.assertEqual(1, len(container._certificates))
         self.assertTrue(
           fixture.id1Key1Cert1.getName() in container._certificates)
 
         # Add the same certificate again.
         container.add(fixture.id1Key1Cert1)
-        self.assertEquals(1, container.size())
-        self.assertEquals(1, len(container._certificates))
+        self.assertEqual(1, container.size())
+        self.assertEqual(1, len(container._certificates))
         self.assertTrue(
           fixture.id1Key1Cert1.getName() in container._certificates)
 
         # Add another certificate.
         container.add(fixture.id1Key1Cert2)
-        self.assertEquals(2, container.size())
-        self.assertEquals(2, len(container._certificates))
+        self.assertEqual(2, container.size())
+        self.assertEqual(2, len(container._certificates))
         self.assertTrue(
           fixture.id1Key1Cert1.getName() in container._certificates)
         self. assertTrue(
@@ -92,28 +92,28 @@ class TestPibCertificateContainer(ut.TestCase):
 
         # Create another container with the same PibImpl. The cache should be empty.
         container2 = PibCertificateContainer(fixture.id1Key1Name, pibImpl)
-        self.assertEquals(2, container2.size())
-        self.assertEquals(0, len(container2._certificates))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(0, len(container2._certificates))
 
         # Get a certificate. The cache should be filled.
         try:
             container2.get(fixture.id1Key1Cert1.getName())
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
-        self.assertEquals(2, container2.size())
-        self.assertEquals(1, len(container2._certificates))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(1, len(container2._certificates))
 
         try:
             container2.get(fixture.id1Key1Cert2.getName())
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
-        self.assertEquals(2, container2.size())
-        self.assertEquals(2, len(container2._certificates))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(2, len(container2._certificates))
 
         # Remove a certificate.
         container2.remove(fixture.id1Key1Cert1.getName())
-        self.assertEquals(1, container2.size())
-        self.assertEquals(1, len(container2._certificates))
+        self.assertEqual(1, container2.size())
+        self.assertEqual(1, len(container2._certificates))
         self.assertTrue(
           not (fixture.id1Key1Cert1.getName() in container2._certificates))
         self.assertTrue(
@@ -121,8 +121,8 @@ class TestPibCertificateContainer(ut.TestCase):
 
         # Remove another certificate.
         container2.remove(fixture.id1Key1Cert2.getName())
-        self.assertEquals(0, container2.size())
-        self.assertEquals(0, len(container2._certificates))
+        self.assertEqual(0, container2.size())
+        self.assertEqual(0, len(container2._certificates))
         self.assertTrue(
           not (fixture.id1Key1Cert2.getName() in container2._certificates))
 

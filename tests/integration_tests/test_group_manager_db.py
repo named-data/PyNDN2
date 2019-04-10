@@ -183,7 +183,7 @@ class TestGroupManagerDb(ut.TestCase):
         self.assertTrue(len(memberMap) != 0)
 
         # When there's no such schedule, the return map's size should be 0.
-        self.assertEquals(0, len(self.database.getScheduleMembers("sleep-time")))
+        self.assertEqual(0, len(self.database.getScheduleMembers("sleep-time")))
 
         # List all members.
         members = self.database.listAllMembers()
@@ -213,9 +213,9 @@ class TestGroupManagerDb(ut.TestCase):
         self.assertTrue(scheduleResult.wireEncode().equals(newSchedule.wireEncode()))
 
         # Add a new schedule when updating a non-existing schedule.
-        self.assertEquals(False, self.database.hasSchedule("ralphs-time"))
+        self.assertEqual(False, self.database.hasSchedule("ralphs-time"))
         self.database.updateSchedule("ralphs-time", newSchedule)
-        self.assertEquals(True, self.database.hasSchedule("ralphs-time"))
+        self.assertEqual(True, self.database.hasSchedule("ralphs-time"))
 
         # Update the schedule of a member.
         self.database.updateMemberSchedule(Name("/ndn/Hello"), "play-time")

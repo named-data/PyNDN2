@@ -36,28 +36,28 @@ class TestPibIdentityContainer(ut.TestCase):
 
         # Start with an empty container.
         container = PibIdentityContainer(pibImpl)
-        self.assertEquals(0, container.size())
-        self.assertEquals(0, len(container._identities))
+        self.assertEqual(0, container.size())
+        self.assertEqual(0, len(container._identities))
 
         # Add the first identity.
         identity11 = container.add(fixture.id1)
         self.assertTrue(fixture.id1.equals(identity11.getName()))
-        self.assertEquals(1, container.size())
-        self.assertEquals(1, len(container._identities))
+        self.assertEqual(1, container.size())
+        self.assertEqual(1, len(container._identities))
         self.assertTrue(fixture.id1 in container._identities)
 
         # Add the same identity again.
         identity12 = container.add(fixture.id1)
         self.assertTrue(fixture.id1.equals(identity12.getName()))
-        self.assertEquals(1, container.size())
-        self.assertEquals(1, len(container._identities))
+        self.assertEqual(1, container.size())
+        self.assertEqual(1, len(container._identities))
         self.assertTrue(fixture.id1 in container._identities)
 
         # Add the second identity.
         identity21 = container.add(fixture.id2)
         self.assertTrue(fixture.id2.equals(identity21.getName()))
-        self.assertEquals(2, container.size())
-        self.assertEquals(2, len(container._identities))
+        self.assertEqual(2, container.size())
+        self.assertEqual(2, len(container._identities))
         self.assertTrue(fixture.id1 in container._identities)
         self.assertTrue(fixture.id2 in container._identities)
 
@@ -86,35 +86,35 @@ class TestPibIdentityContainer(ut.TestCase):
 
         # Create another container from the same PibImpl. The cache should be empty.
         container2 = PibIdentityContainer(pibImpl)
-        self.assertEquals(2, container2.size())
-        self.assertEquals(0, len(container2._identities))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(0, len(container2._identities))
 
         # Get keys. The cache should be filled.
         try:
             container2.get(fixture.id1)
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
-        self.assertEquals(2, container2.size())
-        self.assertEquals(1, len(container2._identities))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(1, len(container2._identities))
 
         try:
             container2.get(fixture.id2)
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
-        self.assertEquals(2, container2.size())
-        self.assertEquals(2, len(container2._identities))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(2, len(container2._identities))
 
         # Remove a key.
         container2.remove(fixture.id1)
-        self.assertEquals(1, container2.size())
-        self.assertEquals(1, len(container2._identities))
+        self.assertEqual(1, container2.size())
+        self.assertEqual(1, len(container2._identities))
         self.assertTrue(not (fixture.id1 in container2._identities))
         self.assertTrue(fixture.id2 in container2._identities)
 
         # Remove another key.
         container2.remove(fixture.id2)
-        self.assertEquals(0, container2.size())
-        self.assertEquals(0, len(container2._identities))
+        self.assertEqual(0, container2.size())
+        self.assertEqual(0, len(container2._identities))
         self.assertTrue(not (fixture.id2 in container2._identities))
 
 if __name__ == '__main__':

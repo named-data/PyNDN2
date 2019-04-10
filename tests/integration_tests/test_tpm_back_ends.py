@@ -66,7 +66,7 @@ class TestTpmBackEnds(ut.TestCase):
             keyName = PibKey.constructKeyName(identityName, keyId)
 
             # The key should not exist.
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
             self.assertTrue(tpm.getKeyHandle(keyName) == None)
 
             # Create a key, which should exist.
@@ -86,7 +86,7 @@ class TestTpmBackEnds(ut.TestCase):
 
             # Delete the key, then it should not exist.
             tpm.deleteKey(keyName)
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
             self.assertTrue(tpm.getKeyHandle(keyName) == None)
 
     def test_rsa_signing(self):
@@ -104,10 +104,10 @@ class TestTpmBackEnds(ut.TestCase):
 
             result = VerificationHelpers.verifySignature(
               content, signature, publicKey)
-            self.assertEquals(True, result)
+            self.assertEqual(True, result)
 
             tpm.deleteKey(keyName)
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
 
     def test_rsa_decryption(self):
         for tpm in self.backEndList:
@@ -130,7 +130,7 @@ class TestTpmBackEnds(ut.TestCase):
             self.assertTrue(plainText.equals(content))
 
             tpm.deleteKey(keyName)
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
 
     def test_ecdsa_signing(self):
         for tpm in self.backEndList:
@@ -147,10 +147,10 @@ class TestTpmBackEnds(ut.TestCase):
 
             result = VerificationHelpers.verifySignature(
               content, signature, publicKey)
-            self.assertEquals(True, result)
+            self.assertEqual(True, result)
 
             tpm.deleteKey(keyName)
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
 
     def test_import_export(self):
         privateKeyPkcs1Base64 = (
@@ -187,7 +187,7 @@ class TestTpmBackEnds(ut.TestCase):
 
             keyName = Name("/Test/KeyName/KEY/1")
             tpm.deleteKey(keyName)
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
 
             privateKey = TpmPrivateKey()
             privateKeyPkcs1Encoding = Blob(base64.b64decode(privateKeyPkcs1Base64))
@@ -197,7 +197,7 @@ class TestTpmBackEnds(ut.TestCase):
             encryptedPkcs8 = privateKey.toEncryptedPkcs8(password)
 
             tpm.importKey(keyName, encryptedPkcs8.buf(), password)
-            self.assertEquals(True, tpm.hasKey(keyName))
+            self.assertEqual(True, tpm.hasKey(keyName))
             try:
                 # Can't import the same keyName again.
                 tpm.importKey(keyName, encryptedPkcs8.buf(), password)
@@ -208,7 +208,7 @@ class TestTpmBackEnds(ut.TestCase):
                 self.fail("Did not throw the expected exception")
 
             exportedKey = tpm.exportKey(keyName, password)
-            self.assertEquals(True, tpm.hasKey(keyName))
+            self.assertEqual(True, tpm.hasKey(keyName))
 
             privateKey2 = TpmPrivateKey()
             privateKey2.loadEncryptedPkcs8(exportedKey.buf(), password)
@@ -216,7 +216,7 @@ class TestTpmBackEnds(ut.TestCase):
             self.assertTrue(privateKeyPkcs1Encoding.equals(privateKey2Pkcs1Encoding))
 
             tpm.deleteKey(keyName)
-            self.assertEquals(False, tpm.hasKey(keyName))
+            self.assertEqual(False, tpm.hasKey(keyName))
             try:
                 tpm.exportKey(keyName, password)
                 self.fail("Did not throw the expected exception")

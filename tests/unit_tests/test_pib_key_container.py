@@ -37,31 +37,31 @@ class TestPibKeyContainer(ut.TestCase):
 
         # Start with an empty container.
         container = PibKeyContainer(fixture.id1, pibImpl)
-        self.assertEquals(0, container.size())
-        self.assertEquals(0, len(container._keys))
+        self.assertEqual(0, container.size())
+        self.assertEqual(0, len(container._keys))
 
         # Add the first key.
         key11 = container.add(fixture.id1Key1.buf(), fixture.id1Key1Name)
         self.assertTrue(fixture.id1Key1Name.equals(key11.getName()))
         self.assertTrue(key11.getPublicKey().equals(fixture.id1Key1))
-        self.assertEquals(1, container.size())
-        self.assertEquals(1, len(container._keys))
+        self.assertEqual(1, container.size())
+        self.assertEqual(1, len(container._keys))
         self.assertTrue(fixture.id1Key1Name in container._keys)
 
         # Add the same key again.
         key12 = container.add(fixture.id1Key1.buf(), fixture.id1Key1Name)
         self.assertTrue(fixture.id1Key1Name.equals(key12.getName()))
         self.assertTrue(key12.getPublicKey().equals(fixture.id1Key1))
-        self.assertEquals(1, container.size())
-        self.assertEquals(1, len(container._keys))
+        self.assertEqual(1, container.size())
+        self.assertEqual(1, len(container._keys))
         self.assertTrue(fixture.id1Key1Name in container._keys)
 
         # Add the second key.
         key21 = container.add(fixture.id1Key2.buf(), fixture.id1Key2Name)
         self.assertTrue(fixture.id1Key2Name.equals(key21.getName()))
         self.assertTrue(key21.getPublicKey().equals(fixture.id1Key2))
-        self.assertEquals(2, container.size())
-        self.assertEquals(2, len(container._keys))
+        self.assertEqual(2, container.size())
+        self.assertEqual(2, len(container._keys))
         self.assertTrue(fixture.id1Key1Name in container._keys)
         self.assertTrue(fixture.id1Key2Name in container._keys)
 
@@ -89,40 +89,40 @@ class TestPibKeyContainer(ut.TestCase):
         key2 = container.get(fixture.id1Key2Name)
         self.assertTrue(fixture.id1Key1Name.equals(key1.getName()))
         self.assertTrue(key1.getPublicKey().equals(fixture.id1Key1))
-        self.assertEquals(fixture.id1Key2Name, key2.getName())
+        self.assertEqual(fixture.id1Key2Name, key2.getName())
         self.assertTrue(key2.getPublicKey().equals(fixture.id1Key2))
 
         # Create another container using the same PibImpl. The cache should be empty.
         container2 = PibKeyContainer(fixture.id1, pibImpl)
-        self.assertEquals(2, container2.size())
-        self.assertEquals(0, len(container2._keys))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(0, len(container2._keys))
 
         # Get a key. The cache should be filled.
         try:
             container2.get(fixture.id1Key1Name)
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
-        self.assertEquals(2, container2.size())
-        self.assertEquals(1, len(container2._keys))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(1, len(container2._keys))
 
         try:
             container2.get(fixture.id1Key2Name)
         except Exception as ex:
             self.fail("Unexpected exception: " + str(ex))
-        self.assertEquals(2, container2.size())
-        self.assertEquals(2, len(container2._keys))
+        self.assertEqual(2, container2.size())
+        self.assertEqual(2, len(container2._keys))
 
         # Remove a key.
         container2.remove(fixture.id1Key1Name)
-        self.assertEquals(1, container2.size())
-        self.assertEquals(1, len(container2._keys))
+        self.assertEqual(1, container2.size())
+        self.assertEqual(1, len(container2._keys))
         self.assertTrue(not (fixture.id1Key1Name in container2._keys))
         self.assertTrue(fixture.id1Key2Name in container2._keys)
 
         # Remove another key.
         container2.remove(fixture.id1Key2Name)
-        self.assertEquals(0, container2.size())
-        self.assertEquals(0, len(container2._keys))
+        self.assertEqual(0, container2.size())
+        self.assertEqual(0, len(container2._keys))
         self.assertTrue(not (fixture.id1Key2Name in container2._keys))
 
     def test_errors(self):

@@ -966,7 +966,7 @@ class TestLink(ut.TestCase):
           link.getDelegations().find(Name("test2")))
         self.assertTrue(interestA.getSelectedDelegationIndex() >= 0)
         link2 = interestA.getLink()
-        self.assertEquals(
+        self.assertEqual(
           Name("test2"),
           link2.getDelegations().get(interestA.getSelectedDelegationIndex()).getName())
 

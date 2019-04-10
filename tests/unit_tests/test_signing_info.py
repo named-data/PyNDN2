@@ -32,86 +32,86 @@ class TestSigningInfo(ut.TestCase):
 
         info = SigningInfo()
 
-        self.assertEquals(SigningInfo.SignerType.NULL, info.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.NULL, info.getSignerType())
         self.assertTrue(Name().equals(info.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
 
         info.setSigningIdentity(identityName)
-        self.assertEquals(SigningInfo.SignerType.ID, info.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.ID, info.getSignerType())
         self.assertTrue(identityName.equals(info.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
 
         infoId = SigningInfo(SigningInfo.SignerType.ID, identityName)
-        self.assertEquals(SigningInfo.SignerType.ID, infoId.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.ID, infoId.getSignerType())
         self.assertTrue(identityName.equals(infoId.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoId.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoId.getDigestAlgorithm())
 
         info.setSigningKeyName(keyName)
-        self.assertEquals(SigningInfo.SignerType.KEY, info.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.KEY, info.getSignerType())
         self.assertTrue(keyName.equals(info.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
 
         infoKey = SigningInfo(SigningInfo.SignerType.KEY, keyName)
-        self.assertEquals(SigningInfo.SignerType.KEY, infoKey.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.KEY, infoKey.getSignerType())
         self.assertTrue(keyName.equals(infoKey.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoKey.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoKey.getDigestAlgorithm())
 
         info.setSigningCertificateName(certificateName)
-        self.assertEquals(SigningInfo.SignerType.CERT, info.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.CERT, info.getSignerType())
         self.assertTrue(certificateName.equals(info.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
 
         infoCert = SigningInfo(SigningInfo.SignerType.CERT, certificateName)
-        self.assertEquals(SigningInfo.SignerType.CERT, infoCert.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.CERT, infoCert.getSignerType())
         self.assertTrue(certificateName.equals(infoCert.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoCert.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoCert.getDigestAlgorithm())
 
         info.setSha256Signing()
-        self.assertEquals(SigningInfo.SignerType.SHA256, info.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.SHA256, info.getSignerType())
         self.assertTrue(Name().equals(info.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, info.getDigestAlgorithm())
 
         infoSha256 = SigningInfo(SigningInfo.SignerType.SHA256)
-        self.assertEquals(SigningInfo.SignerType.SHA256, infoSha256.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.SHA256, infoSha256.getSignerType())
         self.assertTrue(Name().equals(infoSha256.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoSha256.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoSha256.getDigestAlgorithm())
 
     def test_from_string(self):
         infoDefault = SigningInfo("")
-        self.assertEquals(SigningInfo.SignerType.NULL, infoDefault.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.NULL, infoDefault.getSignerType())
         self.assertTrue(Name().equals(infoDefault.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoDefault.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoDefault.getDigestAlgorithm())
 
         infoId = SigningInfo("id:/my-identity")
-        self.assertEquals(SigningInfo.SignerType.ID, infoId.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.ID, infoId.getSignerType())
         self.assertTrue(Name("/my-identity").equals(infoId.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoId.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoId.getDigestAlgorithm())
 
         infoKey = SigningInfo("key:/my-key")
-        self.assertEquals(SigningInfo.SignerType.KEY, infoKey.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.KEY, infoKey.getSignerType())
         self.assertTrue(Name("/my-key").equals(infoKey.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoKey.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoKey.getDigestAlgorithm())
 
         infoCert = SigningInfo("cert:/my-cert")
-        self.assertEquals(SigningInfo.SignerType.CERT, infoCert.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.CERT, infoCert.getSignerType())
         self.assertTrue(Name("/my-cert").equals(infoCert.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoCert.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoCert.getDigestAlgorithm())
 
         infoSha = SigningInfo("id:/localhost/identity/digest-sha256")
-        self.assertEquals(SigningInfo.SignerType.SHA256, infoSha.getSignerType())
+        self.assertEqual(SigningInfo.SignerType.SHA256, infoSha.getSignerType())
         self.assertTrue(Name().equals(infoSha.getSignerName()))
-        self.assertEquals(DigestAlgorithm.SHA256, infoSha.getDigestAlgorithm())
+        self.assertEqual(DigestAlgorithm.SHA256, infoSha.getDigestAlgorithm())
 
     def test_to_string(self):
-        self.assertEquals("", str(SigningInfo()))
+        self.assertEqual("", str(SigningInfo()))
 
-        self.assertEquals("id:/my-identity",
+        self.assertEqual("id:/my-identity",
           str(SigningInfo(SigningInfo.SignerType.ID, Name("/my-identity"))))
-        self.assertEquals("key:/my-key",
+        self.assertEqual("key:/my-key",
           str(SigningInfo(SigningInfo.SignerType.KEY, Name("/my-key"))))
-        self.assertEquals("cert:/my-cert",
+        self.assertEqual("cert:/my-cert",
           str(SigningInfo(SigningInfo.SignerType.CERT, Name("/my-cert"))))
-        self.assertEquals("id:/localhost/identity/digest-sha256",
+        self.assertEqual("id:/localhost/identity/digest-sha256",
           str(SigningInfo(SigningInfo.SignerType.SHA256)))
 
     def test_chaining(self):
@@ -124,7 +124,7 @@ class TestSigningInfo(ut.TestCase):
           .setSha256Signing()
           .setDigestAlgorithm(DigestAlgorithm.SHA256))
 
-        self.assertEquals("id:/localhost/identity/digest-sha256", str(info))
+        self.assertEqual("id:/localhost/identity/digest-sha256", str(info))
 
 if __name__ == '__main__':
     ut.main(verbosity=2)

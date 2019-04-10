@@ -189,7 +189,7 @@ class TestPibImpl(ut.TestCase):
 
             # Get all the identities, which should have id1 and id2.
             idNames = pib.getIdentities()
-            self.assertEquals(2, len(idNames))
+            self.assertEqual(2, len(idNames))
             self.assertTrue(fixture.id1 in idNames)
             self.assertTrue(fixture.id2 in idNames)
 
@@ -207,17 +207,17 @@ class TestPibImpl(ut.TestCase):
 
             # Clear identities.
             pib.clearIdentities()
-            self.assertEquals(0, len(pib.getIdentities()))
-            self.assertEquals(0, len(pib.getKeysOfIdentity(fixture.id1)))
-            self.assertEquals(0, len(pib.getCertificatesOfKey(fixture.id1Key1Name)))
-            self.assertEquals("tpmLocator", pib.getTpmLocator())
+            self.assertEqual(0, len(pib.getIdentities()))
+            self.assertEqual(0, len(pib.getKeysOfIdentity(fixture.id1)))
+            self.assertEqual(0, len(pib.getCertificatesOfKey(fixture.id1Key1Name)))
+            self.assertEqual("tpmLocator", pib.getTpmLocator())
 
     def test_key_management(self):
         for fixture in self.pibImpls:
             pib = fixture.pib
 
             # There is no default setting. This should throw an Error.
-            self.assertEquals(False, pib.hasIdentity(fixture.id2))
+            self.assertEqual(False, pib.hasIdentity(fixture.id2))
             try:
                 pib.getDefaultKeyOfIdentity(fixture.id1)
                 self.fail("Did not throw the expected exception")
@@ -227,31 +227,31 @@ class TestPibImpl(ut.TestCase):
                 self.fail("Did not throw the expected exception")
 
             # Check for id1Key1, which should not exist. Neither should id1.
-            self.assertEquals(False, pib.hasKey(fixture.id1Key1Name))
-            self.assertEquals(False, pib.hasIdentity(fixture.id1))
+            self.assertEqual(False, pib.hasKey(fixture.id1Key1Name))
+            self.assertEqual(False, pib.hasIdentity(fixture.id1))
 
             # Add id1Key1, which should be the default. id1 should be added implicitly.
             pib.addKey(fixture.id1, fixture.id1Key1Name, fixture.id1Key1.buf())
-            self.assertEquals(True, pib.hasKey(fixture.id1Key1Name))
-            self.assertEquals(True, pib.hasIdentity(fixture.id1))
+            self.assertEqual(True, pib.hasKey(fixture.id1Key1Name))
+            self.assertEqual(True, pib.hasIdentity(fixture.id1))
             keyBits = pib.getKeyBits(fixture.id1Key1Name)
             self.assertTrue(keyBits.equals(fixture.id1Key1))
             try:
                 pib.getDefaultKeyOfIdentity(fixture.id1)
             except Exception as ex:
                 self.fail("Unexpected exception: " + str(ex))
-            self.assertEquals(fixture.id1Key1Name,
+            self.assertEqual(fixture.id1Key1Name,
                               pib.getDefaultKeyOfIdentity(fixture.id1))
 
             # Add id1Key2, which should not be the default.
             pib.addKey(fixture.id1, fixture.id1Key2Name, fixture.id1Key2.buf())
-            self.assertEquals(True, pib.hasKey(fixture.id1Key2Name))
-            self.assertEquals(fixture.id1Key1Name,
+            self.assertEqual(True, pib.hasKey(fixture.id1Key2Name))
+            self.assertEqual(fixture.id1Key1Name,
                               pib.getDefaultKeyOfIdentity(fixture.id1))
 
             # Explicitly Set id1Key2 as the default.
             pib.setDefaultKeyOfIdentity(fixture.id1, fixture.id1Key2Name)
-            self.assertEquals(fixture.id1Key2Name,
+            self.assertEqual(fixture.id1Key2Name,
                               pib.getDefaultKeyOfIdentity(fixture.id1))
 
             # Set a non-existing key as the default. This should throw an Error.
@@ -265,7 +265,7 @@ class TestPibImpl(ut.TestCase):
 
             # Remove id1Key2. The PIB should not have a default key.
             pib.removeKey(fixture.id1Key2Name)
-            self.assertEquals(False, pib.hasKey(fixture.id1Key2Name))
+            self.assertEqual(False, pib.hasKey(fixture.id1Key2Name))
             try:
                 pib.getKeyBits(fixture.id1Key2Name)
                 self.fail("Did not throw the expected exception")
@@ -288,19 +288,19 @@ class TestPibImpl(ut.TestCase):
                 pib.getKeyBits(fixture.id1Key2Name)
             except Exception as ex:
                 self.fail("Unexpected exception: " + str(ex))
-            self.assertEquals(fixture.id1Key2Name,
+            self.assertEqual(fixture.id1Key2Name,
                               pib.getDefaultKeyOfIdentity(fixture.id1))
 
             # Get all the keys, which should have id1Key1 and id1Key2.
             keyNames = pib.getKeysOfIdentity(fixture.id1)
-            self.assertEquals(2, len(keyNames))
+            self.assertEqual(2, len(keyNames))
             self.assertTrue(fixture.id1Key1Name in keyNames)
             self.assertTrue(fixture.id1Key2Name in keyNames)
 
             # Remove id1, which should remove all the keys.
             pib.removeIdentity(fixture.id1)
             keyNames = pib.getKeysOfIdentity(fixture.id1)
-            self.assertEquals(0, len(keyNames))
+            self.assertEqual(0, len(keyNames))
 
     def test_certificate_management(self):
         for fixture in self.pibImpls:
@@ -317,18 +317,18 @@ class TestPibImpl(ut.TestCase):
 
             # Check for id1Key1Cert1, which should not exist. Neither should
             #   id1 or id1Key1.
-            self.assertEquals(False,
+            self.assertEqual(False,
                               pib.hasCertificate(fixture.id1Key1Cert1.getName()))
-            self.assertEquals(False, pib.hasIdentity(fixture.id1))
-            self.assertEquals(False, pib.hasKey(fixture.id1Key1Name))
+            self.assertEqual(False, pib.hasIdentity(fixture.id1))
+            self.assertEqual(False, pib.hasKey(fixture.id1Key1Name))
 
             # Add id1Key1Cert1, which should be the default.
             # id1 and id1Key1 should be added implicitly.
             pib.addCertificate(fixture.id1Key1Cert1)
-            self.assertEquals(True,
+            self.assertEqual(True,
                               pib.hasCertificate(fixture.id1Key1Cert1.getName()))
-            self.assertEquals(True, pib.hasIdentity(fixture.id1))
-            self.assertEquals(True, pib.hasKey(fixture.id1Key1Name))
+            self.assertEqual(True, pib.hasIdentity(fixture.id1))
+            self.assertEqual(True, pib.hasKey(fixture.id1Key1Name))
             self.assertTrue(
               pib.getCertificate(fixture.id1Key1Cert1.getName()).wireEncode()
               .equals(fixture.id1Key1Cert1.wireEncode()))
@@ -342,7 +342,7 @@ class TestPibImpl(ut.TestCase):
 
             # Add id1Key1Cert2, which should not be the default.
             pib.addCertificate(fixture.id1Key1Cert2)
-            self.assertEquals(True,
+            self.assertEqual(True,
               pib.hasCertificate(fixture.id1Key1Cert2.getName()))
             self.assertTrue(fixture.id1Key1Cert1.wireEncode().equals
               (pib.getDefaultCertificateOfKey(fixture.id1Key1Name).wireEncode()))
@@ -365,7 +365,7 @@ class TestPibImpl(ut.TestCase):
 
             # Remove id1Key1Cert2, which should not have a default certificate.
             pib.removeCertificate(fixture.id1Key1Cert2.getName())
-            self.assertEquals(False,
+            self.assertEqual(False,
               pib.hasCertificate(fixture.id1Key1Cert2.getName()))
             try:
                 pib.getCertificate(fixture.id1Key1Cert2.getName())
@@ -394,24 +394,24 @@ class TestPibImpl(ut.TestCase):
 
             # Get all certificates, which should have id1Key1Cert1 and id1Key1Cert2.
             certNames = pib.getCertificatesOfKey(fixture.id1Key1Name)
-            self.assertEquals(2, len(certNames))
+            self.assertEqual(2, len(certNames))
             self.assertTrue(fixture.id1Key1Cert1.getName() in certNames)
             self.assertTrue(fixture.id1Key1Cert2.getName() in certNames)
 
             # Remove id1Key1, which should remove all the certificates.
             pib.removeKey(fixture.id1Key1Name)
             certNames = pib.getCertificatesOfKey(fixture.id1Key1Name)
-            self.assertEquals(0, len(certNames))
+            self.assertEqual(0, len(certNames))
 
     def test_defaults_management(self):
         for fixture in self.pibImpls:
             pib = fixture.pib
 
             pib.addIdentity(fixture.id1)
-            self.assertEquals(fixture.id1, pib.getDefaultIdentity())
+            self.assertEqual(fixture.id1, pib.getDefaultIdentity())
 
             pib.addIdentity(fixture.id2)
-            self.assertEquals(fixture.id1, pib.getDefaultIdentity())
+            self.assertEqual(fixture.id1, pib.getDefaultIdentity())
 
             pib.removeIdentity(fixture.id1)
             try:
@@ -423,12 +423,12 @@ class TestPibImpl(ut.TestCase):
                 self.fail("Did not throw the expected exception")
 
             pib.addKey(fixture.id2, fixture.id2Key1Name, fixture.id2Key1.buf())
-            self.assertEquals(fixture.id2, pib.getDefaultIdentity())
-            self.assertEquals(fixture.id2Key1Name,
+            self.assertEqual(fixture.id2, pib.getDefaultIdentity())
+            self.assertEqual(fixture.id2Key1Name,
               pib.getDefaultKeyOfIdentity(fixture.id2))
 
             pib.addKey(fixture.id2, fixture.id2Key2Name, fixture.id2Key2.buf())
-            self.assertEquals(fixture.id2Key1Name,
+            self.assertEqual(fixture.id2Key1Name,
               pib.getDefaultKeyOfIdentity(fixture.id2))
 
             pib.removeKey(fixture.id2Key1Name)
@@ -441,17 +441,17 @@ class TestPibImpl(ut.TestCase):
                 self.fail("Did not throw the expected exception")
 
             pib.addCertificate(fixture.id2Key2Cert1)
-            self.assertEquals(fixture.id2Key2Name,
+            self.assertEqual(fixture.id2Key2Name,
               pib.getDefaultKeyOfIdentity(fixture.id2))
-            self.assertEquals(fixture.id2Key2Cert1.getName(),
+            self.assertEqual(fixture.id2Key2Cert1.getName(),
               pib.getDefaultCertificateOfKey(fixture.id2Key2Name).getName())
 
             pib.addCertificate(fixture.id2Key2Cert2)
-            self.assertEquals(fixture.id2Key2Cert1.getName(),
+            self.assertEqual(fixture.id2Key2Cert1.getName(),
               pib.getDefaultCertificateOfKey(fixture.id2Key2Name).getName())
 
             pib.removeCertificate(fixture.id2Key2Cert2.getName())
-            self.assertEquals(fixture.id2Key2Cert1.getName(),
+            self.assertEqual(fixture.id2Key2Cert1.getName(),
               pib.getDefaultCertificateOfKey(fixture.id2Key2Name).getName())
 
     def test_overwrite(self):
@@ -460,11 +460,11 @@ class TestPibImpl(ut.TestCase):
 
             # Check for id1Key1, which should not exist.
             pib.removeIdentity(fixture.id1)
-            self.assertEquals(False, pib.hasKey(fixture.id1Key1Name))
+            self.assertEqual(False, pib.hasKey(fixture.id1Key1Name))
 
             # Add id1Key1.
             pib.addKey(fixture.id1, fixture.id1Key1Name, fixture.id1Key1.buf())
-            self.assertEquals(True, pib.hasKey(fixture.id1Key1Name))
+            self.assertEqual(True, pib.hasKey(fixture.id1Key1Name))
             keyBits = pib.getKeyBits(fixture.id1Key1Name)
             self.assertTrue(keyBits.equals(fixture.id1Key1))
 
@@ -475,13 +475,13 @@ class TestPibImpl(ut.TestCase):
 
             # Check for id1Key1Cert1, which should not exist.
             pib.removeIdentity(fixture.id1)
-            self.assertEquals(False,
+            self.assertEqual(False,
               pib.hasCertificate(fixture.id1Key1Cert1.getName()))
 
             # Add id1Key1Cert1.
             pib.addKey(fixture.id1, fixture.id1Key1Name, fixture.id1Key1.buf())
             pib.addCertificate(fixture.id1Key1Cert1)
-            self.assertEquals(True,
+            self.assertEqual(True,
               pib.hasCertificate(fixture.id1Key1Cert1.getName()))
 
             cert = pib.getCertificate(fixture.id1Key1Cert1.getName())

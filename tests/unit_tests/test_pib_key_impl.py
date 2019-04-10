@@ -42,13 +42,13 @@ class TestPibKeyImpl(ut.TestCase):
 
         self.assertTrue(fixture.id1Key1Name.equals(key11.getName()))
         self.assertTrue(fixture.id1.equals(key11.getIdentityName()))
-        self.assertEquals(KeyType.RSA, key11.getKeyType())
+        self.assertEqual(KeyType.RSA, key11.getKeyType())
         self.assertTrue(key11.getPublicKey().equals(fixture.id1Key1))
 
         key11FromBackend = PibKeyImpl(fixture.id1Key1Name, pibImpl)
         self.assertTrue(fixture.id1Key1Name.equals(key11FromBackend.getName()))
         self.assertTrue(fixture.id1.equals(key11FromBackend.getIdentityName()))
-        self.assertEquals(KeyType.RSA, key11FromBackend.getKeyType())
+        self.assertEqual(KeyType.RSA, key11FromBackend.getKeyType())
         self.assertTrue(key11FromBackend.getPublicKey().equals(fixture.id1Key1))
 
     def test_certificate_operation(self):
@@ -62,7 +62,7 @@ class TestPibKeyImpl(ut.TestCase):
             self.fail("Unexpected exception: " + str(ex))
 
         # The key should not have any certificates.
-        self.assertEquals(0, key11._certificates.size())
+        self.assertEqual(0, key11._certificates.size())
 
         # Getting a non-existing certificate should throw Pib.Error.
         try:
@@ -153,7 +153,7 @@ class TestPibKeyImpl(ut.TestCase):
 
         # Add another certificate.
         key11.addCertificate(fixture.id1Key1Cert2)
-        self.assertEquals(2, key11._certificates.size())
+        self.assertEqual(2, key11._certificates.size())
 
         # Set the default certificate using a name.
         try:
@@ -182,7 +182,7 @@ class TestPibKeyImpl(ut.TestCase):
         else:
             self.fail("Did not throw the expected exception")
 
-        self.assertEquals(1, key11._certificates.size())
+        self.assertEqual(1, key11._certificates.size())
 
         # Set the default certificate directly again, which should change the default.
         try:
@@ -195,7 +195,7 @@ class TestPibKeyImpl(ut.TestCase):
           (defaultCert3.getName()))
         self.assertTrue(defaultCert3.wireEncode().equals
           (fixture.id1Key1Cert1.wireEncode()))
-        self.assertEquals(2, key11._certificates.size())
+        self.assertEqual(2, key11._certificates.size())
 
         # Remove all certificates.
         key11.removeCertificate(fixture.id1Key1Cert1.getName())
@@ -207,7 +207,7 @@ class TestPibKeyImpl(ut.TestCase):
         else:
             self.fail("Did not throw the expected exception")
 
-        self.assertEquals(1, key11._certificates.size())
+        self.assertEqual(1, key11._certificates.size())
         key11.removeCertificate(fixture.id1Key1Cert2.getName())
         try:
             key11.getCertificate(fixture.id1Key1Cert2.getName())
@@ -225,7 +225,7 @@ class TestPibKeyImpl(ut.TestCase):
         else:
             self.fail("Did not throw the expected exception")
 
-        self.assertEquals(0, key11._certificates.size())
+        self.assertEqual(0, key11._certificates.size())
 
     def test_overwrite(self):
         fixture = self.fixture

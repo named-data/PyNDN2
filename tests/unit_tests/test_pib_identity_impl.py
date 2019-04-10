@@ -46,7 +46,7 @@ class TestPibIdentityImpl(ut.TestCase):
             self.fail("Unexpected exception: " + str(ex))
 
         # The identity should not have any key.
-        self.assertEquals(0, identity1._keys.size())
+        self.assertEqual(0, identity1._keys.size())
 
         # Getting non-existing key should throw Pib.Error.
         try:
@@ -130,7 +130,7 @@ class TestPibIdentityImpl(ut.TestCase):
 
         # Add another key.
         identity1.addKey(fixture.id1Key2.toBytes(), fixture.id1Key2Name)
-        self.assertEquals(2, identity1._keys.size())
+        self.assertEqual(2, identity1._keys.size())
 
         # Set the default key using a name.
         try:
@@ -155,7 +155,7 @@ class TestPibIdentityImpl(ut.TestCase):
         else:
             self.fail("Did not throw the expected exception")
 
-        self.assertEquals(1, identity1._keys.size())
+        self.assertEqual(1, identity1._keys.size())
 
         # Seting the default key directly again should change the default.
         try:
@@ -165,7 +165,7 @@ class TestPibIdentityImpl(ut.TestCase):
         defaultKey3 = identity1.getDefaultKey()
         self.assertTrue(fixture.id1Key1Name.equals(defaultKey3.getName()))
         self.assertTrue(defaultKey3.getPublicKey().equals(fixture.id1Key1))
-        self.assertEquals(2, identity1._keys.size())
+        self.assertEqual(2, identity1._keys.size())
 
         # Remove all keys.
         identity1.removeKey(fixture.id1Key1Name)
@@ -177,7 +177,7 @@ class TestPibIdentityImpl(ut.TestCase):
         else:
             self.fail("Did not throw the expected exception")
 
-        self.assertEquals(1, identity1._keys.size())
+        self.assertEqual(1, identity1._keys.size())
         identity1.removeKey(fixture.id1Key2Name)
         try:
             identity1.getKey(fixture.id1Key2Name)
@@ -187,7 +187,7 @@ class TestPibIdentityImpl(ut.TestCase):
         else:
             self.fail("Did not throw the expected exception")
 
-        self.assertEquals(0, identity1._keys.size())
+        self.assertEqual(0, identity1._keys.size())
         try:
             identity1.getDefaultKey()
             self.fail("Did not throw the expected exception")
