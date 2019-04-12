@@ -835,6 +835,25 @@ class Name(object):
 
         return Common.getBytesIOString(result)
 
+    def appendNumber(self, number, type = None, otherTypeCode = None):
+        """
+        Append a component whose value is the nonNegativeInteger encoding of the
+        number.
+
+        :param int number: The number to be encoded.
+        :param int type: (optional) The component type as an int from the
+          ComponentType enum. If name component type is not a recognized
+          ComponentType enum value, then set this to ComponentType.OTHER_CODE
+          and use the otherTypeCode parameter. If omitted, use
+          ComponentType.GENERIC.
+        :param int otherTypeCode: (optional) If type is
+          ComponentType.OTHER_CODE, then this is the packet's unrecognized
+          content type code, which must be non-negative.
+        :return: This name so that you can chain calls to append.
+        :rtype: Name
+        """
+        return self.append(Name.Component.fromNumber(number, type, otherTypeCode))
+
     def appendSegment(self, segment):
         """
         Append a component with the encoded segment number according to NDN
