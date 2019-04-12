@@ -163,7 +163,7 @@ class Exclude(object):
         Return a string representation of the exclude values.
 
         :return: The string representation.
-        :rtype: string
+        :rtype: str
         """
         if len(self._entries) == 0:
             return ""

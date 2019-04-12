@@ -545,7 +545,7 @@ class DerOid(DerNode):
     def toVal(self):
         """
         :return: The string representation of the OID
-        :rtype: string
+        :rtype: str
         """
         offset = 0
         components = []
@@ -583,7 +583,7 @@ class DerPrintableString(DerByteString):
     def toVal(self):
         """
         :return: The string encoded in the node
-        :rtype: string
+        :rtype: str
         """
         return Blob(self._payload, False).toRawStr()
 

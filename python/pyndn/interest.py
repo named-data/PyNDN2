@@ -676,7 +676,7 @@ class Interest(object):
         http://named-data.net/doc/ndn-ccl-api/interest.html#interest-touri-method .
 
         :return: The URI string.
-        :rtype: string
+        :rtype: str
         """
         selectors = ""
         if self._minSuffixComponents != None:
