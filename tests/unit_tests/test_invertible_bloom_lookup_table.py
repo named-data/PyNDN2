@@ -3,7 +3,7 @@
 # Copyright (C) 2014-2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From ndn-cxx NamingConventions unit tests:
-# https://github.com/named-data/ndn-cxx/blob/master/tests/unit-tests/test-name.cpp.
+# https://github.com/named-data/PSync/blob/master/tests/test-iblt.cpp
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
