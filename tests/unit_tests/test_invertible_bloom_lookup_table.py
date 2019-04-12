@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2014-2019 Regents of the University of California.
+# Copyright (C) 2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
 # From ndn-cxx NamingConventions unit tests:
 # https://github.com/named-data/PSync/blob/master/tests/test-iblt.cpp
