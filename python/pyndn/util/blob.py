@@ -26,7 +26,6 @@ Note that the pointer to the buffer can be None.
 
 import sys
 from io import BytesIO
-from pyndn.util.common import Common
 
 class Blob(object):
     """
@@ -364,3 +363,6 @@ class _memoryviewWrapper(object):
         else:
             # Convert str or bytes to int.
             return ord(self._view[index])
+
+# Import this at the end of the file to avoid circular references.
+from pyndn.util.common import Common
