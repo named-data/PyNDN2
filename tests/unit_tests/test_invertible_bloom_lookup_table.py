@@ -20,13 +20,10 @@
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
 import unittest as ut
-import mmh3
 from pyndn import Name
 from pyndn.util import Blob
+from pyndn.util.common import Common
 from pyndn.sync.detail.invertible_bloom_lookup_table import InvertibleBloomLookupTable
-
-def murmurHash3String(nHashSeed, value):
-    return mmh3.hash(Blob(value).toBytes(), nHashSeed, signed = False)
 
 class TestInvertibleBloomLookupTable(ut.TestCase):
     def testEqual(self):
@@ -38,7 +35,7 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
         self.assertTrue(iblt1.equals(iblt2))
 
         prefix = Name("/test/memphis").appendNumber(1).toUri()
-        newHash = murmurHash3String(11, prefix)
+        newHash = Common.murmurHash3Blob(11, prefix)
         iblt1.insert(newHash)
         iblt2.insert(newHash)
         self.assertTrue(iblt1.equals(iblt2))
@@ -55,7 +52,7 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
 
         iblt = InvertibleBloomLookupTable(size)
         prefix = Name("/test/memphis").appendNumber(1).toUri()
-        newHash = murmurHash3String(11, prefix)
+        newHash = Common.murmurHash3Blob(11, prefix)
         iblt.insert(newHash)
 
         expectedEncoding = [
@@ -89,18 +86,18 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
         iblt1 = InvertibleBloomLookupTable(size)
 
         prefix = Name("/test/memphis").appendNumber(1).toUri()
-        hash1 = murmurHash3String(11, prefix)
+        hash1 = Common.murmurHash3Blob(11, prefix)
         iblt1.insert(hash1)
 
         iblt2 = InvertibleBloomLookupTable(iblt1)
         iblt2.erase(hash1)
         prefix = Name("/test/memphis").appendNumber(2).toUri()
-        hash3 = murmurHash3String(11, prefix)
+        hash3 = Common.murmurHash3Blob(11, prefix)
         iblt2.insert(hash3)
 
         iblt1.erase(hash1)
         prefix = Name("/test/memphis").appendNumber(5).toUri()
-        hash5 = murmurHash3String(11, prefix)
+        hash5 = Common.murmurHash3Blob(11, prefix)
         iblt1.insert(hash5)
 
         iblt2.erase(hash3)
@@ -117,11 +114,11 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
         receivedIblt = InvertibleBloomLookupTable(size)
 
         prefix = Name("/test/memphis").appendNumber(3).toUri()
-        hash1 = murmurHash3String(11, prefix)
+        hash1 = Common.murmurHash3Blob(11, prefix)
         ownIblt.insert(hash1)
 
         prefix2 = Name("/test/memphis").appendNumber(4).toUri()
-        hash2 = murmurHash3String(11, prefix2)
+        hash2 = Common.murmurHash3Blob(11, prefix2)
         receivedIblt.insert(hash2)
 
         diff = ownIblt.difference(receivedIblt)
@@ -153,7 +150,7 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
         self.assertEqual(0, len(negative))
 
         prefix = Name("/test/memphis").appendNumber(1).toUri()
-        newHash = murmurHash3String(11, prefix)
+        newHash = Common.murmurHash3Blob(11, prefix)
         ownIblt.insert(newHash)
 
         diff = ownIblt.difference(receivedIblt)
@@ -162,7 +159,7 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
         self.assertEqual(0, len(negative))
 
         prefix = Name("/test/csu").appendNumber(1).toUri()
-        newHash = murmurHash3String(11, prefix)
+        newHash = Common.murmurHash3Blob(11, prefix)
         receivedIblt.insert(newHash)
 
         diff = ownIblt.difference(receivedIblt)
@@ -180,13 +177,13 @@ class TestInvertibleBloomLookupTable(ut.TestCase):
 
         for i in range(50):
             prefix = Name("/test/memphis" + str(i)).appendNumber(1).toUri()
-            newHash = murmurHash3String(11, prefix)
+            newHash = Common.murmurHash3Blob(11, prefix)
             ownIblt.insert(newHash)
 
         receivedIblt = InvertibleBloomLookupTable(ownIblt)
 
         prefix = Name("/test/ucla").appendNumber(1).toUri()
-        newHash = murmurHash3String(11, prefix)
+        newHash = Common.murmurHash3Blob(11, prefix)
         ownIblt.insert(newHash)
 
         diff = ownIblt.difference(receivedIblt)
