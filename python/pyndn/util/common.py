@@ -222,6 +222,25 @@ class Common(object):
 
         return mmh3.hash(valueBytes, nHashSeed, signed = False)
 
+    @staticmethod
+    def murmurHash3Blob(nHashSeed, value):
+        """
+        Interpret the value as a Blob and use it to compute the MurmurHash3.
+
+        :param int nHashSeed: The hash seed.
+        :param Blob value: If value is not already a Blob, use Blob(value)
+        :return: The hash value.
+        :rtype: int
+        """
+        if not have_mmh3:
+            raise RuntimeError(
+              "murmurHash3Blob: Need to 'sudo python -m pip install mmh3'")
+
+        if not isinstance(value, Blob):
+            value = Blob(value, False)
+
+        return mmh3.hash(value.toBytes(), nHashSeed, signed = False)
+
     """
     The practical limit of the size of a network-layer packet. If a packet is
     larger than this, the library or application MAY drop it. This constant is
@@ -232,3 +251,6 @@ class Common(object):
     MAX_NDN_PACKET_SIZE = 8800
 
     epoch_ = datetime.datetime.utcfromtimestamp(0)
+
+# Import this at the end of the file to avoid circular references.
+from pyndn.util.blob import Blob
