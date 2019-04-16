@@ -26,6 +26,7 @@ Note: In ndn-cxx, this class is called InMemoryStoragePersistent, but
 "persistent" misleadingly sounds like persistent on-disk storage.
 """
 
+from pyndn.interest import Interest
 from pyndn.data import Data
 
 class InMemoryStorageRetaining(object):
@@ -45,22 +46,43 @@ class InMemoryStorageRetaining(object):
         """
         self._cache[data.getFullName()] = Data(data)
 
-    def find(self, interest):
+    def find(self, nameOrInterest):
         """
-        Find the best match Data for an Interest.
+        Find the best match Data for a Name or an Interest.
 
-        :param Interest interest: The Interest with the Name of the Data packet
-          to find.
+        :param nameOrInterest: The Name or the Interest with the Name of the
+          Data packet to find.
+        :type nameOrInterest: Name or Interest
         :return: The best match if any, otherwise None. You should not modify
           the returned object. If you need to modify it then you must make a copy.
         :rtype: Data
         """
-        for name, data in self._cache.items():
+        if isinstance(nameOrInterest, Interest):
             # Debug: Check selectors, especially CanBePrefix.
-            if interest.getName().isPrefixOf(name):
+            name = nameOrInterest.getName()
+        else:
+            name = nameOrInterest
+
+        for cacheName, data in self._cache.items():
+            if name.isPrefixOf(cacheName):
                 return data
 
         return None
+
+    def remove(self, prefix):
+        """
+        Remove matching entries by prefix.
+
+        :param Name prefix: The prefix Name of the entries to remove.
+        """
+        # First get the keys to delete, to not change the dict while iterating.
+        keys = []
+        for key in self._cache.keys():
+            if prefix.isPrefixOf(key):
+                keys.append(key)
+
+        for key in keys:
+            del self._cache[key]
 
     def size(self):
         """
