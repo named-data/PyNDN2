@@ -55,7 +55,7 @@ class InvertibleBloomLookupTable(object):
             # Make nEntries exactly divisible by N_HASH.
             remainder = nEntries % InvertibleBloomLookupTable.N_HASH
             if remainder != 0:
-                nEntries += (N_HASH - remainder);
+                nEntries += (InvertibleBloomLookupTable.N_HASH - remainder);
 
             # initialize() will set the elements.
             self._hashTable = [None] * nEntries  # of _HashTableEntry
