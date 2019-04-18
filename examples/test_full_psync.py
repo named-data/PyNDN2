@@ -191,13 +191,7 @@ class Producer(object):
             random1 = self._systemRandom.random()
             delay = random1 * self._delayRangeMaxMs
 
-            # Make and return a callback since dataPrefix is different each time.
-            def makeCallback(localDataPrefix):
-                def callback():
-                    self.doUpdate(localDataPrefix)
-                return callback
-
-            self._face.callLater(delay, makeCallback(dataPrefix))
+            self._face.callLater(delay, lambda: self.doUpdate(dataPrefix))
 
     def processSyncUpdate(self, names):
         for name in names:
