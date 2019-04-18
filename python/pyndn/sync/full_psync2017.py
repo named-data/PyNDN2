@@ -44,9 +44,46 @@ from pyndn.sync.detail.psync_segment_publisher import PSyncSegmentPublisher
 from pyndn.sync.detail.psync_state import PSyncState
 
 class FullPSync2017(PSyncProducerBase):
-    DEFAULT_SYNC_REPLY_FRESHNESS_PERIOD = 1000.0
     DEFAULT_SYNC_INTEREST_LIFETIME = 1000.0
+    DEFAULT_SYNC_REPLY_FRESHNESS_PERIOD = 1000.0
 
+    """
+    Create a FullPSync2017.
+
+    :param int expectedNEntries: The expected number of entries in the IBLT.
+    :param Face face: The application's Face.
+    :param Name syncPrefix: The prefix Name of the sync group, which is copied.
+    :param onNamesUpdate: When there are new names, this calls
+      onNamesUpdate(names) where names is a list of Names. However, see the
+      canAddReceivedName callback which can control which names are added.
+      NOTE: The library will log any exceptions thrown by this callback, but for
+      better error handling the callback should catch and properly handle any
+      exceptions.
+    :type onNamesUpdate: function object
+    :param KeyChain keyChain: The KeyChain for signing Data packets.
+    :param float syncInterestLifetime: (optional) The Interest lifetime for the
+      sync Interests, in milliseconds. If omitted, use
+      DEFAULT_SYNC_INTEREST_LIFETIME.
+    :param float syncReplyFreshnessPeriod: (optional) The freshness period of
+      the sync Data packet, in milliseconds. If omitted, use
+      DEFAULT_SYNC_REPLY_FRESHNESS_PERIOD.
+    :param SigningInfo signingInfo: (optional) The SigningInfo for signing Data
+      packets, which is copied. If omitted, use the default SigningInfo().
+    :param canAddToSyncData: (optional) When a new IBLT is received in a sync
+      Interest, this calls canAddToSyncData(name, negative) where Name is the
+      candidate Name to add to the response Data packet of Names, and negative
+      is the set of names that the other's user's Name set, but not in our own
+      Name set. If the callback returns False, then this does not report the
+      Name to the other user. However, if canAddToSyncData is omitted or None,
+      then each name is reported.
+    :type canAddToSyncData: function object
+    :param canAddReceivedName: (optional) When new names are received, this
+      calls canAddReceivedName(name) for each name. If the callback returns
+      False, then this does not add to the IBLT or report to the application
+      with onNamesUpdate. However, if canAddReceivedName is omitted or None,
+      then each name is added.
+    :type canAddReceivedName: function object
+    """
     def __init__(self, expectedNEntries, face, syncPrefix, onNamesUpdate,
       keyChain, syncInterestLifetime = DEFAULT_SYNC_INTEREST_LIFETIME,
       syncReplyFreshnessPeriod = DEFAULT_SYNC_REPLY_FRESHNESS_PERIOD,
