@@ -17,14 +17,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
-from pyndn.sync import chrono_sync2013, full_psync2017, psync_missing_data_info
-__all__ = ['chrono_sync2013', 'full_psync2017', 'psync_missing_data_info']
+from pyndn.sync import chrono_sync2013, full_psync2017, full_psync2017_with_users
+from pyndn.sync import psync_missing_data_info
+__all__ = ['chrono_sync2013', 'full_psync2017', 'full_psync2017_with_users',
+           'psync_missing_data_info']
 
 import sys as _sys
 
 try:
     from pyndn.sync.chrono_sync2013 import *
     from pyndn.sync.full_psync2017 import *
+    from pyndn.sync.full_psync2017_with_users import *
     from pyndn.sync.psync_missing_data_info import *
 except ImportError:
     del _sys.modules[__name__]
