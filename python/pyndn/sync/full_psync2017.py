@@ -62,13 +62,13 @@ class FullPSync2017(PSyncProducerBase):
     :type onNamesUpdate: function object
     :param KeyChain keyChain: The KeyChain for signing Data packets.
     :param float syncInterestLifetime: (optional) The Interest lifetime for the
-      sync Interests, in milliseconds. If omitted, use
+      sync Interests, in milliseconds. If omitted or None, use
       DEFAULT_SYNC_INTEREST_LIFETIME.
     :param float syncReplyFreshnessPeriod: (optional) The freshness period of
-      the sync Data packet, in milliseconds. If omitted, use
+      the sync Data packet, in milliseconds. If omitted or None, use
       DEFAULT_SYNC_REPLY_FRESHNESS_PERIOD.
     :param SigningInfo signingInfo: (optional) The SigningInfo for signing Data
-      packets, which is copied. If omitted, use the default SigningInfo().
+      packets, which is copied. If omitted or None, use the default SigningInfo().
     :param canAddToSyncData: (optional) When a new IBLT is received in a sync
       Interest, this calls canAddToSyncData(name, negative) where Name is the
       candidate Name to add to the response Data packet of Names, and negative
