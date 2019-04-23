@@ -12,7 +12,7 @@ Prerequisites
 * Required: The cryptography package
 * Optional: trollius (for asyncio in Python <= 3.2)
 * Optional: Protobuf (for the ProtobufTlv converter and ChronoSync)
-# Optional: Murmur hash 3 (for PSync)
+* Optional: Murmur hash 3 (for PSync)
 * Optional: Sphinx (to make documentation)
 * Optional: pytest and mock (for running unit tests)
 * Optional: python-dev, libcrypto (for the _pyndn C module)
