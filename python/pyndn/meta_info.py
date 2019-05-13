@@ -34,11 +34,10 @@ class MetaInfo(object):
       freshness period is not specified.
     """
     def __init__(self, value = None):
+        self._changeCount = 0
+
         if value == None:
-            self._type = ContentType.BLOB
-            self._otherTypeCode = -1
-            self._freshnessPeriod = None
-            self._finalBlockId = Name.Component()
+            self.clear()
         elif isinstance(value, MetaInfo):
             # Copy its values.
             self._type = value._type
@@ -49,8 +48,6 @@ class MetaInfo(object):
             raise RuntimeError(
               "Unrecognized type for MetaInfo constructor: " +
               str(type(value)))
-
-        self._changeCount = 0
 
     def getType(self):
         """
@@ -156,6 +153,17 @@ class MetaInfo(object):
         :deprecated: Use setFinalBlockId.
         """
         self.setFinalBlockId(finalBlockId)
+
+    def clear(self):
+        """
+        Clear fields and reset to default values.
+        """
+        self._type = ContentType.BLOB
+        self._otherTypeCode = -1
+        self._freshnessPeriod = None
+        self._finalBlockId = Name.Component()
+
+        self._changeCount += 1
 
     def getChangeCount(self):
         """
