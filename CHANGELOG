@@ -1,4 +1,4 @@
-Interim changes since PyNDN v2.10beta1 (2019-04-05)
+Interim changes since PyNDN v2.10beta1 (2019-05-13)
 ---------------------------------------------------
 
 Changes
@@ -14,6 +14,8 @@ Deprecated
 Bug fixes
 * https://github.com/named-data/PyNDN2/pull/6 Change asyncio.async to ensure_future
   for compatibility with Python 3. (Thanks to Nabil Schear!)
+* https://redmine.named-data.net/issues/4926 In decoding Data, make MetaInfo
+  and Content optional.
 
 PyNDN v2.10beta1 (2019-03-05)
 ----------------------------
