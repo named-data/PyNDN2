@@ -363,8 +363,11 @@ class Tlv0_2WireFormat(WireFormat):
         signedPortionBeginOffset = decoder.getOffset()
 
         self._decodeName(data.getName(), decoder, copy)
-        self._decodeMetaInfo(data.getMetaInfo(), decoder, copy)
-        data.setContent(Blob(decoder.readBlobTlv(Tlv.Content), copy))
+        if decoder.peekType(Tlv.MetaInfo, endOffset):
+            self._decodeMetaInfo(data.getMetaInfo(), decoder, copy)
+        else:
+            data.getMetaInfo().clear()
+        data.setContent(Blob(decoder.readOptionalBlobTlv(Tlv.Content, endOffset), copy))
         self._decodeSignatureInfo(data, decoder, copy)
 
         signedPortionEndOffset = decoder.getOffset()
