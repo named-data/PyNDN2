@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2019 Regents of the University of California.
 # Author: Jeff Thompson <jefft0@remap.ucla.edu>
-# From ndn-cxx NamingConventions unit tests:
+# From PSync unit tests:
 # https://github.com/named-data/PSync/blob/master/tests/test-iblt.cpp
 #
 # This program is free software: you can redistribute it and/or modify
