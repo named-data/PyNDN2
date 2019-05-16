@@ -200,7 +200,7 @@ class DecryptorV2(object):
 
                     if kdkKey != None:
                         # The KDK was already fetched and imported.
-                        logging.getLogger(__name__).info("KDK " + kdkKeyName.toUri() +
+                        logging.getLogger(__name__).info("KDK " + kdkKeyName[0].toUri() +
                           " already exists, so directly using it to decrypt the CK")
                         self._decryptCkAndProcessPendingDecrypts(
                           contentKey, ckData, kdkKeyName[0], onError)
@@ -316,7 +316,7 @@ class DecryptorV2(object):
               self._credentialsKey.getName())
             if secret.isNull():
                 onError(EncryptError.ErrorCode.TpmKeyNotFound,
-                  "Could not decrypt secret, " + credentialsKey_.getName().toUri() +
+                  "Could not decrypt secret, " + self._credentialsKey.getName().toUri() +
                   " not found in TPM")
                 return False
 
@@ -330,7 +330,7 @@ class DecryptorV2(object):
 
     def _decryptCkAndProcessPendingDecrypts(
       self, contentKey, ckData, kdkKeyName, onError):
-        logging.getLogger(__name__).info("Decrypting CK data ",
+        logging.getLogger(__name__).info("Decrypting CK data " +
           ckData.getName().toUri())
 
         content = EncryptedContent()
