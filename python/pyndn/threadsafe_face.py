@@ -28,6 +28,7 @@ from pyndn.transport.async_unix_transport import AsyncUnixTransport
 from pyndn.name import Name
 from pyndn.interest_filter import InterestFilter
 from pyndn.face import Face
+from pyndn.node import Node
 
 class ThreadsafeFace(Face):
     """
