@@ -124,7 +124,7 @@ class AccessManagerV2(object):
 
         kdkPrefix = Name(self._nacKey.getIdentityName()).append(
           EncryptorV2.NAME_COMPONENT_KDK).append(nacKeyId)
-        self._kdkRegisteredPrefixId_ = self._face.registerPrefix(
+        self._kdkRegisteredPrefixId = self._face.registerPrefix(
           kdkPrefix, serveFromStorage, onRegisterFailed)
 
     def shutdown(self):
