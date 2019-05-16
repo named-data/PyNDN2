@@ -37,6 +37,7 @@ from pyndn.util.common import Common
 from pyndn.util.command_interest_generator import CommandInterestGenerator
 from pyndn.encoding.tlv.tlv import Tlv
 from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
+from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
 from pyndn.encoding.tlv_wire_format import TlvWireFormat
 from pyndn.impl.delayed_call_table import DelayedCallTable
 from pyndn.impl.interest_filter_table import InterestFilterTable
@@ -132,7 +133,7 @@ class Node(object):
         # TODO: Properly check if we are already connected to the expected host.
         if not self._transport.isAsync():
             # The simple case: Just do a blocking connect and express.
-            self._transport.connect(self._connectionInfo, self, None);
+            self._transport.connect(self._connectionInfo, self, None)
             self._expressInterestHelper(pendingInterestId,
               interestCopy, onData, onTimeout, onNetworkNack, wireFormat, face)
             # Make future calls to expressInterest send directly to the Transport.
@@ -326,6 +327,25 @@ class Node(object):
               "The encoded Data packet size exceeds the maximum limit getMaxNdnPacketSize()")
         self.send(encoding.buf())
 
+    def putNack(self, interest, networkNack):
+        """
+        The OnInterest callback can call this to put a Nack for the received
+        Interest.
+
+        :param Interest interest: The Interest to put in the Nack packet.
+        :param NetworkNack networkNack: The NetworkNack with the reason code.
+          For example, NetworkNack().setReason(NetworkNack.Reason.NO_ROUTE).
+        :raises RuntimeError: If the encoded Nack packet size exceeds
+          getMaxNdnPacketSize().
+        """
+        # TODO: Generalize this and move to WireFormat.encodeLpPacket.
+        encoding = Node._encodeLpNack(interest, networkNack)
+        if encoding.size() > self.getMaxNdnPacketSize():
+            raise RuntimeError(
+              "The encoded Nack packet size exceeds the maximum limit getMaxNdnPacketSize()")
+
+        self.send(encoding.buf())
+
     def send(self, encoding):
         """
         Send the encoded packet out through the transport.
@@ -359,7 +379,7 @@ class Node(object):
 
         # If Face.callLater is overridden to use a different mechanism, then
         # processEvents is not needed to check for delayed calls.
-        self._delayedCallTable.callTimedOut();
+        self._delayedCallTable.callTimedOut()
 
     def getTransport(self):
         """
@@ -685,6 +705,48 @@ class Node(object):
                 logging.exception("Error in onData")
 
         return hasMatch
+
+    @staticmethod
+    def _encodeLpNack(interest, networkNack):
+        """
+        Encode the interest into an NDN-TLV LpPacket as a NACK with the reason
+        code in the networkNack object.
+        TODO: Generalize this and move to WireFormat.encodeLpPacket.
+        
+        :param Interest interest: The Interest to put in the LpPacket fragment.
+        :param NetworkNack networkNack: The NetworkNack with the reason code.
+        :return: A Blob containing the encoding.
+        :rtype: Blob
+        """
+        encoder = TlvEncoder(256)
+        saveLength = len(encoder)
+
+        # Encode backwards.
+        # Encode the fragment with the Interest.
+        encoder.writeBlobTlv(Tlv.LpPacket_Fragment, interest.wireEncode().buf())
+
+        # Encode the reason.
+        if (networkNack.getReason() == NetworkNack.Reason.NONE or
+             networkNack.getReason() == NetworkNack.Reason.CONGESTION or
+             networkNack.getReason() == NetworkNack.Reason.DUPLICATE or
+             networkNack.getReason() == NetworkNack.Reason.NO_ROUTE):
+            # The Reason enum is set up with the correct integer for each NDN-TLV Reason.
+            reason = networkNack.getReason()
+        elif networkNack.getReason() == NetworkNack.Reason.OTHER_CODE:
+            reason = networkNack.getOtherReasonCode()
+        else:
+            # We don't expect this to happen.
+            raise RuntimeError("unrecognized NetworkNack.getReason() value")
+
+        nackSaveLength = len(encoder)
+        encoder.writeNonNegativeIntegerTlv(Tlv.LpPacket_NackReason, reason)
+        encoder.writeTypeAndLength(
+          Tlv.LpPacket_Nack, len(encoder) - nackSaveLength)
+
+        encoder.writeTypeAndLength(
+          Tlv.LpPacket_LpPacket, len(encoder) - saveLength)
+
+        return Blob(encoder.getOutput(), False)
 
     class _ConnectStatus(object):
         UNCONNECTED = 1

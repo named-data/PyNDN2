@@ -460,6 +460,20 @@ class Face(object):
 
         self._node.putData(data, wireFormat)
 
+    def putNack(self, interest, networkNack):
+        """
+        The OnInterest callback can call this to put a Nack for the received
+        Interest.
+        :note: This method is an experimental feature, and the API may change.
+
+        :param Interest interest: The Interest to put in the Nack packet.
+        :param NetworkNack networkNack: The NetworkNack with the reason code.
+          For example, NetworkNack().setReason(NetworkNack.Reason.NO_ROUTE).
+        :raises RuntimeError: If the encoded Nack packet size exceeds
+          getMaxNdnPacketSize().
+        """
+        self._node.putNack(interest, networkNack)
+
     def send(self, encoding):
         """
         Send the encoded packet out through the face.

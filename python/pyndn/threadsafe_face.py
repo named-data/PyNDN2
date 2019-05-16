@@ -184,6 +184,22 @@ class ThreadsafeFace(Face):
         self._loop.call_soon_threadsafe(
             super(ThreadsafeFace, self).putData, data, wireFormat)
 
+    def putNack(self, interest, networkNack):
+        """
+        Override to use the event loop given to the constructor to schedule
+        putData to be called in a thread-safe manner. See
+        Face.putData for calling details.
+        """
+        # Check the encoding size here so that the error message happens before
+        # dispatch.
+        encoding = Node._encodeLpNack(interest, networkNack)
+        if encoding.size() > self.getMaxNdnPacketSize():
+            raise RuntimeError(
+              "The encoded Nack packet size exceeds the maximum limit getMaxNdnPacketSize()")
+
+        self._loop.call_soon_threadsafe(
+            super(ThreadsafeFace, self).putNack, interest, networkNack)
+
     def send(self, encoding):
         """
         Override to use the event loop given to the constructor to schedule
