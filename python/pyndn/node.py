@@ -723,7 +723,8 @@ class Node(object):
 
         # Encode backwards.
         # Encode the fragment with the Interest.
-        encoder.writeBlobTlv(Tlv.LpPacket_Fragment, interest.wireEncode().buf())
+        encoder.writeBlobTlv(
+          Tlv.LpPacket_Fragment, interest.wireEncode(TlvWireFormat.get()).buf())
 
         # Encode the reason.
         if (networkNack.getReason() == NetworkNack.Reason.NONE or
