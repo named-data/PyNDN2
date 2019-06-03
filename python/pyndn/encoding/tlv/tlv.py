@@ -53,7 +53,7 @@ class Tlv(object):
     SelectedDelegation = 32
     CanBePrefix =      33
     HopLimit =         34
-    ApplicationParameters = 35
+    ApplicationParameters = 36
 
     SignatureType_DigestSha256 = 0
     SignatureType_SignatureSha256WithRsa = 1
