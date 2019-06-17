@@ -35,7 +35,8 @@ class SigningInfo(object):
     """
     The SigningInfo constructor has multiple forms:
     SigningInfo() - Create a default SigningInfo with
-    SigningInfo.SignerType.NULL and an empty Name.
+    SigningInfo.SignerType.NULL (which will cause  KeyChain.sign to use the
+      default identity) and an empty Name.
     SigningInfo(signingInfo) - Create a SigningInfo as a copy of the given
       signingInfo (taking a pointer to the given signingInfo PibIdentity and
       PibKey without copying).
