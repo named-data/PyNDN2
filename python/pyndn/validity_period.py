@@ -163,7 +163,8 @@ class ValidityPeriod(object):
     def getFromSignature(signature):
         """
         If the signature is a type that has a ValidityPeriod, then return it. Otherwise
-        throw an error.
+        raise an error. To check if the signature has a ValidityPeriod without
+        raising an error, you can use canGetFromSignature().
 
         :param Signature signature: An object of a subclass of Signature.
         :return: The signature's ValidityPeriod. It is an error if signature doesn't
