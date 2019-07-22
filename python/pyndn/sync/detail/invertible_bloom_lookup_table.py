@@ -185,26 +185,28 @@ class InvertibleBloomLookupTable(object):
         table = [0] * tableSize
 
         for i in range(nEntries):
+            entry = self._hashTable[i]
+
             # table[i*12],   table[i*12+1], table[i*12+2], table[i*12+3] --> hashTable[i]._count
 
-            table[(i * unitSize)]     = 0xFF & self._hashTable[i]._count
-            table[(i * unitSize) + 1] = 0xFF & (self._hashTable[i]._count >> 8)
-            table[(i * unitSize) + 2] = 0xFF & (self._hashTable[i]._count >> 16)
-            table[(i * unitSize) + 3] = 0xFF & (self._hashTable[i]._count >> 24)
+            table[(i * unitSize)]     = 0xFF & entry._count
+            table[(i * unitSize) + 1] = 0xFF & (entry._count >> 8)
+            table[(i * unitSize) + 2] = 0xFF & (entry._count >> 16)
+            table[(i * unitSize) + 3] = 0xFF & (entry._count >> 24)
 
             # table[i*12+4], table[i*12+5], table[i*12+6], table[i*12+7] --> hashTable[i]._keySum
 
-            table[(i * unitSize) + 4] = 0xFF & self._hashTable[i]._keySum
-            table[(i * unitSize) + 5] = 0xFF & (self._hashTable[i]._keySum >> 8)
-            table[(i * unitSize) + 6] = 0xFF & (self._hashTable[i]._keySum >> 16)
-            table[(i * unitSize) + 7] = 0xFF & (self._hashTable[i]._keySum >> 24)
+            table[(i * unitSize) + 4] = 0xFF & entry._keySum
+            table[(i * unitSize) + 5] = 0xFF & (entry._keySum >> 8)
+            table[(i * unitSize) + 6] = 0xFF & (entry._keySum >> 16)
+            table[(i * unitSize) + 7] = 0xFF & (entry._keySum >> 24)
 
             # table[i*12+8], table[i*12+9], table[i*12+10], table[i*12+11] --> hashTable[i]._keyCheck
 
-            table[(i * unitSize) + 8] = 0xFF & self._hashTable[i]._keyCheck
-            table[(i * unitSize) + 9] = 0xFF & (self._hashTable[i]._keyCheck >> 8)
-            table[(i * unitSize) + 10] = 0xFF & (self._hashTable[i]._keyCheck >> 16)
-            table[(i * unitSize) + 11] = 0xFF & (self._hashTable[i]._keyCheck >> 24)
+            table[(i * unitSize) + 8] = 0xFF & entry._keyCheck
+            table[(i * unitSize) + 9] = 0xFF & (entry._keyCheck >> 8)
+            table[(i * unitSize) + 10] = 0xFF & (entry._keyCheck >> 16)
+            table[(i * unitSize) + 11] = 0xFF & (entry._keyCheck >> 24)
 
         Z_BEST_COMPRESSION = 9
         # Use Blob to convert an array to bytes on both Python 2 and 3.
