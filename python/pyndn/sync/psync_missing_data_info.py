@@ -17,8 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # A copy of the GNU Lesser General Public License is in the file COPYING.
 
+from pyndn.name import Name
+
 class PSyncMissingDataInfo(object):
     def __init__(self, prefix, lowSequenceNo, highSequenceNo):
-        self._prefix = prefix
+        # Copy the name.
+        self._prefix = Name(prefix)
         self._lowSequenceNo = lowSequenceNo
         self._highSequenceNo = highSequenceNo
