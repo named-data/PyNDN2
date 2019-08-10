@@ -240,7 +240,7 @@ class FullPSync2017(PSyncProducerBase):
               str(len(positive)) + " negative: " + str(len(negative)) +
               " _threshold: " + str(self._threshold))
 
-            # Send all data if greater then the threshold, or if there are
+            # Send all data if greater than the threshold, or if there are
             # neither positive nor negative differences. Otherwise, continue
             # below and send the positive as usual.
             if (len(positive) + len(negative) >= self._threshold or
