@@ -38,6 +38,7 @@ from pyndn.name import Name
 from pyndn.interest import Interest
 from pyndn.security.signing_info import SigningInfo
 from pyndn.util.segment_fetcher import SegmentFetcher
+from pyndn.util.blob import Blob
 from pyndn.sync.psync_producer_base import PSyncProducerBase
 from pyndn.sync.detail.invertible_bloom_lookup_table import InvertibleBloomLookupTable
 from pyndn.sync.detail.psync_segment_publisher import PSyncSegmentPublisher
@@ -173,6 +174,7 @@ class FullPSync2017(PSyncProducerBase):
 
         syncInterest = Interest(syncInterestName)
         syncInterest.setInterestLifetimeMilliseconds(self._syncInterestLifetime)
+        syncInterest.setNonce(Blob([0, 0, 0, 0]))
         syncInterest.refreshNonce()
 
         SegmentFetcher.fetch(
