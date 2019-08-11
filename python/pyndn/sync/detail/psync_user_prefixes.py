@@ -98,7 +98,7 @@ class PSyncUserPrefixes(object):
         :param int sequenceNo: The sequence number of the update.
         :param Array<int> oldSequenceNo: This sets oldSequenceNo[0] to the old
           sequence number for the prefix. If this method returns True and
-          oldSequenceNo is not zero, the caller can remove the old prefix from
+          oldSequenceNo[0] is not zero, the caller can remove the old prefix from
           the IBLT.
         :return True if the sequence number was updated, False if the prefix was
           not in _prefixes, or if the sequenceNo is less than or equal to the
