@@ -8,6 +8,8 @@ Changes
 * https://redmine.named-data.net/issues/4869 In RegistrationOptions, added setOrigin()
   to use in the flags argument of registerPrefix.
 * https://redmine.named-data.net/issues/4813 In Face, added putNack().
+* sync: Added FullPSync2017 and FullPSync2017WithUsers, implementing the Full PSync protocol.
+* examples: Added test_full_psync and test_full_psync_with_users.
 
 Deprecated
 * Deprecated ForwardingFlags. Use RegistrationOptions.
@@ -17,7 +19,6 @@ Bug fixes
   for compatibility with Python 3. (Thanks to Nabil Schear!)
 * https://redmine.named-data.net/issues/4926 In decoding Data, make MetaInfo
   and Content optional.
-* https://redmine.named-data.net/issues/4813 In Face, added putNack().
 * https://redmine.named-data.net/issues/4968 In examples, updated ControlParameters protobuf.
 
 PyNDN v2.10beta1 (2019-03-05)
