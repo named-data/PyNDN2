@@ -435,15 +435,15 @@ class FullPSync2017(PSyncProducerBase):
 
         :param Name interestName:
         """
-        # Copy the keys before iterating se we can erase entries.
-        for keyName in list(self._pendingEntries.keys()):
-            if keyName.equals(interestName):
-                logging.getLogger(__name__).info("Delete pending interest: " +
-                  interestName.toUri())
-                # Prevent _delayedRemovePendingEntry from removing a new entry
-                # with the same Name.
-                self._pendingEntries[keyName]._isRemoved = True
-                del self._pendingEntries[keyName]
+        if not (interestName in self._pendingEntries):
+            return
+
+        logging.getLogger(__name__).info("Delete pending interest: " +
+          interestName.toUri())
+        # Prevent _delayedRemovePendingEntry from removing a new entry with the
+        # same Name.
+        self._pendingEntries[interestName]._isRemoved = True
+        del self._pendingEntries[interestName]
 
     def _delayedRemovePendingEntry(self, name, entry, nonce):
         """
