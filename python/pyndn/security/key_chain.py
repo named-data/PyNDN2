@@ -131,6 +131,12 @@ class KeyChain(object):
             pibLocator = arg1
             tpmLocator = arg2
             allowReset = arg3
+
+            config = ConfigFile()
+            if pibLocator == "":
+                pibLocator = KeyChain._getDefaultPibLocator(config)
+            if tpmLocator == "":
+                tpmLocator = KeyChain._getDefaultTpmLocator(config)
             if allowReset == None:
                 allowReset = False
 
@@ -157,7 +163,6 @@ class KeyChain(object):
             KeyChain._parseAndCheckTpmLocator(tpmLocator, tpmScheme, tpmLocation)
             canonicalTpmLocator = tpmScheme[0] + ":" + tpmLocation[0]
 
-            config = ConfigFile()
             if canonicalPibLocator == KeyChain._getDefaultPibLocator(config):
                 # The default PIB must use the default TPM.
                 if (oldTpmLocator != "" and
@@ -1586,6 +1591,12 @@ class KeyChain(object):
             KeyChain._defaultPibLocator = config.get(
               "pib", KeyChain._getDefaultPibScheme() + ":")
 
+        pibScheme = [None]
+        pibLocation = [None]
+        KeyChain._parseAndCheckPibLocator(
+          KeyChain._defaultPibLocator, pibScheme, pibLocation)
+        KeyChain._defaultPibLocator = pibScheme[0] + ":" + pibLocation[0]
+
         return KeyChain._defaultPibLocator
 
     @staticmethod
@@ -1606,6 +1617,12 @@ class KeyChain(object):
         else:
             KeyChain._defaultTpmLocator = config.get(
               "tpm", KeyChain._getDefaultTpmScheme() + ":")
+
+        tpmScheme = [None]
+        tpmLocation = [None]
+        KeyChain._parseAndCheckTpmLocator(
+          KeyChain._defaultTpmLocator, tpmScheme, tpmLocation)
+        KeyChain._defaultTpmLocator = tpmScheme[0] + ":" + tpmLocation[0]
 
         return KeyChain._defaultTpmLocator
 
