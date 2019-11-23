@@ -49,6 +49,16 @@ class TestFaceRegisterMethods(ut.TestCase):
         self.face_in.shutdown()
         self.face_out.shutdown()
 
+        # Give time to shut down the face before the next test.
+        timeout = 500
+        startTime = getNowMilliseconds()
+        while True:
+            if getNowMilliseconds() - startTime >= timeout:
+                break
+            self.face_in.processEvents()
+            self.face_out.processEvents()
+            time.sleep(0.01)
+
     def test_register_prefix_response(self):
         prefixName = Name("/test")
         self.face_in.setCommandSigningInfo(self.keyChain,
@@ -124,6 +134,15 @@ class TestFaceInterestMethods(ut.TestCase):
 
     def tearDown(self):
         self.face.shutdown()
+
+        # Give time to shut down the face before the next test.
+        timeout = 500
+        startTime = getNowMilliseconds()
+        while True:
+            if getNowMilliseconds() - startTime >= timeout:
+                break
+            self.face.processEvents()
+            time.sleep(0.01)
 
     def run_express_name_test(self, interestName, useOnNack = False):
         # returns the dataCallback and timeoutCallback mock objects so we can test timeout behavior
