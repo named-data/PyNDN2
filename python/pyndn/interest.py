@@ -70,7 +70,7 @@ class Interest(object):
             self._keyLocator = ChangeCounter(KeyLocator())
             self._exclude = ChangeCounter(Exclude())
             self._childSelector = None
-            self._mustBeFresh = True
+            self._mustBeFresh = False
 
             self._nonce = Blob()
             self._interestLifetimeMilliseconds = None
@@ -189,7 +189,7 @@ class Interest(object):
         Get the must be fresh flag.
 
         :return: The must be fresh flag.  If not specified, the default is
-          True.
+          False.
         :rtype: bool
         """
         return self._mustBeFresh
@@ -545,7 +545,7 @@ class Interest(object):
         Set the MustBeFresh flag.
 
         :param bool mustBeFresh: True if the content must be fresh, otherwise
-          False. If you do not set this flag, the default value is true.
+          False. If you do not set this flag, the default value is False.
         :return: This Interest so that you can chain calls to update values.
         :rtype: Interest
         """

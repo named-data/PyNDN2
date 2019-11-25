@@ -581,6 +581,7 @@ class Node(object):
 
         commandInterest = Interest()
         commandInterest.setCanBePrefix(True)
+        commandInterest.setMustBeFresh(True)
         if self.isLocal():
             commandInterest.setName(Name("/localhost/nfd/rib/register"))
             # The interest is answered by the local host, so set a short timeout.
