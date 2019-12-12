@@ -1,10 +1,3 @@
-Interim changes since PyNDN v2.11beta1 (2019-11-25)
----------------------------------------------------
-
-Changes
-* https://redmine.named-data.net/issues/5053 In Interest, changed the
-  MustBeFresh default value to false.
-
 PyNDN v2.11beta1 (2019-08-07)
 -----------------------------
 
