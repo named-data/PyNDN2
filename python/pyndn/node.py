@@ -119,9 +119,10 @@ class Node(object):
         :throws: RuntimeError If the encoded interest size exceeds
           getMaxNdnPacketSize().
         """
-        # Set the nonce in our copy of the Interest so it is saved in the PIT.
-        interestCopy.setNonce(Node._nonceTemplate)
-        interestCopy.refreshNonce()
+        if interestCopy.getNonce().size() == 0:
+            # Set the nonce in our copy of the Interest so it is saved in the PIT.
+            interestCopy.setNonce(Node._nonceTemplate)
+            interestCopy.refreshNonce()
 
         if self._connectStatus == self._ConnectStatus.CONNECT_COMPLETE:
             # We are connected. Simply send the interest.
